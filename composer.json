@@ -9,6 +9,10 @@
         {
             "name": "Joel Wurtz",
             "email": "jwurtz@jolicode.com"
+        },
+        {
+            "name": "Baptiste Leduc",
+            "email": "baptiste.leduc@gmail.com"
         }
     ],
     "require": {
@@ -21,7 +25,8 @@
         "doctrine/annotations": "~1.0",
         "phpdocumentor/reflection-docblock": "^3.0 || ^4.0 || ^5.0",
         "symfony/serializer": "^4.2 || ^5.0",
-        "moneyphp/money": "^3.0"
+        "moneyphp/money": "^3.0",
+        "phpunit/phpunit": "^8.0"
     },
     "suggest": {
         "symfony/serializer": "Allow to bridge mappers to normalizer and denormalizer",
@@ -29,7 +34,6 @@
     },
     "conflict": {
         "symfony/serializer": "<4.2",
-        "symfony/framework-bundle": "5.1.0",
         "symfony/property-info": "5.1.6 || 5.1.7"
     },
     "extra": {
@@ -43,11 +47,6 @@
         },
         "exclude-from-classmap": [
             "/Tests/"
-        ]
-    },
-    "autoload-dev": {
-        "classmap": [
-            "Bundle/Tests/Resources/app/AppKernel.php"
         ]
     },
     "config": {

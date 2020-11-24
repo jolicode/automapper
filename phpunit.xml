@@ -10,18 +10,12 @@
 >
     <php>
         <ini name="error_reporting" value="-1" />
-        <server name="KERNEL_DIR" value="./Bundle/Tests/Resources/app" />
-        <server name="KERNEL_CLASS" value="DummyApp\AppKernel" />
     </php>
 
 
     <testsuites>
         <testsuite name="Jane AutoMapper Unit Test Suite">
             <directory>./Tests</directory>
-        </testsuite>
-
-        <testsuite name="Jane AutoMapper Bundle Test Suite">
-            <directory>./Bundle/Tests</directory>
         </testsuite>
     </testsuites>
 
@@ -30,7 +24,6 @@
             <directory>./</directory>
             <exclude>
                 <directory>./Tests</directory>
-                <directory>./Bundle/Tests</directory>
                 <directory>./vendor</directory>
             </exclude>
         </whitelist>
