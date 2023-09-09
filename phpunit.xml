@@ -14,8 +14,8 @@
 
 
     <testsuites>
-        <testsuite name="Jane AutoMapper Unit Test Suite">
-            <directory>./Tests</directory>
+        <testsuite name="AutoMapper Unit Test Suite">
+            <directory>./tests</directory>
         </testsuite>
     </testsuites>
 
@@ -23,7 +23,7 @@
         <whitelist>
             <directory>./</directory>
             <exclude>
-                <directory>./Tests</directory>
+                <directory>./tests</directory>
                 <directory>./vendor</directory>
             </exclude>
         </whitelist>

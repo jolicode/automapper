@@ -131,17 +131,17 @@ To use it, you just have to add the main bundle class to your `config/bundles.ph
 ```php
 return [
     // ...
-    Jane\Component\AutoMapper\Bundle\JaneAutoMapperBundle::class => ['all' => true],
+    AutoMapper\Bundle\AutoMapperBundle::class => ['all' => true],
 ];
 ```
 
 Then configure the bundle to your needs, for example:
 ```yaml
-jane_auto_mapper:
+automapper:
   autoregister: true
   mappings:
-    - source: Jane\Component\AutoMapper\Bundle\Tests\Fixtures\User
-      target: Jane\Component\AutoMapper\Tests\Fixtures\UserDTO
+    - source: AutoMapper\Bundle\Tests\Fixtures\User
+      target: AutoMapper\Tests\Fixtures\UserDTO
       pass: DummyApp\UserConfigurationPass
 ```
 
@@ -149,7 +149,7 @@ Possible properties:
 - `normalizer` (default: `false`):  A boolean which indicate if we inject the AutoMapperNormalizer;
 - `cache_dir` (default: `%kernel.cache_dir%/automapper`): This settings allows you to customize the output directory for generated mappers;
 - `mappings`: This option allows you to customize Mapper metadata, you have to specify `source` & `target` data types and related configuration using `pass` field.
-This configuration should implements `Jane\Component\AutoMapper\Bundle\Configuration\ConfigurationPassInterface`.
+This configuration should implements `AutoMapper\Bundle\Configuration\ConfigurationPassInterface`.
 
 ## Normalizer Bridge
 A Normalizer Bridge is available, aiming to be 100% feature compatible with the ObjectNormalizer of the ``symfony/serializer`` component. The goal of this bridge **is not to replace the ObjectNormalizer** but rather providing a very fast alternative.

@@ -1,9 +1,9 @@
 {
-    "name": "jane-php/automapper",
+    "name": "jolicode/automapper",
     "type": "library",
-    "description": "Jane AutoMapper Component",
+    "description": "JoliCode AutoMapper",
     "keywords": [],
-    "homepage": "https://github.com/janephp/janephp",
+    "homepage": "https://github.com/jolicode/automapper",
     "license": "MIT",
     "authors": [
         {
@@ -16,7 +16,7 @@
         }
     ],
     "require": {
-        "php": "^7.3 || ^8.0",
+        "php": "^8.2",
         "doctrine/inflector": "^1.4 || ^2.0",
         "nikic/php-parser": "^4.0",
         "symfony/property-info": "^5.3 || ^6.0",
@@ -27,6 +27,8 @@
         "moneyphp/money": "^3.0",
         "phpdocumentor/reflection-docblock": "^3.0 || ^4.0 || ^5.0",
         "phpunit/phpunit": "^8.0",
+        "symfony/filesystem": "^5.3 || ^6.0",
+        "symfony/http-kernel": "^5.3 || ^6.0",
         "symfony/uid": "^5.2 || ^6.0"
     },
     "suggest": {
@@ -38,18 +40,15 @@
         "symfony/property-info": "5.1.6 || 5.1.7",
         "nikic/php-parser": "<4.0.4"
     },
-    "extra": {
-        "branch-alias": {
-            "dev-next": "7-dev"
-        }
-    },
     "autoload": {
         "psr-4": {
-            "Jane\\Component\\AutoMapper\\": ""
-        },
-        "exclude-from-classmap": [
-            "/Tests/"
-        ]
+            "AutoMapper\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AutoMapper\\Tests\\": "tests/"
+        }
     },
     "config": {
         "process-timeout": 1800,
