@@ -19,6 +19,7 @@ return (new PhpCsFixer\Config())
             'remove_inheritdoc' => false,
         ],
         'nullable_type_declaration_for_default_null_value' => false,
+        'declare_strict_types' => true,
 
         // Can be removed once PHP requirement is upgraded
         'get_class_to_class_keyword' => false,

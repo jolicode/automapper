@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Transformer;
 
 use AutoMapper\MapperMetadataInterface;
@@ -38,9 +40,6 @@ final class BuiltinTransformerFactory implements TransformerFactoryInterface, Pr
         return null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPriority(): int
     {
         return 8;

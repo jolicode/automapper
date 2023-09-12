@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Transformer;
 
 use AutoMapper\MapperMetadataInterface;
@@ -12,16 +14,11 @@ use Symfony\Component\PropertyInfo\Type;
  */
 final class ArrayTransformerFactory extends AbstractUniqueTypeTransformerFactory implements PrioritizedTransformerFactoryInterface
 {
-    private $chainTransformerFactory;
-
-    public function __construct(ChainTransformerFactory $chainTransformerFactory)
-    {
-        $this->chainTransformerFactory = $chainTransformerFactory;
+    public function __construct(
+        private readonly ChainTransformerFactory $chainTransformerFactory,
+    ) {
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function createTransformer(Type $sourceType, Type $targetType, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
     {
         if (!$sourceType->isCollection()) {
@@ -52,9 +49,6 @@ final class ArrayTransformerFactory extends AbstractUniqueTypeTransformerFactory
         return null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPriority(): int
     {
         return 4;

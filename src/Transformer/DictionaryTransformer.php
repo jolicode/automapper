@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Transformer;
 
 use PhpParser\Node\Expr;
@@ -9,7 +11,7 @@ use PhpParser\Node\Expr;
  *
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
  */
-final class DictionaryTransformer extends AbstractArrayTransformer
+final readonly class DictionaryTransformer extends AbstractArrayTransformer
 {
     protected function getAssignExpr(Expr $valuesVar, Expr $outputVar, Expr $loopKeyVar, bool $assignByRef): Expr
     {

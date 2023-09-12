@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Transformer;
 
 use AutoMapper\MapperMetadataInterface;
@@ -9,18 +11,13 @@ use AutoMapper\MapperMetadataInterface;
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-final class UniqueTypeTransformerFactory implements TransformerFactoryInterface, PrioritizedTransformerFactoryInterface
+final readonly class UniqueTypeTransformerFactory implements TransformerFactoryInterface, PrioritizedTransformerFactoryInterface
 {
-    private $chainTransformerFactory;
-
-    public function __construct(ChainTransformerFactory $chainTransformerFactory)
-    {
-        $this->chainTransformerFactory = $chainTransformerFactory;
+    public function __construct(
+        private ChainTransformerFactory $chainTransformerFactory,
+    ) {
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getTransformer(?array $sourceTypes, ?array $targetTypes, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
     {
         $nbSourceTypes = $sourceTypes ? \count($sourceTypes) : 0;
@@ -49,9 +46,6 @@ final class UniqueTypeTransformerFactory implements TransformerFactoryInterface,
         return null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPriority(): int
     {
         return 32;

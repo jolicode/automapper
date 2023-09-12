@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Transformer;
 
 use AutoMapper\Extractor\PropertyMapping;
@@ -15,21 +17,14 @@ use PhpParser\Node\Scalar;
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-final class StringToDateTimeTransformer implements TransformerInterface
+final readonly class StringToDateTimeTransformer implements TransformerInterface
 {
-    private $className;
-
-    private $format;
-
-    public function __construct(string $className, string $format = \DateTimeInterface::RFC3339)
-    {
-        $this->className = $className;
-        $this->format = $format;
+    public function __construct(
+        private string $className,
+        private string $format = \DateTimeInterface::RFC3339,
+    ) {
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
         $className = \DateTimeInterface::class === $this->className ? \DateTimeImmutable::class : $this->className;

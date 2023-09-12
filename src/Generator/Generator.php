@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Generator;
 
 use AutoMapper\AutoMapperRegistryInterface;
@@ -28,17 +30,14 @@ use Symfony\Component\Serializer\Mapping\ClassDiscriminatorResolverInterface;
  */
 final class Generator
 {
-    private $parser;
+    private readonly Parser $parser;
 
-    private $classDiscriminator;
-
-    private $allowReadOnlyTargetToPopulate;
-
-    public function __construct(Parser $parser = null, ClassDiscriminatorResolverInterface $classDiscriminator = null, bool $allowReadOnlyTargetToPopulate = false)
-    {
+    public function __construct(
+        ?Parser $parser = null,
+        private readonly ?ClassDiscriminatorResolverInterface $classDiscriminator = null,
+        private readonly bool $allowReadOnlyTargetToPopulate = false,
+    ) {
         $this->parser = $parser ?? (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
-        $this->classDiscriminator = $classDiscriminator;
-        $this->allowReadOnlyTargetToPopulate = $allowReadOnlyTargetToPopulate;
     }
 
     /**
@@ -111,23 +110,23 @@ final class Generator
         ]);
 
         foreach ($propertiesMapping as $propertyMapping) {
-            if (!$propertyMapping->getTransformer() instanceof DependentTransformerInterface) {
+            if (!$propertyMapping->transformer instanceof DependentTransformerInterface) {
                 continue;
             }
 
-            foreach ($propertyMapping->getTransformer()->getDependencies() as $dependency) {
-                if (isset($addedDependencies[$dependency->getName()])) {
+            foreach ($propertyMapping->transformer->getDependencies() as $dependency) {
+                if (isset($addedDependencies[$dependency->name])) {
                     continue;
                 }
 
                 $injectMapperStatements[] = new Stmt\Expression(new Expr\Assign(
-                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'mappers'), new Scalar\String_($dependency->getName())),
+                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'mappers'), new Scalar\String_($dependency->name)),
                     new Expr\MethodCall(new Expr\Variable('autoMapperRegistry'), 'getMapper', [
-                        new Arg(new Scalar\String_($dependency->getSource())),
-                        new Arg(new Scalar\String_($dependency->getTarget())),
+                        new Arg(new Scalar\String_($dependency->source)),
+                        new Arg(new Scalar\String_($dependency->target)),
                     ])
                 ));
-                $addedDependencies[$dependency->getName()] = true;
+                $addedDependencies[$dependency->name] = true;
             }
         }
 
@@ -159,28 +158,28 @@ final class Generator
                 continue;
             }
 
-            $transformer = $propertyMapping->getTransformer();
+            $transformer = $propertyMapping->transformer;
 
             $fieldValueVariable = new Expr\Variable($uniqueVariableScope->getUniqueName('fieldValue'));
-            $sourcePropertyAccessor = new Expr\Assign($fieldValueVariable, $propertyMapping->getReadAccessor()->getExpression($sourceInput));
+            $sourcePropertyAccessor = new Expr\Assign($fieldValueVariable, $propertyMapping->readAccessor->getExpression($sourceInput));
 
             [$output, $propStatements] = $transformer->transform($fieldValueVariable, $result, $propertyMapping, $uniqueVariableScope);
 
-            $extractCallback = $propertyMapping->getReadAccessor()->getExtractCallback($mapperGeneratorMetadata->getSource());
+            $extractCallback = $propertyMapping->readAccessor->getExtractCallback($mapperGeneratorMetadata->getSource());
 
             if (null !== $extractCallback) {
                 $constructStatements[] = new Stmt\Expression(new Expr\Assign(
-                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractCallbacks'), new Scalar\String_($propertyMapping->getProperty())),
+                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractCallbacks'), new Scalar\String_($propertyMapping->property)),
                     $extractCallback
                 ));
             }
 
-            if (null === $propertyMapping->getWriteMutator()) {
+            if (null === $propertyMapping->writeMutator) {
                 continue;
             }
 
-            if ($propertyMapping->getWriteMutator()->getType() !== WriteMutator::TYPE_ADDER_AND_REMOVER) {
-                $writeExpression = $propertyMapping->getWriteMutator()->getExpression($result, $output, $transformer instanceof AssignedByReferenceTransformerInterface ? $transformer->assignByRef() : false);
+            if ($propertyMapping->writeMutator->type !== WriteMutator::TYPE_ADDER_AND_REMOVER) {
+                $writeExpression = $propertyMapping->writeMutator->getExpression($result, $output, $transformer instanceof AssignedByReferenceTransformerInterface ? $transformer->assignByRef() : false);
                 if (null === $writeExpression) {
                     continue;
                 }
@@ -188,28 +187,28 @@ final class Generator
                 $propStatements[] = new Stmt\Expression($writeExpression);
             }
 
-            $hydrateCallback = $propertyMapping->getWriteMutator()->getHydrateCallback($mapperGeneratorMetadata->getTarget());
+            $hydrateCallback = $propertyMapping->writeMutator->getHydrateCallback($mapperGeneratorMetadata->getTarget());
 
             if (null !== $hydrateCallback) {
                 $constructStatements[] = new Stmt\Expression(new Expr\Assign(
-                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'hydrateCallbacks'), new Scalar\String_($propertyMapping->getProperty())),
+                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'hydrateCallbacks'), new Scalar\String_($propertyMapping->property)),
                     $hydrateCallback
                 ));
             }
 
             $conditions = [];
 
-            if ($propertyMapping->checkExists()) {
+            if ($propertyMapping->checkExists) {
                 if (\stdClass::class === $mapperGeneratorMetadata->getSource()) {
                     $conditions[] = new Expr\FuncCall(new Name('property_exists'), [
                         new Arg($sourceInput),
-                        new Arg(new Scalar\String_($propertyMapping->getProperty())),
+                        new Arg(new Scalar\String_($propertyMapping->property)),
                     ]);
                 }
 
                 if ('array' === $mapperGeneratorMetadata->getSource()) {
                     $conditions[] = new Expr\FuncCall(new Name('array_key_exists'), [
-                        new Arg(new Scalar\String_($propertyMapping->getProperty())),
+                        new Arg(new Scalar\String_($propertyMapping->property)),
                         new Arg($sourceInput),
                     ]);
                 }
@@ -218,12 +217,12 @@ final class Generator
             if ($mapperGeneratorMetadata->shouldCheckAttributes()) {
                 $conditions[] = new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'isAllowedAttribute', [
                     new Arg($contextVariable),
-                    new Arg(new Scalar\String_($propertyMapping->getProperty())),
+                    new Arg(new Scalar\String_($propertyMapping->property)),
                     new Arg($sourcePropertyAccessor),
                 ]);
             }
 
-            if (null !== $propertyMapping->getSourceGroups()) {
+            if (null !== $propertyMapping->sourceGroups) {
                 $conditions[] = new Expr\BinaryOp\BooleanAnd(
                     new Expr\BinaryOp\NotIdentical(
                         new Expr\ConstFetch(new Name('null')),
@@ -239,12 +238,12 @@ final class Generator
                         )),
                         new Arg(new Expr\Array_(array_map(function (string $group) {
                             return new Expr\ArrayItem(new Scalar\String_($group));
-                        }, $propertyMapping->getSourceGroups()))),
+                        }, $propertyMapping->sourceGroups))),
                     ])
                 );
             }
 
-            if (null !== $propertyMapping->getTargetGroups()) {
+            if (null !== $propertyMapping->targetGroups) {
                 $conditions[] = new Expr\BinaryOp\BooleanAnd(
                     new Expr\BinaryOp\NotIdentical(
                         new Expr\ConstFetch(new Name('null')),
@@ -260,18 +259,18 @@ final class Generator
                         )),
                         new Arg(new Expr\Array_(array_map(function (string $group) {
                             return new Expr\ArrayItem(new Scalar\String_($group));
-                        }, $propertyMapping->getTargetGroups()))),
+                        }, $propertyMapping->targetGroups))),
                     ])
                 );
             }
 
-            if (null !== $propertyMapping->getMaxDepth()) {
+            if (null !== $propertyMapping->maxDepth) {
                 $conditions[] = new Expr\BinaryOp\SmallerOrEqual(
                     new Expr\BinaryOp\Coalesce(
                         new Expr\ArrayDimFetch($contextVariable, new Scalar\String_(MapperContext::DEPTH)),
                         new Expr\ConstFetch(new Name('0'))
                     ),
-                    new Scalar\LNumber($propertyMapping->getMaxDepth())
+                    new Scalar\LNumber($propertyMapping->maxDepth)
                 );
             }
 
@@ -287,7 +286,7 @@ final class Generator
                 ])];
             }
 
-            $propInConstructor = \in_array($propertyMapping->getProperty(), $inConstructor, true);
+            $propInConstructor = \in_array($propertyMapping->property, $inConstructor, true);
             foreach ($propStatements as $propStatement) {
                 if ($propInConstructor) {
                     $duplicatedStatements[] = $propStatement;
@@ -371,7 +370,7 @@ final class Generator
         $classDiscriminatorMapping = 'array' !== $target && null !== $this->classDiscriminator ? $this->classDiscriminator->getMappingForClass($target) : null;
 
         if (null !== $classDiscriminatorMapping && null !== ($propertyMapping = $mapperMetadata->getPropertyMapping($classDiscriminatorMapping->getTypeProperty()))) {
-            [$output, $createObjectStatements] = $propertyMapping->getTransformer()->transform($propertyMapping->getReadAccessor()->getExpression($sourceInput), $result, $propertyMapping, $uniqueVariableScope);
+            [$output, $createObjectStatements] = $propertyMapping->transformer->transform($propertyMapping->readAccessor->getExpression($sourceInput), $result, $propertyMapping, $uniqueVariableScope);
 
             foreach ($classDiscriminatorMapping->getTypesMapping() as $typeValue => $typeTarget) {
                 $mapperName = 'Discriminator_Mapper_' . $source . '_' . $typeTarget;
@@ -406,32 +405,32 @@ final class Generator
             $constructArguments = [];
 
             foreach ($propertiesMapping as $propertyMapping) {
-                if (null === $propertyMapping->getWriteMutatorConstructor() || null === ($parameter = $propertyMapping->getWriteMutatorConstructor()->getParameter())) {
+                if (null === $propertyMapping->writeMutatorConstructor || null === ($parameter = $propertyMapping->writeMutatorConstructor->parameter)) {
                     continue;
                 }
 
                 $constructVar = new Expr\Variable($uniqueVariableScope->getUniqueName('constructArg'));
 
-                [$output, $propStatements] = $propertyMapping->getTransformer()->transform($propertyMapping->getReadAccessor()->getExpression($sourceInput), $constructVar, $propertyMapping, $uniqueVariableScope);
+                [$output, $propStatements] = $propertyMapping->transformer->transform($propertyMapping->readAccessor->getExpression($sourceInput), $constructVar, $propertyMapping, $uniqueVariableScope);
                 $constructArguments[$parameter->getPosition()] = new Arg($constructVar);
 
                 $propStatements[] = new Stmt\Expression(new Expr\Assign($constructVar, $output));
                 $createObjectStatements[] = new Stmt\If_(new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'hasConstructorArgument', [
                     new Arg($contextVariable),
                     new Arg(new Scalar\String_($target)),
-                    new Arg(new Scalar\String_($propertyMapping->getProperty())),
+                    new Arg(new Scalar\String_($propertyMapping->property)),
                 ]), [
                     'stmts' => [
                         new Stmt\Expression(new Expr\Assign($constructVar, new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'getConstructorArgument', [
                             new Arg($contextVariable),
                             new Arg(new Scalar\String_($target)),
-                            new Arg(new Scalar\String_($propertyMapping->getProperty())),
+                            new Arg(new Scalar\String_($propertyMapping->property)),
                         ]))),
                     ],
                     'else' => new Stmt\Else_($propStatements),
                 ]);
 
-                $inConstructor[] = $propertyMapping->getProperty();
+                $inConstructor[] = $propertyMapping->property;
             }
 
             foreach ($targetConstructor->getParameters() as $constructorParameter) {

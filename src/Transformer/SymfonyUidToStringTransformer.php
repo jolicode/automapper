@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Transformer;
 
 use AutoMapper\Extractor\PropertyMapping;
@@ -11,18 +13,13 @@ use PhpParser\Node\Expr;
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-final class SymfonyUidToStringTransformer implements TransformerInterface
+final readonly class SymfonyUidToStringTransformer implements TransformerInterface
 {
-    private $isUlid;
-
-    public function __construct(bool $isUlid)
-    {
-        $this->isUlid = $isUlid;
+    public function __construct(
+        private bool $isUlid,
+    ) {
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
         if ($this->isUlid) {

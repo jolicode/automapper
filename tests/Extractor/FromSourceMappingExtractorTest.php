@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Tests\Extractor;
 
 use AutoMapper\Exception\InvalidMappingException;
@@ -28,8 +30,7 @@ use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
  */
 class FromSourceMappingExtractorTest extends AutoMapperBaseTest
 {
-    /** @var FromSourceMappingExtractor */
-    protected $fromSourceMappingExtractor;
+    protected FromSourceMappingExtractor $fromSourceMappingExtractor;
 
     protected function setUp(): void
     {
@@ -83,7 +84,7 @@ class FromSourceMappingExtractorTest extends AutoMapperBaseTest
         self::assertCount(\count($userReflection->getProperties()), $sourcePropertiesMapping);
         /** @var PropertyMapping $propertyMapping */
         foreach ($sourcePropertiesMapping as $propertyMapping) {
-            self::assertTrue($userReflection->hasProperty($propertyMapping->getProperty()));
+            self::assertTrue($userReflection->hasProperty($propertyMapping->property));
         }
     }
 
@@ -96,7 +97,7 @@ class FromSourceMappingExtractorTest extends AutoMapperBaseTest
         self::assertCount(\count($userReflection->getProperties()), $sourcePropertiesMapping);
         /** @var PropertyMapping $propertyMapping */
         foreach ($sourcePropertiesMapping as $propertyMapping) {
-            self::assertTrue($userReflection->hasProperty($propertyMapping->getProperty()));
+            self::assertTrue($userReflection->hasProperty($propertyMapping->property));
         }
     }
 

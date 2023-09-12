@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper;
 
 use AutoMapper\Exception\CircularReferenceException;
@@ -28,7 +30,7 @@ class MapperContext
     public const DATETIME_FORMAT = 'datetime_format';
     public const MAP_TO_ACCESSOR_PARAMETER = 'map_to_accessor_parameter';
 
-    private $context = [
+    private array $context = [
         self::DEPTH => 0,
         self::CIRCULAR_REFERENCE_REGISTRY => [],
         self::CIRCULAR_COUNT_REFERENCE_REGISTRY => [],
@@ -105,7 +107,7 @@ class MapperContext
     }
 
     /**
-     * Whether a reference has reached it's limit.
+     * Whether a reference has reached its limit.
      */
     public static function shouldHandleCircularReference(array $context, string $reference, ?int $circularReferenceLimit = null): bool
     {
@@ -127,7 +129,7 @@ class MapperContext
     /**
      * Handle circular reference for a specific reference.
      *
-     * By default will try to keep it and return the previous value
+     * By default, will try to keep it and return the previous value
      */
     public static function &handleCircularReference(array &$context, string $reference, $object, ?int $circularReferenceLimit = null, callable $callback = null)
     {

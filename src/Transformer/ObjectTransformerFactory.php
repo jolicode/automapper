@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Transformer;
 
 use AutoMapper\AutoMapperRegistryInterface;
@@ -11,16 +13,11 @@ use Symfony\Component\PropertyInfo\Type;
  */
 final class ObjectTransformerFactory extends AbstractUniqueTypeTransformerFactory implements PrioritizedTransformerFactoryInterface
 {
-    private $autoMapper;
-
-    public function __construct(AutoMapperRegistryInterface $autoMapper)
-    {
-        $this->autoMapper = $autoMapper;
+    public function __construct(
+        private readonly AutoMapperRegistryInterface $autoMapper,
+    ) {
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function createTransformer(Type $sourceType, Type $targetType, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
     {
         // Only deal with source type being an object or an array that is not a collection
@@ -63,9 +60,6 @@ final class ObjectTransformerFactory extends AbstractUniqueTypeTransformerFactor
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPriority(): int
     {
         return 2;

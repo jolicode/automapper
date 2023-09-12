@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper;
 
 use AutoMapper\Extractor\FromSourceMappingExtractor;
@@ -11,29 +13,16 @@ use AutoMapper\Extractor\SourceTargetMappingExtractor;
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-final class MapperGeneratorMetadataFactory implements MapperGeneratorMetadataFactoryInterface
+final readonly class MapperGeneratorMetadataFactory implements MapperGeneratorMetadataFactoryInterface
 {
-    private $sourceTargetPropertiesMappingExtractor;
-    private $fromSourcePropertiesMappingExtractor;
-    private $fromTargetPropertiesMappingExtractor;
-    private $classPrefix;
-    private $attributeChecking;
-    private $dateTimeFormat;
-
     public function __construct(
-        SourceTargetMappingExtractor $sourceTargetPropertiesMappingExtractor,
-        FromSourceMappingExtractor $fromSourcePropertiesMappingExtractor,
-        FromTargetMappingExtractor $fromTargetPropertiesMappingExtractor,
-        string $classPrefix = 'Mapper_',
-        bool $attributeChecking = true,
-        string $dateTimeFormat = \DateTime::RFC3339
+        private SourceTargetMappingExtractor $sourceTargetPropertiesMappingExtractor,
+        private FromSourceMappingExtractor $fromSourcePropertiesMappingExtractor,
+        private FromTargetMappingExtractor $fromTargetPropertiesMappingExtractor,
+        private string $classPrefix = 'Mapper_',
+        private bool $attributeChecking = true,
+        private string $dateTimeFormat = \DateTime::RFC3339,
     ) {
-        $this->sourceTargetPropertiesMappingExtractor = $sourceTargetPropertiesMappingExtractor;
-        $this->fromSourcePropertiesMappingExtractor = $fromSourcePropertiesMappingExtractor;
-        $this->fromTargetPropertiesMappingExtractor = $fromTargetPropertiesMappingExtractor;
-        $this->classPrefix = $classPrefix;
-        $this->attributeChecking = $attributeChecking;
-        $this->dateTimeFormat = $dateTimeFormat;
     }
 
     /**

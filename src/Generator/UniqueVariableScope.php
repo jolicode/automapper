@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Generator;
 
 /**
@@ -11,10 +13,11 @@ namespace AutoMapper\Generator;
  */
 final class UniqueVariableScope
 {
-    private $registry = [];
+    /** @var array<string, non-negative-int> */
+    private array $registry = [];
 
     /**
-     * Return an unique name for a variable name.
+     * Return a unique name for a variable name.
      */
     public function getUniqueName(string $name): string
     {

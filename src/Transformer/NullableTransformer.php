@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Transformer;
 
 use AutoMapper\Extractor\PropertyMapping;
@@ -13,20 +15,14 @@ use PhpParser\Node\Stmt;
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-final class NullableTransformer implements TransformerInterface, DependentTransformerInterface
+final readonly class NullableTransformer implements TransformerInterface, DependentTransformerInterface
 {
-    private $itemTransformer;
-    private $isTargetNullable;
-
-    public function __construct(TransformerInterface $itemTransformer, bool $isTargetNullable)
-    {
-        $this->itemTransformer = $itemTransformer;
-        $this->isTargetNullable = $isTargetNullable;
+    public function __construct(
+        private TransformerInterface $itemTransformer,
+        private bool $isTargetNullable,
+    ) {
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
         [$output, $itemStatements] = $this->itemTransformer->transform($input, $target, $propertyMapping, $uniqueVariableScope);
@@ -48,9 +44,6 @@ final class NullableTransformer implements TransformerInterface, DependentTransf
         return [$newOutput ?? $output, $statements];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getDependencies(): array
     {
         if (!$this->itemTransformer instanceof DependentTransformerInterface) {

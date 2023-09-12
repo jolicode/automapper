@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Transformer;
 
 use AutoMapper\MapperMetadataInterface;
@@ -7,13 +9,11 @@ use AutoMapper\MapperMetadataInterface;
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-final class MultipleTransformerFactory implements TransformerFactoryInterface, PrioritizedTransformerFactoryInterface
+final readonly class MultipleTransformerFactory implements TransformerFactoryInterface, PrioritizedTransformerFactoryInterface
 {
-    private $chainTransformerFactory;
-
-    public function __construct(ChainTransformerFactory $chainTransformerFactory)
-    {
-        $this->chainTransformerFactory = $chainTransformerFactory;
+    public function __construct(
+        private ChainTransformerFactory $chainTransformerFactory,
+    ) {
     }
 
     /**
@@ -49,9 +49,6 @@ final class MultipleTransformerFactory implements TransformerFactoryInterface, P
         return null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPriority(): int
     {
         return 128;

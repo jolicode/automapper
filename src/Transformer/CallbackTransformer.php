@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Transformer;
 
 use AutoMapper\Extractor\PropertyMapping;
@@ -15,16 +17,11 @@ use PhpParser\Node\Scalar;
  */
 final class CallbackTransformer implements TransformerInterface
 {
-    private $callbackName;
-
-    public function __construct(string $callbackName)
-    {
-        $this->callbackName = $callbackName;
+    public function __construct(
+        private readonly string $callbackName,
+    ) {
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
         /*

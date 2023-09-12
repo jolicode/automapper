@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Extractor;
 
 use AutoMapper\Exception\CompileException;
@@ -23,22 +25,12 @@ final class WriteMutator
     public const TYPE_CONSTRUCTOR = 4;
     public const TYPE_ADDER_AND_REMOVER = 5;
 
-    private $type;
-    private $name;
-    private $private;
-    private $parameter;
-
-    public function __construct(int $type, string $name, bool $private = false, \ReflectionParameter $parameter = null)
-    {
-        $this->type = $type;
-        $this->name = $name;
-        $this->private = $private;
-        $this->parameter = $parameter;
-    }
-
-    public function getType(): int
-    {
-        return $this->type;
+    public function __construct(
+        public readonly int $type,
+        private readonly string $name,
+        private readonly bool $private = false,
+        public readonly ?\ReflectionParameter $parameter = null,
+    ) {
     }
 
     /**
@@ -85,7 +77,7 @@ final class WriteMutator
     /**
      * Get AST expression for binding closure when dealing with private property.
      */
-    public function getHydrateCallback($className): ?Expr
+    public function getHydrateCallback(string $className): ?Expr
     {
         if (self::TYPE_PROPERTY !== $this->type || !$this->private) {
             return null;
@@ -102,15 +94,7 @@ final class WriteMutator
                 ],
             ])),
             new Arg(new Expr\ConstFetch(new Name('null'))),
-            new Arg(new Scalar\String_(new Name\FullyQualified($className))),
+            new Arg(new Scalar\String_($className)),
         ]);
-    }
-
-    /**
-     * Get reflection parameter.
-     */
-    public function getParameter(): ?\ReflectionParameter
-    {
-        return $this->parameter;
     }
 }

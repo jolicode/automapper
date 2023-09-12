@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Transformer;
 
 use AutoMapper\Extractor\PropertyMapping;
@@ -54,21 +56,13 @@ final class BuiltinTransformer implements TransformerInterface
         Type::BUILTIN_TYPE_RESOURCE => [],
     ];
 
-    /** @var Type */
-    private $sourceType;
-
-    /** @var Type[] */
-    private $targetTypes;
-
-    public function __construct(Type $sourceType, array $targetTypes)
-    {
-        $this->sourceType = $sourceType;
-        $this->targetTypes = $targetTypes;
+    public function __construct(
+        private Type $sourceType,
+        /** @var Type[] $targetTypes */
+        private array $targetTypes,
+    ) {
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
         $targetTypes = array_map(function (Type $type) {
@@ -94,12 +88,12 @@ final class BuiltinTransformer implements TransformerInterface
         return [$input, []];
     }
 
-    private function toArray(Expr $input)
+    private function toArray(Expr $input): Expr
     {
         return new Expr\Array_([new Expr\ArrayItem($input)]);
     }
 
-    private function fromIteratorToArray(Expr $input)
+    private function fromIteratorToArray(Expr $input): Expr
     {
         return new Expr\FuncCall(new Name('iterator_to_array'), [
             new Arg($input),

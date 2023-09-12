@@ -10,14 +10,11 @@ use Symfony\Component\PropertyInfo\PropertyAccessExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyReadInfo;
 use Symfony\Component\PropertyInfo\PropertyReadInfoExtractorInterface;
 
-final class MapToContextPropertyInfoExtractorDecorator implements PropertyAccessExtractorInterface, PropertyReadInfoExtractorInterface
+final readonly class MapToContextPropertyInfoExtractorDecorator implements PropertyAccessExtractorInterface, PropertyReadInfoExtractorInterface
 {
-    /** @var PropertyReadInfoExtractorInterface&PropertyAccessExtractorInterface */
-    private $propertyReadInfoExtractor;
-
-    public function __construct($propertyReadInfoExtractor)
-    {
-        $this->propertyReadInfoExtractor = $propertyReadInfoExtractor;
+    public function __construct(
+        private PropertyReadInfoExtractorInterface&PropertyAccessExtractorInterface $propertyReadInfoExtractor
+    ) {
     }
 
     public function getReadInfo(string $class, string $property, array $context = []): ?PropertyReadInfo
@@ -48,7 +45,7 @@ final class MapToContextPropertyInfoExtractorDecorator implements PropertyAccess
         return $readInfo;
     }
 
-    public function isReadable(string $class, string $property, array $context = [])
+    public function isReadable(string $class, string $property, array $context = []): bool
     {
         if ($this->isAllowedProperty($class, $property)) {
             return true;
@@ -57,7 +54,7 @@ final class MapToContextPropertyInfoExtractorDecorator implements PropertyAccess
         return null !== $this->getReadInfo($class, $property, $context);
     }
 
-    public function isWritable(string $class, string $property, array $context = [])
+    public function isWritable(string $class, string $property, array $context = []): bool
     {
         return $this->propertyReadInfoExtractor->isWritable($class, $property, $context);
     }
@@ -88,7 +85,7 @@ final class MapToContextPropertyInfoExtractorDecorator implements PropertyAccess
             }
 
             return (bool) ($reflectionProperty->getModifiers() & \ReflectionProperty::IS_PUBLIC);
-        } catch (\ReflectionException $e) {
+        } catch (\ReflectionException) {
             // Return false if the property doesn't exist
         }
 

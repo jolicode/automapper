@@ -4,15 +4,11 @@ declare(strict_types=1);
 
 namespace AutoMapper\Attribute;
 
-#[\Attribute(\Attribute::TARGET_PARAMETER)] final class MapToContext
+#[\Attribute(\Attribute::TARGET_PARAMETER)]
+final class MapToContext
 {
     public function __construct(
-        private string $contextName,
+        public readonly string $contextName,
     ) {
-    }
-
-    public function getContextName(): string
-    {
-        return $this->contextName;
     }
 }

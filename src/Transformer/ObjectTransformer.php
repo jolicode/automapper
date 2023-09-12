@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Transformer;
 
 use AutoMapper\Extractor\PropertyMapping;
@@ -18,19 +20,12 @@ use Symfony\Component\PropertyInfo\Type;
  */
 final class ObjectTransformer implements TransformerInterface, DependentTransformerInterface, AssignedByReferenceTransformerInterface
 {
-    private $sourceType;
-
-    private $targetType;
-
-    public function __construct(Type $sourceType, Type $targetType)
-    {
-        $this->sourceType = $sourceType;
-        $this->targetType = $targetType;
+    public function __construct(
+        private Type $sourceType,
+        private Type $targetType,
+    ) {
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
         $mapperName = $this->getDependencyName();
@@ -42,22 +37,16 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
             new Arg($input),
             new Arg(new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'withNewContext', [
                 new Arg(new Expr\Variable('context')),
-                new Arg(new Scalar\String_($propertyMapping->getProperty())),
+                new Arg(new Scalar\String_($propertyMapping->property)),
             ])),
         ]), []];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function assignByRef(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getDependencies(): array
     {
         return [new MapperDependency($this->getDependencyName(), $this->getSource(), $this->getTarget())];

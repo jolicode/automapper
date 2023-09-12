@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Extractor;
 
 use AutoMapper\Exception\InvalidMappingException;
@@ -23,18 +25,17 @@ final class FromSourceMappingExtractor extends MappingExtractor
 {
     private const ALLOWED_TARGETS = ['array', \stdClass::class];
 
-    private $nameConverter;
-
-    public function __construct(PropertyInfoExtractorInterface $propertyInfoExtractor, PropertyReadInfoExtractorInterface $readInfoExtractor, PropertyWriteInfoExtractorInterface $writeInfoExtractor, TransformerFactoryInterface $transformerFactory, ClassMetadataFactoryInterface $classMetadataFactory = null, AdvancedNameConverterInterface $nameConverter = null)
-    {
+    public function __construct(
+        PropertyInfoExtractorInterface $propertyInfoExtractor,
+        PropertyReadInfoExtractorInterface $readInfoExtractor,
+        PropertyWriteInfoExtractorInterface $writeInfoExtractor,
+        TransformerFactoryInterface $transformerFactory,
+        ClassMetadataFactoryInterface $classMetadataFactory = null,
+        private readonly ?AdvancedNameConverterInterface $nameConverter = null,
+    ) {
         parent::__construct($propertyInfoExtractor, $readInfoExtractor, $writeInfoExtractor, $transformerFactory, $classMetadataFactory);
-
-        $this->nameConverter = $nameConverter;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPropertiesMapping(MapperMetadataInterface $mapperMetadata): array
     {
         $sourceProperties = $this->propertyInfoExtractor->getProperties($mapperMetadata->getSource());
@@ -123,9 +124,6 @@ final class FromSourceMappingExtractor extends MappingExtractor
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getWriteMutator(string $source, string $target, string $property, array $context = []): WriteMutator
     {
         if (null !== $this->nameConverter) {

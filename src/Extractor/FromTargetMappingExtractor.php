@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Extractor;
 
 use AutoMapper\Exception\InvalidMappingException;
@@ -24,18 +26,17 @@ final class FromTargetMappingExtractor extends MappingExtractor
 {
     private const ALLOWED_SOURCES = ['array', \stdClass::class];
 
-    private $nameConverter;
-
-    public function __construct(PropertyInfoExtractorInterface $propertyInfoExtractor, PropertyReadInfoExtractorInterface $readInfoExtractor, PropertyWriteInfoExtractorInterface $writeInfoExtractor, TransformerFactoryInterface $transformerFactory, ClassMetadataFactoryInterface $classMetadataFactory = null, AdvancedNameConverterInterface $nameConverter = null)
-    {
+    public function __construct(
+        PropertyInfoExtractorInterface $propertyInfoExtractor,
+        PropertyReadInfoExtractorInterface $readInfoExtractor,
+        PropertyWriteInfoExtractorInterface $writeInfoExtractor,
+        TransformerFactoryInterface $transformerFactory,
+        ClassMetadataFactoryInterface $classMetadataFactory = null,
+        private ?AdvancedNameConverterInterface $nameConverter = null,
+    ) {
         parent::__construct($propertyInfoExtractor, $readInfoExtractor, $writeInfoExtractor, $transformerFactory, $classMetadataFactory);
-
-        $this->nameConverter = $nameConverter;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPropertiesMapping(MapperMetadataInterface $mapperMetadata): array
     {
         $targetProperties = array_unique($this->propertyInfoExtractor->getProperties($mapperMetadata->getTarget()) ?? []);
@@ -44,12 +45,7 @@ final class FromTargetMappingExtractor extends MappingExtractor
             throw new InvalidMappingException('Only array or stdClass are accepted as a source');
         }
 
-        if (null === $targetProperties) {
-            return [];
-        }
-
         $mapping = [];
-
         foreach ($targetProperties as $property) {
             if (!$this->isWritable($mapperMetadata->getTarget(), $property)) {
                 continue;
@@ -110,7 +106,7 @@ final class FromTargetMappingExtractor extends MappingExtractor
         return $sourceAccessor;
     }
 
-    private function transformType(string $source, Type $type = null): ?Type
+    private function transformType(string $source, ?Type $type = null): ?Type
     {
         if (null === $type) {
             return null;

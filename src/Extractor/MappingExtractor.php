@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Extractor;
 
 use AutoMapper\Transformer\TransformerFactoryInterface;
@@ -18,28 +20,15 @@ use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
  */
 abstract class MappingExtractor implements MappingExtractorInterface
 {
-    protected $propertyInfoExtractor;
-
-    protected $transformerFactory;
-
-    protected $readInfoExtractor;
-
-    protected $writeInfoExtractor;
-
-    protected $classMetadataFactory;
-
-    public function __construct(PropertyInfoExtractorInterface $propertyInfoExtractor, PropertyReadInfoExtractorInterface $readInfoExtractor, PropertyWriteInfoExtractorInterface $writeInfoExtractor, TransformerFactoryInterface $transformerFactory, ClassMetadataFactoryInterface $classMetadataFactory = null)
-    {
-        $this->propertyInfoExtractor = $propertyInfoExtractor;
-        $this->readInfoExtractor = $readInfoExtractor;
-        $this->writeInfoExtractor = $writeInfoExtractor;
-        $this->transformerFactory = $transformerFactory;
-        $this->classMetadataFactory = $classMetadataFactory;
+    public function __construct(
+        protected readonly PropertyInfoExtractorInterface $propertyInfoExtractor,
+        private readonly PropertyReadInfoExtractorInterface $readInfoExtractor,
+        protected readonly PropertyWriteInfoExtractorInterface $writeInfoExtractor,
+        protected readonly TransformerFactoryInterface $transformerFactory,
+        private readonly ?ClassMetadataFactoryInterface $classMetadataFactory = null,
+    ) {
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getReadAccessor(string $source, string $target, string $property): ?ReadAccessor
     {
         $readInfo = $this->readInfoExtractor->getReadInfo($source, $property);
@@ -62,9 +51,6 @@ abstract class MappingExtractor implements MappingExtractorInterface
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getWriteMutator(string $source, string $target, string $property, array $context = []): ?WriteMutator
     {
         $writeInfo = $this->writeInfoExtractor->getWriteInfo($target, $property, $context);

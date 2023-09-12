@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Extractor;
 
 use AutoMapper\MapperMetadataInterface;
@@ -11,9 +13,6 @@ use AutoMapper\MapperMetadataInterface;
  */
 class SourceTargetMappingExtractor extends MappingExtractor
 {
-    /**
-     * {@inheritdoc}
-     */
     public function getPropertiesMapping(MapperMetadataInterface $mapperMetadata): array
     {
         $sourceProperties = $this->propertyInfoExtractor->getProperties($mapperMetadata->getSource());
@@ -23,8 +22,8 @@ class SourceTargetMappingExtractor extends MappingExtractor
             return [];
         }
 
-        $sourceProperties = array_unique($sourceProperties ?? []);
-        $targetProperties = array_unique($targetProperties ?? []);
+        $sourceProperties = array_unique($sourceProperties);
+        $targetProperties = array_unique($targetProperties);
 
         $mapping = [];
 
@@ -38,7 +37,7 @@ class SourceTargetMappingExtractor extends MappingExtractor
                     'enable_constructor_extraction' => true,
                 ]);
 
-                if ((null === $targetMutatorConstruct || null === $targetMutatorConstruct->getParameter()) && !$this->propertyInfoExtractor->isWritable($mapperMetadata->getTarget(), $property)) {
+                if ((null === $targetMutatorConstruct || null === $targetMutatorConstruct->parameter) && !$this->propertyInfoExtractor->isWritable($mapperMetadata->getTarget(), $property)) {
                     continue;
                 }
 
@@ -70,7 +69,7 @@ class SourceTargetMappingExtractor extends MappingExtractor
                 $mapping[] = new PropertyMapping(
                     $sourceAccessor,
                     $targetMutator,
-                    WriteMutator::TYPE_CONSTRUCTOR === $targetMutatorConstruct->getType() ? $targetMutatorConstruct : null,
+                    WriteMutator::TYPE_CONSTRUCTOR === $targetMutatorConstruct->type ? $targetMutatorConstruct : null,
                     $transformer,
                     $property,
                     false,

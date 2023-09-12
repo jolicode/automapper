@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper;
 
 use AutoMapper\Exception\NoMappingFoundException;
@@ -40,38 +42,23 @@ use Symfony\Component\Uid\AbstractUid;
 class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, MapperGeneratorMetadataRegistryInterface
 {
     /** @var MapperGeneratorMetadataInterface[] */
-    private $metadata = [];
+    private array $metadata = [];
 
     /** @var GeneratedMapper[] */
-    private $mapperRegistry = [];
+    private array $mapperRegistry = [];
 
-    /** @var ClassLoaderInterface */
-    private $classLoader;
-
-    /** @var MapperGeneratorMetadataFactoryInterface|null */
-    private $mapperConfigurationFactory;
-
-    /** @var ChainTransformerFactory */
-    private $chainTransformerFactory;
-
-    public function __construct(ClassLoaderInterface $classLoader, ChainTransformerFactory $chainTransformerFactory, MapperGeneratorMetadataFactoryInterface $mapperConfigurationFactory = null)
-    {
-        $this->classLoader = $classLoader;
-        $this->mapperConfigurationFactory = $mapperConfigurationFactory;
-        $this->chainTransformerFactory = $chainTransformerFactory;
+    public function __construct(
+        private readonly ClassLoaderInterface $classLoader,
+        private readonly ChainTransformerFactory $chainTransformerFactory,
+        private readonly ?MapperGeneratorMetadataFactoryInterface $mapperConfigurationFactory = null
+    ) {
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function register(MapperGeneratorMetadataInterface $metadata): void
+    public function register(MapperGeneratorMetadataInterface $configuration): void
     {
-        $this->metadata[$metadata->getSource()][$metadata->getTarget()] = $metadata;
+        $this->metadata[$configuration->getSource()][$configuration->getTarget()] = $configuration;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getMapper(string $source, string $target): MapperInterface
     {
         $metadata = $this->getMetadata($source, $target);
@@ -100,60 +87,50 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
         return $this->mapperRegistry[$className];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function hasMapper(string $source, string $target): bool
     {
         return null !== $this->getMetadata($source, $target);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function map($sourceData, $targetData, array $context = [])
+    public function map(null|array|object $source, string|array|object $target, array $context = []): null|array|object
     {
-        $source = null;
-        $target = null;
+        $sourceType = $targetType = null;
 
-        if (null === $sourceData) {
+        if (null === $source) {
             return null;
         }
 
-        if (\is_object($sourceData)) {
-            $source = \get_class($sourceData);
-        } elseif (\is_array($sourceData)) {
-            $source = 'array';
+        if (\is_object($source)) {
+            $sourceType = \get_class($source);
+        } elseif (\is_array($source)) {
+            $sourceType = 'array';
         }
 
-        if (null === $source) {
+        if (null === $sourceType) {
             throw new NoMappingFoundException('Cannot map this value, source is neither an object or an array.');
         }
 
-        if (\is_object($targetData)) {
-            $target = \get_class($targetData);
-            $context[MapperContext::TARGET_TO_POPULATE] = $targetData;
-        } elseif (\is_array($targetData)) {
-            $target = 'array';
-            $context[MapperContext::TARGET_TO_POPULATE] = $targetData;
-        } elseif (\is_string($targetData)) {
-            $target = $targetData;
+        if (\is_object($target)) {
+            $targetType = \get_class($target);
+            $context[MapperContext::TARGET_TO_POPULATE] = $target;
+        } elseif (\is_array($target)) {
+            $targetType = 'array';
+            $context[MapperContext::TARGET_TO_POPULATE] = $target;
+        } elseif (\is_string($target)) {
+            $targetType = $target;
         }
 
-        if (null === $target) {
+        if (null === $targetType) {
             throw new NoMappingFoundException('Cannot map this value, target is neither an object or an array.');
         }
 
-        if ('array' === $source && 'array' === $target) {
+        if ('array' === $sourceType && 'array' === $targetType) {
             throw new NoMappingFoundException('Cannot map this value, both source and target are array.');
         }
 
-        return $this->getMapper($source, $target)->map($sourceData, $context);
+        return $this->getMapper($sourceType, $targetType)->map($source, $context);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getMetadata(string $source, string $target): ?MapperGeneratorMetadataInterface
     {
         if (!isset($this->metadata[$source][$target])) {
@@ -167,9 +144,6 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
         return $this->metadata[$source][$target];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function bindTransformerFactory(TransformerFactoryInterface $transformerFactory): void
     {
         if (!$this->chainTransformerFactory->hasTransformerFactory($transformerFactory)) {
@@ -177,9 +151,6 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
         }
     }
 
-    /**
-     * Create an automapper.
-     */
     public static function create(
         bool $private = true,
         ClassLoaderInterface $loader = null,
@@ -187,7 +158,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
         string $classPrefix = 'Mapper_',
         bool $attributeChecking = true,
         bool $autoRegister = true,
-        string $dateTimeFormat = \DateTime::RFC3339,
+        string $dateTimeFormat = \DateTimeInterface::RFC3339,
         bool $allowReadOnlyTargetToPopulate = false
     ): self {
         $classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));

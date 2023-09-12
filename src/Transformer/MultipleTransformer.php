@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Transformer;
 
 use AutoMapper\Extractor\PropertyMapping;
@@ -33,11 +35,9 @@ final class MultipleTransformer implements TransformerInterface, DependentTransf
         Type::BUILTIN_TYPE_ITERABLE => 'is_iterable',
     ];
 
-    private $transformers = [];
-
-    public function __construct(array $transformers)
-    {
-        $this->transformers = $transformers;
+    public function __construct(
+        private readonly array $transformers,
+    ) {
     }
 
     /**
@@ -77,9 +77,6 @@ final class MultipleTransformer implements TransformerInterface, DependentTransf
         return [$output, $statements];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getDependencies(): array
     {
         $dependencies = [];

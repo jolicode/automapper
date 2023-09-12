@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Tests;
 
 use AutoMapper\AutoMapper;
@@ -719,21 +721,6 @@ class AutoMapperTest extends AutoMapperBaseTest
 
         $data = ['test' => 'foo'];
         $array = $this->autoMapper->map($data, 'array');
-    }
-
-    public function testInvalidMappingSource(): void
-    {
-        self::expectException(NoMappingFoundException::class);
-
-        $array = $this->autoMapper->map('test', 'array');
-    }
-
-    public function testInvalidMappingTarget(): void
-    {
-        self::expectException(NoMappingFoundException::class);
-
-        $data = ['test' => 'foo'];
-        $array = $this->autoMapper->map($data, 3);
     }
 
     public function testNoAutoRegister(): void

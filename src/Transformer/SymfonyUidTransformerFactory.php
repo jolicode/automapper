@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Transformer;
 
 use AutoMapper\MapperMetadataInterface;
@@ -12,14 +14,8 @@ use Symfony\Component\Uid\Ulid;
  */
 final class SymfonyUidTransformerFactory extends AbstractUniqueTypeTransformerFactory implements PrioritizedTransformerFactoryInterface
 {
-    /**
-     * @var array
-     */
-    private $reflectionCache = [];
+    private array $reflectionCache = [];
 
-    /**
-     * {@inheritdoc}
-     */
     protected function createTransformer(Type $sourceType, Type $targetType, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
     {
         $isSourceUid = $this->isUid($sourceType);
@@ -58,9 +54,6 @@ final class SymfonyUidTransformerFactory extends AbstractUniqueTypeTransformerFa
         return $this->reflectionCache[$type->getClassName()][0];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPriority(): int
     {
         return 24;

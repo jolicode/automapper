@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Transformer;
 
 use AutoMapper\MapperMetadataInterface;
@@ -12,9 +14,6 @@ use Symfony\Component\PropertyInfo\Type;
  */
 abstract class AbstractUniqueTypeTransformerFactory implements TransformerFactoryInterface
 {
-    /**
-     * {@inheritdoc}
-     */
     public function getTransformer(?array $sourceTypes, ?array $targetTypes, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
     {
         $nbSourceTypes = $sourceTypes ? \count($sourceTypes) : 0;

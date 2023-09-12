@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Transformer;
 
 use AutoMapper\Extractor\PropertyMapping;
@@ -17,7 +19,7 @@ interface TransformerInterface
     /**
      * Get AST output and expressions for transforming a property mapping given an input.
      *
-     * @return [Expr, Stmt[]] First value is the output expression, second value is an array of stmt needed to get the output
+     * @return array{0: Expr, 1: Stmt[]} First value is the output expression, second value is an array of stmt needed to get the output
      */
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array;
 }

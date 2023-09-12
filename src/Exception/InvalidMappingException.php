@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -14,6 +16,6 @@ namespace AutoMapper\Exception;
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-class InvalidMappingException extends RuntimeException
+final class InvalidMappingException extends RuntimeException
 {
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper;
 
 use AutoMapper\Extractor\MappingExtractorInterface;
@@ -15,42 +17,28 @@ use AutoMapper\Transformer\DependentTransformerInterface;
  */
 class MapperMetadata implements MapperGeneratorMetadataInterface
 {
-    private $mappingExtractor;
+    private bool $isConstructorAllowed;
+    private string $dateTimeFormat;
+    private bool $attributeChecking;
 
-    private $customMapping = [];
+    private ?\ReflectionClass $targetReflectionClass = null;
 
-    private $propertiesMapping;
+    /** @var PropertyMapping[] */
+    private ?array $propertiesMapping = null;
+    private ?string $className = null;
+    /** @var array<string, callable> */
+    private array $customMapping = [];
 
-    private $metadataRegistry;
-
-    private $source;
-
-    private $target;
-
-    private $className;
-
-    private $isConstructorAllowed;
-
-    private $isTargetReadOnlyClass;
-
-    private $dateTimeFormat;
-
-    private $classPrefix;
-
-    private $attributeChecking;
-
-    private $targetReflectionClass;
-
-    public function __construct(MapperGeneratorMetadataRegistryInterface $metadataRegistry, MappingExtractorInterface $mappingExtractor, string $source, string $target, bool $isTargetReadOnlyClass, string $classPrefix = 'Mapper_')
-    {
-        $this->mappingExtractor = $mappingExtractor;
-        $this->metadataRegistry = $metadataRegistry;
-        $this->source = $source;
-        $this->target = $target;
-        $this->isTargetReadOnlyClass = $isTargetReadOnlyClass;
+    public function __construct(
+        private readonly MapperGeneratorMetadataRegistryInterface $metadataRegistry,
+        private readonly MappingExtractorInterface $mappingExtractor,
+        private readonly string $source,
+        private readonly string $target,
+        private readonly bool $isTargetReadOnlyClass,
+        private readonly string $classPrefix = 'Mapper_',
+    ) {
         $this->isConstructorAllowed = true;
         $this->dateTimeFormat = \DateTime::RFC3339;
-        $this->classPrefix = $classPrefix;
         $this->attributeChecking = true;
     }
 
@@ -63,9 +51,6 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
         return $this->targetReflectionClass;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPropertiesMapping(): array
     {
         if (null === $this->propertiesMapping) {
@@ -75,17 +60,11 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
         return $this->propertiesMapping;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPropertyMapping(string $property): ?PropertyMapping
     {
         return $this->getPropertiesMapping()[$property] ?? null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function hasConstructor(): bool
     {
         if (!$this->isConstructorAllowed()) {
@@ -127,9 +106,6 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isTargetCloneable(): bool
     {
         try {
@@ -142,9 +118,6 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function canHaveCircularReference(): bool
     {
         $checked = [];
@@ -152,9 +125,6 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
         return $this->checkCircularMapperConfiguration($this, $checked);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getMapperClassName(): string
     {
         if (null !== $this->className) {
@@ -164,9 +134,6 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
         return $this->className = sprintf('%s%s_%s', $this->classPrefix, str_replace('\\', '_', $this->source), str_replace('\\', '_', $this->target));
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getHash(): string
     {
         $hash = '';
@@ -184,49 +151,31 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
         return $hash;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isConstructorAllowed(): bool
     {
         return $this->isConstructorAllowed;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getSource(): string
     {
         return $this->source;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getTarget(): string
     {
         return $this->target;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getDateTimeFormat(): string
     {
         return $this->dateTimeFormat;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getCallbacks(): array
     {
         return $this->customMapping;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function shouldCheckAttributes(): bool
     {
         return $this->attributeChecking;
@@ -241,7 +190,7 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
     }
 
     /**
-     * Whether or not the constructor should be used.
+     * Whether the constructor should be used.
      */
     public function setConstructorAllowed(bool $isConstructorAllowed): void
     {
@@ -257,7 +206,7 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
     }
 
     /**
-     * Whether or not attribute checking code should be generated.
+     * Whether attribute checking code should be generated.
      */
     public function setAttributeChecking(bool $attributeChecking): void
     {
@@ -269,7 +218,7 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
         $this->propertiesMapping = [];
 
         foreach ($this->mappingExtractor->getPropertiesMapping($this) as $propertyMapping) {
-            $this->propertiesMapping[$propertyMapping->getProperty()] = $propertyMapping;
+            $this->propertiesMapping[$propertyMapping->property] = $propertyMapping;
         }
 
         foreach ($this->customMapping as $property => $callback) {
@@ -287,22 +236,22 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
     private function checkCircularMapperConfiguration(MapperGeneratorMetadataInterface $configuration, &$checked): bool
     {
         foreach ($configuration->getPropertiesMapping() as $propertyMapping) {
-            if (!$propertyMapping->getTransformer() instanceof DependentTransformerInterface) {
+            if (!$propertyMapping->transformer instanceof DependentTransformerInterface) {
                 continue;
             }
 
-            foreach ($propertyMapping->getTransformer()->getDependencies() as $dependency) {
-                if (isset($checked[$dependency->getName()])) {
+            foreach ($propertyMapping->transformer->getDependencies() as $dependency) {
+                if (isset($checked[$dependency->name])) {
                     continue;
                 }
 
-                $checked[$dependency->getName()] = true;
+                $checked[$dependency->name] = true;
 
-                if ($dependency->getSource() === $this->getSource() && $dependency->getTarget() === $this->getTarget()) {
+                if ($dependency->source === $this->getSource() && $dependency->target === $this->getTarget()) {
                     return true;
                 }
 
-                $subConfiguration = $this->metadataRegistry->getMetadata($dependency->getSource(), $dependency->getTarget());
+                $subConfiguration = $this->metadataRegistry->getMetadata($dependency->source, $dependency->target);
 
                 if (null !== $subConfiguration && true === $this->checkCircularMapperConfiguration($subConfiguration, $checked)) {
                     return true;

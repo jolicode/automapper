@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Transformer;
 
 use AutoMapper\Extractor\PropertyMapping;
@@ -13,13 +15,11 @@ use PhpParser\Node\Name;
  *
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
  */
-final class TargetEnumTransformer implements TransformerInterface
+final readonly class TargetEnumTransformer implements TransformerInterface
 {
-    public $targetClassName;
-
-    public function __construct(string $targetClassName)
-    {
-        $this->targetClassName = $targetClassName;
+    public function __construct(
+        private string $targetClassName,
+    ) {
     }
 
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array

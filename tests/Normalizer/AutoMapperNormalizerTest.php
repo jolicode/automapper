@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Tests\Normalizer;
 
 use AutoMapper\MapperContext;
@@ -90,7 +92,7 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
     {
         $normalizer = new AutoMapperNormalizer(
             new class() implements \AutoMapper\AutoMapperInterface {
-                public function map($source, $target, array $context = [])
+                public function map(null|array|object $source, string|array|object $target, array $context = []): null|array|object
                 {
                     return $context;
                 }

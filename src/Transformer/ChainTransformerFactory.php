@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Transformer;
 
 use AutoMapper\MapperMetadataInterface;
@@ -10,10 +12,10 @@ use AutoMapper\MapperMetadataInterface;
 final class ChainTransformerFactory implements TransformerFactoryInterface
 {
     /** @var TransformerFactoryInterface[] */
-    private $factories = [];
+    private array $factories = [];
 
     /** @var TransformerFactoryInterface[]|null */
-    private $sorted;
+    private ?array $sorted = null;
 
     /**
      * Biggest priority is MultipleTransformerFactory with 128, so default priority will be bigger in order to
@@ -38,7 +40,7 @@ final class ChainTransformerFactory implements TransformerFactoryInterface
         $this->sortFactories();
 
         $transformerFactoryClass = \get_class($transformerFactory);
-        foreach ($this->sorted as $factory) {
+        foreach ($this->sorted ?? [] as $factory) {
             if (is_a($factory, $transformerFactoryClass)) {
                 return true;
             }
@@ -47,14 +49,11 @@ final class ChainTransformerFactory implements TransformerFactoryInterface
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getTransformer(?array $sourceTypes, ?array $targetTypes, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
     {
         $this->sortFactories();
 
-        foreach ($this->sorted as $factory) {
+        foreach ($this->sorted ?? [] as $factory) {
             $transformer = $factory->getTransformer($sourceTypes, $targetTypes, $mapperMetadata);
 
             if (null !== $transformer) {

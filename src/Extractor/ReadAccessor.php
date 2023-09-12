@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Extractor;
 
 use AutoMapper\Attribute\MapToContext;
@@ -24,21 +26,12 @@ final class ReadAccessor
     public const TYPE_ARRAY_DIMENSION = 3;
     public const TYPE_SOURCE = 4;
 
-    private $type;
-
-    private $name;
-
-    private $sourceClass;
-
-    private $private;
-
-    public function __construct(int $type, string $name, string $sourceClass = null, $private = false)
+    public function __construct(
+        private readonly int $type,
+        private readonly string $name,
+        private readonly ?string $sourceClass = null,
+        private readonly bool $private = false)
     {
-        $this->type = $type;
-        $this->name = $name;
-        $this->sourceClass = $sourceClass;
-        $this->private = $private;
-
         if (self::TYPE_METHOD === $this->type && null === $this->sourceClass) {
             throw new \InvalidArgumentException('Source class must be provided when using "method" type.');
         }
@@ -71,7 +64,7 @@ final class ReadAccessor
                                         new Expr\Variable('context'),
                                         new Scalar\String_(MapperContext::MAP_TO_ACCESSOR_PARAMETER)
                                     ),
-                                    new Scalar\String_($attribute->newInstance()->getContextName())
+                                    new Scalar\String_($attribute->newInstance()->contextName)
                                 ),
                                 new Expr\Throw_(
                                     new Expr\New_(
@@ -123,7 +116,7 @@ final class ReadAccessor
     /**
      * Get AST expression for binding closure when dealing with a private property.
      */
-    public function getExtractCallback($className): ?Expr
+    public function getExtractCallback(string $className): ?Expr
     {
         if (self::TYPE_PROPERTY !== $this->type || !$this->private) {
             return null;
@@ -139,7 +132,7 @@ final class ReadAccessor
                 ],
             ])),
             new Arg(new Expr\ConstFetch(new Name('null'))),
-            new Arg(new Scalar\String_(new Name\FullyQualified($className))),
+            new Arg(new Scalar\String_($className)),
         ]);
     }
 }
