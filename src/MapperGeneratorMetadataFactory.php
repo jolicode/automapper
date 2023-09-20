@@ -22,6 +22,7 @@ final readonly class MapperGeneratorMetadataFactory implements MapperGeneratorMe
         private string $classPrefix = 'Mapper_',
         private bool $attributeChecking = true,
         private string $dateTimeFormat = \DateTime::RFC3339,
+        private bool $mapPrivateProperties = true,
     ) {
     }
 
@@ -40,7 +41,7 @@ final readonly class MapperGeneratorMetadataFactory implements MapperGeneratorMe
             $extractor = $this->fromSourcePropertiesMappingExtractor;
         }
 
-        $mapperMetadata = new MapperMetadata($autoMapperRegister, $extractor, $source, $target, $this->isReadOnly($target), $this->classPrefix);
+        $mapperMetadata = new MapperMetadata($autoMapperRegister, $extractor, $source, $target, $this->isReadOnly($target), $this->mapPrivateProperties, $this->classPrefix);
         $mapperMetadata->setAttributeChecking($this->attributeChecking);
         $mapperMetadata->setDateTimeFormat($this->dateTimeFormat);
 

@@ -22,7 +22,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
 {
     public function __construct(
         protected readonly PropertyInfoExtractorInterface $propertyInfoExtractor,
-        private readonly PropertyReadInfoExtractorInterface $readInfoExtractor,
+        protected readonly PropertyReadInfoExtractorInterface $readInfoExtractor,
         protected readonly PropertyWriteInfoExtractorInterface $writeInfoExtractor,
         protected readonly TransformerFactoryInterface $transformerFactory,
         private readonly ?ClassMetadataFactoryInterface $classMetadataFactory = null,
@@ -47,7 +47,8 @@ abstract class MappingExtractor implements MappingExtractorInterface
             $type,
             $readInfo->getName(),
             $source,
-            PropertyReadInfo::VISIBILITY_PUBLIC !== $readInfo->getVisibility()
+            PropertyReadInfo::VISIBILITY_PUBLIC !== $readInfo->getVisibility(),
+            $property
         );
     }
 

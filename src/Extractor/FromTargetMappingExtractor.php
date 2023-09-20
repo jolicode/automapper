@@ -8,6 +8,7 @@ use AutoMapper\Exception\InvalidMappingException;
 use AutoMapper\MapperMetadataInterface;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
+use Symfony\Component\PropertyInfo\PropertyReadInfo;
 use Symfony\Component\PropertyInfo\PropertyReadInfoExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyWriteInfo;
 use Symfony\Component\PropertyInfo\PropertyWriteInfoExtractorInterface;
@@ -84,7 +85,8 @@ final class FromTargetMappingExtractor extends MappingExtractor
                 $this->getGroups($mapperMetadata->getTarget(), $property),
                 $this->getMaxDepth($mapperMetadata->getTarget(), $property),
                 $this->isIgnoredProperty($mapperMetadata->getSource(), $property),
-                $this->isIgnoredProperty($mapperMetadata->getTarget(), $property)
+                $this->isIgnoredProperty($mapperMetadata->getTarget(), $property),
+                PropertyReadInfo::VISIBILITY_PUBLIC === $this->readInfoExtractor->getReadInfo($mapperMetadata->getSource(), $property)?->getVisibility() ?? true,
             );
         }
 

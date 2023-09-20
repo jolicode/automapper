@@ -23,6 +23,7 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
     protected function setUp(): void
     {
         parent::setUp();
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
         $this->normalizer = new AutoMapperNormalizer($this->autoMapper);
     }
 

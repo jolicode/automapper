@@ -35,6 +35,7 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
         private readonly string $source,
         private readonly string $target,
         private readonly bool $isTargetReadOnlyClass,
+        private readonly bool $mapPrivateProperties,
         private readonly string $classPrefix = 'Mapper_',
     ) {
         $this->isConstructorAllowed = true;
@@ -265,5 +266,10 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
     public function isTargetReadOnlyClass(): bool
     {
         return $this->isTargetReadOnlyClass;
+    }
+
+    public function shouldMapPrivateProperties(): bool
+    {
+        return $this->mapPrivateProperties;
     }
 }

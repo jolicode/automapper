@@ -154,7 +154,7 @@ final class Generator
         $duplicatedStatements = [];
         $setterStatements = [];
         foreach ($propertiesMapping as $propertyMapping) {
-            if ($propertyMapping->shouldIgnoreProperty()) {
+            if ($propertyMapping->shouldIgnoreProperty($mapperGeneratorMetadata->shouldMapPrivateProperties())) {
                 continue;
             }
 

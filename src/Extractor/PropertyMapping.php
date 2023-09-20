@@ -24,12 +24,15 @@ final class PropertyMapping
         public readonly ?array $targetGroups = null,
         public readonly ?int $maxDepth = null,
         public readonly bool $sourceIgnored = false,
-        public readonly bool $targetIgnored = false
+        public readonly bool $targetIgnored = false,
+        public readonly bool $isPublic = false,
     ) {
     }
 
-    public function shouldIgnoreProperty(): bool
+    public function shouldIgnoreProperty(bool $shouldMapPrivateProperties = true): bool
     {
-        return $this->sourceIgnored || $this->targetIgnored;
+        return $this->sourceIgnored
+            || $this->targetIgnored
+            || !($shouldMapPrivateProperties || $this->isPublic);
     }
 }
