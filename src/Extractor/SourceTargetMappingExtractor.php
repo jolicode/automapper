@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Extractor;
 
 use AutoMapper\MapperMetadataInterface;
+use Symfony\Component\PropertyInfo\PropertyReadInfo;
 
 /**
  * Extracts mapping between two objects, only gives properties that have the same name.
@@ -77,7 +78,8 @@ class SourceTargetMappingExtractor extends MappingExtractor
                     $this->getGroups($mapperMetadata->getTarget(), $property),
                     $maxDepth,
                     $this->isIgnoredProperty($mapperMetadata->getSource(), $property),
-                    $this->isIgnoredProperty($mapperMetadata->getTarget(), $property)
+                    $this->isIgnoredProperty($mapperMetadata->getTarget(), $property),
+                    PropertyReadInfo::VISIBILITY_PUBLIC === $this->readInfoExtractor->getReadInfo($mapperMetadata->getSource(), $property)?->getVisibility() ?? true,
                 );
             }
         }

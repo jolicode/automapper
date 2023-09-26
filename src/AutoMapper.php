@@ -152,7 +152,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
     }
 
     public static function create(
-        bool $private = true,
+        bool $mapPrivateProperties = false,
         ClassLoaderInterface $loader = null,
         AdvancedNameConverterInterface $nameConverter = null,
         string $classPrefix = 'Mapper_',
@@ -171,19 +171,9 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
             ));
         }
 
-        $flags = ReflectionExtractor::ALLOW_PUBLIC;
+        $flags = ReflectionExtractor::ALLOW_PUBLIC | ReflectionExtractor::ALLOW_PROTECTED | ReflectionExtractor::ALLOW_PRIVATE;
 
-        if ($private) {
-            $flags |= ReflectionExtractor::ALLOW_PROTECTED | ReflectionExtractor::ALLOW_PRIVATE;
-        }
-
-        $reflectionExtractor = new ReflectionExtractor(
-            null,
-            null,
-            null,
-            true,
-            $flags
-        );
+        $reflectionExtractor = new ReflectionExtractor(accessFlags: $flags);
 
         $phpDocExtractor = new PhpDocExtractor();
         $propertyInfoExtractor = new PropertyInfoExtractor(
@@ -226,7 +216,8 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
             $fromTargetMappingExtractor,
             $classPrefix,
             $attributeChecking,
-            $dateTimeFormat
+            $dateTimeFormat,
+            $mapPrivateProperties
         )) : new self($loader, $transformerFactory);
 
         $transformerFactory->addTransformerFactory(new MultipleTransformerFactory($transformerFactory));

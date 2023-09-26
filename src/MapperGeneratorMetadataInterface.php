@@ -54,4 +54,9 @@ interface MapperGeneratorMetadataInterface extends MapperMetadataInterface
      * If not the case, allow to not generate code about circular references
      */
     public function canHaveCircularReference(): bool;
+
+    /**
+     * Whether we should map private properties and methods.
+     */
+    public function shouldMapPrivateProperties(): bool;
 }
