@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [8.0.0] - 2023-09-26
+### Changed
+- Modernization, PHP 8.2 and typed properties everywhere
+
 ### Fixed
 - [GH#753](https://github.com/janephp/janephp/pull/753) Fix: AutoMapper should accept getters with default properties
 
