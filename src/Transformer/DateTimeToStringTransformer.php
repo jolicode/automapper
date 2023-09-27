@@ -25,6 +25,11 @@ final class DateTimeToStringTransformer implements TransformerInterface
 
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
+        /*
+         * Format the date time object to a string.
+         *
+         * $input->format($context[MapperContext::DATETIME_FORMAT] ?? \DateTimeInterface::RFC3339);
+         */
         return [new Expr\MethodCall($input, 'format', [
             new Arg(
                 new Expr\BinaryOp\Coalesce(

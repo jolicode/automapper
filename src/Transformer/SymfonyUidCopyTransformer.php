@@ -21,6 +21,11 @@ final class SymfonyUidCopyTransformer implements TransformerInterface
 {
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
+        /*
+         * Create a Symfony Uid object from another Symfony Uid object.
+         *
+         * $input instanceof \Symfony\Component\Uid\Ulid ? new \Symfony\Component\Uid\Ulid($input->toBase32()) : new \Symfony\Component\Uid\Uuid($input->toRfc4122());
+         */
         return [
             new Expr\Ternary(
                 new Expr\Instanceof_($input, new Name(Ulid::class)),

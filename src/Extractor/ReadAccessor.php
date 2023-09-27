@@ -53,11 +53,11 @@ final class ReadAccessor
 
                 foreach ($parameters as $parameter) {
                     if ($attribute = ($parameter->getAttributes(MapToContext::class)[0] ?? null)) {
-                        // generates code similar to:
-                        // $value->getValue(
-                        //     $context['map_to_accessor_parameter']['some_key'] ?? throw new \InvalidArgumentException('error message');
-                        // )
-
+                        /*
+                         * Create method call argument to read value from context and throw exception if not found
+                         *
+                         * $context['map_to_accessor_parameter']['some_key'] ?? throw new \InvalidArgumentException('error message');
+                         */
                         $methodCallArguments[] = new Arg(
                             new Expr\BinaryOp\Coalesce(
                                 new Expr\ArrayDimFetch(
@@ -88,6 +88,13 @@ final class ReadAccessor
             }
 
             if ($this->private) {
+                /*
+                 * When the method is private we use the extract callback that can read this value
+                 *
+                 * @see \AutoMapper\Extractor\ReadAccessor::getExtractCallback()
+                 *
+                 * $this->extractCallbacks['method_name']($input)
+                 */
                 return new Expr\FuncCall(
                     new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractCallbacks'), new Scalar\String_($this->name ?? $this->accessor)),
                     [
@@ -96,11 +103,23 @@ final class ReadAccessor
                 );
             }
 
+            /*
+             * Use the method call to read the value
+             *
+             * $input->method_name(...$args)
+             */
             return new Expr\MethodCall($input, $this->accessor, $methodCallArguments);
         }
 
         if (self::TYPE_PROPERTY === $this->type) {
             if ($this->private) {
+                /*
+                 * When the property is private we use the extract callback that can read this value
+                 *
+                 * @see \AutoMapper\Extractor\ReadAccessor::getExtractCallback()
+                 *
+                 * $this->extractCallbacks['property_name']($input)
+                 */
                 return new Expr\FuncCall(
                     new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractCallbacks'), new Scalar\String_($this->accessor)),
                     [
@@ -109,10 +128,20 @@ final class ReadAccessor
                 );
             }
 
+            /*
+             * Use the property fetch to read the value
+             *
+             * $input->property_name
+             */
             return new Expr\PropertyFetch($input, $this->accessor);
         }
 
         if (self::TYPE_ARRAY_DIMENSION === $this->type) {
+            /*
+             * Use the array dim fetch to read the value
+             *
+             * $input['property_name']
+             */
             return new Expr\ArrayDimFetch($input, new Scalar\String_($this->accessor));
         }
 
@@ -132,6 +161,17 @@ final class ReadAccessor
             return null;
         }
 
+        /*
+         * Create extract callback for this accessor
+         *
+         *  \Closure::bind(function ($object) {
+         *      return $object->property_name;
+         *  }, null, $className)
+         *
+         *  \Closure::bind(function ($object) {
+         *      return $object->method_name();
+         *  }, null, $className)
+         */
         return new Expr\StaticCall(new Name\FullyQualified(\Closure::class), 'bind', [
             new Arg(
                 new Expr\Closure([

@@ -30,6 +30,11 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
     {
         $mapperName = $this->getDependencyName();
 
+        /*
+         * Use a sub mapper to map the property
+         *
+         * $this->mappers['Mapper_SourceType_TargetType']->map($input, MapperContext::withNewContext($context, $propertyMapping->property));
+         */
         return [new Expr\MethodCall(new Expr\ArrayDimFetch(
             new Expr\PropertyFetch(new Expr\Variable('this'), 'mappers'),
             new Scalar\String_($mapperName)

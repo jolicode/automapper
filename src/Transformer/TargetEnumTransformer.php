@@ -24,6 +24,11 @@ final readonly class TargetEnumTransformer implements TransformerInterface
 
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
+        /*
+         * Transform a string into a BackendEnum.
+         *
+         * \Backend\Enum\TargetEnum::from($input);
+         */
         return [new Expr\StaticCall(new Name\FullyQualified($this->targetClassName), 'from', [
             new Arg($input),
         ]), []];
