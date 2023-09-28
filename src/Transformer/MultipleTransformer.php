@@ -50,6 +50,18 @@ final class MultipleTransformer implements TransformerInterface, DependentTransf
             new Stmt\Expression(new Expr\Assign($output, $input)),
         ];
 
+        /*
+         * In case of the source type can be mixed we need to check the type before doing the transformation.
+         *
+         *  if (is_bool($input)) {
+         *     $output = $input;
+         *  }
+         *
+         *  if (is_int($input)) {
+         *     $output = (bool) $input;
+         *  }
+         *
+         */
         foreach ($this->transformers as $transformerData) {
             $transformer = $transformerData['transformer'];
             $type = $transformerData['type'];

@@ -24,6 +24,11 @@ final readonly class StringToSymfonyUidTransformer implements TransformerInterfa
 
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
+        /*
+         * Create a Symfony Uid object from a string.
+         *
+         * new \Symfony\Component\Uid\Uuid($input);
+         */
         return [
             new Expr\New_(new Name($this->className), [new Arg($input)]),
             [],

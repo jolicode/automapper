@@ -19,6 +19,11 @@ final class DateTimeMutableToImmutableTransformer implements TransformerInterfac
 {
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
+        /*
+         * In case of mutable source we create the immutable value by using createFromMutable.
+         *
+         * \DateTimeImmutable::createFromMutable($input);
+         */
         return [
             new Expr\StaticCall(new Name\FullyQualified(\DateTimeImmutable::class), 'createFromMutable', [
                 new Arg($input),

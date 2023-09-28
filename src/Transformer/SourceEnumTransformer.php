@@ -17,6 +17,7 @@ final class SourceEnumTransformer implements TransformerInterface
 {
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
+        /* $input->value */
         return [new Expr\PropertyFetch($input, 'value'), []];
     }
 }

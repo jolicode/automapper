@@ -25,6 +25,9 @@ abstract readonly class AbstractArrayTransformer implements TransformerInterface
 
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
+        /**
+         * $values = [];.
+         */
         $valuesVar = new Expr\Variable($uniqueVariableScope->getUniqueName('values'));
         $statements = [
             new Stmt\Expression(new Expr\Assign($valuesVar, new Expr\Array_())),
@@ -35,9 +38,15 @@ abstract readonly class AbstractArrayTransformer implements TransformerInterface
 
         $assignByRef = $this->itemTransformer instanceof AssignedByReferenceTransformerInterface && $this->itemTransformer->assignByRef();
 
+        /* Get the transform statements for the source property */
         [$output, $itemStatements] = $this->itemTransformer->transform($loopValueVar, $target, $propertyMapping, $uniqueVariableScope);
 
         if ($propertyMapping->writeMutator && $propertyMapping->writeMutator->type === WriteMutator::TYPE_ADDER_AND_REMOVER) {
+            /**
+             * Use add and remove methods.
+             *
+             * $target->add($output);
+             */
             $mappedValueVar = new Expr\Variable($uniqueVariableScope->getUniqueName('mappedValue'));
             $itemStatements[] = new Stmt\Expression(new Expr\Assign($mappedValueVar, $output));
             $itemStatements[] = new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name('null')), $mappedValueVar), [
@@ -46,6 +55,13 @@ abstract readonly class AbstractArrayTransformer implements TransformerInterface
                 ],
             ]);
         } else {
+            /*
+             * Assign the value to the array.
+             *
+             * $values[] = $output;
+             * or
+             * $values[$key] = $output;
+             */
             $itemStatements[] = new Stmt\Expression($this->getAssignExpr($valuesVar, $output, $loopKeyVar, $assignByRef));
         }
 

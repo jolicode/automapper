@@ -41,6 +41,11 @@ final class WriteMutator
     public function getExpression(Expr\Variable $output, Expr $value, bool $byRef = false): ?Expr
     {
         if (self::TYPE_METHOD === $this->type || self::TYPE_ADDER_AND_REMOVER === $this->type) {
+            /*
+             * Create method call expression to write value
+             *
+             * $output->method($value);
+             */
             return new Expr\MethodCall($output, $this->name, [
                 new Arg($value),
             ]);
@@ -48,6 +53,11 @@ final class WriteMutator
 
         if (self::TYPE_PROPERTY === $this->type) {
             if ($this->private) {
+                /*
+                 * Use hydrate callback to write value
+                 *
+                 * $this->hydrateCallbacks['propertyName']($output, $value);
+                 */
                 return new Expr\FuncCall(
                     new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'hydrateCallbacks'), new Scalar\String_($this->name)),
                     [
@@ -56,6 +66,12 @@ final class WriteMutator
                     ]
                 );
             }
+
+            /*
+             * Create property expression to write value
+             *
+             * $output->propertyName &= $value;
+             */
             if ($byRef) {
                 return new Expr\AssignRef(new Expr\PropertyFetch($output, $this->name), $value);
             }
@@ -64,6 +80,11 @@ final class WriteMutator
         }
 
         if (self::TYPE_ARRAY_DIMENSION === $this->type) {
+            /*
+             * Create array write expression to write value
+             *
+             * $output['propertyName'] &= $value;
+             */
             if ($byRef) {
                 return new Expr\AssignRef(new Expr\ArrayDimFetch($output, new Scalar\String_($this->name)), $value);
             }
@@ -83,6 +104,13 @@ final class WriteMutator
             return null;
         }
 
+        /*
+         * Create hydrate callback for this mutator
+         *
+         * \Closure::bind(function ($object, $value) {
+         *    $object->propertyName = $value;
+         * }, null, $className)
+         */
         return new Expr\StaticCall(new Name\FullyQualified(\Closure::class), 'bind', [
             new Arg(new Expr\Closure([
                 'params' => [

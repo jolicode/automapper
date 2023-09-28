@@ -20,6 +20,11 @@ final class DateTimeImmutableToMutableTransformer implements TransformerInterfac
 {
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
+        /*
+         * In case of immutable source we clone the value by using format into a new mutable DateTime.
+         *
+         * \DateTime::createFromFormat(\DateTime::RFC3339, $input->format(\DateTime::RFC3339));
+         */
         return [
             new Expr\StaticCall(new Name\FullyQualified(\DateTime::class), 'createFromFormat', [
                 new Arg(new String_(\DateTime::RFC3339)),

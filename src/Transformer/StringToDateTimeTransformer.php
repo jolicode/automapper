@@ -29,6 +29,11 @@ final readonly class StringToDateTimeTransformer implements TransformerInterface
     {
         $className = \DateTimeInterface::class === $this->className ? \DateTimeImmutable::class : $this->className;
 
+        /*
+         * Create a \DateTime[Immutable] object from a string.
+         *
+         * \DateTimeImmutable::createFromFormat($context[MapperContext::DATETIME_FORMAT] ?? \DateTimeInterface::RFC3339, $input);
+         */
         return [new Expr\StaticCall(new Name\FullyQualified($className), 'createFromFormat', [
             new Arg(
                 new Expr\BinaryOp\Coalesce(

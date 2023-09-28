@@ -13,6 +13,11 @@ use PhpParser\Node\Expr;
  */
 final readonly class ArrayTransformer extends AbstractArrayTransformer
 {
+    /**
+     * Assign the value by pushing it to the array.
+     *
+     * $values[] = $output;
+     */
     protected function getAssignExpr(Expr $valuesVar, Expr $outputVar, Expr $loopKeyVar, bool $assignByRef): Expr
     {
         if ($assignByRef) {

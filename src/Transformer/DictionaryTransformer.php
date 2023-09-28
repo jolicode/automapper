@@ -13,6 +13,11 @@ use PhpParser\Node\Expr;
  */
 final readonly class DictionaryTransformer extends AbstractArrayTransformer
 {
+    /**
+     * Assign the value by using the key as the array key.
+     *
+     * $values[$key] = $output;
+     */
     protected function getAssignExpr(Expr $valuesVar, Expr $outputVar, Expr $loopKeyVar, bool $assignByRef): Expr
     {
         if ($assignByRef) {

@@ -17,6 +17,7 @@ final class CopyTransformer implements TransformerInterface
 {
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
+        /* No transform here it's the same value and it's a copy so we do not need to clone */
         return [$input, []];
     }
 }
