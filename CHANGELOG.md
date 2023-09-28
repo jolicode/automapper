@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- [GH#6](https://github.com/jolicode/automapper/pull/6) Document all AST code by explaining what it generates
+
 ## [8.0.0] - 2023-09-26
 ### Changed
 - Modernization, PHP 8.2 and typed properties everywhere
