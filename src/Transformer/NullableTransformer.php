@@ -49,9 +49,21 @@ final readonly class NullableTransformer implements TransformerInterface, Depend
             $itemStatements[] = new Stmt\Expression(new $assignClass($newOutput, $output));
         }
 
-        $statements[] = new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name('null')), $input), [
-            'stmts' => $itemStatements,
-        ]);
+        if ($input instanceof Expr\ArrayDimFetch) {
+            /*
+             * if `$input` is an array access, let's validate if the array key exists and is not null:
+             *
+             * if (isset($value['key'])) {
+             */
+            $statements[] = new Stmt\If_(new Expr\Isset_([$input]), ['stmts' => $itemStatements]);
+        } else {
+            /*
+             * otherwise, let's check the value is not null:
+             *
+             *  if ($input !== null) {
+             */
+            $statements[] = new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name('null')), $input), ['stmts' => $itemStatements]);
+        }
 
         return [$newOutput ?? $output, $statements];
     }
