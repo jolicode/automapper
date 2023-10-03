@@ -17,6 +17,7 @@ use AutoMapper\Tests\Fixtures\AddressDTOWithReadonlyPromotedProperty;
 use AutoMapper\Tests\Fixtures\AddressType;
 use AutoMapper\Tests\Fixtures\AddressWithEnum;
 use AutoMapper\Tests\Fixtures\ClassWithMapToContextAttribute;
+use AutoMapper\Tests\Fixtures\ClassWithNullablePropertyInConstructor;
 use AutoMapper\Tests\Fixtures\ClassWithPrivateProperty;
 use AutoMapper\Tests\Fixtures\Fish;
 use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
@@ -1205,6 +1206,14 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertSame(
             [],
             $this->autoMapper->map(new ClassWithPrivateProperty('foo'), 'array')
+        );
+    }
+
+    public function testItCanMapFromArrayWithMissingNullableProperty(): void
+    {
+        self::assertEquals(
+            new ClassWithNullablePropertyInConstructor(foo: 1),
+            $this->autoMapper->map(['foo' => 1], ClassWithNullablePropertyInConstructor::class)
         );
     }
 }
