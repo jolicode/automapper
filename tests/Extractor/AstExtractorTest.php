@@ -6,7 +6,7 @@ namespace AutoMapper\Tests\Extractor;
 
 use AutoMapper\Exception\InvalidArgumentException;
 use AutoMapper\Exception\RuntimeException;
-use AutoMapper\Extractor\AstExtractor;
+use AutoMapper\Extractor\ClassMethodToCallbackExtractor;
 use AutoMapper\Tests\Extractor\Fixtures\Foo;
 use AutoMapper\Tests\Extractor\Fixtures\FooCustomMapper;
 use PhpParser\Node\Arg;
@@ -20,10 +20,13 @@ use PHPUnit\Framework\TestCase;
  */
 class AstExtractorTest extends TestCase
 {
-    public function testExtractSimpleMethod(): void
+    /**
+     * @dataProvider extractSimpleMethodProvider
+     */
+    public function testExtractSimpleMethod(string $varName): void
     {
-        $extractor = new AstExtractor();
-        $extractedMethod = new Expression($extractor->extract(FooCustomMapper::class, 'transform', [new Arg(new Variable('object'))]));
+        $extractor = new ClassMethodToCallbackExtractor();
+        $extractedMethod = new Expression($extractor->extract(FooCustomMapper::class, 'transform', [new Arg(new Variable($varName))]));
 
         $this->assertEquals(<<<PHP
 (function (mixed \$object) : mixed {
@@ -31,27 +34,32 @@ class AstExtractorTest extends TestCase
         \$object->bar = 'Hello World!';
     }
     return \$object;
-})(\$object);
+})(\${$varName});
 PHP, $generatedCode = (new Standard())->prettyPrint([$extractedMethod]));
 
-        $codeToEval = <<<PHP
-class Foo
-{
-    public string \$bar;
-    public string \$baz;
-}
+        $this->assertGeneratedCodeIsRunnable($generatedCode, $varName);
+    }
 
-\$object = new Foo();
-\$object->bar = 'Hello';
+    public function extractSimpleMethodProvider(): iterable
+    {
+        yield 'with same variable names' => ['object'];
+        yield 'with different variable names' => ['someVar'];
+    }
 
-{$generatedCode}
+    public function testExtractMethodWithTwoVariables(): void
+    {
+        $extractor = new ClassMethodToCallbackExtractor();
+        $extractedMethod = new Expression($extractor->extract(FooCustomMapper::class, 'switch', [new Arg(new Variable('someVar')), new Arg(new Variable('context'))]));
 
-return \$object;
-PHP;
-
-        /** @var Foo $object */
-        $object = eval($codeToEval);
-        $this->assertEquals('Hello World!', $object->bar);
+        $this->assertEquals(<<<PHP
+(function (mixed \$object, string \$someString) : mixed {
+    if (\$object instanceof Foo) {
+        \$object->bar = 'Hello World!';
+        \$object->baz = \$someString;
+    }
+    return \$object;
+})(\$someVar, \$context);
+PHP, (new Standard())->prettyPrint([$extractedMethod]));
     }
 
     public function testCannotExtractCode(): void
@@ -61,7 +69,7 @@ PHP;
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage("You cannot extract code from \"{$coreClass}\" class.");
 
-        $extractor = new AstExtractor();
+        $extractor = new ClassMethodToCallbackExtractor();
         $extractor->extract($coreClass, 'rewind', [new Arg(new Variable('object'))]);
     }
 
@@ -72,7 +80,7 @@ PHP;
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Input parameters and method parameters in class \"{$class}\" do not match.");
 
-        $extractor = new AstExtractor();
+        $extractor = new ClassMethodToCallbackExtractor();
         $extractor->extract($class, 'transform', [new Arg(new Variable('object')), new Arg(new Variable('context'))]);
     }
 
@@ -83,7 +91,32 @@ PHP;
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Input parameters and method parameters in class \"{$class}\" do not match.");
 
-        $extractor = new AstExtractor();
+        $extractor = new ClassMethodToCallbackExtractor();
         $extractor->extract($class, 'switch', [new Arg(new Variable('object'))]);
+    }
+
+    private function assertGeneratedCodeIsRunnable(string $generatedCode, string $varName): void
+    {
+        $codeToEval = <<<PHP
+if(!class_exists(Foo::class))
+{
+    class Foo
+    {
+        public string \$bar;
+        public string \$baz;
+    }
+}
+
+\${$varName} = new Foo();
+\${$varName}->bar = 'Hello';
+
+{$generatedCode}
+
+return \${$varName};
+PHP;
+
+        /** @var Foo $object */
+        $object = eval($codeToEval);
+        $this->assertEquals('Hello World!', $object->bar);
     }
 }

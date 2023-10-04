@@ -8,6 +8,8 @@ namespace AutoMapper;
  * Allows to retrieve a mapper.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 interface AutoMapperRegistryInterface
 {

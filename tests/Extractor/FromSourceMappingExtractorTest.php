@@ -13,6 +13,7 @@ use AutoMapper\Tests\Fixtures;
 use AutoMapper\Transformer\ArrayTransformerFactory;
 use AutoMapper\Transformer\BuiltinTransformerFactory;
 use AutoMapper\Transformer\ChainTransformerFactory;
+use AutoMapper\Transformer\CustomTransformer\CustomTransformersRegistry;
 use AutoMapper\Transformer\DateTimeTransformerFactory;
 use AutoMapper\Transformer\MultipleTransformerFactory;
 use AutoMapper\Transformer\NullableTransformerFactory;
@@ -62,6 +63,7 @@ class FromSourceMappingExtractorTest extends AutoMapperBaseTest
             $reflectionExtractor,
             $reflectionExtractor,
             $transformerFactory,
+            new CustomTransformersRegistry(),
             $classMetadataFactory
         );
 

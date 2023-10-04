@@ -7,12 +7,14 @@ namespace AutoMapper\Generator;
 use AutoMapper\AutoMapperRegistryInterface;
 use AutoMapper\Exception\CompileException;
 use AutoMapper\Exception\ReadOnlyTargetException;
+use AutoMapper\Extractor\ClassMethodToCallbackExtractor;
 use AutoMapper\Extractor\WriteMutator;
 use AutoMapper\GeneratedMapper;
 use AutoMapper\MapperContext;
 use AutoMapper\MapperGeneratorMetadataInterface;
 use AutoMapper\Transformer\AssignedByReferenceTransformerInterface;
 use AutoMapper\Transformer\DependentTransformerInterface;
+use AutoMapper\Transformer\TransformerInterface;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
@@ -28,14 +30,15 @@ use Symfony\Component\Serializer\Mapping\ClassDiscriminatorResolverInterface;
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-final class Generator
+final readonly class Generator
 {
-    private readonly Parser $parser;
+    private Parser $parser;
 
     public function __construct(
+        private ClassMethodToCallbackExtractor $classMethodToCallbackExtractor,
         ?Parser $parser = null,
-        private readonly ?ClassDiscriminatorResolverInterface $classDiscriminator = null,
-        private readonly bool $allowReadOnlyTargetToPopulate = false,
+        private ?ClassDiscriminatorResolverInterface $classDiscriminator = null,
+        private bool $allowReadOnlyTargetToPopulate = false,
     ) {
         $this->parser = $parser ?? (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
     }
@@ -234,14 +237,20 @@ final class Generator
                 continue;
             }
 
-            $transformer = $propertyMapping->transformer;
-
             $fieldValueVariable = new Expr\Variable($uniqueVariableScope->getUniqueName('fieldValue'));
             /** Create expression on how to read the value from the source */
             $sourcePropertyAccessor = new Expr\Assign($fieldValueVariable, $propertyMapping->readAccessor->getExpression($sourceInput));
 
-            /* Create expression to transform the readed value into the wanted writed value, depending on the transform it may add new statements to get the correct value */
-            [$output, $propStatements] = $transformer->transform($fieldValueVariable, $result, $propertyMapping, $uniqueVariableScope);
+            $transformer = $propertyMapping->transformer;
+
+            if (\is_string($transformer)) {
+                /* If the transformer is a string, it means it's a custom transformer, so we extract the code of the transform method and wrap it into a closure */
+                $output = $this->classMethodToCallbackExtractor->extract($transformer, 'transform', [new Arg($fieldValueVariable)]);
+                $propStatements = [];
+            } else {
+                /* Create expression to transform the read value into the wanted written value, depending on the transform it may add new statements to get the correct value */
+                [$output, $propStatements] = $transformer->transform($fieldValueVariable, $result, $propertyMapping, $uniqueVariableScope);
+            }
 
             $extractCallback = $propertyMapping->readAccessor->getExtractCallback($mapperGeneratorMetadata->getSource());
 
@@ -392,7 +401,7 @@ final class Generator
             }
 
             if ($conditions) {
-                /**
+                /*
                  * If there is any conditions generated we encapsulate the mapping into it.
                  *
                  * if (condition1 && condition2 && ...) {
@@ -410,9 +419,9 @@ final class Generator
                 ])];
             }
 
-            /**
+            /*
              * Here we dispatch those statements into two categories
-             *  * Statements that need to be executed before the constructor, if the property need to be write in the constructor
+             *  * Statements that need to be executed before the constructor, if the property need to be written in the constructor
              *  * Statements that need to be executed after the constructor.
              */
             $propInConstructor = \in_array($propertyMapping->property, $inConstructor, true);
@@ -451,7 +460,7 @@ final class Generator
         /* return $result; */
         $statements[] = new Stmt\Return_($result);
 
-        /**
+        /*
          * Create the map method for this mapper.
          *
          * public function map($source, array $context = []) {
@@ -469,7 +478,7 @@ final class Generator
             'returnType' => \PHP_VERSION_ID >= 80000 ? 'mixed' : null,
         ]);
 
-        /**
+        /*
          * Create the constructor for this mapper.
          *
          * public function __construct() {
@@ -560,8 +569,12 @@ final class Generator
         $injectMapperStatements = [];
         $classDiscriminatorMapping = 'array' !== $target && null !== $this->classDiscriminator ? $this->classDiscriminator->getMappingForClass($target) : null;
 
-        if (null !== $classDiscriminatorMapping && null !== ($propertyMapping = $mapperMetadata->getPropertyMapping($classDiscriminatorMapping->getTypeProperty()))) {
-            /* Here we generated the code that allow to put the type into the output variable so we are able to determine which mapper to use */
+        if (
+            null !== $classDiscriminatorMapping
+            && null !== ($propertyMapping = $mapperMetadata->getPropertyMapping($classDiscriminatorMapping->getTypeProperty()))
+            && $propertyMapping->transformer instanceof TransformerInterface
+        ) {
+            /* Here we generated the code that allow to put the type into the output variable, so we are able to determine which mapper to use */
             [$output, $createObjectStatements] = $propertyMapping->transformer->transform($propertyMapping->readAccessor->getExpression($sourceInput), $result, $propertyMapping, $uniqueVariableScope);
 
             foreach ($classDiscriminatorMapping->getTypesMapping() as $typeValue => $typeTarget) {
@@ -634,8 +647,17 @@ final class Generator
 
                 $constructVar = new Expr\Variable($uniqueVariableScope->getUniqueName('constructArg'));
 
-                /* Get extract and transform statements for this property */
-                [$output, $propStatements] = $propertyMapping->transformer->transform($propertyMapping->readAccessor->getExpression($sourceInput), $constructVar, $propertyMapping, $uniqueVariableScope);
+                $fieldValueExpr = $propertyMapping->readAccessor->getExpression($sourceInput);
+
+                if (\is_string($propertyMapping->transformer)) {
+                    /* If the transformer is a string, it means it's a custom transformer, so we extract the code of the transform method and wrap it into a closure */
+                    $propStatements = [];
+                    $output = $this->classMethodToCallbackExtractor->extract($propertyMapping->transformer, 'transform', [new Arg($fieldValueExpr)]);
+                } else {
+                    /* Get extract and transform statements for this property */
+                    [$output, $propStatements] = $propertyMapping->transformer->transform($fieldValueExpr, $constructVar, $propertyMapping, $uniqueVariableScope);
+                }
+
                 $constructArguments[$parameter->getPosition()] = new Arg($constructVar);
 
                 /*
