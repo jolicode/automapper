@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.0.1] - 2023-10-04
 ### Changed
 - [GH#6](https://github.com/jolicode/automapper/pull/6) Document all AST code by explaining what it generates
 
