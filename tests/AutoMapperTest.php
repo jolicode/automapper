@@ -93,7 +93,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testAutoMapperFromArrayCustomDateTime(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'CustomDateTime_');
+        $this->buildAutoMapper(classPrefix: 'CustomDateTime_');
 
         $dateTime = \DateTime::createFromFormat(\DateTime::RFC3339, '1987-04-30T06:00:00Z');
         $customFormat = 'U';
@@ -581,6 +581,8 @@ class AutoMapperTest extends AutoMapperBaseTest
         $address->setCity('some city');
         $user->setAddress($address);
 
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+
         /** @var Fixtures\UserDTO $userDto */
         $userDto = $this->autoMapper->map($user, Fixtures\UserDTO::class, [MapperContext::ALLOWED_ATTRIBUTES => ['id', 'age', 'address']]);
 
@@ -615,6 +617,7 @@ class AutoMapperTest extends AutoMapperBaseTest
         });
 
         $user = new Fixtures\User(1, 'yolo', '13');
+
         $userDto = $this->autoMapper->map($user, Fixtures\UserDTOMerged::class);
 
         self::assertArrayHasKey('name', $userDto->getProperties());

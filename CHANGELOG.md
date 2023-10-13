@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - [GH#11](https://github.com/jolicode/automapper/pull/11) Added phpstan level 5 in CI
+- [GH#9](https://github.com/jolicode/automapper/pull/9) fix: `mapPrivatePropertiesAndMethod` should not be mandatory
 
 ## [8.0.1] - 2023-10-04
 ### Changed
