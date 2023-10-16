@@ -33,7 +33,7 @@ final readonly class NullableTransformerFactory implements TransformerFactoryInt
 
         $isTargetNullable = false;
 
-        foreach ($targetTypes as $targetType) {
+        foreach ($targetTypes ?? [] as $targetType) {
             if ($targetType->isNullable()) {
                 $isTargetNullable = true;
 

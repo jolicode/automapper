@@ -3,3 +3,4 @@ composer.lock
 .php-cs-fixer.cache
 .phpunit.result.cache
 tests/cache/
+tools/phpstan/cache/

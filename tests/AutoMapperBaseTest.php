@@ -21,11 +21,8 @@ use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
  */
 abstract class AutoMapperBaseTest extends TestCase
 {
-    /** @var AutoMapper */
-    protected $autoMapper;
-
-    /** @var ClassLoaderInterface */
-    protected $loader;
+    protected AutoMapper $autoMapper;
+    protected ClassLoaderInterface $loader;
 
     protected function setUp(): void
     {

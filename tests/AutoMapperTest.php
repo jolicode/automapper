@@ -726,13 +726,6 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertInstanceOf(Fixtures\Cat::class, $pet);
     }
 
-    public function testAutomapNull(): void
-    {
-        $array = $this->autoMapper->map(null, 'array');
-
-        self::assertNull($array);
-    }
-
     public function testInvalidMappingBothArray(): void
     {
         self::expectException(NoMappingFoundException::class);
@@ -939,7 +932,7 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertEquals('foobar', $entity->getName());
     }
 
-    public function testAdderAndRemoverWithClass()
+    public function testAdderAndRemoverWithClass(): void
     {
         $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
@@ -960,7 +953,7 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertSame('dog', $petOwnerData->getPets()[1]->type);
     }
 
-    public function testAdderAndRemoverWithInstance()
+    public function testAdderAndRemoverWithInstance(): void
     {
         $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
@@ -990,7 +983,7 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertSame('dog', $petOwner->getPets()[2]->type);
     }
 
-    public function testAdderAndRemoverWithNull()
+    public function testAdderAndRemoverWithNull(): void
     {
         $petOwner = [
             'pets' => [
@@ -1005,7 +998,7 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertCount(0, $petOwnerData->getPets());
     }
 
-    public function testIssueTargetToPopulate()
+    public function testIssueTargetToPopulate(): void
     {
         $source = new Fixtures\IssueTargetToPopulate\VatModel();
         $source->setCountryCode('fr');

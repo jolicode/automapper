@@ -13,7 +13,7 @@ class MultipleTransformerTest extends TestCase
 {
     use EvalTransformerTrait;
 
-    public function testMultipleTransformer()
+    public function testMultipleTransformer(): void
     {
         $transformer = new MultipleTransformer([
             [

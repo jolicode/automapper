@@ -16,7 +16,7 @@ use Symfony\Component\PropertyInfo\Type;
 
 class DateTimeTransformerFactoryTest extends TestCase
 {
-    public function testGetTransformer()
+    public function testGetTransformer(): void
     {
         $factory = new DateTimeTransformerFactory();
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
@@ -37,7 +37,7 @@ class DateTimeTransformerFactoryTest extends TestCase
         self::assertInstanceOf(StringToDateTimeTransformer::class, $transformer);
     }
 
-    public function testGetTransformerImmutable()
+    public function testGetTransformerImmutable(): void
     {
         $factory = new DateTimeTransformerFactory();
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
@@ -48,7 +48,7 @@ class DateTimeTransformerFactoryTest extends TestCase
         self::assertInstanceOf(DateTimeImmutableToMutableTransformer::class, $transformer);
     }
 
-    public function testGetTransformerMutable()
+    public function testGetTransformerMutable(): void
     {
         $factory = new DateTimeTransformerFactory();
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
@@ -59,7 +59,7 @@ class DateTimeTransformerFactoryTest extends TestCase
         self::assertInstanceOf(DateTimeMutableToImmutableTransformer::class, $transformer);
     }
 
-    public function testNoTransformer()
+    public function testNoTransformer(): void
     {
         $factory = new DateTimeTransformerFactory();
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();

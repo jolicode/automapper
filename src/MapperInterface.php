@@ -19,5 +19,5 @@ interface MapperInterface
      *
      * @return mixed The mapped value
      */
-    public function &map($value, array $context = []);
+    public function &map(mixed $value, array $context = []): mixed;
 }

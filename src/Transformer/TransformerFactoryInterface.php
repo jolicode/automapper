@@ -17,8 +17,8 @@ interface TransformerFactoryInterface
     /**
      * Get transformer to use when mapping from an array of type to another array of type.
      *
-     * @param Type[] $sourceTypes
-     * @param Type[] $targetTypes
+     * @param Type[]|null $sourceTypes
+     * @param Type[]|null $targetTypes
      */
     public function getTransformer(?array $sourceTypes, ?array $targetTypes, MapperMetadataInterface $mapperMetadata): ?TransformerInterface;
 }

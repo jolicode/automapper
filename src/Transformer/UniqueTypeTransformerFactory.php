@@ -32,10 +32,6 @@ final readonly class UniqueTypeTransformerFactory implements TransformerFactoryI
         }
 
         foreach ($targetTypes as $targetType) {
-            if (null === $targetType) {
-                continue;
-            }
-
             $transformer = $this->chainTransformerFactory->getTransformer($sourceTypes, [$targetType], $mapperMetadata);
 
             if (null !== $transformer) {

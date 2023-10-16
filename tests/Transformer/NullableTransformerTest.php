@@ -13,7 +13,7 @@ class NullableTransformerTest extends TestCase
 {
     use EvalTransformerTrait;
 
-    public function testNullTransformerTargetNullable()
+    public function testNullTransformerTargetNullable(): void
     {
         $transformer = new NullableTransformer(new BuiltinTransformer(new Type('string'), [new Type('string', true)]), true);
 
@@ -26,7 +26,7 @@ class NullableTransformerTest extends TestCase
         self::assertNull($output);
     }
 
-    public function testNullTransformerTargetNotNullable()
+    public function testNullTransformerTargetNotNullable(): void
     {
         $transformer = new NullableTransformer(new BuiltinTransformer(new Type('string'), [new Type('string')]), false);
 

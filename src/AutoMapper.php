@@ -92,36 +92,24 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
         return null !== $this->getMetadata($source, $target);
     }
 
-    public function map(null|array|object $source, string|array|object $target, array $context = []): null|array|object
+    public function map(array|object $source, string|array|object $target, array $context = []): null|array|object
     {
         $sourceType = $targetType = null;
 
-        if (null === $source) {
-            return null;
-        }
-
         if (\is_object($source)) {
-            $sourceType = \get_class($source);
+            $sourceType = $source::class;
         } elseif (\is_array($source)) {
             $sourceType = 'array';
         }
 
-        if (null === $sourceType) {
-            throw new NoMappingFoundException('Cannot map this value, source is neither an object or an array.');
-        }
-
         if (\is_object($target)) {
-            $targetType = \get_class($target);
+            $targetType = $target::class;
             $context[MapperContext::TARGET_TO_POPULATE] = $target;
         } elseif (\is_array($target)) {
             $targetType = 'array';
             $context[MapperContext::TARGET_TO_POPULATE] = $target;
         } elseif (\is_string($target)) {
             $targetType = $target;
-        }
-
-        if (null === $targetType) {
-            throw new NoMappingFoundException('Cannot map this value, target is neither an object or an array.');
         }
 
         if ('array' === $sourceType && 'array' === $targetType) {

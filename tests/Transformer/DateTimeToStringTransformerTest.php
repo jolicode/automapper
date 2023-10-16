@@ -11,7 +11,7 @@ class DateTimeToStringTransformerTest extends TestCase
 {
     use EvalTransformerTrait;
 
-    public function testDateTimeTransformer()
+    public function testDateTimeTransformer(): void
     {
         $transformer = new DateTimeToStringTransformer();
 
@@ -21,7 +21,7 @@ class DateTimeToStringTransformerTest extends TestCase
         self::assertSame($date->format(\DateTime::RFC3339), $output);
     }
 
-    public function testDateTimeTransformerCustomFormat()
+    public function testDateTimeTransformerCustomFormat(): void
     {
         $transformer = new DateTimeToStringTransformer(\DateTime::COOKIE);
 

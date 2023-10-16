@@ -112,10 +112,6 @@ abstract class MappingExtractor implements MappingExtractorInterface
             return null;
         }
 
-        if (!$this->classMetadataFactory->getMetadataFor($class)) {
-            return null;
-        }
-
         $serializerClassMetadata = $this->classMetadataFactory->getMetadataFor($class);
         $maxDepth = null;
 
@@ -134,7 +130,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
             return null;
         }
 
-        if (null === $this->classMetadataFactory || !$this->classMetadataFactory->getMetadataFor($class)) {
+        if (null === $this->classMetadataFactory) {
             return null;
         }
 
@@ -167,7 +163,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
             return false;
         }
 
-        if (null === $this->classMetadataFactory || !$this->classMetadataFactory->getMetadataFor($class)) {
+        if (null === $this->classMetadataFactory) {
             return false;
         }
 

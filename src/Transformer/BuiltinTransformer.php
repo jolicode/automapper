@@ -17,7 +17,7 @@ use Symfony\Component\PropertyInfo\Type;
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-final class BuiltinTransformer implements TransformerInterface
+final readonly class BuiltinTransformer implements TransformerInterface
 {
     private const CAST_MAPPING = [
         Type::BUILTIN_TYPE_BOOL => [

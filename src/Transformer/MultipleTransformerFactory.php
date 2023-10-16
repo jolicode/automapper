@@ -16,9 +16,6 @@ final readonly class MultipleTransformerFactory implements TransformerFactoryInt
     ) {
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getTransformer(?array $sourceTypes, ?array $targetTypes, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
     {
         if (null === $sourceTypes || \count($sourceTypes) <= 1) {

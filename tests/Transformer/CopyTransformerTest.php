@@ -11,7 +11,7 @@ class CopyTransformerTest extends TestCase
 {
     use EvalTransformerTrait;
 
-    public function testCopyTransformer()
+    public function testCopyTransformer(): void
     {
         $transformer = new CopyTransformer();
 

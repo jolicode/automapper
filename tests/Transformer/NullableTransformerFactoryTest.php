@@ -14,7 +14,7 @@ use Symfony\Component\PropertyInfo\Type;
 
 class NullableTransformerFactoryTest extends TestCase
 {
-    private $isTargetNullableProperty;
+    private \ReflectionProperty $isTargetNullableProperty;
 
     protected function setUp(): void
     {
