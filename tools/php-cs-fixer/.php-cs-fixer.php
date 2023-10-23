@@ -1,9 +1,9 @@
 <?php
 
 $finder = (new PhpCsFixer\Finder())
-    ->exclude('tests/cache')
-    ->in(__DIR__ . '/src')
-    ->in(__DIR__ . '/tests')
+    ->exclude(__DIR__ . '/../../tests/cache')
+    ->in(__DIR__ . '/../../src')
+    ->in(__DIR__ . '/../../tests')
 ;
 
 return (new PhpCsFixer\Config())
@@ -20,10 +20,6 @@ return (new PhpCsFixer\Config())
         ],
         'nullable_type_declaration_for_default_null_value' => false,
         'declare_strict_types' => true,
-
-        // Can be removed once PHP requirement is upgraded
-        'get_class_to_class_keyword' => false,
-        'modernize_strpos' => false,
     ])
     ->setFinder($finder)
     ;

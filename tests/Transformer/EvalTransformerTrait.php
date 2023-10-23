@@ -47,7 +47,7 @@ trait EvalTransformerTrait
         return eval($code);
     }
 
-    private function evalTransformer(TransformerInterface $transformer, $input, PropertyMapping $propertyMapping = null)
+    private function evalTransformer(TransformerInterface $transformer, mixed $input, PropertyMapping $propertyMapping = null): mixed
     {
         $function = $this->createTransformerFunction($transformer, $propertyMapping);
 

@@ -15,7 +15,7 @@ use Symfony\Component\PropertyInfo\Type;
 
 class MultipleTransformerFactoryTest extends TestCase
 {
-    public function testGetTransformer()
+    public function testGetTransformer(): void
     {
         $chainFactory = new ChainTransformerFactory();
         $factory = new MultipleTransformerFactory($chainFactory);
@@ -36,7 +36,7 @@ class MultipleTransformerFactoryTest extends TestCase
         self::assertInstanceOf(BuiltinTransformer::class, $transformer);
     }
 
-    public function testNoTransformerIfNoSubTransformer()
+    public function testNoTransformerIfNoSubTransformer(): void
     {
         $chainFactory = new ChainTransformerFactory();
         $factory = new MultipleTransformerFactory($chainFactory);
@@ -48,7 +48,7 @@ class MultipleTransformerFactoryTest extends TestCase
         self::assertNull($transformer);
     }
 
-    public function testNoTransformer()
+    public function testNoTransformer(): void
     {
         $chainFactory = new ChainTransformerFactory();
         $factory = new MultipleTransformerFactory($chainFactory);

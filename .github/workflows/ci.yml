@@ -16,7 +16,30 @@ jobs:
         with:
           composer-options: '--working-dir=tools/php-cs-fixer'
       - name: 'php-cs-fixer check'
-        run: 'tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --dry-run --diff'
+        run: 'tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config=tools/php-cs-fixer/.php-cs-fixer.php --dry-run --diff'
+  phpstan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@master
+      - name: cache-composer
+        uses: actions/cache@v2
+        with:
+          path: ~/.composer/cache/
+          key: composer-${{ github.sha }}
+      - name: setup
+        uses: shivammathur/setup-php@2.9.0
+        with:
+          php-version: 8.2
+          coverage: none
+      - name: composer install
+        run: composer update --prefer-stable
+      - name: install phpstan
+        uses: ramsey/composer-install@v2
+        with:
+          composer-options: '--working-dir=tools/phpstan'
+      - name: 'php-cs-fixer check'
+        run: 'tools/phpstan/vendor/bin/phpstan analyse --configuration=tools/phpstan/phpstan.neon'
   tests:
     runs-on: ubuntu-latest
     name: tests

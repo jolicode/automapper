@@ -14,6 +14,7 @@ use Symfony\Component\Uid\Ulid;
  */
 final class SymfonyUidTransformerFactory extends AbstractUniqueTypeTransformerFactory implements PrioritizedTransformerFactoryInterface
 {
+    /** @var array<string, array{0: bool, 1: bool}> */
     private array $reflectionCache = [];
 
     protected function createTransformer(Type $sourceType, Type $targetType, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
@@ -42,16 +43,19 @@ final class SymfonyUidTransformerFactory extends AbstractUniqueTypeTransformerFa
             return false;
         }
 
-        if (null === $type->getClassName()) {
+        /** @var class-string|null $typeClassName */
+        $typeClassName = $type->getClassName();
+
+        if (null === $typeClassName) {
             return false;
         }
 
-        if (!\array_key_exists($type->getClassName(), $this->reflectionCache)) {
-            $reflClass = new \ReflectionClass($type->getClassName());
-            $this->reflectionCache[$type->getClassName()] = [$reflClass->isSubclassOf(AbstractUid::class), $type->getClassName() === Ulid::class];
+        if (!\array_key_exists($typeClassName, $this->reflectionCache)) {
+            $reflClass = new \ReflectionClass($typeClassName);
+            $this->reflectionCache[$typeClassName] = [$reflClass->isSubclassOf(AbstractUid::class), $typeClassName === Ulid::class];
         }
 
-        return $this->reflectionCache[$type->getClassName()][0];
+        return $this->reflectionCache[$typeClassName][0];
     }
 
     public function getPriority(): int

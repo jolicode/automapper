@@ -12,7 +12,7 @@ class ObjectTransformerTest extends TestCase
 {
     use EvalTransformerTrait;
 
-    public function testObjectTransformer()
+    public function testObjectTransformer(): void
     {
         $transformer = new ObjectTransformer(new Type('object', false, Foo::class), new Type('object', false, Foo::class));
 
@@ -41,5 +41,5 @@ class ObjectTransformerTest extends TestCase
 
 class Foo
 {
-    public $bar;
+    public string $bar;
 }

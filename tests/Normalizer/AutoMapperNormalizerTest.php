@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Normalizer;
 
+use AutoMapper\AutoMapperInterface;
+use AutoMapper\AutoMapperRegistryInterface;
 use AutoMapper\MapperContext;
+use AutoMapper\MapperInterface;
 use AutoMapper\Normalizer\AutoMapperNormalizer;
 use AutoMapper\Tests\AutoMapperBaseTest;
 use AutoMapper\Tests\Fixtures;
@@ -17,8 +20,7 @@ use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
  */
 class AutoMapperNormalizerTest extends AutoMapperBaseTest
 {
-    /** @var AutoMapperNormalizer */
-    protected $normalizer;
+    protected AutoMapperNormalizer $normalizer;
 
     protected function setUp(): void
     {
@@ -92,10 +94,25 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
     public function testItUsesSerializerContext(): void
     {
         $normalizer = new AutoMapperNormalizer(
-            new class() implements \AutoMapper\AutoMapperInterface {
+            new class() implements AutoMapperInterface, AutoMapperRegistryInterface {
                 public function map(null|array|object $source, string|array|object $target, array $context = []): null|array|object
                 {
                     return $context;
+                }
+
+                public function getMapper(string $source, string $target): MapperInterface
+                {
+                    return new class() implements MapperInterface {
+                        public function &map($value, array $context = []): mixed
+                        {
+                            return $value;
+                        }
+                    };
+                }
+
+                public function hasMapper(string $source, string $target): bool
+                {
+                    return true;
                 }
             }
         );

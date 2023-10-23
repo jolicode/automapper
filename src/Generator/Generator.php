@@ -85,7 +85,7 @@ final class Generator
             ]),
                 new Scalar\String_($mapperGeneratorMetadata->getTarget())
             )));
-            $statements[] = new Stmt\If_(new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), new Name('shouldHandleCircularReference'), [
+            $statements[] = new Stmt\If_(new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'shouldHandleCircularReference', [
                 new Arg($contextVariable),
                 new Arg($hashVariable),
                 new Arg(new Expr\PropertyFetch(new Expr\Variable('this'), 'circularReferenceLimit')),
@@ -516,7 +516,7 @@ final class Generator
          *     ... // class methods
          * }
          */
-        return new Stmt\Class_(new Name($mapperGeneratorMetadata->getMapperClassName()), [
+        return new Stmt\Class_($mapperGeneratorMetadata->getMapperClassName(), [
             'flags' => Stmt\Class_::MODIFIER_FINAL,
             'extends' => new Name\FullyQualified(GeneratedMapper::class),
             'stmts' => $classStmts,

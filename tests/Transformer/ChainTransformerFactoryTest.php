@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 
 class ChainTransformerFactoryTest extends TestCase
 {
-    public function testGetTransformer()
+    public function testGetTransformer(): void
     {
         $chainTransformerFactory = new ChainTransformerFactory();
         $transformer = new CopyTransformer();
@@ -30,7 +30,7 @@ class ChainTransformerFactoryTest extends TestCase
         self::assertSame($transformer, $transformerReturned);
     }
 
-    public function testNoTransformer()
+    public function testNoTransformer(): void
     {
         $chainTransformerFactory = new ChainTransformerFactory();
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();

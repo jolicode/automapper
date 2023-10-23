@@ -1,0 +1,13 @@
+includes:
+	- phpstan-baseline.neon
+
+parameters:
+	level: max
+	paths:
+		- ../../src/
+
+	tmpDir: cache
+
+	ignoreErrors:
+	    - "#Instantiated class fromIteratorToArray not found#"
+	    - "#Instantiated class toArray not found#"

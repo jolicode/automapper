@@ -87,7 +87,7 @@ final class FromSourceMappingExtractor extends MappingExtractor
                 $this->getMaxDepth($mapperMetadata->getSource(), $property),
                 $this->isIgnoredProperty($mapperMetadata->getSource(), $property),
                 $this->isIgnoredProperty($mapperMetadata->getTarget(), $property),
-                PropertyReadInfo::VISIBILITY_PUBLIC === $this->readInfoExtractor->getReadInfo($mapperMetadata->getSource(), $property)?->getVisibility() ?? true,
+                PropertyReadInfo::VISIBILITY_PUBLIC === ($this->readInfoExtractor->getReadInfo($mapperMetadata->getSource(), $property)?->getVisibility() ?? true)
             );
         }
 

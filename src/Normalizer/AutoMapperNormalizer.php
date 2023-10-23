@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Normalizer;
 
 use AutoMapper\AutoMapperInterface;
+use AutoMapper\AutoMapperRegistryInterface;
 use AutoMapper\MapperContext;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface;
@@ -30,7 +31,7 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
     ];
 
     public function __construct(
-        private AutoMapperInterface $autoMapper,
+        private AutoMapperInterface&AutoMapperRegistryInterface $autoMapper,
     ) {
     }
 
@@ -50,7 +51,7 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
             return false;
         }
 
-        return $this->autoMapper->hasMapper(\get_class($data), 'array');
+        return $this->autoMapper->hasMapper($data::class, 'array');
     }
 
     public function supportsDenormalization(mixed $data, string $type, string $format = null): bool

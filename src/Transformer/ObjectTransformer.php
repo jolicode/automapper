@@ -18,7 +18,7 @@ use Symfony\Component\PropertyInfo\Type;
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-final class ObjectTransformer implements TransformerInterface, DependentTransformerInterface, AssignedByReferenceTransformerInterface
+final readonly class ObjectTransformer implements TransformerInterface, DependentTransformerInterface, AssignedByReferenceTransformerInterface
 {
     public function __construct(
         private Type $sourceType,
@@ -67,6 +67,11 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
         $sourceTypeName = 'array';
 
         if (Type::BUILTIN_TYPE_OBJECT === $this->sourceType->getBuiltinType()) {
+            /**
+             * Cannot be null since we check the source type is an Object.
+             *
+             * @var string $sourceTypeName
+             */
             $sourceTypeName = $this->sourceType->getClassName();
         }
 
@@ -78,6 +83,11 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
         $targetTypeName = 'array';
 
         if (Type::BUILTIN_TYPE_OBJECT === $this->targetType->getBuiltinType()) {
+            /**
+             * Cannot be null since we check the target type is an Object.
+             *
+             * @var string $targetTypeName
+             */
             $targetTypeName = $this->targetType->getClassName();
         }
 

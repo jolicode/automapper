@@ -33,7 +33,7 @@ final class FromTargetMappingExtractor extends MappingExtractor
         PropertyWriteInfoExtractorInterface $writeInfoExtractor,
         TransformerFactoryInterface $transformerFactory,
         ClassMetadataFactoryInterface $classMetadataFactory = null,
-        private ?AdvancedNameConverterInterface $nameConverter = null,
+        private readonly ?AdvancedNameConverterInterface $nameConverter = null,
     ) {
         parent::__construct($propertyInfoExtractor, $readInfoExtractor, $writeInfoExtractor, $transformerFactory, $classMetadataFactory);
     }
@@ -86,7 +86,7 @@ final class FromTargetMappingExtractor extends MappingExtractor
                 $this->getMaxDepth($mapperMetadata->getTarget(), $property),
                 $this->isIgnoredProperty($mapperMetadata->getSource(), $property),
                 $this->isIgnoredProperty($mapperMetadata->getTarget(), $property),
-                PropertyReadInfo::VISIBILITY_PUBLIC === $this->readInfoExtractor->getReadInfo($mapperMetadata->getSource(), $property)?->getVisibility() ?? true,
+                PropertyReadInfo::VISIBILITY_PUBLIC === ($this->readInfoExtractor->getReadInfo($mapperMetadata->getSource(), $property)?->getVisibility() ?? true),
             );
         }
 

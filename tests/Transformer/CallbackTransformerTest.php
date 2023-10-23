@@ -11,12 +11,13 @@ class CallbackTransformerTest extends TestCase
 {
     use EvalTransformerTrait;
 
-    public function testCallbackTransform()
+    public function testCallbackTransform(): void
     {
         $transformer = new CallbackTransformer('test');
         $function = $this->createTransformerFunction($transformer);
         $class = new class() {
-            public $callbacks;
+            /** @var array<callable> */
+            public array $callbacks;
 
             public function __construct()
             {

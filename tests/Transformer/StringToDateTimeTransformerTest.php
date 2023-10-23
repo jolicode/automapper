@@ -11,7 +11,7 @@ class StringToDateTimeTransformerTest extends TestCase
 {
     use EvalTransformerTrait;
 
-    public function testDateTimeTransformer()
+    public function testDateTimeTransformer(): void
     {
         $transformer = new StringToDateTimeTransformer(\DateTime::class);
 
@@ -22,7 +22,7 @@ class StringToDateTimeTransformerTest extends TestCase
         self::assertSame($date->format(\DateTime::RFC3339), $output->format(\DateTime::RFC3339));
     }
 
-    public function testDateTimeTransformerCustomFormat()
+    public function testDateTimeTransformerCustomFormat(): void
     {
         $transformer = new StringToDateTimeTransformer(\DateTime::class, \DateTime::COOKIE);
 
@@ -33,7 +33,7 @@ class StringToDateTimeTransformerTest extends TestCase
         self::assertSame($date->format(\DateTime::RFC3339), $output->format(\DateTime::RFC3339));
     }
 
-    public function testDateTimeTransformerImmutable()
+    public function testDateTimeTransformerImmutable(): void
     {
         $transformer = new StringToDateTimeTransformer(\DateTimeImmutable::class, \DateTime::COOKIE);
 
@@ -43,7 +43,7 @@ class StringToDateTimeTransformerTest extends TestCase
         self::assertInstanceOf(\DateTimeImmutable::class, $output);
     }
 
-    public function testDateTimeTransformerInterface()
+    public function testDateTimeTransformerInterface(): void
     {
         $transformer = new StringToDateTimeTransformer(\DateTimeInterface::class);
 

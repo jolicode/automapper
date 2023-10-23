@@ -11,7 +11,7 @@ class DateTimeMutableToImmutableTransformerTest extends TestCase
 {
     use EvalTransformerTrait;
 
-    public function testDateTimeImmutableTransformer()
+    public function testDateTimeImmutableTransformer(): void
     {
         $transformer = new DateTimeMutableToImmutableTransformer();
 

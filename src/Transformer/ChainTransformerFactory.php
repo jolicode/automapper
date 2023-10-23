@@ -11,7 +11,7 @@ use AutoMapper\MapperMetadataInterface;
  */
 final class ChainTransformerFactory implements TransformerFactoryInterface
 {
-    /** @var TransformerFactoryInterface[] */
+    /** @var array<int, list<TransformerFactoryInterface>> */
     private array $factories = [];
 
     /** @var TransformerFactoryInterface[]|null */
@@ -39,7 +39,7 @@ final class ChainTransformerFactory implements TransformerFactoryInterface
     {
         $this->sortFactories();
 
-        $transformerFactoryClass = \get_class($transformerFactory);
+        $transformerFactoryClass = $transformerFactory::class;
         foreach ($this->sorted ?? [] as $factory) {
             if (is_a($factory, $transformerFactoryClass)) {
                 return true;
