@@ -229,7 +229,8 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
                 null,
                 new CallbackTransformer($property),
                 $property,
-                false
+                false,
+                isPublic: true,
             );
         }
     }
