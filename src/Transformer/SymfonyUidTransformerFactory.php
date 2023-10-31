@@ -46,7 +46,7 @@ final class SymfonyUidTransformerFactory extends AbstractUniqueTypeTransformerFa
         /** @var class-string|null $typeClassName */
         $typeClassName = $type->getClassName();
 
-        if (null === $typeClassName) {
+        if (null === $typeClassName || !class_exists($typeClassName)) {
             return false;
         }
 
