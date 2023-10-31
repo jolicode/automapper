@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - [GH#9](https://github.com/jolicode/automapper/pull/9) fix: `mapPrivatePropertiesAndMethod` should not be mandatory
+- [GH#15](https://github.com/jolicode/automapper/pull/15) fix: check class existence in SymfonyUidTransformerFactory
 
 ## [8.0.1] - 2023-10-04
 ### Changed
