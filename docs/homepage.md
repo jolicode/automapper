@@ -1,7 +1,7 @@
 # Welcome 👋
 
 Welcome to the AutoMapper documentation, this library solves a simple problem: removing all the code you need to
-map one object to another. A boring code to write and often replaced by less-performant alternatives like the Symfony's
+map one object to another. A boring code to write and often replaced by less-performant alternatives like Symfony's
 Serializer.
 
 AutoMapper uses a convention-based matching algorithm to match up source to destination values. AutoMapper is geared 
@@ -34,7 +34,7 @@ for each layer can affect only types in that layer.
 ### Installation 📦
 
 ```shell
-$ composer require jolicode/automapper
+composer require jolicode/automapper
 ```
 
 ### How to use it ? 🕹️

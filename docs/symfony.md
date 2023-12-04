@@ -7,7 +7,7 @@ To make Symfony's users life easier, we made a bundle that will make all Depende
 ### Installation 📦
 
 ```shell
-$ composer require jolicode/automapper-bundle
+composer require jolicode/automapper-bundle
 ```
 
 ### Configuration 🔧
@@ -32,7 +32,7 @@ automapper:
 
 Possible properties:
 - `normalizer` (default: `false`):  A boolean which indicate if we inject the AutoMapperNormalizer;
-- `cache_dir` (default: `%kernel.cache_dir%/automapper`): This settings allows you to customize the output directory 
+- `cache_dir` (default: `%kernel.cache_dir%/automapper`): This setting allows you to customize the output directory 
 for generated mappers;
 - `mappings`: This option allows you to customize Mapper metadata, you have to specify `source` & `target` data types 
 and related configuration using `pass` field. This configuration should implements `AutoMapper\Bundle\Configuration\ConfigurationPassInterface`.

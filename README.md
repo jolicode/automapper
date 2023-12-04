@@ -1,10 +1,11 @@
 # AutoMapper
 
-The AutoMapper solves a simple problem: removing all the code you need to map one object to another. A boring code to write and often replaced by less-performant alternatives like the Symfony's Serializer.
+The AutoMapper solves a simple problem: removing all the code you need to map one object to another. A boring code to 
+write and often replaced by less-performant alternatives like Symfony's Serializer.
 ## Quick Start 🚀
 
 ```shell
-composer req jolicode/automapper
+composer require jolicode/automapper
 ```
 
 You can read more about this library and how to use it on the [documentation](https://jolicode.github.io/automapper/).
