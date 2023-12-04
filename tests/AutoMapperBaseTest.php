@@ -8,13 +8,12 @@ use AutoMapper\AutoMapper;
 use AutoMapper\Generator\Generator;
 use AutoMapper\Loader\ClassLoaderInterface;
 use AutoMapper\Loader\FileLoader;
-use Doctrine\Common\Annotations\AnnotationReader;
 use PhpParser\ParserFactory;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
-use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
+use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 
 /**
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
@@ -34,7 +33,7 @@ abstract class AutoMapperBaseTest extends TestCase
     {
         $fs = new Filesystem();
         $fs->remove(__DIR__ . '/cache/');
-        $classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
+        $classMetadataFactory = new ClassMetadataFactory(new AttributeLoader());
 
         $this->loader = new FileLoader(new Generator(
             (new ParserFactory())->create(ParserFactory::PREFER_PHP7),
