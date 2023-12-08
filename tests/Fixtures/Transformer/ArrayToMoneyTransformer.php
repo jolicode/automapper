@@ -21,9 +21,6 @@ use PhpParser\Node\Scalar\String_;
  */
 final class ArrayToMoneyTransformer implements TransformerInterface
 {
-    /**
-     * {@inheritdoc}
-     */
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
         return [new Expr\New_(new Name\FullyQualified(Money::class), [
@@ -34,17 +31,11 @@ final class ArrayToMoneyTransformer implements TransformerInterface
         ]), []];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getDependencies(): array
     {
         return [];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function assignByRef(): bool
     {
         return false;

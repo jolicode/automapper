@@ -15,9 +15,8 @@ class FooMaxDepth
 
     /**
      * @var FooMaxDepth|null
-     *
-     * @MaxDepth(2)
      */
+    #[MaxDepth(2)]
     private $child;
 
     public function __construct(int $id, ?self $child = null)

@@ -19,25 +19,23 @@
         "php": "^8.2",
         "doctrine/inflector": "^1.4 || ^2.0",
         "nikic/php-parser": "^4.0",
-        "symfony/property-info": "^5.3 || ^6.0",
-        "symfony/serializer": "^5.1 || ^6.0"
+        "symfony/property-info": "^5.4 || ^6.0",
+        "symfony/serializer": "^5.4 || ^6.0"
     },
     "require-dev": {
         "doctrine/annotations": "~1.0",
         "moneyphp/money": "^3.0",
         "phpdocumentor/reflection-docblock": "^3.0 || ^4.0 || ^5.0",
         "phpunit/phpunit": "^8.0",
-        "symfony/filesystem": "^5.3 || ^6.0",
-        "symfony/http-kernel": "^5.3 || ^6.0",
-        "symfony/uid": "^5.2 || ^6.0"
+        "symfony/filesystem": "^5.4 || ^6.0",
+        "symfony/http-kernel": "^5.4 || ^6.0",
+        "symfony/uid": "^5.4 || ^6.0"
     },
     "suggest": {
         "doctrine/annotations": "Docblock Annotations Parser",
         "phpdocumentor/reflection-docblock": "Allow to extract informations from PHP Doc blocks"
     },
     "conflict": {
-        "symfony/serializer": "<4.2",
-        "symfony/property-info": "5.1.6 || 5.1.7",
         "nikic/php-parser": "<4.0.4"
     },
     "autoload": {

@@ -6,13 +6,11 @@ namespace AutoMapper\Tests\Fixtures;
 
 use Symfony\Component\Serializer\Annotation\DiscriminatorMap;
 
-/**
- * @DiscriminatorMap(typeProperty="type", mapping={
- *    "cat"="AutoMapper\Tests\Fixtures\Cat",
- *    "dog"="AutoMapper\Tests\Fixtures\Dog",
- *    "fish"="AutoMapper\Tests\Fixtures\Fish"
- * })
- */
+#[DiscriminatorMap(typeProperty: 'type', mapping: [
+    'cat' => Cat::class,
+    'dog' => Dog::class,
+    'fish' => Fish::class,
+])]
 abstract class Pet
 {
     /** @var string */

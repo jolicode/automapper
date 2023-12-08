@@ -15,9 +15,6 @@ use Symfony\Component\PropertyInfo\Type;
  */
 final class MoneyTransformerFactory extends AbstractUniqueTypeTransformerFactory
 {
-    /**
-     * {@inheritdoc}
-     */
     protected function createTransformer(Type $sourceType, Type $targetType, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
     {
         $isSourceMoney = $this->isMoneyType($sourceType);
