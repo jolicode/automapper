@@ -10,9 +10,8 @@ class Bar
 {
     /**
      * @var int|null
-     *
-     * @Groups({"group2", "group3"})
      */
+    #[Groups(['group2', 'group3'])]
     private $id;
 
     public function getId(): ?int

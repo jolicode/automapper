@@ -20,9 +20,6 @@ use PhpParser\Node\Name;
  */
 final class MoneyToMoneyTransformer implements TransformerInterface
 {
-    /**
-     * {@inheritdoc}
-     */
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
         return [
@@ -36,17 +33,11 @@ final class MoneyToMoneyTransformer implements TransformerInterface
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getDependencies(): array
     {
         return [];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function assignByRef(): bool
     {
         return false;

@@ -9,24 +9,21 @@ use Symfony\Component\Serializer\Annotation\Groups;
 class UserWithYearOfBirth
 {
     /**
-     * @Groups({"read"})
-     *
      * @var int
      */
+    #[Groups('read')]
     private $id;
 
     /**
-     * @Groups({"read"})
-     *
      * @var string
      */
+    #[Groups('read')]
     public $name;
 
     /**
-     * @Groups({"read"})
-     *
      * @var string|int
      */
+    #[Groups('read')]
     public $age;
 
     public function __construct($id, $name, $age)
@@ -36,9 +33,7 @@ class UserWithYearOfBirth
         $this->age = $age;
     }
 
-    /**
-     * @Groups({"read"})
-     */
+    #[Groups('read')]
     public function getYearOfBirth()
     {
         return ((int) date('Y')) - ((int) $this->age);

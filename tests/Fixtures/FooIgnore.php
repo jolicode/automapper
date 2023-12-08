@@ -10,9 +10,8 @@ class FooIgnore
 {
     /**
      * @var int
-     *
-     * @Ignore
      */
+    #[Ignore]
     public $id;
 
     public function getId(): int

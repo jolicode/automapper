@@ -18,9 +18,6 @@ use PhpParser\Node\Stmt\Expression;
  */
 final class MoneyToArrayTransformer implements TransformerInterface
 {
-    /**
-     * {@inheritdoc}
-     */
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
         $moneyVar = new Expr\Variable($uniqueVariableScope->getUniqueName('money'));
@@ -31,17 +28,11 @@ final class MoneyToArrayTransformer implements TransformerInterface
         ]];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getDependencies(): array
     {
         return [];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function assignByRef(): bool
     {
         return false;
