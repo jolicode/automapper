@@ -536,11 +536,6 @@ parameters:
 			path: ../../src/Transformer/AbstractArrayTransformer.php
 
 		-
-			message: "#^Offset 0 does not exist on array\\<Symfony\\\\Component\\\\PropertyInfo\\\\Type\\>\\|null\\.$#"
-			count: 2
-			path: ../../src/Transformer/AbstractUniqueTypeTransformerFactory.php
-
-		-
 			message: "#^Parameter \\#1 \\$object_or_class of function is_subclass_of expects object\\|string, string\\|null given\\.$#"
 			count: 2
 			path: ../../src/Transformer/DateTimeTransformerFactory.php

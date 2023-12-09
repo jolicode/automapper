@@ -16,14 +16,11 @@ abstract class AbstractUniqueTypeTransformerFactory implements TransformerFactor
 {
     public function getTransformer(?array $sourceTypes, ?array $targetTypes, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
     {
-        $nbSourceTypes = $sourceTypes ? \count($sourceTypes) : 0;
-        $nbTargetTypes = $targetTypes ? \count($targetTypes) : 0;
-
-        if (0 === $nbSourceTypes || $nbSourceTypes > 1 || !$sourceTypes[0] instanceof Type) {
+        if (0 === \count($sourceTypes ?? []) || \count($sourceTypes) > 1 || !$sourceTypes[0] instanceof Type) {
             return null;
         }
 
-        if (0 === $nbTargetTypes || $nbTargetTypes > 1 || !$targetTypes[0] instanceof Type) {
+        if (0 === \count($targetTypes ?? []) || \count($targetTypes) > 1 || !$targetTypes[0] instanceof Type) {
             return null;
         }
 
