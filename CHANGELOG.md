@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - [GH#22](https://github.com/jolicode/automapper/pull/22) Added generic AST extractor
+- [GH#21](https://github.com/jolicode/automapper/pull/21) Add VERSION constants within AutoMapper class and use it for transformers hashes
  
 ### Changed
 - [GH#19](https://github.com/jolicode/automapper/pull/19) Use attributes everywhere instead of annotations

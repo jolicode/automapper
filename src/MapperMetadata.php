@@ -149,6 +149,8 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
             $hash .= filemtime($reflection->getFileName());
         }
 
+        $hash .= AutoMapper::VERSION_ID;
+
         return $hash;
     }
 
