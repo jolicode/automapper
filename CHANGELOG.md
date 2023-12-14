@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  
 ### Changed
 - [GH#19](https://github.com/jolicode/automapper/pull/19) Use attributes everywhere instead of annotations
+- [GH#18](https://github.com/jolicode/automapper/pull/18) Symfony 7 support
 
 ## [8.0.2] - 2023-11-06
 ### Added

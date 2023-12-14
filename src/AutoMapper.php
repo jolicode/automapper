@@ -31,6 +31,7 @@ use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
+use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
 use Symfony\Component\Uid\AbstractUid;
 
@@ -156,11 +157,14 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
         string $dateTimeFormat = \DateTimeInterface::RFC3339,
         bool $allowReadOnlyTargetToPopulate = false
     ): self {
-        if (class_exists(AnnotationReader::class)) {
-            $classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
+        if (class_exists(AttributeLoader::class)) {
+            $loaderClass = new AttributeLoader();
+        } elseif (class_exists(AnnotationReader::class)) {
+            $loaderClass = new AnnotationLoader(new AnnotationReader());
         } else {
-            $classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader());
+            $loaderClass = new AnnotationLoader();
         }
+        $classMetadataFactory = new ClassMetadataFactory($loaderClass);
 
         if (null === $loader) {
             $loader = new EvalLoader(new Generator(

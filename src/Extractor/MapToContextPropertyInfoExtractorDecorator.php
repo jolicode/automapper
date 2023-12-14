@@ -112,12 +112,12 @@ final readonly class MapToContextPropertyInfoExtractorDecorator implements Prope
         return $this->decorated->isInitializable($class, $property, $context);
     }
 
-    public function getProperties(string $class, array $context = [])
+    public function getProperties(string $class, array $context = []): ?array
     {
         return $this->decorated->getProperties($class, $context);
     }
 
-    public function getTypes(string $class, string $property, array $context = [])
+    public function getTypes(string $class, string $property, array $context = []): ?array
     {
         return $this->decorated->getTypes($class, $property, $context);
     }
