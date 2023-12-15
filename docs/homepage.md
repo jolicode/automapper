@@ -77,3 +77,70 @@ dump($automapper->map(new InputUser('John', 'Doe', 28), DatabaseUser::class));
 //   +age: 28
 // }
 ```
+
+### How to customize the mapping? 🚀
+
+The mapping process could be extended in multiple ways.
+
+#### Map manually a single property
+
+You can override the mapping of a single property by leveraging `AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformerInterface`.
+It can be useful if you need to map several properties from the source to a unique property in the target. 
+
+```php
+class BirthDateUserTransformer implements CustomPropertyTransformerInterface
+{
+    public function supports(string $source, string $target, string $propertyName): bool
+    {
+        return $source === InputUser::class && $target === DatabaseUser::class && $propertyName === 'birthDate';
+    }
+
+    /**
+     * @param InputUser $source
+     */
+    public function transform(object $source): \DateTimeImmutable
+    {
+        return new \DateTimeImmutable("{$source->birthYear}-{$source->birthMonth}-{$source->birthDay}");
+    }
+}
+```
+
+#### Map manually a whole object
+
+In order to customize the mapping of a whole object, you can leverage `AutoMapper\Transformer\CustomTransformer\CustomModelTransformerInterface`.
+You have then full control over the transformation between two types:
+
+```php
+use Symfony\Component\PropertyInfo\Type;
+
+class InputUserToDatabaseUserCustomTransformer implements CustomModelTransformerInterface
+{
+    public function supports(array $sourceTypes, array $targetTypes): bool
+    {
+        return $this->hasType($sourceTypes, DatabaseUser::class) && $this->hasType($targetTypes, OutputUser::class);
+    }
+
+    /**
+     * @param DatabaseUser $source
+     */
+    public function transform(object $source): OutputUser
+    {
+        return OutputUser::fromDatabaserUser($source);
+    }
+    
+    /**
+     * @param Type[] $types
+     * @param class-string $class
+     */
+    private function hasType(array $types, string $class): bool
+    {
+        foreach ($types as $type) {
+            if ($type->getClassName() === $class) {
+                return true;
+            }
+        }
+        
+        return false;
+    }      
+}
+```

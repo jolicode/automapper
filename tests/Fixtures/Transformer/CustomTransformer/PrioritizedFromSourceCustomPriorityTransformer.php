@@ -15,9 +15,12 @@ final readonly class PrioritizedFromSourceCustomPriorityTransformer implements C
         return $source === UserDTO::class && $target === 'array' && $propertyName === 'address';
     }
 
-    public function transform(mixed $input): mixed
+    /**
+     * @param UserDTO $source
+     */
+    public function transform(object|array $source): mixed
     {
-        return "address with city \"{$input->city}\"";
+        return "address with city \"{$source->address->city}\"";
     }
 
     public function getPriority(): int

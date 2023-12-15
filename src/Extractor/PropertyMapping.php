@@ -15,7 +15,7 @@ use AutoMapper\Transformer\TransformerInterface;
 final class PropertyMapping
 {
     public function __construct(
-        public readonly ReadAccessor $readAccessor,
+        public readonly ?ReadAccessor $readAccessor,
         public readonly ?WriteMutator $writeMutator,
         public readonly ?WriteMutator $writeMutatorConstructor,
         /** @var TransformerInterface|class-string<CustomTransformerInterface> */
@@ -36,5 +36,16 @@ final class PropertyMapping
         return $this->sourceIgnored
             || $this->targetIgnored
             || !($shouldMapPrivateProperties || $this->isPublic);
+    }
+
+    /**
+     * @phpstan-assert-if-false TransformerInterface $this->transformer
+     * @phpstan-assert-if-false !null $this->readAccessor
+     *
+     * @phpstan-assert-if-true string $this->transformer
+     */
+    public function hasCustomTransformer(): bool
+    {
+        return \is_string($this->transformer);
     }
 }

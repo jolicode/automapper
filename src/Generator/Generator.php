@@ -7,14 +7,13 @@ namespace AutoMapper\Generator;
 use AutoMapper\AutoMapperRegistryInterface;
 use AutoMapper\Exception\CompileException;
 use AutoMapper\Exception\ReadOnlyTargetException;
-use AutoMapper\Extractor\ClassMethodToCallbackExtractor;
+use AutoMapper\Extractor\CustomTransformerExtractor;
 use AutoMapper\Extractor\WriteMutator;
 use AutoMapper\GeneratedMapper;
 use AutoMapper\MapperContext;
 use AutoMapper\MapperGeneratorMetadataInterface;
 use AutoMapper\Transformer\AssignedByReferenceTransformerInterface;
 use AutoMapper\Transformer\DependentTransformerInterface;
-use AutoMapper\Transformer\TransformerInterface;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
@@ -35,7 +34,7 @@ final readonly class Generator
     private Parser $parser;
 
     public function __construct(
-        private ClassMethodToCallbackExtractor $classMethodToCallbackExtractor,
+        private CustomTransformerExtractor $customTransformerExtractor,
         ?Parser $parser = null,
         private ?ClassDiscriminatorResolverInterface $classDiscriminator = null,
         private bool $allowReadOnlyTargetToPopulate = false,
@@ -127,6 +126,7 @@ final readonly class Generator
             $targetToPopulate,
             new Expr\ConstFetch(new Name('null'))
         )));
+
         if (!$this->allowReadOnlyTargetToPopulate && $mapperGeneratorMetadata->isTargetReadOnlyClass()) {
             /*
              * If the target is a read-only class, we throw an exception if the target is not null
@@ -238,21 +238,16 @@ final readonly class Generator
             }
 
             $fieldValueVariable = new Expr\Variable($uniqueVariableScope->getUniqueName('fieldValue'));
-            /** Create expression on how to read the value from the source */
-            $sourcePropertyAccessor = new Expr\Assign($fieldValueVariable, $propertyMapping->readAccessor->getExpression($sourceInput));
 
-            $transformer = $propertyMapping->transformer;
-
-            if (\is_string($transformer)) {
-                /* If the transformer is a string, it means it's a custom transformer, so we extract the code of the transform method and wrap it into a closure */
-                $output = $this->classMethodToCallbackExtractor->extract($transformer, 'transform', [new Arg($fieldValueVariable)]);
+            if ($propertyMapping->hasCustomTransformer()) {
+                $output = $this->customTransformerExtractor->extract($propertyMapping->transformer, $fieldValueVariable, $sourceInput);
                 $propStatements = [];
             } else {
                 /* Create expression to transform the read value into the wanted written value, depending on the transform it may add new statements to get the correct value */
-                [$output, $propStatements] = $transformer->transform($fieldValueVariable, $result, $propertyMapping, $uniqueVariableScope);
+                [$output, $propStatements] = $propertyMapping->transformer->transform($fieldValueVariable, $result, $propertyMapping, $uniqueVariableScope);
             }
 
-            $extractCallback = $propertyMapping->readAccessor->getExtractCallback($mapperGeneratorMetadata->getSource());
+            $extractCallback = $propertyMapping->readAccessor?->getExtractCallback($mapperGeneratorMetadata->getSource());
 
             if (null !== $extractCallback) {
                 /*
@@ -272,7 +267,7 @@ final readonly class Generator
 
             if ($propertyMapping->writeMutator->type !== WriteMutator::TYPE_ADDER_AND_REMOVER) {
                 /** Create expression to write the transformed value to the target only if not add / remove mutator, as it's already called by the transformer in this case */
-                $writeExpression = $propertyMapping->writeMutator->getExpression($result, $output, $transformer instanceof AssignedByReferenceTransformerInterface ? $transformer->assignByRef() : false);
+                $writeExpression = $propertyMapping->writeMutator->getExpression($result, $output, $propertyMapping->transformer instanceof AssignedByReferenceTransformerInterface ? $propertyMapping->transformer->assignByRef() : false);
                 if (null === $writeExpression) {
                     continue;
                 }
@@ -321,7 +316,10 @@ final readonly class Generator
                 }
             }
 
-            if ($mapperGeneratorMetadata->shouldCheckAttributes()) {
+            if ($propertyMapping->readAccessor && $mapperGeneratorMetadata->shouldCheckAttributes()) {
+                /** Create expression on how to read the value from the source */
+                $sourcePropertyAccessor = new Expr\Assign($fieldValueVariable, $propertyMapping->readAccessor->getExpression($sourceInput));
+
                 /*
                  * In case of supporting attributes checking, we check if the property is allowed to be mapped
                  * MapperContext::isAllowedAttribute($context, 'propertyName', $source)
@@ -572,9 +570,12 @@ final readonly class Generator
         if (
             null !== $classDiscriminatorMapping
             && null !== ($propertyMapping = $mapperMetadata->getPropertyMapping($classDiscriminatorMapping->getTypeProperty()))
-            && $propertyMapping->transformer instanceof TransformerInterface
+            && !$propertyMapping->hasCustomTransformer()
         ) {
-            /* Here we generated the code that allow to put the type into the output variable, so we are able to determine which mapper to use */
+            /*
+             * Generate the code that allows to put the type into the output variable,
+             * so we are able to determine which mapper to use
+             */
             [$output, $createObjectStatements] = $propertyMapping->transformer->transform($propertyMapping->readAccessor->getExpression($sourceInput), $result, $propertyMapping, $uniqueVariableScope);
 
             foreach ($classDiscriminatorMapping->getTypesMapping() as $typeValue => $typeTarget) {
@@ -647,15 +648,25 @@ final readonly class Generator
 
                 $constructVar = new Expr\Variable($uniqueVariableScope->getUniqueName('constructArg'));
 
-                $fieldValueExpr = $propertyMapping->readAccessor->getExpression($sourceInput);
-
-                if (\is_string($propertyMapping->transformer)) {
-                    /* If the transformer is a string, it means it's a custom transformer, so we extract the code of the transform method and wrap it into a closure */
+                if ($propertyMapping->hasCustomTransformer()) {
                     $propStatements = [];
-                    $output = $this->classMethodToCallbackExtractor->extract($propertyMapping->transformer, 'transform', [new Arg($fieldValueExpr)]);
+                    /*
+                     * let's extract custom transformer's transform() method in a closure,
+                     * and add it as a constructor argument
+                     */
+                    $output = $this->customTransformerExtractor->extract(
+                        $propertyMapping->transformer,
+                        $propertyMapping->readAccessor?->getExpression($sourceInput),
+                        $sourceInput
+                    );
                 } else {
                     /* Get extract and transform statements for this property */
-                    [$output, $propStatements] = $propertyMapping->transformer->transform($fieldValueExpr, $constructVar, $propertyMapping, $uniqueVariableScope);
+                    [$output, $propStatements] = $propertyMapping->transformer->transform(
+                        $propertyMapping->readAccessor->getExpression($sourceInput),
+                        $constructVar,
+                        $propertyMapping,
+                        $uniqueVariableScope
+                    );
                 }
 
                 $constructArguments[$parameter->getPosition()] = new Arg($constructVar);

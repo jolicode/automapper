@@ -9,7 +9,6 @@ use AutoMapper\Exception\LogicException;
 use AutoMapper\Exception\RuntimeException;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
-use PhpParser\Node\Identifier;
 use PhpParser\Node\Param;
 use PhpParser\Node\Stmt;
 use PhpParser\Parser;
@@ -65,8 +64,8 @@ final readonly class ClassMethodToCallbackExtractor
 
         $closureParameters = [];
         foreach ($classMethod->getParams() as $parameter) {
-            if ($parameter->var instanceof Expr\Variable && $parameter->type instanceof Identifier) {
-                $closureParameters[] = new Param(new Expr\Variable($parameter->var->name), type: $parameter->type->name);
+            if ($parameter->var instanceof Expr\Variable) {
+                $closureParameters[] = new Param(new Expr\Variable($parameter->var->name), type: $parameter->type);
             }
         }
 

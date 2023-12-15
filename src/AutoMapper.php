@@ -6,6 +6,7 @@ namespace AutoMapper;
 
 use AutoMapper\Exception\NoMappingFoundException;
 use AutoMapper\Extractor\ClassMethodToCallbackExtractor;
+use AutoMapper\Extractor\CustomTransformerExtractor;
 use AutoMapper\Extractor\FromSourceMappingExtractor;
 use AutoMapper\Extractor\FromTargetMappingExtractor;
 use AutoMapper\Extractor\MapToContextPropertyInfoExtractorDecorator;
@@ -178,7 +179,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
         if (null === $loader) {
             $loader = new EvalLoader(
                 new Generator(
-                    new ClassMethodToCallbackExtractor(),
+                    new CustomTransformerExtractor(new ClassMethodToCallbackExtractor()),
                     (new ParserFactory())->create(ParserFactory::PREFER_PHP7),
                     new ClassDiscriminatorFromClassMetadata($classMetadataFactory),
                     $allowReadOnlyTargetToPopulate

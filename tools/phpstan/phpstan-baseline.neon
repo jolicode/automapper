@@ -96,17 +96,7 @@ parameters:
 			path: ../../src/Extractor/FromSourceMappingExtractor.php
 
 		-
-			message: "#^Parameter \\#1 \\$readAccessor of class AutoMapper\\\\Extractor\\\\PropertyMapping constructor expects AutoMapper\\\\Extractor\\\\ReadAccessor, AutoMapper\\\\Extractor\\\\ReadAccessor\\|null given\\.$#"
-			count: 1
-			path: ../../src/Extractor/FromSourceMappingExtractor.php
-
-		-
 			message: "#^Parameter \\#1 \\$object_or_class of function is_subclass_of expects object\\|string, string\\|null given\\.$#"
-			count: 1
-			path: ../../src/Extractor/FromTargetMappingExtractor.php
-
-		-
-			message: "#^Parameter \\#1 \\$readAccessor of class AutoMapper\\\\Extractor\\\\PropertyMapping constructor expects AutoMapper\\\\Extractor\\\\ReadAccessor, AutoMapper\\\\Extractor\\\\ReadAccessor\\|null given\\.$#"
 			count: 1
 			path: ../../src/Extractor/FromTargetMappingExtractor.php
 
@@ -221,11 +211,6 @@ parameters:
 			path: ../../src/Extractor/SourceTargetMappingExtractor.php
 
 		-
-			message: "#^Parameter \\#1 \\$readAccessor of class AutoMapper\\\\Extractor\\\\PropertyMapping constructor expects AutoMapper\\\\Extractor\\\\ReadAccessor, AutoMapper\\\\Extractor\\\\ReadAccessor\\|null given\\.$#"
-			count: 1
-			path: ../../src/Extractor/SourceTargetMappingExtractor.php
-
-		-
 			message: "#^Property AutoMapper\\\\GeneratedMapper\\:\\:\\$cachedTarget has no type specified\\.$#"
 			count: 1
 			path: ../../src/GeneratedMapper.php
@@ -259,6 +244,11 @@ parameters:
 			message: "#^Property AutoMapper\\\\GeneratedMapper\\:\\:\\$mappers has no type specified\\.$#"
 			count: 1
 			path: ../../src/GeneratedMapper.php
+
+		-
+			message: "#^Cannot call method getExpression\\(\\) on null\\.$#"
+			count: 1
+			path: ../../src/Generator/Generator.php
 
 		-
 			message: "#^Method AutoMapper\\\\Generator\\\\Generator\\:\\:getCreateObjectStatements\\(\\) return type has no value type specified in iterable type array\\.$#"
