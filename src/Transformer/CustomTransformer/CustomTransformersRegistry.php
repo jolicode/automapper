@@ -35,7 +35,7 @@ final class CustomTransformersRegistry
     {
         foreach ($this->prioritizedCustomTransformers() as $customTransformer) {
             if (
-                $customTransformer instanceof CustomModelTransformerInterface && $customTransformer->supports($sourceTypes, $targetTypes)
+                ($customTransformer instanceof CustomModelTransformerInterface && $sourceTypes && $targetTypes && $customTransformer->supports($sourceTypes, $targetTypes))
                 || $customTransformer instanceof CustomPropertyTransformerInterface && $customTransformer->supports($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $propertyName)
             ) {
                 return $customTransformer::class;

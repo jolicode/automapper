@@ -6,6 +6,8 @@ namespace AutoMapper\Tests;
 
 use AutoMapper\Tests\Fixtures\Address;
 use AutoMapper\Tests\Fixtures\AddressDTO;
+use AutoMapper\Tests\Fixtures\BirthDateDateTime;
+use AutoMapper\Tests\Fixtures\BirthDateExploded;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\FromSourceCustomModelTransformer;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\FromSourceCustomPropertyTransformer;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\FromTargetCustomModelTransformer;
@@ -13,6 +15,7 @@ use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\FromTargetCustomProp
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\PrioritizedFromSourceCustomPriorityTransformer;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\SourceTargetCustomModelTransformer;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\SourceTargetCustomPropertyTransformer;
+use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\SourceTargetMultiFieldsCustomPropertyTransformer;
 use AutoMapper\Tests\Fixtures\User;
 use AutoMapper\Tests\Fixtures\UserDTO;
 
@@ -96,6 +99,20 @@ class AutoMapperWithCustomTransformerTest extends AutoMapperBaseTest
     {
         yield 'class name' => [User::class];
         yield 'object' => [self::createUser()];
+    }
+
+    public function testFromSourceToTargetMultipleFieldsTransformation(): void
+    {
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'SourceTargetMultiFieldsCustomPropertyTransformer_');
+
+        $this->autoMapper->bindCustomTransformer(new SourceTargetMultiFieldsCustomPropertyTransformer());
+
+        $birthDateDateTime = $this->autoMapper->map(
+            new BirthDateExploded(year: 1985, month: 07, day: 01),
+            BirthDateDateTime::class
+        );
+
+        self::assertSame('1985-07-01', $birthDateDateTime->date->format('Y-m-d'));
     }
 
     private static function createUserDTO(string|null $name = null, string|null $city = null): UserDTO

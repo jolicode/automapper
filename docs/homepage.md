@@ -77,3 +77,9 @@ dump($automapper->map(new InputUser('John', 'Doe', 28), DatabaseUser::class));
 //   +age: 28
 // }
 ```
+
+### How to customize the mapping? 🚀
+
+#### Manually customize a unique property
+
+
