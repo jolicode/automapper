@@ -101,22 +101,12 @@ parameters:
 			path: ../../src/Extractor/FromSourceMappingExtractor.php
 
 		-
-			message: "#^Parameter \\#2 \\$targetTypes of method AutoMapper\\\\Transformer\\\\TransformerFactoryInterface\\:\\:getTransformer\\(\\) expects array\\<Symfony\\\\Component\\\\PropertyInfo\\\\Type\\>\\|null, array\\<int\\<0, max\\>, Symfony\\\\Component\\\\PropertyInfo\\\\Type\\|null\\> given\\.$#"
-			count: 1
-			path: ../../src/Extractor/FromSourceMappingExtractor.php
-
-		-
 			message: "#^Parameter \\#1 \\$object_or_class of function is_subclass_of expects object\\|string, string\\|null given\\.$#"
 			count: 1
 			path: ../../src/Extractor/FromTargetMappingExtractor.php
 
 		-
 			message: "#^Parameter \\#1 \\$readAccessor of class AutoMapper\\\\Extractor\\\\PropertyMapping constructor expects AutoMapper\\\\Extractor\\\\ReadAccessor, AutoMapper\\\\Extractor\\\\ReadAccessor\\|null given\\.$#"
-			count: 1
-			path: ../../src/Extractor/FromTargetMappingExtractor.php
-
-		-
-			message: "#^Parameter \\#1 \\$sourceTypes of method AutoMapper\\\\Transformer\\\\TransformerFactoryInterface\\:\\:getTransformer\\(\\) expects array\\<Symfony\\\\Component\\\\PropertyInfo\\\\Type\\>\\|null, array\\<int\\<0, max\\>, Symfony\\\\Component\\\\PropertyInfo\\\\Type\\|null\\> given\\.$#"
 			count: 1
 			path: ../../src/Extractor/FromTargetMappingExtractor.php
 
@@ -554,6 +544,16 @@ parameters:
 			message: "#^Parameter \\#1 \\$output of method AutoMapper\\\\Extractor\\\\WriteMutator\\:\\:getExpression\\(\\) expects PhpParser\\\\Node\\\\Expr\\\\Variable, PhpParser\\\\Node\\\\Expr given\\.$#"
 			count: 1
 			path: ../../src/Transformer/AbstractArrayTransformer.php
+
+		-
+			message: "#^Parameter \\#1 \\$source of method AutoMapper\\\\Transformer\\\\CustomTransformer\\\\CustomPropertyTransformerInterface\\:\\:supports\\(\\) expects 'array'\\|class\\-string, string given\\.$#"
+			count: 1
+			path: ../../src/Transformer/CustomTransformer/CustomTransformersRegistry.php
+
+		-
+			message: "#^Parameter \\#2 \\$target of method AutoMapper\\\\Transformer\\\\CustomTransformer\\\\CustomPropertyTransformerInterface\\:\\:supports\\(\\) expects 'array'\\|class\\-string, string given\\.$#"
+			count: 1
+			path: ../../src/Transformer/CustomTransformer/CustomTransformersRegistry.php
 
 		-
 			message: "#^Parameter \\#1 \\$object_or_class of function is_subclass_of expects object\\|string, string\\|null given\\.$#"

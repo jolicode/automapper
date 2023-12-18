@@ -15,10 +15,11 @@ class FooCustomMapper
         return $object;
     }
 
-    public function switch(mixed $object, array $context): mixed
+    public function switch(mixed $object, string $someString): mixed
     {
         if ($object instanceof Foo) {
             $object->bar = 'Hello World!';
+            $object->baz = $someString;
         }
 
         return $object;

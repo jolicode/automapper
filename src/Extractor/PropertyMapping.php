@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Extractor;
 
+use AutoMapper\Transformer\CustomTransformer\CustomTransformerInterface;
 use AutoMapper\Transformer\TransformerInterface;
 
 /**
@@ -17,7 +18,8 @@ final class PropertyMapping
         public readonly ReadAccessor $readAccessor,
         public readonly ?WriteMutator $writeMutator,
         public readonly ?WriteMutator $writeMutatorConstructor,
-        public readonly TransformerInterface $transformer,
+        /** @var TransformerInterface|class-string<CustomTransformerInterface> */
+        public readonly TransformerInterface|string $transformer,
         public readonly string $property,
         public readonly bool $checkExists = false,
         public readonly ?array $sourceGroups = null,
