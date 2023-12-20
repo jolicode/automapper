@@ -20,5 +20,4 @@ final class HasDateTimeInterfaceWithMutableInstance
     {
         return $this->dateTime->format(\DateTime::ATOM);
     }
-
 }

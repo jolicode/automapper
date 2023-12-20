@@ -17,5 +17,4 @@ final class HasDateTimeInterfaceWithNullValue
     {
         return $this->dateTime?->format(\DateTime::ATOM);
     }
-
 }

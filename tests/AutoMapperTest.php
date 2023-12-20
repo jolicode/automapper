@@ -656,8 +656,7 @@ class AutoMapperTest extends AutoMapperBaseTest
     public function testNameConverter(): void
     {
         if (Kernel::MAJOR_VERSION < 6) {
-            $nameConverter = new class() implements AdvancedNameConverterInterface
-            {
+            $nameConverter = new class() implements AdvancedNameConverterInterface {
                 public function normalize($propertyName, ?string $class = null, ?string $format = null, array $context = [])
                 {
                     if ('id' === $propertyName) {
@@ -677,8 +676,7 @@ class AutoMapperTest extends AutoMapperBaseTest
                 }
             };
         } else {
-            $nameConverter = new class() implements AdvancedNameConverterInterface
-            {
+            $nameConverter = new class() implements AdvancedNameConverterInterface {
                 public function normalize(string $propertyName, ?string $class = null, ?string $format = null, array $context = []): string
                 {
                     if ('id' === $propertyName) {
@@ -1173,6 +1171,7 @@ class AutoMapperTest extends AutoMapperBaseTest
     /**
      * @param class-string<HasDateTime|HasDateTimeWithNullValue|HasDateTimeImmutable|HasDateTimeImmutableWithNullValue|HasDateTimeInterfaceWithImmutableInstance|HasDateTimeInterfaceWithNullValue> $from
      * @param class-string<HasDateTime|HasDateTimeWithNullValue|HasDateTimeImmutable|HasDateTimeImmutableWithNullValue|HasDateTimeInterfaceWithImmutableInstance|HasDateTimeInterfaceWithNullValue> $to
+     *
      * @dataProvider dateTimeMappingProvider
      */
     public function testDateTimeMapping(

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace AutoMapper\Tests\Transformer;
 
 use AutoMapper\MapperMetadata;
-use AutoMapper\Transformer\DateTimeInterfaceToMutableTransformer;
 use AutoMapper\Transformer\DateTimeInterfaceToImmutableTransformer;
+use AutoMapper\Transformer\DateTimeInterfaceToMutableTransformer;
 use AutoMapper\Transformer\DateTimeToStringTransformer;
 use AutoMapper\Transformer\DateTimeTransformerFactory;
 use AutoMapper\Transformer\StringToDateTimeTransformer;
