@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Transformer;
 
-use AutoMapper\Transformer\DateTimeImmutableToMutableTransformer;
+use AutoMapper\Transformer\DateTimeInterfaceToImmutableTransformer;
 use PHPUnit\Framework\TestCase;
 
-class DateTimeImmutableToMutableTransformerTest extends TestCase
+class DateTimeInterfaceToImmutableTransformerTest extends TestCase
 {
     use EvalTransformerTrait;
 
     public function testDateTimeImmutableTransformer(): void
     {
-        $transformer = new DateTimeImmutableToMutableTransformer();
+        $transformer = new DateTimeInterfaceToImmutableTransformer();
 
-        $date = new \DateTimeImmutable();
+        $date = new \DateTime();
         $output = $this->evalTransformer($transformer, $date);
 
-        self::assertInstanceOf(\DateTime::class, $output);
+        self::assertInstanceOf(\DateTimeImmutable::class, $output);
         self::assertSame($date->format(\DateTime::RFC3339), $output->format(\DateTime::RFC3339));
     }
 }

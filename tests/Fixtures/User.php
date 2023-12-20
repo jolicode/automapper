@@ -37,7 +37,7 @@ class User
     public $addresses = [];
 
     /**
-     * @var \DateTime
+     * @var \DateTime|null
      */
     public $createdAt;
 
