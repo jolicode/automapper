@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - [GH#10](https://github.com/jolicode/automapper/pull/10) Introduce custom transformers
+- [GH#26](https://github.com/jolicode/automapper/pull/26) Fix mappings involving DateTimeInterface type
 
 ## [8.1.0] - 2023-12-14
 ### Added

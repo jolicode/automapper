@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace AutoMapper\Tests\Transformer;
 
 use AutoMapper\MapperMetadata;
-use AutoMapper\Transformer\CopyTransformer;
-use AutoMapper\Transformer\DateTimeImmutableToMutableTransformer;
-use AutoMapper\Transformer\DateTimeMutableToImmutableTransformer;
+use AutoMapper\Transformer\DateTimeInterfaceToImmutableTransformer;
+use AutoMapper\Transformer\DateTimeInterfaceToMutableTransformer;
 use AutoMapper\Transformer\DateTimeToStringTransformer;
 use AutoMapper\Transformer\DateTimeTransformerFactory;
 use AutoMapper\Transformer\StringToDateTimeTransformer;
@@ -24,7 +23,7 @@ class DateTimeTransformerFactoryTest extends TestCase
         $transformer = $factory->getTransformer([new Type('object', false, \DateTime::class)], [new Type('object', false, \DateTime::class)], $mapperMetadata);
 
         self::assertNotNull($transformer);
-        self::assertInstanceOf(CopyTransformer::class, $transformer);
+        self::assertInstanceOf(DateTimeInterfaceToMutableTransformer::class, $transformer);
 
         $transformer = $factory->getTransformer([new Type('object', false, \DateTime::class)], [new Type('string')], $mapperMetadata);
 
@@ -45,7 +44,7 @@ class DateTimeTransformerFactoryTest extends TestCase
         $transformer = $factory->getTransformer([new Type('object', false, \DateTimeImmutable::class)], [new Type('object', false, \DateTime::class)], $mapperMetadata);
 
         self::assertNotNull($transformer);
-        self::assertInstanceOf(DateTimeImmutableToMutableTransformer::class, $transformer);
+        self::assertInstanceOf(DateTimeInterfaceToMutableTransformer::class, $transformer);
     }
 
     public function testGetTransformerMutable(): void
@@ -56,7 +55,7 @@ class DateTimeTransformerFactoryTest extends TestCase
         $transformer = $factory->getTransformer([new Type('object', false, \DateTime::class)], [new Type('object', false, \DateTimeImmutable::class)], $mapperMetadata);
 
         self::assertNotNull($transformer);
-        self::assertInstanceOf(DateTimeMutableToImmutableTransformer::class, $transformer);
+        self::assertInstanceOf(DateTimeInterfaceToImmutableTransformer::class, $transformer);
     }
 
     public function testNoTransformer(): void

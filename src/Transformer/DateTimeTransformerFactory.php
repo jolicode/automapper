@@ -34,18 +34,13 @@ final class DateTimeTransformerFactory extends AbstractUniqueTypeTransformerFact
 
     protected function createTransformerForSourceAndTarget(Type $sourceType, Type $targetType): ?TransformerInterface
     {
-        $isSourceMutable = $this->isDateTimeMutable($sourceType);
-        $isTargetMutable = $this->isDateTimeMutable($targetType);
-
-        if ($isSourceMutable === $isTargetMutable) {
-            return new CopyTransformer();
+        // if target is mutable
+        if ($this->isDateTimeMutable($targetType)) {
+            return new DateTimeInterfaceToMutableTransformer();
         }
 
-        if ($isSourceMutable) {
-            return new DateTimeMutableToImmutableTransformer();
-        }
-
-        return new DateTimeImmutableToMutableTransformer();
+        // if target is immutable or a generic DateTimeInterface
+        return new DateTimeInterfaceToImmutableTransformer();
     }
 
     protected function createTransformerForSource(Type $targetType, MapperMetadataInterface $mapperMetadata): ?TransformerInterface

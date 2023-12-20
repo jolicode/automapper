@@ -11,21 +11,21 @@ use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
 
 /**
- * Transform DateTime to DateTimeImmutable.
+ * Transform DateTimeInterface to DateTimeImmutable.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-final class DateTimeMutableToImmutableTransformer implements TransformerInterface
+final class DateTimeInterfaceToImmutableTransformer implements TransformerInterface
 {
     public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
         /*
-         * In case of mutable source we create the immutable value by using createFromMutable.
+         * Handles all DateTime instance types using createFromInterface.
          *
-         * \DateTimeImmutable::createFromMutable($input);
+         * \DateTimeImmutable::createFromInterface($input);
          */
         return [
-            new Expr\StaticCall(new Name\FullyQualified(\DateTimeImmutable::class), 'createFromMutable', [
+            new Expr\StaticCall(new Name\FullyQualified(\DateTimeImmutable::class), 'createFromInterface', [
                 new Arg($input),
             ]),
             [],

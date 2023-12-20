@@ -20,6 +20,13 @@ use AutoMapper\Tests\Fixtures\ClassWithMapToContextAttribute;
 use AutoMapper\Tests\Fixtures\ClassWithNullablePropertyInConstructor;
 use AutoMapper\Tests\Fixtures\ClassWithPrivateProperty;
 use AutoMapper\Tests\Fixtures\Fish;
+use AutoMapper\Tests\Fixtures\HasDateTime;
+use AutoMapper\Tests\Fixtures\HasDateTimeImmutable;
+use AutoMapper\Tests\Fixtures\HasDateTimeImmutableWithNullValue;
+use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithImmutableInstance;
+use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithMutableInstance;
+use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithNullValue;
+use AutoMapper\Tests\Fixtures\HasDateTimeWithNullValue;
 use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
 use AutoMapper\Tests\Fixtures\Order;
 use AutoMapper\Tests\Fixtures\PetOwner;
@@ -1159,6 +1166,53 @@ class AutoMapperTest extends AutoMapperBaseTest
                 [MapperContext::DATETIME_FORMAT => '!d-m-Y']
             )
         );
+    }
+
+    /**
+     * @param class-string<HasDateTime|HasDateTimeWithNullValue|HasDateTimeImmutable|HasDateTimeImmutableWithNullValue|HasDateTimeInterfaceWithImmutableInstance|HasDateTimeInterfaceWithNullValue> $from
+     * @param class-string<HasDateTime|HasDateTimeWithNullValue|HasDateTimeImmutable|HasDateTimeImmutableWithNullValue|HasDateTimeInterfaceWithImmutableInstance|HasDateTimeInterfaceWithNullValue> $to
+     *
+     * @dataProvider dateTimeMappingProvider
+     */
+    public function testDateTimeMapping(
+        string $from,
+        string $to,
+        bool $isError,
+    ): void {
+        if ($isError) {
+            $this->expectException(\TypeError::class);
+        }
+
+        $fromObject = $from::create();
+        $toObject = $this->autoMapper->map($fromObject, $to);
+
+        self::assertInstanceOf($to, $toObject);
+        self::assertEquals($fromObject->getString(), $toObject->getString());
+    }
+
+    /**
+     * @return iterable<array{0:HasDateTime|HasDateTimeWithNullValue|HasDateTimeImmutable|HasDateTimeImmutableWithNullValue|HasDateTimeInterfaceWithImmutableInstance|HasDateTimeInterfaceWithNullValue,1:HasDateTime|HasDateTimeWithNullValue|HasDateTimeImmutable|HasDateTimeImmutableWithNullValue|HasDateTimeInterfaceWithImmutableInstance|HasDateTimeInterfaceWithNullValue,2:bool}>
+     */
+    public function dateTimeMappingProvider(): iterable
+    {
+        $classes = [
+            HasDateTime::class,
+            HasDateTimeWithNullValue::class,
+            HasDateTimeImmutable::class,
+            HasDateTimeImmutableWithNullValue::class,
+            HasDateTimeInterfaceWithImmutableInstance::class,
+            HasDateTimeInterfaceWithMutableInstance::class,
+            HasDateTimeInterfaceWithNullValue::class,
+        ];
+
+        foreach ($classes as $from) {
+            foreach ($classes as $to) {
+                $fromIsNullable = str_contains($from, 'NullValue');
+                $toIsNullable = str_contains($to, 'NullValue');
+                $isError = $fromIsNullable && !$toIsNullable;
+                yield "$from to $to" => [$from, $to, $isError];
+            }
+        }
     }
 
     public function testMapToContextAttribute(): void
