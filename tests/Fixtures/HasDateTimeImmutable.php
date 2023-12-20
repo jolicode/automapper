@@ -16,7 +16,7 @@ final class HasDateTimeImmutable
         return $self;
     }
 
-    public function getString(): string
+    public function getString(): ?string
     {
         return $this->dateTime->format(\DateTime::ATOM);
     }
