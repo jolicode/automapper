@@ -1181,7 +1181,7 @@ class AutoMapperTest extends AutoMapperBaseTest
         bool $isError,
     ): void {
         if ($isError) {
-            $this->expectException(\Throwable::class);
+            $this->expectException(\TypeError::class);
         }
 
         $fromObject = $from::create();
