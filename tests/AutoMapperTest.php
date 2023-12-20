@@ -20,6 +20,10 @@ use AutoMapper\Tests\Fixtures\ClassWithMapToContextAttribute;
 use AutoMapper\Tests\Fixtures\ClassWithNullablePropertyInConstructor;
 use AutoMapper\Tests\Fixtures\ClassWithPrivateProperty;
 use AutoMapper\Tests\Fixtures\Fish;
+use AutoMapper\Tests\Fixtures\HasDateTime;
+use AutoMapper\Tests\Fixtures\HasDateTimeImmutable;
+use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithImmutableInstance;
+use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithMutableInstance;
 use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
 use AutoMapper\Tests\Fixtures\Order;
 use AutoMapper\Tests\Fixtures\PetOwner;
@@ -649,7 +653,8 @@ class AutoMapperTest extends AutoMapperBaseTest
     public function testNameConverter(): void
     {
         if (Kernel::MAJOR_VERSION < 6) {
-            $nameConverter = new class() implements AdvancedNameConverterInterface {
+            $nameConverter = new class() implements AdvancedNameConverterInterface
+            {
                 public function normalize($propertyName, ?string $class = null, ?string $format = null, array $context = [])
                 {
                     if ('id' === $propertyName) {
@@ -669,7 +674,8 @@ class AutoMapperTest extends AutoMapperBaseTest
                 }
             };
         } else {
-            $nameConverter = new class() implements AdvancedNameConverterInterface {
+            $nameConverter = new class() implements AdvancedNameConverterInterface
+            {
                 public function normalize(string $propertyName, ?string $class = null, ?string $format = null, array $context = []): string
                 {
                     if ('id' === $propertyName) {
@@ -1159,6 +1165,41 @@ class AutoMapperTest extends AutoMapperBaseTest
                 [MapperContext::DATETIME_FORMAT => '!d-m-Y']
             )
         );
+    }
+
+    /**
+     * @param class-string<HasDateTime|HasDateTimeImmutable|HasDateTimeInterfaceWithImmutableInstance> $from
+     * @param class-string<HasDateTime|HasDateTimeImmutable|HasDateTimeInterfaceWithImmutableInstance> $to
+     * @dataProvider dateTimeMappingProvider
+     */
+    public function testDateTimeMapping(
+        string $from,
+        string $to
+    ): void {
+        $fromObject = $from::create();
+        $toObject = $this->autoMapper->map($fromObject, $to);
+
+        self::assertInstanceOf($to, $toObject);
+        self::assertEquals($fromObject->getString(), $toObject->getString());
+    }
+
+    /**
+     * @return iterable<array<class-string<HasDateTime|HasDateTimeImmutable|HasDateTimeInterfaceWithImmutableInstance>,class-string<HasDateTime|HasDateTimeImmutable|HasDateTimeInterfaceWithImmutableInstance>>>
+     */
+    public function dateTimeMappingProvider(): iterable
+    {
+        $classes = [
+            HasDateTime::class,
+            HasDateTimeImmutable::class,
+            HasDateTimeInterfaceWithImmutableInstance::class,
+            HasDateTimeInterfaceWithMutableInstance::class,
+        ];
+
+        foreach ($classes as $from) {
+            foreach ($classes as $to) {
+                yield "$from to $to" => [$from, $to];
+            }
+        }
     }
 
     public function testMapToContextAttribute(): void
