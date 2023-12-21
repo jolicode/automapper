@@ -19,7 +19,7 @@ use AutoMapper\Transformer\MultipleTransformerFactory;
 use AutoMapper\Transformer\NullableTransformerFactory;
 use AutoMapper\Transformer\ObjectTransformerFactory;
 use AutoMapper\Transformer\UniqueTypeTransformerFactory;
-use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
+use Symfony\Component\PropertyInfo\Extractor\PhpStanExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
@@ -40,10 +40,10 @@ class MapperGeneratorMetadataFactoryTest extends AutoMapperBaseTest
         $customTransformerRegistry = new CustomTransformersRegistry();
         $reflectionExtractor = new ReflectionExtractor(null, null, null, true, ReflectionExtractor::ALLOW_PUBLIC | ReflectionExtractor::ALLOW_PROTECTED | ReflectionExtractor::ALLOW_PRIVATE);
 
-        $phpDocExtractor = new PhpDocExtractor();
+        $phpStanExtractor = new PhpStanExtractor();
         $propertyInfoExtractor = new PropertyInfoExtractor(
             [$reflectionExtractor],
-            [$phpDocExtractor, $reflectionExtractor],
+            [$phpStanExtractor, $reflectionExtractor],
             [$reflectionExtractor],
             [$reflectionExtractor]
         );

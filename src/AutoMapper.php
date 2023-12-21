@@ -28,7 +28,7 @@ use AutoMapper\Transformer\TransformerFactoryInterface;
 use AutoMapper\Transformer\UniqueTypeTransformerFactory;
 use Doctrine\Common\Annotations\AnnotationReader;
 use PhpParser\ParserFactory;
-use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
+use Symfony\Component\PropertyInfo\Extractor\PhpStanExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
@@ -190,10 +190,10 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
 
         $reflectionExtractor = new ReflectionExtractor(accessFlags: $flags);
 
-        $phpDocExtractor = new PhpDocExtractor();
+        $phpStanExtractor = new PhpStanExtractor();
         $propertyInfoExtractor = new PropertyInfoExtractor(
             [$reflectionExtractor],
-            [$phpDocExtractor, $reflectionExtractor],
+            [$phpStanExtractor, $reflectionExtractor],
             [$reflectionExtractor],
             [new MapToContextPropertyInfoExtractorDecorator($reflectionExtractor)]
         );
