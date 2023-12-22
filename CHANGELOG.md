@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#10](https://github.com/jolicode/automapper/pull/10) Introduce custom transformers
 - [GH#26](https://github.com/jolicode/automapper/pull/26) Fix mappings involving DateTimeInterface type
 
+### Changed
+- [GH#27](https://github.com/jolicode/automapper/pull/27) Use PhpStanExtractor instead of PhpDocExtractor
+
 ## [8.1.0] - 2023-12-14
 ### Added
 - [GH#22](https://github.com/jolicode/automapper/pull/22) Added generic AST extractor

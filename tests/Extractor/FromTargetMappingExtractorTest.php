@@ -18,7 +18,7 @@ use AutoMapper\Transformer\MultipleTransformerFactory;
 use AutoMapper\Transformer\NullableTransformerFactory;
 use AutoMapper\Transformer\ObjectTransformerFactory;
 use AutoMapper\Transformer\UniqueTypeTransformerFactory;
-use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
+use Symfony\Component\PropertyInfo\Extractor\PhpStanExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
@@ -48,10 +48,10 @@ class FromTargetMappingExtractorTest extends AutoMapperBaseTest
 
         $reflectionExtractor = new ReflectionExtractor(null, null, null, true, $flags);
 
-        $phpDocExtractor = new PhpDocExtractor();
+        $phpStanExtractor = new PhpStanExtractor();
         $propertyInfoExtractor = new PropertyInfoExtractor(
             [$reflectionExtractor],
-            [$phpDocExtractor, $reflectionExtractor],
+            [$phpStanExtractor, $reflectionExtractor],
             [$reflectionExtractor],
             [$reflectionExtractor]
         );
