@@ -16,7 +16,7 @@ namespace AutoMapper\Transformer\CustomTransformer;
  *         return $source === UserDTO::class && $target === User::class && $propertyName === 'name'
  *     }
  *
- *     public function transform(mixed $input): string
+ *     public function transform(mixed $source): string
  *     {
  *        assert($input instanceof UserDTO);
  *

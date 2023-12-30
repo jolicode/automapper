@@ -14,8 +14,11 @@ final readonly class FromSourceCustomPropertyTransformer implements CustomProper
         return $source === UserDTO::class && $target === 'array' && $propertyName === 'name';
     }
 
-    public function transform(mixed $input): mixed
+    /**
+     * @param UserDTO $source
+     */
+    public function transform(object|array $source): mixed
     {
-        return "{$input} set by custom property transformer";
+        return "{$source->getName()} set by custom property transformer";
     }
 }

@@ -15,9 +15,12 @@ final readonly class FromSourceCustomModelTransformer implements CustomModelTran
         return $this->sourceIsAddressDTO($sourceTypes) && $this->targetIsArray($targetTypes);
     }
 
-    public function transform(mixed $input): mixed
+    public function transform(object|array $source): mixed
     {
-        return ['city' => "{$input->city} set by custom model transformer", 'street' => 'street set by custom model transformer'];
+        return [
+            'city' => "{$source->city} set by custom model transformer",
+            'street' => 'street set by custom model transformer',
+        ];
     }
 
     /**

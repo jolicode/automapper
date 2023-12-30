@@ -15,10 +15,13 @@ final readonly class FromTargetCustomModelTransformer implements CustomModelTran
         return $this->sourceIsArray($sourceTypes) && $this->targetIsAddressDTO($targetTypes);
     }
 
-    public function transform(mixed $input): mixed
+    /**
+     * @param array $source
+     */
+    public function transform(object|array $source): mixed
     {
         $addressDTO = new \AutoMapper\Tests\Fixtures\AddressDTO();
-        $addressDTO->city = "{$input['city']} from custom model transformer";
+        $addressDTO->city = "{$source['city']} from custom model transformer";
 
         return $addressDTO;
     }
