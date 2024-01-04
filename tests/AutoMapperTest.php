@@ -27,6 +27,11 @@ use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithImmutableInstance;
 use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithMutableInstance;
 use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithNullValue;
 use AutoMapper\Tests\Fixtures\HasDateTimeWithNullValue;
+use AutoMapper\Tests\Fixtures\Inheritance\Dto\AnimalDto;
+use AutoMapper\Tests\Fixtures\Inheritance\Dto\CatDto;
+use AutoMapper\Tests\Fixtures\Inheritance\Dto\DogDto;
+use AutoMapper\Tests\Fixtures\Inheritance\Dto\FishDto;
+use AutoMapper\Tests\Fixtures\Inheritance\Entity;
 use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
 use AutoMapper\Tests\Fixtures\Order;
 use AutoMapper\Tests\Fixtures\PetOwner;
@@ -1265,5 +1270,30 @@ class AutoMapperTest extends AutoMapperBaseTest
             new ClassWithNullablePropertyInConstructor(foo: 1),
             $this->autoMapper->map(['foo' => 1], ClassWithNullablePropertyInConstructor::class)
         );
+    }
+
+    public function testInheritance(): void
+    {
+        $this->buildAutoMapper();
+
+        $dog = new Entity\Dog();
+        $cat = new Entity\Cat();
+        $fish = new Entity\Fish();
+
+        $dogDto = $this->autoMapper->map($dog, AnimalDto::class);   
+        $catDto = $this->autoMapper->map($cat, AnimalDto::class);   
+        $fishDto = $this->autoMapper->map($fish, AnimalDto::class);
+
+        self::assertInstanceOf(DogDto::class, $dogDto);
+        self::assertInstanceOf(CatDto::class, $catDto);
+        self::assertInstanceOf(FishDto::class, $fishDto);
+
+        $dog = $this->autoMapper->map($dogDto, Entity\Animal::class);
+        $cat = $this->autoMapper->map($catDto, Entity\Animal::class);
+        $fish = $this->autoMapper->map($fishDto, Entity\Animal::class);
+
+        self::assertInstanceOf(Entity\Dog::class, $dog);
+        self::assertInstanceOf(Entity\Cat::class, $cat);
+        self::assertInstanceOf(Entity\Fish::class, $fish);
     }
 }
