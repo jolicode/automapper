@@ -15,8 +15,11 @@ use AutoMapper\MapperGeneratorMetadataInterface;
 use AutoMapper\Transformer\AssignedByReferenceTransformerInterface;
 use AutoMapper\Transformer\DependentTransformerInterface;
 use AutoMapper\Transformer\TransformerInterface;
+use PhpParser\Modifiers;
 use PhpParser\Node\Arg;
+use PhpParser\Node\ArrayItem as NewArrayItem;
 use PhpParser\Node\Expr;
+use PhpParser\Node\Expr\ArrayItem as OldArrayItem;
 use PhpParser\Node\Name;
 use PhpParser\Node\Param;
 use PhpParser\Node\Scalar;
@@ -40,7 +43,7 @@ final readonly class Generator
         private ?ClassDiscriminatorResolverInterface $classDiscriminator = null,
         private bool $allowReadOnlyTargetToPopulate = false,
     ) {
-        $this->parser = $parser ?? (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
+        $this->parser = $parser ?? (new ParserFactory())->createForHostVersion();
     }
 
     /**
@@ -60,6 +63,7 @@ final readonly class Generator
         $constructStatements = [];
         $addedDependencies = [];
         $canHaveCircularDependency = $mapperGeneratorMetadata->canHaveCircularReference() && 'array' !== $mapperGeneratorMetadata->getSource();
+        $arrayItemClass = class_exists(NewArrayItem::class) ? NewArrayItem::class : OldArrayItem::class;
 
         /**
          * First statement is to check if the source is null, if so, return null.
@@ -352,8 +356,8 @@ final readonly class Generator
                             new Expr\ArrayDimFetch($contextVariable, new Scalar\String_(MapperContext::GROUPS)),
                             new Expr\Array_()
                         )),
-                        new Arg(new Expr\Array_(array_map(function (string $group) {
-                            return new Expr\ArrayItem(new Scalar\String_($group));
+                        new Arg(new Expr\Array_(array_map(function (string $group) use ($arrayItemClass) {
+                            return new $arrayItemClass(new Scalar\String_($group));
                         }, $propertyMapping->sourceGroups))),
                     ])
                 );
@@ -378,8 +382,8 @@ final readonly class Generator
                             new Expr\ArrayDimFetch($contextVariable, new Scalar\String_(MapperContext::GROUPS)),
                             new Expr\Array_()
                         )),
-                        new Arg(new Expr\Array_(array_map(function (string $group) {
-                            return new Expr\ArrayItem(new Scalar\String_($group));
+                        new Arg(new Expr\Array_(array_map(function (string $group) use ($arrayItemClass) {
+                            return new $arrayItemClass(new Scalar\String_($group));
                         }, $propertyMapping->targetGroups))),
                     ])
                 );
@@ -396,7 +400,7 @@ final readonly class Generator
                         new Expr\ArrayDimFetch($contextVariable, new Scalar\String_(MapperContext::DEPTH)),
                         new Expr\ConstFetch(new Name('0'))
                     ),
-                    new Scalar\LNumber($propertyMapping->maxDepth)
+                    new Scalar\Int_($propertyMapping->maxDepth)
                 );
             }
 
@@ -468,14 +472,14 @@ final readonly class Generator
          * }
          */
         $mapMethod = new Stmt\ClassMethod('map', [
-            'flags' => Stmt\Class_::MODIFIER_PUBLIC,
+            'flags' => class_exists(Modifiers::class) ? Modifiers::PUBLIC : Stmt\Class_::MODIFIER_PUBLIC,
             'params' => [
                 new Param(new Expr\Variable($sourceInput->name)),
-                new Param(new Expr\Variable('context'), new Expr\Array_(), 'array'),
+                new Param(new Expr\Variable('context'), new Expr\Array_(), new Name('array')),
             ],
             'byRef' => true,
             'stmts' => $statements,
-            'returnType' => \PHP_VERSION_ID >= 80000 ? 'mixed' : null,
+            'returnType' => \PHP_VERSION_ID >= 80000 ? new Name('mixed') : null,
         ]);
 
         /*
@@ -490,7 +494,7 @@ final readonly class Generator
          * }
          */
         $constructMethod = new Stmt\ClassMethod('__construct', [
-            'flags' => Stmt\Class_::MODIFIER_PUBLIC,
+            'flags' => class_exists(Modifiers::class) ? Modifiers::PUBLIC : Stmt\Class_::MODIFIER_PUBLIC,
             'stmts' => $constructStatements,
         ]);
 
@@ -509,11 +513,11 @@ final readonly class Generator
              * }
              */
             $classStmts[] = new Stmt\ClassMethod('injectMappers', [
-                'flags' => Stmt\Class_::MODIFIER_PUBLIC,
+                'flags' => class_exists(Modifiers::class) ? Modifiers::PUBLIC : Stmt\Class_::MODIFIER_PUBLIC,
                 'params' => [
                     new Param(new Expr\Variable('autoMapperRegistry'), null, new Name\FullyQualified(AutoMapperRegistryInterface::class)),
                 ],
-                'returnType' => 'void',
+                'returnType' => new Name('void'),
                 'stmts' => $injectMapperStatements,
             ]);
         }
@@ -526,7 +530,7 @@ final readonly class Generator
          * }
          */
         return new Stmt\Class_($mapperGeneratorMetadata->getMapperClassName(), [
-            'flags' => Stmt\Class_::MODIFIER_FINAL,
+            'flags' => class_exists(Modifiers::class) ? Modifiers::FINAL : Stmt\Class_::MODIFIER_FINAL,
             'extends' => new Name\FullyQualified(GeneratedMapper::class),
             'stmts' => $classStmts,
         ]);

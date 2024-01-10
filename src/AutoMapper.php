@@ -179,7 +179,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
             $loader = new EvalLoader(
                 new Generator(
                     new ClassMethodToCallbackExtractor(),
-                    (new ParserFactory())->create(ParserFactory::PREFER_PHP7),
+                    (new ParserFactory())->createForHostVersion(),
                     new ClassDiscriminatorFromClassMetadata($classMetadataFactory),
                     $allowReadOnlyTargetToPopulate
                 )

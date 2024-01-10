@@ -19,10 +19,12 @@ use AutoMapper\Transformer\MultipleTransformerFactory;
 use AutoMapper\Transformer\NullableTransformerFactory;
 use AutoMapper\Transformer\ObjectTransformerFactory;
 use AutoMapper\Transformer\UniqueTypeTransformerFactory;
+use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\PropertyInfo\Extractor\PhpStanExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
+use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 
 /**
@@ -40,7 +42,11 @@ class FromSourceMappingExtractorTest extends AutoMapperBaseTest
 
     private function fromSourceMappingExtractorBootstrap(bool $private = true): void
     {
-        $classMetadataFactory = new ClassMetadataFactory(new AttributeLoader());
+        if (class_exists(AttributeLoader::class)) {
+            $classMetadataFactory = new ClassMetadataFactory(new AttributeLoader());
+        } else {
+            $classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
+        }
         $flags = ReflectionExtractor::ALLOW_PUBLIC;
 
         if ($private) {

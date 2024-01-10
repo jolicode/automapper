@@ -10,6 +10,7 @@ use AutoMapper\Exception\RuntimeException;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Identifier;
+use PhpParser\Node\Name;
 use PhpParser\Node\Param;
 use PhpParser\Node\Stmt;
 use PhpParser\Parser;
@@ -30,7 +31,7 @@ final readonly class ClassMethodToCallbackExtractor
 
     public function __construct(?Parser $parser = null)
     {
-        $this->parser = $parser ?? (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
+        $this->parser = $parser ?? (new ParserFactory())->createForHostVersion();
     }
 
     /**
@@ -66,15 +67,24 @@ final readonly class ClassMethodToCallbackExtractor
         $closureParameters = [];
         foreach ($classMethod->getParams() as $parameter) {
             if ($parameter->var instanceof Expr\Variable && $parameter->type instanceof Identifier) {
-                $closureParameters[] = new Param(new Expr\Variable($parameter->var->name), type: $parameter->type->name);
+                $closureParameters[] = new Param(new Expr\Variable($parameter->var->name), type: new Name($parameter->type->name));
             }
+        }
+
+        /** @var Stmt[] $statements */
+        $statements = $classMethod->stmts;
+
+        /** @var string|Identifier|Name|null $returnType */
+        $returnType = $classMethod->returnType;
+        if (\is_string($returnType)) {
+            $returnType = new Name($returnType);
         }
 
         return new Expr\FuncCall(
             new Expr\Closure([
-                'stmts' => $classMethod->stmts,
+                'stmts' => $statements,
                 'params' => $closureParameters,
-                'returnType' => $classMethod->returnType,
+                'returnType' => $returnType,
             ]),
             $inputParameters,
         );

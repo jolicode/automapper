@@ -27,15 +27,19 @@ class AstExtractorTest extends TestCase
     {
         $extractor = new ClassMethodToCallbackExtractor();
         $extractedMethod = new Expression($extractor->extract(FooCustomMapper::class, 'transform', [new Arg(new Variable($varName))]));
+        $generatedCode = (new Standard())->prettyPrint([$extractedMethod]);
+
+        // here to handle low deps nikic/php-parser behaviors
+//        $generatedCode = str_replace(') :', '):', $generatedCode);
 
         $this->assertEquals(<<<PHP
-(function (mixed \$object) : mixed {
+(function (mixed \$object): mixed {
     if (\$object instanceof Foo) {
         \$object->bar = 'Hello World!';
     }
     return \$object;
 })(\${$varName});
-PHP, $generatedCode = (new Standard())->prettyPrint([$extractedMethod]));
+PHP, $generatedCode);
 
         $this->assertGeneratedCodeIsRunnable($generatedCode, $varName);
     }
@@ -50,16 +54,20 @@ PHP, $generatedCode = (new Standard())->prettyPrint([$extractedMethod]));
     {
         $extractor = new ClassMethodToCallbackExtractor();
         $extractedMethod = new Expression($extractor->extract(FooCustomMapper::class, 'switch', [new Arg(new Variable('someVar')), new Arg(new Variable('context'))]));
+        $generatedCode = (new Standard())->prettyPrint([$extractedMethod]);
+
+        // here to handle low deps nikic/php-parser behaviors
+//        $generatedCode = str_replace(') :', '):', $generatedCode);
 
         $this->assertEquals(<<<PHP
-(function (mixed \$object, string \$someString) : mixed {
+(function (mixed \$object, string \$someString): mixed {
     if (\$object instanceof Foo) {
         \$object->bar = 'Hello World!';
         \$object->baz = \$someString;
     }
     return \$object;
 })(\$someVar, \$context);
-PHP, (new Standard())->prettyPrint([$extractedMethod]));
+PHP, $generatedCode);
     }
 
     public function testCannotExtractCode(): void

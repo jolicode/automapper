@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - [GH#27](https://github.com/jolicode/automapper/pull/27) Use PhpStanExtractor instead of PhpDocExtractor
+- [GH#31](https://github.com/jolicode/automapper/pull/31) Compability with PhpParser v5
 
 ## [8.1.0] - 2023-12-14
 ### Added

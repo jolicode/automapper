@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Fixtures\Transformer\CustomTransformer;
 
-use AutoMapper\Tests\Fixtures\Address;
 use AutoMapper\Tests\Fixtures\AddressDTO;
 use AutoMapper\Transformer\CustomTransformer\CustomModelTransformerInterface;
 use Symfony\Component\PropertyInfo\Type;
@@ -46,7 +45,7 @@ final readonly class SourceTargetCustomModelTransformer implements CustomModelTr
     private function targetIsAddress(array $targetTypes): bool
     {
         foreach ($targetTypes as $targetType) {
-            if ($targetType->getClassName() === Address::class) {
+            if ($targetType->getClassName() === \AutoMapper\Tests\Fixtures\Address::class) {
                 return true;
             }
         }
