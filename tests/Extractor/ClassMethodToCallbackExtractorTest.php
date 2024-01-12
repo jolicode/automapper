@@ -18,7 +18,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
  */
-class AstExtractorTest extends TestCase
+class ClassMethodToCallbackExtractorTest extends TestCase
 {
     /**
      * @dataProvider extractSimpleMethodProvider
@@ -30,7 +30,7 @@ class AstExtractorTest extends TestCase
 
         $this->assertEquals(<<<PHP
 (function (mixed \$object) : mixed {
-    if (\$object instanceof Foo) {
+    if (\$object instanceof \AutoMapper\Tests\Extractor\Fixtures\Foo) {
         \$object->bar = 'Hello World!';
     }
     return \$object;
@@ -53,7 +53,7 @@ PHP, $generatedCode = (new Standard())->prettyPrint([$extractedMethod]));
 
         $this->assertEquals(<<<PHP
 (function (mixed \$object, string \$someString) : mixed {
-    if (\$object instanceof Foo) {
+    if (\$object instanceof \AutoMapper\Tests\Extractor\Fixtures\Foo) {
         \$object->bar = 'Hello World!';
         \$object->baz = \$someString;
     }
@@ -98,7 +98,7 @@ PHP, (new Standard())->prettyPrint([$extractedMethod]));
     private function assertGeneratedCodeIsRunnable(string $generatedCode, string $varName): void
     {
         $codeToEval = <<<PHP
-if(!class_exists(Foo::class))
+if(!class_exists(\AutoMapper\Tests\Extractor\Fixtures\Foo::class))
 {
     class Foo
     {
@@ -107,7 +107,7 @@ if(!class_exists(Foo::class))
     }
 }
 
-\${$varName} = new Foo();
+\${$varName} = new \AutoMapper\Tests\Extractor\Fixtures\Foo();
 \${$varName}->bar = 'Hello';
 
 {$generatedCode}
