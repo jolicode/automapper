@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#10](https://github.com/jolicode/automapper/pull/10) Introduce custom transformers
 - [GH#26](https://github.com/jolicode/automapper/pull/26) Fix mappings involving DateTimeInterface type
 
+### Fixed
+- [GH#33](https://github.com/jolicode/automapper/pull/33) Allow usage of imported class names in custom transformers
+
 ### Changed
 - [GH#27](https://github.com/jolicode/automapper/pull/27) Use PhpStanExtractor instead of PhpDocExtractor
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Fixtures\Transformer\CustomTransformer;
 
+use AutoMapper\Tests\Fixtures\Address;
 use AutoMapper\Tests\Fixtures\AddressDTO;
 use AutoMapper\Transformer\CustomTransformer\CustomModelTransformerInterface;
 use Symfony\Component\PropertyInfo\Type;
@@ -22,7 +23,7 @@ final readonly class SourceTargetCustomModelTransformer implements CustomModelTr
     {
         $source->city = "{$source->city} from custom model transformer";
 
-        return \AutoMapper\Tests\Fixtures\Address::fromDTO($source);
+        return Address::fromDTO($source);
     }
 
     /**
@@ -45,7 +46,7 @@ final readonly class SourceTargetCustomModelTransformer implements CustomModelTr
     private function targetIsAddress(array $targetTypes): bool
     {
         foreach ($targetTypes as $targetType) {
-            if ($targetType->getClassName() === \AutoMapper\Tests\Fixtures\Address::class) {
+            if ($targetType->getClassName() === Address::class) {
                 return true;
             }
         }
