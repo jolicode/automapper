@@ -8,6 +8,7 @@ use AutoMapper\Extractor\MappingExtractorInterface;
 use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Extractor\ReadAccessor;
 use AutoMapper\Transformer\CallbackTransformer;
+use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformerInterface;
 use AutoMapper\Transformer\DependentTransformerInterface;
 
 /**
@@ -202,9 +203,13 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
 
     /**
      * Set a callable to use when mapping a specific property.
+     *
+     * @deprecated Use CustomPropertyTransformerInterface instead
      */
     public function forMember(string $property, callable $callback): void
     {
+        trigger_deprecation('jolicode\automapper', '8.2.0', 'Method "%s()" is deprecated. Implement interface "%s" instead.', __METHOD__, CustomPropertyTransformerInterface::class);
+
         $this->customMapping[$property] = $callback;
     }
 

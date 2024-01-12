@@ -19,6 +19,7 @@
         "php": "^8.2",
         "doctrine/inflector": "^1.4 || ^2.0",
         "nikic/php-parser": "^4.0",
+        "symfony/deprecation-contracts": "^2.2|^3.0",
         "symfony/property-info": "^5.4 || ^6.0 || ^7.0",
         "symfony/serializer": "^5.4 || ^6.0 || ^7.0"
     },
