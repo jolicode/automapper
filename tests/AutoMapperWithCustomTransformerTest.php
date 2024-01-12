@@ -105,6 +105,8 @@ class AutoMapperWithCustomTransformerTest extends AutoMapperBaseTest
 
     public function testTransformCustomPropertyInConstructor(): void
     {
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'TransformCustomPropertyInConstructor_');
+
         $this->autoMapper->bindCustomTransformer(new UserConstructorPropertyTransformer());
 
         $mappedUser = $this->autoMapper->map(self::createUserDTO(), UserConstructorDTO::class);

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper\Extractor;
 
+use AutoMapper\CustomTransformer\CustomTransformerInterface;
 use AutoMapper\MapperGeneratorMetadataInterface;
-use AutoMapper\Transformer\CustomTransformer\CustomTransformerInterface;
 use AutoMapper\Transformer\TransformerInterface;
 
 /**

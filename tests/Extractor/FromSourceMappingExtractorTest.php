@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Extractor;
 
+use AutoMapper\CustomTransformer\CustomTransformersRegistry;
 use AutoMapper\Exception\InvalidMappingException;
 use AutoMapper\Extractor\FromSourceMappingExtractor;
 use AutoMapper\Extractor\PropertyMapping;
@@ -13,7 +14,6 @@ use AutoMapper\Tests\Fixtures;
 use AutoMapper\Transformer\ArrayTransformerFactory;
 use AutoMapper\Transformer\BuiltinTransformerFactory;
 use AutoMapper\Transformer\ChainTransformerFactory;
-use AutoMapper\Transformer\CustomTransformer\CustomTransformersRegistry;
 use AutoMapper\Transformer\DateTimeTransformerFactory;
 use AutoMapper\Transformer\MultipleTransformerFactory;
 use AutoMapper\Transformer\NullableTransformerFactory;

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper;
 
+use AutoMapper\CustomTransformer\CustomTransformerInterface;
+use AutoMapper\CustomTransformer\CustomTransformersRegistry;
 use AutoMapper\Exception\NoMappingFoundException;
 use AutoMapper\Extractor\ClassMethodToCallbackExtractor;
 use AutoMapper\Extractor\CustomTransformerExtractor;
@@ -18,8 +20,6 @@ use AutoMapper\Loader\EvalLoader;
 use AutoMapper\Transformer\ArrayTransformerFactory;
 use AutoMapper\Transformer\BuiltinTransformerFactory;
 use AutoMapper\Transformer\ChainTransformerFactory;
-use AutoMapper\Transformer\CustomTransformer\CustomTransformerInterface;
-use AutoMapper\Transformer\CustomTransformer\CustomTransformersRegistry;
 use AutoMapper\Transformer\DateTimeTransformerFactory;
 use AutoMapper\Transformer\EnumTransformerFactory;
 use AutoMapper\Transformer\MultipleTransformerFactory;

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper\Extractor;
 
-use AutoMapper\Transformer\CustomTransformer\CustomModelTransformerInterface;
-use AutoMapper\Transformer\CustomTransformer\CustomTransformerInterface;
+use AutoMapper\CustomTransformer\CustomModelTransformerInterface;
+use AutoMapper\CustomTransformer\CustomTransformerInterface;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 

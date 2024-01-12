@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Fixtures\Transformer\CustomTransformer;
 
+use AutoMapper\CustomTransformer\CustomPropertyTransformerInterface;
+use AutoMapper\CustomTransformer\PrioritizedCustomTransformerInterface;
 use AutoMapper\Tests\Fixtures\UserDTO;
-use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformerInterface;
-use AutoMapper\Transformer\CustomTransformer\PrioritizedCustomTransformerInterface;
 
 final readonly class PrioritizedFromSourceCustomPriorityTransformer implements CustomPropertyTransformerInterface, PrioritizedCustomTransformerInterface
 {

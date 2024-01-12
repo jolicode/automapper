@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AutoMapper\Transformer\CustomTransformer;
+namespace AutoMapper\CustomTransformer;
 
 /**
  * @experimental

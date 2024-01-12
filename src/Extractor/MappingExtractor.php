@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Extractor;
 
-use AutoMapper\Transformer\CustomTransformer\CustomTransformersRegistry;
+use AutoMapper\CustomTransformer\CustomTransformersRegistry;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyReadInfo;

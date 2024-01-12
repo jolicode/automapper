@@ -84,7 +84,7 @@ The mapping process could be extended in multiple ways.
 
 #### Map manually a single property
 
-You can override the mapping of a single property by leveraging `AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformerInterface`.
+You can override the mapping of a single property by leveraging `AutoMapper\CustomTransformer\CustomPropertyTransformerInterface`.
 It can be useful if you need to map several properties from the source to a unique property in the target. 
 
 ```php
@@ -107,7 +107,7 @@ class BirthDateUserTransformer implements CustomPropertyTransformerInterface
 
 #### Map manually a whole object
 
-In order to customize the mapping of a whole object, you can leverage `AutoMapper\Transformer\CustomTransformer\CustomModelTransformerInterface`.
+In order to customize the mapping of a whole object, you can leverage `AutoMapper\CustomTransformer\CustomModelTransformerInterface`.
 You have then full control over the transformation between two types:
 
 ```php

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper;
 
-use AutoMapper\Transformer\CustomTransformer\CustomTransformerInterface;
+use AutoMapper\CustomTransformer\CustomTransformerInterface;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 
 /**

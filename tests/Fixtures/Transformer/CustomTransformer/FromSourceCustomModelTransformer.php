@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Fixtures\Transformer\CustomTransformer;
 
+use AutoMapper\CustomTransformer\CustomModelTransformerInterface;
 use AutoMapper\Tests\Fixtures\AddressDTO;
-use AutoMapper\Transformer\CustomTransformer\CustomModelTransformerInterface;
 use Symfony\Component\PropertyInfo\Type;
 
 final readonly class FromSourceCustomModelTransformer implements CustomModelTransformerInterface

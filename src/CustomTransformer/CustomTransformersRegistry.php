@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AutoMapper\Transformer\CustomTransformer;
+namespace AutoMapper\CustomTransformer;
 
 use AutoMapper\MapperMetadataInterface;
 use Symfony\Component\PropertyInfo\Type;
@@ -22,6 +22,7 @@ final class CustomTransformersRegistry
     {
         if (!\in_array($customTransformer, $this->customTransformers, true)) {
             $this->customTransformers[] = $customTransformer;
+            $this->prioritizedCustomTransformers = null; // reset priority computation
         }
     }
 

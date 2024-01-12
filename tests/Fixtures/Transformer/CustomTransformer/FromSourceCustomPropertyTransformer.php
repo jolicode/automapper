@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Fixtures\Transformer\CustomTransformer;
 
+use AutoMapper\CustomTransformer\CustomPropertyTransformerInterface;
 use AutoMapper\Tests\Fixtures\UserDTO;
-use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformerInterface;
 
 final readonly class FromSourceCustomPropertyTransformer implements CustomPropertyTransformerInterface
 {

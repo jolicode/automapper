@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace AutoMapper;
 
+use AutoMapper\CustomTransformer\CustomPropertyTransformerInterface;
 use AutoMapper\Extractor\MappingExtractorInterface;
 use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Extractor\ReadAccessor;
 use AutoMapper\Generator\VariableRegistry;
 use AutoMapper\Transformer\CallbackTransformer;
-use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformerInterface;
 use AutoMapper\Transformer\DependentTransformerInterface;
 use AutoMapper\Transformer\MapperDependency;
 
@@ -64,11 +64,7 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
 
     public function getPropertiesMapping(): array
     {
-        if (null === $this->propertiesMapping) {
-            $this->buildPropertyMapping();
-        }
-
-        return $this->propertiesMapping;
+        return $this->propertiesMapping ??= $this->buildPropertyMapping();
     }
 
     public function getPropertyMapping(string $property): ?PropertyMapping
@@ -237,16 +233,19 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
         $this->attributeChecking = $attributeChecking;
     }
 
-    private function buildPropertyMapping(): void
+    /**
+     * @return array<string, PropertyMapping>
+     */
+    private function buildPropertyMapping(): array
     {
-        $this->propertiesMapping = [];
+        $propertiesMapping = [];
 
         foreach ($this->mappingExtractor->getPropertiesMapping($this) as $propertyMapping) {
-            $this->propertiesMapping[$propertyMapping->property] = $propertyMapping;
+            $propertiesMapping[$propertyMapping->property] = $propertyMapping;
         }
 
         foreach ($this->customMapping as $property => $callback) {
-            $this->propertiesMapping[$property] = new PropertyMapping(
+            $propertiesMapping[$property] = new PropertyMapping(
                 $this,
                 new ReadAccessor(ReadAccessor::TYPE_SOURCE, $property),
                 $this->mappingExtractor->getWriteMutator($this->source, $this->target, $property),
@@ -257,6 +256,8 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
                 isPublic: true,
             );
         }
+
+        return $propertiesMapping;
     }
 
     private function checkCircularMapperConfiguration(MapperGeneratorMetadataInterface $configuration, &$checked): bool
