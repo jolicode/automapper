@@ -16,7 +16,9 @@ use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\PrioritizedFromSourc
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\SourceTargetCustomModelTransformer;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\SourceTargetCustomPropertyTransformer;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\SourceTargetMultiFieldsCustomPropertyTransformer;
+use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\UserConstructorPropertyTransformer;
 use AutoMapper\Tests\Fixtures\User;
+use AutoMapper\Tests\Fixtures\UserConstructorDTO;
 use AutoMapper\Tests\Fixtures\UserDTO;
 
 class AutoMapperWithCustomTransformerTest extends AutoMapperBaseTest
@@ -99,6 +101,15 @@ class AutoMapperWithCustomTransformerTest extends AutoMapperBaseTest
     {
         yield 'class name' => [User::class];
         yield 'object' => [self::createUser()];
+    }
+
+    public function testTransformCustomPropertyInConstructor(): void
+    {
+        $this->autoMapper->bindCustomTransformer(new UserConstructorPropertyTransformer());
+
+        $mappedUser = $this->autoMapper->map(self::createUserDTO(), UserConstructorDTO::class);
+
+        self::assertSame('custom name DTO', $mappedUser->getName());
     }
 
     public function testFromSourceToTargetMultipleFieldsTransformation(): void
