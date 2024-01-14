@@ -7,10 +7,10 @@ namespace AutoMapper\Tests;
 use AutoMapper\AutoMapper;
 use AutoMapper\Extractor\ClassMethodToCallbackExtractor;
 use AutoMapper\Extractor\CustomTransformerExtractor;
-use AutoMapper\Generator\Generator;
+use AutoMapper\Generator\MapperGenerator;
+use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
 use AutoMapper\Loader\ClassLoaderInterface;
 use AutoMapper\Loader\FileLoader;
-use PhpParser\ParserFactory;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
@@ -37,10 +37,9 @@ abstract class AutoMapperBaseTest extends TestCase
         $fs->remove(__DIR__ . '/cache/');
         $classMetadataFactory = new ClassMetadataFactory(new AttributeLoader());
 
-        $this->loader = new FileLoader(new Generator(
+        $this->loader = new FileLoader(new MapperGenerator(
             new CustomTransformerExtractor(new ClassMethodToCallbackExtractor()),
-            (new ParserFactory())->create(ParserFactory::PREFER_PHP7),
-            new ClassDiscriminatorFromClassMetadata($classMetadataFactory),
+            new ClassDiscriminatorResolver(new ClassDiscriminatorFromClassMetadata($classMetadataFactory)),
             $allowReadOnlyTargetToPopulate
         ), __DIR__ . '/cache');
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper;
 
 use AutoMapper\Extractor\PropertyMapping;
+use AutoMapper\Transformer\MapperDependency;
 
 /**
  * Stores metadata needed for mapping data.
@@ -24,9 +25,21 @@ interface MapperMetadataInterface
     public function getTarget(): string;
 
     /**
+     * Returns true if target is an object.
+     */
+    public function targetIsAUserDefinedClass(): bool;
+
+    /**
      * Check if the target is a read-only class.
      */
     public function isTargetReadOnlyClass(): bool;
+
+    /**
+     * Get a set of all dependencies, deduplicated.
+     *
+     * @return list<MapperDependency>
+     */
+    public function getAllDependencies(): array;
 
     /**
      * Get properties to map between source and target.
@@ -36,7 +49,7 @@ interface MapperMetadataInterface
     public function getPropertiesMapping(): array;
 
     /**
-     * Get property to map by name, or null if not mapped.
+     * Get propertyMapping by property name, or null if not mapped.
      */
     public function getPropertyMapping(string $property): ?PropertyMapping;
 

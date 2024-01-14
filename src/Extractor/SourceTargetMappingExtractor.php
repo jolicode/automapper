@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Extractor;
 
+use AutoMapper\MapperGeneratorMetadataInterface;
 use AutoMapper\MapperMetadataInterface;
 use Symfony\Component\PropertyInfo\PropertyReadInfo;
 
@@ -11,10 +12,12 @@ use Symfony\Component\PropertyInfo\PropertyReadInfo;
  * Extracts mapping between two objects, only gives properties that have the same name.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 class SourceTargetMappingExtractor extends MappingExtractor
 {
-    public function getPropertiesMapping(MapperMetadataInterface $mapperMetadata): array
+    public function getPropertiesMapping(MapperGeneratorMetadataInterface $mapperMetadata): array
     {
         $sourceProperties = $this->propertyInfoExtractor->getProperties($mapperMetadata->getSource());
         $targetProperties = $this->propertyInfoExtractor->getProperties($mapperMetadata->getTarget());
@@ -61,7 +64,7 @@ class SourceTargetMappingExtractor extends MappingExtractor
         return $mapping;
     }
 
-    private function toPropertyMapping(MapperMetadataInterface $mapperMetadata, string $property, bool $onlyCustomTransformer = false): PropertyMapping|null
+    private function toPropertyMapping(MapperGeneratorMetadataInterface $mapperMetadata, string $property, bool $onlyCustomTransformer = false): PropertyMapping|null
     {
         $targetMutatorConstruct = $this->getWriteMutator($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property, [
             'enable_constructor_extraction' => true,
@@ -85,6 +88,7 @@ class SourceTargetMappingExtractor extends MappingExtractor
         }
 
         return new PropertyMapping(
+            $mapperMetadata,
             readAccessor: $this->getReadAccessor($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property),
             writeMutator: $this->getWriteMutator($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property, [
                 'enable_constructor_extraction' => false,

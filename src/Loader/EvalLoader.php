@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Loader;
 
-use AutoMapper\Generator\Generator;
+use AutoMapper\Generator\MapperGenerator;
 use AutoMapper\MapperGeneratorMetadataInterface;
 use PhpParser\PrettyPrinter\Standard;
 use PhpParser\PrettyPrinterAbstract;
@@ -19,7 +19,7 @@ final readonly class EvalLoader implements ClassLoaderInterface
     private PrettyPrinterAbstract $printer;
 
     public function __construct(
-        private Generator $generator,
+        private MapperGenerator $generator,
     ) {
         $this->printer = new Standard();
     }

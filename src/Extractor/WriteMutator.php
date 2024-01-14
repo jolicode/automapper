@@ -16,6 +16,8 @@ use PhpParser\Node\Stmt;
  * Writes mutator tell how to write to a property.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 final class WriteMutator
 {

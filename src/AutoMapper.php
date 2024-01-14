@@ -11,7 +11,8 @@ use AutoMapper\Extractor\FromSourceMappingExtractor;
 use AutoMapper\Extractor\FromTargetMappingExtractor;
 use AutoMapper\Extractor\MapToContextPropertyInfoExtractorDecorator;
 use AutoMapper\Extractor\SourceTargetMappingExtractor;
-use AutoMapper\Generator\Generator;
+use AutoMapper\Generator\MapperGenerator;
+use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
 use AutoMapper\Loader\ClassLoaderInterface;
 use AutoMapper\Loader\EvalLoader;
 use AutoMapper\Transformer\ArrayTransformerFactory;
@@ -28,7 +29,6 @@ use AutoMapper\Transformer\SymfonyUidTransformerFactory;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use AutoMapper\Transformer\UniqueTypeTransformerFactory;
 use Doctrine\Common\Annotations\AnnotationReader;
-use PhpParser\ParserFactory;
 use Symfony\Component\PropertyInfo\Extractor\PhpStanExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
@@ -178,13 +178,11 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
 
         if (null === $loader) {
             $loader = new EvalLoader(
-                new Generator(
+                new MapperGenerator(
                     new CustomTransformerExtractor(new ClassMethodToCallbackExtractor()),
-                    (new ParserFactory())->create(ParserFactory::PREFER_PHP7),
-                    new ClassDiscriminatorFromClassMetadata($classMetadataFactory),
+                    new ClassDiscriminatorResolver(new ClassDiscriminatorFromClassMetadata($classMetadataFactory)),
                     $allowReadOnlyTargetToPopulate
-                )
-            );
+                ));
         }
 
         $flags = ReflectionExtractor::ALLOW_PUBLIC | ReflectionExtractor::ALLOW_PROTECTED | ReflectionExtractor::ALLOW_PRIVATE;

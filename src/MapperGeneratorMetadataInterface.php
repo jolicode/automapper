@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper;
 
+use AutoMapper\Generator\VariableRegistry;
+
 /**
  * Stores metadata needed when generating a mapper.
  *
@@ -59,4 +61,15 @@ interface MapperGeneratorMetadataInterface extends MapperMetadataInterface
      * Whether we should map private properties and methods.
      */
     public function shouldMapPrivateProperties(): bool;
+
+    public function getCachedTargetReflectionClass(): \ReflectionClass|null; // @phpstan-ignore-line
+
+    /**
+     * Fields to set in the constructor: this allows transforming them before the constructor is called.
+     *
+     * @return list<string>
+     */
+    public function getPropertiesInConstructor(): array;
+
+    public function getVariableRegistry(): VariableRegistry;
 }
