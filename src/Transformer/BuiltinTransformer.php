@@ -7,7 +7,9 @@ namespace AutoMapper\Transformer;
 use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Generator\UniqueVariableScope;
 use PhpParser\Node\Arg;
+use PhpParser\Node\ArrayItem as NewArrayItem;
 use PhpParser\Node\Expr;
+use PhpParser\Node\Expr\ArrayItem as OldArrayItem;
 use PhpParser\Node\Expr\Cast;
 use PhpParser\Node\Name;
 use Symfony\Component\PropertyInfo\Type;
@@ -104,7 +106,14 @@ final readonly class BuiltinTransformer implements TransformerInterface
 
     private function toArray(Expr $input): Expr
     {
-        return new Expr\Array_([new Expr\ArrayItem($input)]);
+        // compatibility with old versions of nikic/php-parser
+        if (class_exists(NewArrayItem::class)) {
+            $arrayItemClass = NewArrayItem::class;
+        } else {
+            $arrayItemClass = OldArrayItem::class;
+        }
+
+        return new Expr\Array_([new $arrayItemClass($input)]);
     }
 
     private function fromIteratorToArray(Expr $input): Expr

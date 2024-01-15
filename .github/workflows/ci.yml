@@ -7,7 +7,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@master
       - name: setup
-        uses: shivammathur/setup-php@2.9.0
+        uses: shivammathur/setup-php@2.29.0
         with:
           php-version: 8.2
           coverage: none
@@ -28,7 +28,7 @@ jobs:
           path: ~/.composer/cache/
           key: composer-${{ github.sha }}
       - name: setup
-        uses: shivammathur/setup-php@2.9.0
+        uses: shivammathur/setup-php@2.29.0
         with:
           php-version: 8.3
           coverage: none
@@ -58,13 +58,34 @@ jobs:
           path: ~/.composer/cache/
           key: composer-${{ github.sha }}
       - name: setup
-        uses: shivammathur/setup-php@2.9.0
+        uses: shivammathur/setup-php@2.29.0
         with:
           php-version: '${{ matrix.php-versions }}'
           coverage: none
           extensions: mbstring, fileinfo, json, intl, dom
       - name: composer install
         run: composer update --prefer-stable
+      - name: tests
+        run: vendor/bin/phpunit
+  tests-lowest:
+    runs-on: ubuntu-latest
+    name: tests-lowest
+    steps:
+      - name: checkout
+        uses: actions/checkout@master
+      - name: cache-composer
+        uses: actions/cache@v2
+        with:
+          path: ~/.composer/cache/
+          key: composer-${{ github.sha }}
+      - name: setup
+        uses: shivammathur/setup-php@2.29.0
+        with:
+          php-version: 8.2
+          coverage: none
+          extensions: mbstring, fileinfo, json, intl, dom
+      - name: composer install
+        run: composer update --prefer-stable --prefer-lowest
       - name: tests
         run: vendor/bin/phpunit
   check-version:
@@ -78,7 +99,7 @@ jobs:
           path: ~/.composer/cache/
           key: composer-${{ github.sha }}
       - name: setup
-        uses: shivammathur/setup-php@2.9.0
+        uses: shivammathur/setup-php@2.29.0
         with:
           php-version: 8.3
           coverage: none

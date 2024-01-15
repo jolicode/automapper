@@ -7,7 +7,9 @@ namespace AutoMapper\Generator;
 use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\MapperContext;
 use PhpParser\Node\Arg;
+use PhpParser\Node\ArrayItem as NewArrayItem;
 use PhpParser\Node\Expr;
+use PhpParser\Node\Expr\ArrayItem as OldArrayItem;
 use PhpParser\Node\Name;
 use PhpParser\Node\Scalar;
 
@@ -134,6 +136,13 @@ final readonly class PropertyConditionsGenerator
 
         $variableRegistry = $propertyMapping->mapperMetadata->getVariableRegistry();
 
+        // compatibility with old versions of nikic/php-parser
+        if (class_exists(NewArrayItem::class)) {
+            $arrayItemClass = NewArrayItem::class;
+        } else {
+            $arrayItemClass = OldArrayItem::class;
+        }
+
         return new Expr\BinaryOp\BooleanAnd(
             new Expr\BinaryOp\NotIdentical(
                 new Expr\ConstFetch(new Name('null')),
@@ -149,8 +158,8 @@ final readonly class PropertyConditionsGenerator
                         new Expr\Array_()
                     )
                 ),
-                new Arg(new Expr\Array_(array_map(function (string $group) {
-                    return new Expr\ArrayItem(new Scalar\String_($group));
+                new Arg(new Expr\Array_(array_map(function (string $group) use ($arrayItemClass) {
+                    return new $arrayItemClass(new Scalar\String_($group));
                 }, $propertyMapping->sourceGroups))),
             ])
         );
@@ -171,6 +180,13 @@ final readonly class PropertyConditionsGenerator
 
         $variableRegistry = $propertyMapping->mapperMetadata->getVariableRegistry();
 
+        // compatibility with old versions of nikic/php-parser
+        if (class_exists(NewArrayItem::class)) {
+            $arrayItemClass = NewArrayItem::class;
+        } else {
+            $arrayItemClass = OldArrayItem::class;
+        }
+
         return new Expr\BinaryOp\BooleanAnd(
             new Expr\BinaryOp\NotIdentical(
                 new Expr\ConstFetch(new Name('null')),
@@ -186,8 +202,8 @@ final readonly class PropertyConditionsGenerator
                         new Expr\Array_()
                     )
                 ),
-                new Arg(new Expr\Array_(array_map(function (string $group) {
-                    return new Expr\ArrayItem(new Scalar\String_($group));
+                new Arg(new Expr\Array_(array_map(function (string $group) use ($arrayItemClass) {
+                    return new $arrayItemClass(new Scalar\String_($group));
                 }, $propertyMapping->targetGroups))),
             ])
         );

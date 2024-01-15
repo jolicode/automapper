@@ -9,10 +9,12 @@ use AutoMapper\Generator\MapperGenerator;
 use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
 use AutoMapper\Loader\ClassLoaderInterface;
 use AutoMapper\Loader\FileLoader;
+use Doctrine\Common\Annotations\AnnotationReader;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
+use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 
 /**
@@ -33,7 +35,13 @@ abstract class AutoMapperBaseTest extends TestCase
     {
         $fs = new Filesystem();
         $fs->remove(__DIR__ . '/cache/');
-        $classMetadataFactory = new ClassMetadataFactory(new AttributeLoader());
+
+        if (class_exists(AttributeLoader::class)) {
+            $loaderClass = new AttributeLoader();
+        } else {
+            $loaderClass = new AnnotationLoader(new AnnotationReader());
+        }
+        $classMetadataFactory = new ClassMetadataFactory($loaderClass);
 
         $this->loader = new FileLoader(new MapperGenerator(
             new ClassDiscriminatorResolver(new ClassDiscriminatorFromClassMetadata($classMetadataFactory)),

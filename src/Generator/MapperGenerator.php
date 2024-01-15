@@ -13,6 +13,7 @@ use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
 use AutoMapper\MapperGeneratorMetadataInterface;
 use PhpParser\Builder;
 use PhpParser\Node\Expr;
+use PhpParser\Node\Name;
 use PhpParser\Node\Param;
 use PhpParser\Node\Stmt;
 
@@ -103,7 +104,7 @@ final readonly class MapperGenerator
             ->setReturnType('mixed')
             ->makeReturnByRef()
             ->addParam(new Param($variableRegistry->getSourceInput()))
-            ->addParam(new Param($variableRegistry->getContext(), default: new Expr\Array_(), type: 'array'))
+            ->addParam(new Param($variableRegistry->getContext(), default: new Expr\Array_(), type: new Name('array')))
             ->addStmts($this->mapMethodStatementsGenerator->getStatements($mapperMetadata))
             ->setDocComment(
                 sprintf(
@@ -133,11 +134,9 @@ final readonly class MapperGenerator
         return (new Builder\Method('injectMappers'))
             ->makePublic()
             ->setReturnType('void')
-            ->addParam(
-                new Param(
-                    var: $param = new Expr\Variable('autoMapperRegistry'),
-                    type: AutoMapperRegistryInterface::class
-                )
+            ->addParam(new Param(
+                var: $param = new Expr\Variable('autoMapperRegistry'),
+                type: new Name(AutoMapperRegistryInterface::class))
             )
             ->addStmts($this->injectMapperMethodStatementsGenerator->getStatements($param, $mapperMetadata))
             ->getNode();
