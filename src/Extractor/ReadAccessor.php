@@ -18,6 +18,8 @@ use PhpParser\Node\Stmt;
  * Read accessor tell how to read from a property.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 final class ReadAccessor
 {

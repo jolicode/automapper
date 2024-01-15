@@ -7,9 +7,11 @@ namespace AutoMapper;
 use AutoMapper\Extractor\MappingExtractorInterface;
 use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Extractor\ReadAccessor;
+use AutoMapper\Generator\VariableRegistry;
 use AutoMapper\Transformer\CallbackTransformer;
 use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformerInterface;
 use AutoMapper\Transformer\DependentTransformerInterface;
+use AutoMapper\Transformer\MapperDependency;
 
 /**
  * Mapper metadata.
@@ -30,6 +32,11 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
     /** @var array<string, callable> */
     private array $customMapping = [];
 
+    /** @var list<string>|null */
+    private array|null $propertiesInConstructor = null;
+
+    private VariableRegistry $variableRegistry;
+
     public function __construct(
         private readonly MapperGeneratorMetadataRegistryInterface $metadataRegistry,
         private readonly MappingExtractorInterface $mappingExtractor,
@@ -42,14 +49,16 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
         $this->isConstructorAllowed = true;
         $this->dateTimeFormat = \DateTime::RFC3339;
         $this->attributeChecking = true;
-    }
 
-    private function getCachedTargetReflectionClass(): \ReflectionClass
-    {
-        if (null === $this->targetReflectionClass) {
+        if (class_exists($this->getTarget()) && $this->getTarget() !== \stdClass::class) {
             $this->targetReflectionClass = new \ReflectionClass($this->getTarget());
         }
 
+        $this->variableRegistry = new VariableRegistry();
+    }
+
+    public function getCachedTargetReflectionClass(): \ReflectionClass|null
+    {
         return $this->targetReflectionClass;
     }
 
@@ -77,8 +86,7 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
             return false;
         }
 
-        $reflection = $this->getCachedTargetReflectionClass();
-        $constructor = $reflection->getConstructor();
+        $constructor = $this->getCachedTargetReflectionClass()?->getConstructor();
 
         if (null === $constructor) {
             return false;
@@ -113,6 +121,10 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
         try {
             $reflection = $this->getCachedTargetReflectionClass();
 
+            if (!$reflection) {
+                return false;
+            }
+
             return $reflection->isCloneable() && !$reflection->hasMethod('__clone');
         } catch (\ReflectionException $e) {
             // if we have a \ReflectionException, then we can't clone target
@@ -124,7 +136,7 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
     {
         $checked = [];
 
-        return $this->checkCircularMapperConfiguration($this, $checked);
+        return 'array' !== $this->getSource() && $this->checkCircularMapperConfiguration($this, $checked);
     }
 
     public function getMapperClassName(): string
@@ -145,8 +157,7 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
             $hash .= filemtime($reflection->getFileName());
         }
 
-        if (!\in_array($this->target, ['array', \stdClass::class], true)) {
-            $reflection = $this->getCachedTargetReflectionClass();
+        if ($reflection = $this->getCachedTargetReflectionClass()) {
             $hash .= filemtime($reflection->getFileName());
         }
 
@@ -168,6 +179,11 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
     public function getTarget(): string
     {
         return $this->target;
+    }
+
+    public function targetIsAUserDefinedClass(): bool
+    {
+        return !\in_array($this->target, ['array', \stdClass::class], true);
     }
 
     public function getDateTimeFormat(): string
@@ -231,6 +247,7 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
 
         foreach ($this->customMapping as $property => $callback) {
             $this->propertiesMapping[$property] = new PropertyMapping(
+                $this,
                 new ReadAccessor(ReadAccessor::TYPE_SOURCE, $property),
                 $this->mappingExtractor->getWriteMutator($this->source, $this->target, $property),
                 null,
@@ -271,6 +288,24 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
         return false;
     }
 
+    public function getAllDependencies(): array
+    {
+        /** @var list<MapperDependency> $dependencies */
+        $dependencies = array_merge(
+            ...array_values(
+                array_map(
+                    static fn (PropertyMapping $pm) => $pm->transformer instanceof DependentTransformerInterface
+                        ? $pm->transformer->getDependencies()
+                        : [],
+                    $this->getPropertiesMapping()
+                )
+            )
+        );
+
+        // remove duplicates
+        return array_values(array_combine(array_column($dependencies, 'name'), $dependencies));
+    }
+
     public function isTargetReadOnlyClass(): bool
     {
         return $this->isTargetReadOnlyClass;
@@ -279,5 +314,37 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
     public function shouldMapPrivateProperties(): bool
     {
         return $this->mapPrivateProperties;
+    }
+
+    public function getPropertiesInConstructor(): array
+    {
+        return $this->propertiesInConstructor ??= (function () {
+            if (\in_array($this->target, ['array', \stdClass::class])) {
+                return [];
+            }
+
+            $targetConstructor = $this->getCachedTargetReflectionClass()?->getConstructor();
+
+            if (null === $targetConstructor || !$this->hasConstructor()) {
+                return [];
+            }
+
+            $inConstructor = [];
+
+            foreach ($this->getPropertiesMapping() as $propertyMapping) {
+                if (null === $propertyMapping->writeMutatorConstructor || null === $propertyMapping->writeMutatorConstructor->parameter) {
+                    continue;
+                }
+
+                $inConstructor[] = $propertyMapping->property;
+            }
+
+            return $inConstructor;
+        })();
+    }
+
+    public function getVariableRegistry(): VariableRegistry
+    {
+        return $this->variableRegistry;
     }
 }

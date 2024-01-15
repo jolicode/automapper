@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Extractor;
 
 use AutoMapper\Exception\InvalidMappingException;
-use AutoMapper\MapperMetadataInterface;
+use AutoMapper\MapperGeneratorMetadataInterface;
 use AutoMapper\Transformer\CustomTransformer\CustomTransformersRegistry;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
@@ -23,6 +23,8 @@ use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
  * Can use a NameConverter to use specific properties name in the source
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 final class FromTargetMappingExtractor extends MappingExtractor
 {
@@ -40,7 +42,7 @@ final class FromTargetMappingExtractor extends MappingExtractor
         parent::__construct($propertyInfoExtractor, $readInfoExtractor, $writeInfoExtractor, $transformerFactory, $customTransformerRegistry, $classMetadataFactory);
     }
 
-    public function getPropertiesMapping(MapperMetadataInterface $mapperMetadata): array
+    public function getPropertiesMapping(MapperGeneratorMetadataInterface $mapperMetadata): array
     {
         $targetProperties = array_unique($this->propertyInfoExtractor->getProperties($mapperMetadata->getTarget()) ?? []);
 
@@ -78,6 +80,7 @@ final class FromTargetMappingExtractor extends MappingExtractor
             }
 
             $mapping[] = new PropertyMapping(
+                $mapperMetadata,
                 $this->getReadAccessor($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property),
                 $this->getWriteMutator($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property, [
                     'enable_constructor_extraction' => false,

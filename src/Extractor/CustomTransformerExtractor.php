@@ -9,6 +9,9 @@ use AutoMapper\Transformer\CustomTransformer\CustomTransformerInterface;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 
+/**
+ * @internal
+ */
 final readonly class CustomTransformerExtractor
 {
     public function __construct(
