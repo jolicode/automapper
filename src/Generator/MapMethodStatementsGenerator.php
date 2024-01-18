@@ -10,6 +10,7 @@ use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
 use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
 use AutoMapper\MapperContext;
 use AutoMapper\MapperGeneratorMetadataInterface;
+use PhpParser\Comment;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
@@ -219,7 +220,8 @@ final readonly class MapMethodStatementsGenerator
             new Expr\Assign(
                 $variableRegistry->getResult(),
                 new Expr\BinaryOp\Coalesce($targetToPopulate, new Expr\ConstFetch(new Name('null')))
-            )
+            ),
+            ['comments' => [new Comment(sprintf('/** @var %s $result */', $mapperMetadata->getTarget() === 'array' ? $mapperMetadata->getTarget() : '\\' . $mapperMetadata->getTarget()))]]
         );
 
         if (!$this->allowReadOnlyTargetToPopulate && $mapperMetadata->isTargetReadOnlyClass()) {

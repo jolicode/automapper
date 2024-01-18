@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#25](https://github.com/jolicode/automapper/pull/25) Pass full input object to property custom transformers
 - [GH#10](https://github.com/jolicode/automapper/pull/10) Introduce custom transformers
 - [GH#26](https://github.com/jolicode/automapper/pull/26) Fix mappings involving DateTimeInterface type
+- [GH#37](https://github.com/jolicode/automapper/pull/37) Adds useful phpDoc annotation in generated mappers
 
 ### Fixed
 - [GH#33](https://github.com/jolicode/automapper/pull/33) Allow usage of imported class names in custom transformers
