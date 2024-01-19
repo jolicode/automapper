@@ -108,6 +108,13 @@ final readonly class MapperGenerator
             ->addParam(new Param($variableRegistry->getSourceInput()))
             ->addParam(new Param($variableRegistry->getContext(), default: new Expr\Array_(), type: 'array'))
             ->addStmts($this->mapMethodStatementsGenerator->getStatements($mapperMetadata))
+            ->setDocComment(
+                sprintf(
+                    '/** @param %s $%s */',
+                    $mapperMetadata->getSource() === 'array' ? $mapperMetadata->getSource() : '\\' . $mapperMetadata->getSource(),
+                    'value'
+                )
+            )
             ->getNode();
     }
 
@@ -129,7 +136,12 @@ final readonly class MapperGenerator
         return (new Builder\Method('injectMappers'))
             ->makePublic()
             ->setReturnType('void')
-            ->addParam(new Param(var: $param = new Expr\Variable('autoMapperRegistry'), type: AutoMapperRegistryInterface::class))
+            ->addParam(
+                new Param(
+                    var: $param = new Expr\Variable('autoMapperRegistry'),
+                    type: AutoMapperRegistryInterface::class
+                )
+            )
             ->addStmts($this->injectMapperMethodStatementsGenerator->getStatements($param, $mapperMetadata))
             ->getNode();
     }

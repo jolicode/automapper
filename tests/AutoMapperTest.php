@@ -50,7 +50,7 @@ class AutoMapperTest extends AutoMapperBaseTest
             return ((int) date('Y')) - ((int) $user->age);
         });
 
-        $address = new Fixtures\Address();
+        $address = new Address();
         $address->setCity('Toulon');
         $user = new Fixtures\User(1, 'yolo', '13');
         $user->address = $address;
@@ -66,8 +66,8 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertSame(13, $userDto->age);
         self::assertSame(((int) date('Y')) - 13, $userDto->yearOfBirth);
         self::assertCount(1, $userDto->addresses);
-        self::assertInstanceOf(Fixtures\AddressDTO::class, $userDto->address);
-        self::assertInstanceOf(Fixtures\AddressDTO::class, $userDto->addresses[0]);
+        self::assertInstanceOf(AddressDTO::class, $userDto->address);
+        self::assertInstanceOf(AddressDTO::class, $userDto->addresses[0]);
         self::assertSame('Toulon', $userDto->address->city);
         self::assertSame('Toulon', $userDto->addresses[0]->city);
         self::assertIsArray($userDto->money);
@@ -92,7 +92,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
         self::assertInstanceOf(Fixtures\UserDTO::class, $userDto);
         self::assertEquals(1, $userDto->id);
-        self::assertInstanceOf(Fixtures\AddressDTO::class, $userDto->address);
+        self::assertInstanceOf(AddressDTO::class, $userDto->address);
         self::assertSame('Toulon', $userDto->address->city);
         self::assertInstanceOf(\DateTimeInterface::class, $userDto->createdAt);
         self::assertEquals(1987, $userDto->createdAt->format('Y'));
@@ -124,7 +124,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testAutoMapperToArray(): void
     {
-        $address = new Fixtures\Address();
+        $address = new Address();
         $address->setCity('Toulon');
         $user = new Fixtures\User(1, 'yolo', '13');
         $user->address = $address;
@@ -182,7 +182,7 @@ class AutoMapperTest extends AutoMapperBaseTest
     {
         $this->buildAutoMapper(classPrefix: 'CustomDateTime_');
 
-        $address = new Fixtures\Address();
+        $address = new Address();
         $address->setCity('test');
 
         $addressArray = $this->autoMapper->map($address, 'array');
@@ -190,9 +190,9 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertIsArray($addressArray);
         self::assertArrayNotHasKey('city', $addressArray);
 
-        $addressMapped = $this->autoMapper->map($address, Fixtures\Address::class);
+        $addressMapped = $this->autoMapper->map($address, Address::class);
 
-        self::assertInstanceOf(Fixtures\Address::class, $addressMapped);
+        self::assertInstanceOf(Address::class, $addressMapped);
 
         $property = (new \ReflectionClass($addressMapped))->getProperty('city');
         $property->setAccessible(true);
@@ -777,9 +777,9 @@ class AutoMapperTest extends AutoMapperBaseTest
                 'currency' => 'EUR',
             ],
         ];
-        $order = $this->autoMapper->map($data, Fixtures\Order::class);
+        $order = $this->autoMapper->map($data, Order::class);
 
-        self::assertInstanceOf(Fixtures\Order::class, $order);
+        self::assertInstanceOf(Order::class, $order);
         self::assertInstanceOf(\Money\Money::class, $order->price);
         self::assertEquals(1000, $order->price->getAmount());
         self::assertEquals('EUR', $order->price->getCurrency()->getCode());
@@ -811,7 +811,7 @@ class AutoMapperTest extends AutoMapperBaseTest
         $newOrder = new Order();
         $newOrder = $this->autoMapper->map($order, $newOrder);
 
-        self::assertInstanceOf(Fixtures\Order::class, $newOrder);
+        self::assertInstanceOf(Order::class, $newOrder);
         self::assertInstanceOf(\Money\Money::class, $newOrder->price);
         self::assertEquals(1000, $newOrder->price->getAmount());
         self::assertEquals('EUR', $newOrder->price->getCurrency()->getCode());
