@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Loader;
 
 use AutoMapper\Generator\MapperGenerator;
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataInterface;
 use PhpParser\PrettyPrinter\Standard;
 use PhpParser\PrettyPrinterAbstract;
 
@@ -13,6 +13,8 @@ use PhpParser\PrettyPrinterAbstract;
  * Use file system to load mapper, and persist them using a registry.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 final class FileLoader implements ClassLoaderInterface
 {
@@ -20,14 +22,13 @@ final class FileLoader implements ClassLoaderInterface
     private ?array $registry = null;
 
     public function __construct(
-        private readonly MapperGenerator $generator,
         private readonly string $directory,
         private readonly bool $hotReload = true,
     ) {
         $this->printer = new Standard();
     }
 
-    public function loadClass(MapperGeneratorMetadataInterface $mapperMetadata): void
+    public function loadClass(MapperGenerator $mapperGenerator, MapperGeneratorMetadataInterface $mapperMetadata): void
     {
         $className = $mapperMetadata->getMapperClassName();
         $classPath = $this->directory . \DIRECTORY_SEPARATOR . $className . '.php';
@@ -46,7 +47,7 @@ final class FileLoader implements ClassLoaderInterface
         }
 
         if ($shouldSaveMapper) {
-            $this->saveMapper($mapperMetadata);
+            $this->saveMapper($mapperGenerator, $mapperMetadata);
         }
 
         require $classPath;
@@ -55,11 +56,11 @@ final class FileLoader implements ClassLoaderInterface
     /**
      * @return string The generated class name
      */
-    public function saveMapper(MapperGeneratorMetadataInterface $mapperGeneratorMetadata): string
+    private function saveMapper(MapperGenerator $generator, MapperGeneratorMetadataInterface $mapperGeneratorMetadata): string
     {
         $className = $mapperGeneratorMetadata->getMapperClassName();
         $classPath = $this->directory . \DIRECTORY_SEPARATOR . $className . '.php';
-        $classCode = $this->printer->prettyPrint([$this->generator->generate($mapperGeneratorMetadata)]);
+        $classCode = $this->printer->prettyPrint([$generator->generate($mapperGeneratorMetadata)]);
 
         $this->write($classPath, "<?php\n\n" . $classCode . "\n");
         if ($this->hotReload) {

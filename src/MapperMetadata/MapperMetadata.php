@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
-namespace AutoMapper;
+namespace AutoMapper\MapperMetadata;
 
+use AutoMapper\AutoMapper;
 use AutoMapper\CustomTransformer\CustomPropertyTransformerInterface;
 use AutoMapper\Extractor\MappingExtractorInterface;
 use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Extractor\ReadAccessor;
+use AutoMapper\Generator\TransformerResolver\TransformerResolverInterface;
 use AutoMapper\Generator\VariableRegistry;
 use AutoMapper\Transformer\CallbackTransformer;
 use AutoMapper\Transformer\DependentTransformerInterface;
@@ -17,6 +19,8 @@ use AutoMapper\Transformer\MapperDependency;
  * Mapper metadata.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 class MapperMetadata implements MapperGeneratorMetadataInterface
 {
@@ -38,7 +42,6 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
     private VariableRegistry $variableRegistry;
 
     public function __construct(
-        private readonly MapperGeneratorMetadataRegistryInterface $metadataRegistry,
         private readonly MappingExtractorInterface $mappingExtractor,
         private readonly string $source,
         private readonly string $target,
@@ -126,13 +129,6 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
             // if we have a \ReflectionException, then we can't clone target
             return false;
         }
-    }
-
-    public function canHaveCircularReference(): bool
-    {
-        $checked = [];
-
-        return 'array' !== $this->getSource() && $this->checkCircularMapperConfiguration($this, $checked);
     }
 
     public function getMapperClassName(): string
@@ -241,62 +237,41 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
         $propertiesMapping = [];
 
         foreach ($this->mappingExtractor->getPropertiesMapping($this) as $propertyMapping) {
+            $transformer = $this->mappingExtractor->resolveTransformer($propertyMapping);
+
+            if (!$transformer) {
+                continue;
+            }
+
+            $propertyMapping->setTransformer($transformer);
+
             $propertiesMapping[$propertyMapping->property] = $propertyMapping;
         }
 
         foreach ($this->customMapping as $property => $callback) {
             $propertiesMapping[$property] = new PropertyMapping(
-                $this,
-                new ReadAccessor(ReadAccessor::TYPE_SOURCE, $property),
-                $this->mappingExtractor->getWriteMutator($this->source, $this->target, $property),
-                null,
-                new CallbackTransformer($property),
-                $property,
-                false,
+                mapperMetadata: $this,
+                readAccessor: new ReadAccessor(ReadAccessor::TYPE_SOURCE, $property),
+                writeMutator: $this->mappingExtractor->getWriteMutator($this->source, $this->target, $property),
+                writeMutatorConstructor: null,
+                property: $property,
                 isPublic: true,
             );
+
+            $propertiesMapping[$property]->setTransformer(new CallbackTransformer($property));
         }
 
         return $propertiesMapping;
     }
 
-    private function checkCircularMapperConfiguration(MapperGeneratorMetadataInterface $configuration, &$checked): bool
-    {
-        foreach ($configuration->getPropertiesMapping() as $propertyMapping) {
-            if (!$propertyMapping->transformer instanceof DependentTransformerInterface) {
-                continue;
-            }
-
-            foreach ($propertyMapping->transformer->getDependencies() as $dependency) {
-                if (isset($checked[$dependency->name])) {
-                    continue;
-                }
-
-                $checked[$dependency->name] = true;
-
-                if ($dependency->source === $this->getSource() && $dependency->target === $this->getTarget()) {
-                    return true;
-                }
-
-                $subConfiguration = $this->metadataRegistry->getMetadata($dependency->source, $dependency->target);
-
-                if (null !== $subConfiguration && true === $this->checkCircularMapperConfiguration($subConfiguration, $checked)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
     public function getAllDependencies(): array
     {
-        /** @var list<MapperDependency> $dependencies */
+        /** @var MapperDependency $dependencies */
         $dependencies = array_merge(
             ...array_values(
                 array_map(
-                    static fn (PropertyMapping $pm) => $pm->transformer instanceof DependentTransformerInterface
-                        ? $pm->transformer->getDependencies()
+                    static fn (PropertyMapping $pm) => $pm->getTransformer() instanceof DependentTransformerInterface
+                        ? $pm->getTransformer()->getDependencies()
                         : [],
                     $this->getPropertiesMapping()
                 )
@@ -347,5 +322,14 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
     public function getVariableRegistry(): VariableRegistry
     {
         return $this->variableRegistry;
+    }
+
+    public function mapperType(): MapperType
+    {
+        return match(true){
+            'array' === $this->target || 'stdClass' === $this->target => MapperType::FROM_SOURCE,
+            'array' === $this->source || 'stdClass' === $this->source => MapperType::FROM_TARGET,
+            default => MapperType::SOURCE_TARGET
+        };
     }
 }

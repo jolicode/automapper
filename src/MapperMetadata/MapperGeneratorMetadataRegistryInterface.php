@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AutoMapper;
+namespace AutoMapper\MapperMetadata;
 
 use AutoMapper\CustomTransformer\CustomTransformerInterface;
 use AutoMapper\Transformer\TransformerFactoryInterface;
@@ -20,16 +20,6 @@ interface MapperGeneratorMetadataRegistryInterface
      * Register metadata.
      */
     public function register(MapperGeneratorMetadataInterface $configuration): void;
-
-    /**
-     * Bind custom TransformerFactory to the AutoMapper.
-     */
-    public function bindTransformerFactory(TransformerFactoryInterface $transformerFactory): void;
-
-    /**
-     * Bind custom TransformerFactory to the AutoMapper.
-     */
-    public function bindCustomTransformer(CustomTransformerInterface $customTransformer): void;
 
     /**
      * Get metadata for a source and a target.

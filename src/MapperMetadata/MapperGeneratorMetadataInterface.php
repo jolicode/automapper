@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AutoMapper;
+namespace AutoMapper\MapperMetadata;
 
 use AutoMapper\Generator\VariableRegistry;
 
@@ -10,6 +10,8 @@ use AutoMapper\Generator\VariableRegistry;
  * Stores metadata needed when generating a mapper.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 interface MapperGeneratorMetadataInterface extends MapperMetadataInterface
 {
@@ -51,13 +53,6 @@ interface MapperGeneratorMetadataInterface extends MapperMetadataInterface
     public function isTargetCloneable(): bool;
 
     /**
-     * Whether the mapping can have circular reference.
-     *
-     * If not the case, allow to not generate code about circular references
-     */
-    public function canHaveCircularReference(): bool;
-
-    /**
      * Whether we should map private properties and methods.
      */
     public function shouldMapPrivateProperties(): bool;
@@ -72,4 +67,6 @@ interface MapperGeneratorMetadataInterface extends MapperMetadataInterface
     public function getPropertiesInConstructor(): array;
 
     public function getVariableRegistry(): VariableRegistry;
+
+    public function mapperType(): MapperType;
 }

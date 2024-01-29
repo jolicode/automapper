@@ -8,8 +8,9 @@ use AutoMapper\Extractor\CustomTransformerExtractor;
 use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
 use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
+use AutoMapper\Generator\TransformerResolver\TransformerResolverInterface;
 use AutoMapper\MapperContext;
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataInterface;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
@@ -214,7 +215,7 @@ final readonly class CreateTargetStatementsGenerator
              * and add it as a constructor argument
              */
             $output = $this->customTransformerExtractor->extract(
-                $propertyMapping->transformer,
+                $propertyMapping->getTransformer(),
                 $propertyMapping->readAccessor?->getExpression($variableRegistry->getSourceInput()),
                 $variableRegistry->getSourceInput()
             );
@@ -222,7 +223,7 @@ final readonly class CreateTargetStatementsGenerator
             $fieldValueExpr = $propertyMapping->readAccessor->getExpression($variableRegistry->getSourceInput());
 
             /* Get extract and transform statements for this property */
-            [$output, $propStatements] = $propertyMapping->transformer->transform($fieldValueExpr, $constructVar, $propertyMapping, $variableRegistry->getUniqueVariableScope());
+            [$output, $propStatements] = $propertyMapping->getTransformer()->transform($fieldValueExpr, $constructVar, $propertyMapping, $variableRegistry->getUniqueVariableScope());
         } else {
             return null;
         }

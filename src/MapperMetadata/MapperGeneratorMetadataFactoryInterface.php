@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AutoMapper;
+namespace AutoMapper\MapperMetadata;
 
 /**
  * Metadata factory, used to autoregistering new mapping without creating them.
@@ -11,5 +11,5 @@ namespace AutoMapper;
  */
 interface MapperGeneratorMetadataFactoryInterface
 {
-    public function create(MapperGeneratorMetadataRegistryInterface $autoMapperRegister, string $source, string $target): MapperGeneratorMetadataInterface;
+    public function create(string $source, string $target): MapperGeneratorMetadataInterface;
 }

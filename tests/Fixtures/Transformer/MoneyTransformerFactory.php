@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Fixtures\Transformer;
 
-use AutoMapper\MapperMetadataInterface;
+use AutoMapper\MapperMetadata\MapperMetadataInterface;
 use AutoMapper\Transformer\AbstractUniqueTypeTransformerFactory;
 use AutoMapper\Transformer\TransformerInterface;
 use Money\Money;

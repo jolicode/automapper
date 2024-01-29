@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\CustomTransformer;
 
-use AutoMapper\MapperMetadataInterface;
+use AutoMapper\MapperMetadata\MapperMetadataInterface;
 use Symfony\Component\PropertyInfo\Type;
 
 /**

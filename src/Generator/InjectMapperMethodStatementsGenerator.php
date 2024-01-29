@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Generator;
 
 use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataInterface;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Scalar;

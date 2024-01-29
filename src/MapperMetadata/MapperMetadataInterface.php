@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AutoMapper;
+namespace AutoMapper\MapperMetadata;
 
 use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Transformer\MapperDependency;

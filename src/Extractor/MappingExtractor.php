@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace AutoMapper\Extractor;
 
 use AutoMapper\CustomTransformer\CustomTransformersRegistry;
+use AutoMapper\Generator\TransformerResolver\ChainTransformerResolver;
+use AutoMapper\Generator\TransformerResolver\TransformerResolverInterface;
 use AutoMapper\Transformer\TransformerFactoryInterface;
+use AutoMapper\Transformer\TransformerInterface;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyReadInfo;
 use Symfony\Component\PropertyInfo\PropertyReadInfoExtractorInterface;
@@ -21,6 +24,8 @@ use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
  */
 abstract class MappingExtractor implements MappingExtractorInterface
 {
+    private TransformerResolverInterface $transformerResolver;
+
     public function __construct(
         protected readonly PropertyInfoExtractorInterface $propertyInfoExtractor,
         protected readonly PropertyReadInfoExtractorInterface $readInfoExtractor,
@@ -29,6 +34,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
         protected readonly CustomTransformersRegistry $customTransformerRegistry,
         private readonly ?ClassMetadataFactoryInterface $classMetadataFactory = null,
     ) {
+        $this->transformerResolver = ChainTransformerResolver::create($propertyInfoExtractor, $customTransformerRegistry, $transformerFactory);
     }
 
     public function getReadAccessor(string $source, string $target, string $property): ?ReadAccessor
@@ -177,5 +183,10 @@ abstract class MappingExtractor implements MappingExtractorInterface
         }
 
         return false;
+    }
+
+    public function resolveTransformer(PropertyMapping $propertyMapping): TransformerInterface|string|null
+    {
+        return $this->transformerResolver->resolveTransformer($propertyMapping);
     }
 }

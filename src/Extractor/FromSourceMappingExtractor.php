@@ -6,7 +6,7 @@ namespace AutoMapper\Extractor;
 
 use AutoMapper\CustomTransformer\CustomTransformersRegistry;
 use AutoMapper\Exception\InvalidMappingException;
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataInterface;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyReadInfo;
@@ -61,35 +61,11 @@ final class FromSourceMappingExtractor extends MappingExtractor
                 continue;
             }
 
-            $sourceTypes = $this->propertyInfoExtractor->getTypes($mapperMetadata->getSource(), $property);
-
-            if (null === $sourceTypes) {
-                $sourceTypes = [new Type(Type::BUILTIN_TYPE_NULL)]; // if no types found, we force a null type
-            }
-
-            $targetTypes = [];
-
-            foreach ($sourceTypes as $type) {
-                $targetType = $this->transformType($mapperMetadata->getTarget(), $type);
-
-                if ($targetType) {
-                    $targetTypes[] = $targetType;
-                }
-            }
-
-            $transformer = $this->customTransformerRegistry->getCustomTransformerClass($mapperMetadata, $sourceTypes, $targetTypes, $property)
-                ?? $this->transformerFactory->getTransformer($sourceTypes, $targetTypes, $mapperMetadata);
-
-            if (null === $transformer) {
-                continue;
-            }
-
             $mapping[] = new PropertyMapping(
                 $mapperMetadata,
                 $this->getReadAccessor($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property),
                 $this->getWriteMutator($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property),
                 null,
-                $transformer,
                 $property,
                 false,
                 $this->getGroups($mapperMetadata->getSource(), $property),
@@ -102,38 +78,6 @@ final class FromSourceMappingExtractor extends MappingExtractor
         }
 
         return $mapping;
-    }
-
-    private function transformType(string $target, Type $type = null): ?Type
-    {
-        if (null === $type) {
-            return null;
-        }
-
-        $builtinType = $type->getBuiltinType();
-        $className = $type->getClassName();
-
-        if (Type::BUILTIN_TYPE_OBJECT === $type->getBuiltinType() && \stdClass::class !== $type->getClassName()) {
-            $builtinType = 'array' === $target ? Type::BUILTIN_TYPE_ARRAY : Type::BUILTIN_TYPE_OBJECT;
-            $className = 'array' === $target ? null : \stdClass::class;
-        }
-
-        // Use string for datetime
-        if (Type::BUILTIN_TYPE_OBJECT === $type->getBuiltinType() && (\DateTimeInterface::class === $type->getClassName() || is_subclass_of($type->getClassName(), \DateTimeInterface::class))) {
-            $builtinType = 'string';
-        }
-
-        $collectionKeyTypes = $type->getCollectionKeyTypes();
-        $collectionValueTypes = $type->getCollectionValueTypes();
-
-        return new Type(
-            $builtinType,
-            $type->isNullable(),
-            $className,
-            $type->isCollection(),
-            $this->transformType($target, $collectionKeyTypes[0] ?? null),
-            $this->transformType($target, $collectionValueTypes[0] ?? null)
-        );
     }
 
     public function getWriteMutator(string $source, string $target, string $property, array $context = []): WriteMutator

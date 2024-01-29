@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Transformer;
 
-use AutoMapper\MapperMetadata;
+use AutoMapper\MapperMetadata\MapperMetadata;
 use AutoMapper\Transformer\BuiltinTransformerFactory;
 use AutoMapper\Transformer\ChainTransformerFactory;
 use AutoMapper\Transformer\NullableTransformer;

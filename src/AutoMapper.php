@@ -15,8 +15,14 @@ use AutoMapper\Extractor\MapToContextPropertyInfoExtractorDecorator;
 use AutoMapper\Extractor\SourceTargetMappingExtractor;
 use AutoMapper\Generator\MapperGenerator;
 use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
+use AutoMapper\Generator\TransformerResolver\ChainTransformerResolver;
 use AutoMapper\Loader\ClassLoaderInterface;
 use AutoMapper\Loader\EvalLoader;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataFactory;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataFactoryInterface;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataInterface;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataRegistry;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataRegistryInterface;
 use AutoMapper\Transformer\ArrayTransformerFactory;
 use AutoMapper\Transformer\BuiltinTransformerFactory;
 use AutoMapper\Transformer\ChainTransformerFactory;
@@ -53,28 +59,21 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
     public const RELEASE_VERSION = 0;
     public const EXTRA_VERSION = 'DEV';
 
-    /** @var MapperGeneratorMetadataInterface[] */
-    private array $metadata = [];
-
     /** @var GeneratedMapper[] */
     private array $mapperRegistry = [];
 
     public function __construct(
         private readonly ClassLoaderInterface $classLoader,
         private readonly ChainTransformerFactory $chainTransformerFactory,
-        public readonly CustomTransformersRegistry $customTransformersRegistry,
-        private readonly ?MapperGeneratorMetadataFactoryInterface $mapperConfigurationFactory = null
+        private readonly CustomTransformersRegistry $customTransformersRegistry,
+        private readonly MapperGeneratorMetadataRegistryInterface $mapperGeneratorMetadataRegistry,
+        private readonly MapperGenerator $mapperGenerator,
     ) {
-    }
-
-    public function register(MapperGeneratorMetadataInterface $configuration): void
-    {
-        $this->metadata[$configuration->getSource()][$configuration->getTarget()] = $configuration;
     }
 
     public function getMapper(string $source, string $target): MapperInterface
     {
-        $metadata = $this->getMetadata($source, $target);
+        $metadata = $this->mapperGeneratorMetadataRegistry->getMetadata($source, $target);
 
         if (null === $metadata) {
             throw new NoMappingFoundException('No mapping found for source ' . $source . ' and target ' . $target);
@@ -87,7 +86,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
         }
 
         if (!class_exists($className)) {
-            $this->classLoader->loadClass($metadata);
+            $this->classLoader->loadClass($this->mapperGenerator, $metadata);
         }
 
         $this->mapperRegistry[$className] = new $className();
@@ -102,7 +101,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
 
     public function hasMapper(string $source, string $target): bool
     {
-        return null !== $this->getMetadata($source, $target);
+        return null !== $this->mapperGeneratorMetadataRegistry->getMetadata($source, $target);
     }
 
     public function map(array|object $source, string|array|object $target, array $context = []): null|array|object
@@ -132,19 +131,6 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
         return $this->getMapper($sourceType, $targetType)->map($source, $context);
     }
 
-    public function getMetadata(string $source, string $target): ?MapperGeneratorMetadataInterface
-    {
-        if (!isset($this->metadata[$source][$target])) {
-            if (null === $this->mapperConfigurationFactory) {
-                return null;
-            }
-
-            $this->register($this->mapperConfigurationFactory->create($this, $source, $target));
-        }
-
-        return $this->metadata[$source][$target];
-    }
-
     public function bindTransformerFactory(TransformerFactoryInterface $transformerFactory): void
     {
         if (!$this->chainTransformerFactory->hasTransformerFactory($transformerFactory)) {
@@ -155,6 +141,16 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
     public function bindCustomTransformer(CustomTransformerInterface $customTransformer): void
     {
         $this->customTransformersRegistry->addCustomTransformer($customTransformer);
+    }
+
+    public function register(MapperGeneratorMetadataInterface $configuration): void
+    {
+        $this->mapperGeneratorMetadataRegistry->register($configuration);
+    }
+
+    public function getMetadata(string $source, string $target): ?MapperGeneratorMetadataInterface
+    {
+        return $this->mapperGeneratorMetadataRegistry->getMetadata($source, $target);
     }
 
     public static function create(
@@ -175,15 +171,6 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
             $loaderClass = new AnnotationLoader();
         }
         $classMetadataFactory = new ClassMetadataFactory($loaderClass);
-
-        if (null === $loader) {
-            $loader = new EvalLoader(
-                new MapperGenerator(
-                    new CustomTransformerExtractor(new ClassMethodToCallbackExtractor()),
-                    new ClassDiscriminatorResolver(new ClassDiscriminatorFromClassMetadata($classMetadataFactory)),
-                    $allowReadOnlyTargetToPopulate
-                ));
-        }
 
         $flags = ReflectionExtractor::ALLOW_PUBLIC | ReflectionExtractor::ALLOW_PROTECTED | ReflectionExtractor::ALLOW_PRIVATE;
 
@@ -229,11 +216,9 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
             $nameConverter
         );
 
-        $autoMapper = $autoRegister ? new self(
-            $loader,
-            $transformerFactory,
-            $customTransformerRegistry,
-            new MapperGeneratorMetadataFactory(
+        $mapperConfigurationFactory = null;
+        if ($autoRegister) {
+            $mapperConfigurationFactory = new MapperGeneratorMetadataFactory(
                 $sourceTargetMappingExtractor,
                 $fromSourceMappingExtractor,
                 $fromTargetMappingExtractor,
@@ -241,8 +226,23 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
                 $attributeChecking,
                 $dateTimeFormat,
                 $mapPrivateProperties
-            ),
-        ) : new self($loader, $transformerFactory, $customTransformerRegistry);
+            );
+        }
+
+        $mapperGeneratorMetadataRegistry = new MapperGeneratorMetadataRegistry($mapperConfigurationFactory);
+
+        $autoMapper = new self(
+            $loader ?? new EvalLoader(),
+            $transformerFactory,
+            $customTransformerRegistry,
+            $mapperGeneratorMetadataRegistry,
+            new MapperGenerator(
+                new CustomTransformerExtractor(new ClassMethodToCallbackExtractor()),
+                new ClassDiscriminatorResolver(new ClassDiscriminatorFromClassMetadata($classMetadataFactory)),
+                $mapperGeneratorMetadataRegistry,
+                $allowReadOnlyTargetToPopulate,
+            )
+        );
 
         $transformerFactory->addTransformerFactory(new MultipleTransformerFactory($transformerFactory));
         $transformerFactory->addTransformerFactory(new NullableTransformerFactory($transformerFactory));

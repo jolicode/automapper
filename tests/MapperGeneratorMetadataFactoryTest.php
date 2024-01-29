@@ -9,8 +9,8 @@ use AutoMapper\Extractor\FromSourceMappingExtractor;
 use AutoMapper\Extractor\FromTargetMappingExtractor;
 use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Extractor\SourceTargetMappingExtractor;
-use AutoMapper\MapperGeneratorMetadataFactory;
-use AutoMapper\MapperGeneratorMetadataFactoryInterface;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataFactory;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataFactoryInterface;
 use AutoMapper\Transformer\ArrayTransformerFactory;
 use AutoMapper\Transformer\BuiltinTransformerFactory;
 use AutoMapper\Transformer\ChainTransformerFactory;
@@ -95,7 +95,7 @@ class MapperGeneratorMetadataFactoryTest extends AutoMapperBaseTest
     {
         $userReflection = new \ReflectionClass(Fixtures\User::class);
 
-        $metadata = $this->factory->create($this->autoMapper, Fixtures\User::class, 'array');
+        $metadata = $this->factory->create(Fixtures\User::class, 'array');
         self::assertFalse($metadata->hasConstructor());
         self::assertTrue($metadata->shouldCheckAttributes());
         self::assertFalse($metadata->isTargetCloneable());
@@ -111,7 +111,7 @@ class MapperGeneratorMetadataFactoryTest extends AutoMapperBaseTest
     {
         $userReflection = new \ReflectionClass(Fixtures\User::class);
 
-        $metadata = $this->factory->create($this->autoMapper, 'array', Fixtures\User::class);
+        $metadata = $this->factory->create('array', Fixtures\User::class);
         self::assertTrue($metadata->hasConstructor());
         self::assertTrue($metadata->shouldCheckAttributes());
         self::assertTrue($metadata->isTargetCloneable());
@@ -125,7 +125,7 @@ class MapperGeneratorMetadataFactoryTest extends AutoMapperBaseTest
 
     public function testCreateWithBothObjects(): void
     {
-        $metadata = $this->factory->create($this->autoMapper, Fixtures\UserConstructorDTO::class, Fixtures\User::class);
+        $metadata = $this->factory->create(Fixtures\UserConstructorDTO::class, Fixtures\User::class);
         self::assertTrue($metadata->hasConstructor());
         self::assertTrue($metadata->shouldCheckAttributes());
         self::assertTrue($metadata->isTargetCloneable());
@@ -139,7 +139,7 @@ class MapperGeneratorMetadataFactoryTest extends AutoMapperBaseTest
 
     public function testHasNotConstructor(): void
     {
-        $metadata = $this->factory->create($this->autoMapper, 'array', Fixtures\UserDTO::class);
+        $metadata = $this->factory->create('array', Fixtures\UserDTO::class);
 
         self::assertFalse($metadata->hasConstructor());
     }
@@ -149,7 +149,7 @@ class MapperGeneratorMetadataFactoryTest extends AutoMapperBaseTest
      */
     public function testTargetIsReadOnlyClass(): void
     {
-        $metadata = $this->factory->create($this->autoMapper, 'array', Fixtures\AddressDTOReadonlyClass::class);
+        $metadata = $this->factory->create('array', Fixtures\AddressDTOReadonlyClass::class);
 
         self::assertEquals(Fixtures\AddressDTOReadonlyClass::class, $metadata->getTarget());
         self::assertTrue($metadata->isTargetReadOnlyClass());

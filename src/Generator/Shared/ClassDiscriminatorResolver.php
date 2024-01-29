@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Generator\Shared;
 
 use AutoMapper\Extractor\PropertyMapping;
-use AutoMapper\MapperGeneratorMetadataInterface;
-use AutoMapper\Transformer\TransformerInterface;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataInterface;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorMapping;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorResolverInterface;
 
@@ -24,7 +23,6 @@ final readonly class ClassDiscriminatorResolver
     {
         if (!$mapperMetadata->targetIsAUserDefinedClass()
             || !($propertyMapping = $this->propertyMapping($mapperMetadata))
-            || !$propertyMapping->transformer instanceof TransformerInterface
             || $propertyMapping->hasCustomTransformer()
         ) {
             return false;

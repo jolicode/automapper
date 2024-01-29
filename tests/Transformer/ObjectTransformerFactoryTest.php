@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Tests\Transformer;
 
 use AutoMapper\AutoMapperRegistryInterface;
-use AutoMapper\MapperMetadata;
+use AutoMapper\MapperMetadata\MapperMetadata;
 use AutoMapper\Transformer\ObjectTransformer;
 use AutoMapper\Transformer\ObjectTransformerFactory;
 use PHPUnit\Framework\TestCase;

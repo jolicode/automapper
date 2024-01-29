@@ -163,7 +163,7 @@ final readonly class PropertyConditionsGenerator
     }
 
     /**
-     * When there is groups associated to the target property we check if the context has the same groups.
+     * When there are groups associated to the target property we check if the context has the same groups.
      *
      * ```php
      * (null !== $context[MapperContext::GROUPS] ?? null && array_intersect($context[MapperContext::GROUPS] ?? [], ['group1', 'group2']))

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator\Shared;
 
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\Generator\TransformerResolver\TransformerResolverInterface;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataInterface;
 use AutoMapper\Transformer\TransformerInterface;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
@@ -20,7 +21,7 @@ use PhpParser\Node\Stmt;
 final readonly class DiscriminatorStatementsGenerator
 {
     public function __construct(
-        private ClassDiscriminatorResolver $classDiscriminatorResolver
+        private ClassDiscriminatorResolver $classDiscriminatorResolver,
     ) {
     }
 
@@ -87,7 +88,7 @@ final readonly class DiscriminatorStatementsGenerator
 
         // Generate the code that allows to put the type into the output variable,
         // so we are able to determine which mapper to use
-        [$output, $createObjectStatements] = $propertyMapping->transformer->transform(
+        [$output, $createObjectStatements] = $propertyMapping->getTransformer()->transform(
             $propertyMapping->readAccessor->getExpression($variableRegistry->getSourceInput()),
             $variableRegistry->getResult(),
             $propertyMapping,
@@ -128,6 +129,6 @@ final readonly class DiscriminatorStatementsGenerator
 
         $propertyMapping = $this->classDiscriminatorResolver->propertyMapping($mapperMetadata);
 
-        return $propertyMapping && $propertyMapping->transformer instanceof TransformerInterface;
+        return $propertyMapping && $propertyMapping->getTransformer() instanceof TransformerInterface;
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
-use AutoMapper\MapperMetadataInterface;
+use AutoMapper\MapperMetadata\MapperMetadataInterface;
 
 /**
  * Reduce array of type to only one type on source and target.

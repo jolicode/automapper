@@ -7,8 +7,10 @@ namespace AutoMapper\Extractor;
 use AutoMapper\Attribute\MapTo;
 use AutoMapper\CustomTransformer\CustomTransformerGenerator;
 use AutoMapper\CustomTransformer\CustomTransformersRegistry;
-use AutoMapper\MapperGeneratorMetadataInterface;
-use AutoMapper\MapperMetadataInterface;
+use AutoMapper\Generator\TransformerResolver\ChainTransformerResolver;
+use AutoMapper\Generator\TransformerResolver\TransformerResolverInterface;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataInterface;
+use AutoMapper\MapperMetadata\MapperMetadataInterface;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyReadInfo;
@@ -25,8 +27,6 @@ use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
  */
 class SourceTargetMappingExtractor extends MappingExtractor
 {
-    private CustomTransformerGenerator $customTransformerGenerator;
-
     public function __construct(
         PropertyInfoExtractorInterface $propertyInfoExtractor,
         PropertyReadInfoExtractorInterface $readInfoExtractor,
@@ -35,8 +35,6 @@ class SourceTargetMappingExtractor extends MappingExtractor
         CustomTransformersRegistry $customTransformerRegistry,
         ClassMetadataFactoryInterface $classMetadataFactory = null,
     ) {
-        $this->customTransformerGenerator = new CustomTransformerGenerator($customTransformerRegistry);
-
         parent::__construct($propertyInfoExtractor, $readInfoExtractor, $writeInfoExtractor, $transformerFactory, $customTransformerRegistry, $classMetadataFactory);
     }
 
@@ -54,91 +52,34 @@ class SourceTargetMappingExtractor extends MappingExtractor
 
         $mapping = [];
 
-        foreach ($sourceProperties as $property) {
-            if (!$this->propertyInfoExtractor->isReadable($mapperMetadata->getSource(), $property)) {
+        foreach ([...$sourceProperties, ...$targetProperties] as $property) {
+            if (isset($mapping[$property])) {
                 continue;
             }
 
-            if (!$this->propertyHasMapToAttribute($mapperMetadata, $property) && !\in_array($property, $targetProperties, true)) {
-                continue;
-            }
+            $targetMutatorConstruct = $this->getWriteMutator($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property, [
+                'enable_constructor_extraction' => true,
+            ]);
 
-            if ($propertyMapping = $this->toPropertyMapping($mapperMetadata, $property)) {
-                $mapping[] = $propertyMapping;
-            }
-        }
-
-        // let's loop over target properties which are not automatically mapped to a source property:
-        // this would eventually allow finding custom transformers which only operate on target properties
-        foreach ($targetProperties as $property) {
-            if (!$this->propertyInfoExtractor->isWritable($mapperMetadata->getTarget(), $property)) {
-                continue;
-            }
-
-            if (\in_array($property, $sourceProperties, true)) {
-                continue;
-            }
-
-            if ($propertyMapping = $this->toPropertyMapping($mapperMetadata, $property, onlyCustomTransformer: true)) {
-                $mapping[] = $propertyMapping;
-            }
-        }
-
-        return $mapping;
-    }
-
-    private function toPropertyMapping(MapperGeneratorMetadataInterface $mapperMetadata, string $property, bool $onlyCustomTransformer = false): PropertyMapping|null
-    {
-        $readAccessor = $this->getReadAccessor($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property);
-
-        if (!$onlyCustomTransformer && ($mapToAttribute = $this->propertyHasMapToAttribute($mapperMetadata, $property)) && $readAccessor) {
-            $generatedCustomTransformer = $this->customTransformerGenerator->generateMapToCustomTransformer(
-                $mapperMetadata->getSource(),
-                $mapperMetadata->getTarget(),
-                $property,
-                $mapToAttribute->propertyName,
-                $readAccessor
+            $mapping[$property] = new PropertyMapping(
+                $mapperMetadata,
+                readAccessor: $this->getReadAccessor($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property),
+                writeMutator: $this->getWriteMutator($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property, [
+                    'enable_constructor_extraction' => false,
+                ]),
+                writeMutatorConstructor: $targetMutatorConstruct && WriteMutator::TYPE_CONSTRUCTOR === $targetMutatorConstruct->type ? $targetMutatorConstruct : null,
+                property: $property,
+                checkExists: false,
+                sourceGroups: $this->getGroups($mapperMetadata->getSource(), $property),
+                targetGroups: $this->getGroups($mapperMetadata->getTarget(), $property),
+                maxDepth: $this->guessMaxDepth($mapperMetadata, $property),
+                sourceIgnored: $this->isIgnoredProperty($mapperMetadata->getSource(), $property),
+                targetIgnored: $this->isIgnoredProperty($mapperMetadata->getTarget(), $property),
+                isPublic: PropertyReadInfo::VISIBILITY_PUBLIC === ($this->readInfoExtractor->getReadInfo($mapperMetadata->getSource(), $property)?->getVisibility() ?? PropertyReadInfo::VISIBILITY_PUBLIC),
             );
         }
 
-        $targetMutatorConstruct = $this->getWriteMutator($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property, [
-            'enable_constructor_extraction' => true,
-        ]);
-
-        if ((null === $targetMutatorConstruct || null === $targetMutatorConstruct->parameter) && !$this->propertyInfoExtractor->isWritable($mapperMetadata->getTarget(), $property)) {
-            return null;
-        }
-
-        $sourceTypes = $this->propertyInfoExtractor->getTypes($mapperMetadata->getSource(), $property) ?? [];
-        $targetTypes = $this->propertyInfoExtractor->getTypes($mapperMetadata->getTarget(), $property) ?? [];
-
-        $transformer = $generatedCustomTransformer ?? $this->customTransformerRegistry->getCustomTransformerClass($mapperMetadata, $sourceTypes, $targetTypes, $property);
-
-        if (null === $transformer && !$onlyCustomTransformer) {
-            $transformer = $this->transformerFactory->getTransformer($sourceTypes, $targetTypes, $mapperMetadata);
-        }
-
-        if (null === $transformer) {
-            return null;
-        }
-
-        return new PropertyMapping(
-            $mapperMetadata,
-            readAccessor: $readAccessor,
-            writeMutator: $this->getWriteMutator($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property, [
-                'enable_constructor_extraction' => false,
-            ]),
-            writeMutatorConstructor: WriteMutator::TYPE_CONSTRUCTOR === $targetMutatorConstruct->type ? $targetMutatorConstruct : null,
-            transformer: $transformer,
-            property: $property,
-            checkExists: false,
-            sourceGroups: $this->getGroups($mapperMetadata->getSource(), $property),
-            targetGroups: $this->getGroups($mapperMetadata->getTarget(), $property),
-            maxDepth: $this->guessMaxDepth($mapperMetadata, $property),
-            sourceIgnored: $this->isIgnoredProperty($mapperMetadata->getSource(), $property),
-            targetIgnored: $this->isIgnoredProperty($mapperMetadata->getTarget(), $property),
-            isPublic: PropertyReadInfo::VISIBILITY_PUBLIC === ($this->readInfoExtractor->getReadInfo($mapperMetadata->getSource(), $property)?->getVisibility() ?? PropertyReadInfo::VISIBILITY_PUBLIC),
-        );
+        return $mapping;
     }
 
     private function guessMaxDepth(MapperMetadataInterface $mapperMetadata, string $property): int|null

@@ -9,9 +9,12 @@ use AutoMapper\Exception\CompileException;
 use AutoMapper\Extractor\CustomTransformerExtractor;
 use AutoMapper\GeneratedMapper;
 use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
+use AutoMapper\Generator\Shared\CircularReferenceChecker;
 use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
 use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\Generator\TransformerResolver\TransformerResolverInterface;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataInterface;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataRegistryInterface;
 use PhpParser\Builder;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Param;
@@ -33,6 +36,7 @@ final readonly class MapperGenerator
     public function __construct(
         CustomTransformerExtractor $customTransformerExtractor,
         ClassDiscriminatorResolver $classDiscriminatorResolver,
+        MapperGeneratorMetadataRegistryInterface $metadataRegistry,
         bool $allowReadOnlyTargetToPopulate = false,
     ) {
         $this->mapperConstructorGenerator = new MapperConstructorGenerator(
@@ -43,6 +47,7 @@ final readonly class MapperGenerator
             $discriminatorStatementsGenerator = new DiscriminatorStatementsGenerator($classDiscriminatorResolver),
             $cachedReflectionStatementsGenerator,
             $customTransformerExtractor,
+            new CircularReferenceChecker($metadataRegistry),
             $allowReadOnlyTargetToPopulate,
         );
 
@@ -71,7 +76,8 @@ final readonly class MapperGenerator
      * Create the constructor for this mapper.
      *
      * ```php
-     * public function __construct() {
+     * public function __construct()
+     * {
      *    // construct statements
      *    $this->extractCallbacks['propertyName'] = \Closure::bind(function ($object) {
      *       return $object->propertyName;
@@ -92,7 +98,8 @@ final readonly class MapperGenerator
      * Create the map method for this mapper.
      *
      * ```php
-     * public function map($source, array $context = []) {
+     * public function map($source, array $context = [])
+     * {
      *   ... // statements
      * }
      * ```
@@ -124,7 +131,8 @@ final readonly class MapperGenerator
      * This is not done into the constructor in order to avoid circular dependency between mappers
      *
      * ```php
-     * public function injectMappers(AutoMapperRegistryInterface $autoMapperRegistry) {
+     * public function injectMappers(AutoMapperRegistryInterface $autoMapperRegistry)
+     * {
      *   // inject mapper statements
      *   $this->mappers['SOURCE_TO_TARGET_MAPPER'] = $autoMapperRegistry->getMapper($source, $target);
      *   ...

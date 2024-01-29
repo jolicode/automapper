@@ -6,7 +6,7 @@ namespace AutoMapper\Extractor;
 
 use AutoMapper\CustomTransformer\CustomTransformersRegistry;
 use AutoMapper\Exception\InvalidMappingException;
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataInterface;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyReadInfo;
@@ -56,29 +56,6 @@ final class FromTargetMappingExtractor extends MappingExtractor
                 continue;
             }
 
-            $targetTypes = $this->propertyInfoExtractor->getTypes($mapperMetadata->getTarget(), $property);
-
-            if (null === $targetTypes) {
-                continue;
-            }
-
-            $sourceTypes = [];
-
-            foreach ($targetTypes as $type) {
-                $sourceType = $this->transformType($mapperMetadata->getSource(), $type);
-
-                if ($sourceType) {
-                    $sourceTypes[] = $sourceType;
-                }
-            }
-
-            $transformer = $this->customTransformerRegistry->getCustomTransformerClass($mapperMetadata, $sourceTypes, $targetTypes, $property)
-                ?? $this->transformerFactory->getTransformer($sourceTypes, $targetTypes, $mapperMetadata);
-
-            if (null === $transformer) {
-                continue;
-            }
-
             $mapping[] = new PropertyMapping(
                 $mapperMetadata,
                 $this->getReadAccessor($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property),
@@ -88,7 +65,6 @@ final class FromTargetMappingExtractor extends MappingExtractor
                 $this->getWriteMutator($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property, [
                     'enable_constructor_extraction' => true,
                 ]),
-                $transformer,
                 $property,
                 true,
                 $this->getGroups($mapperMetadata->getSource(), $property),

@@ -7,6 +7,7 @@ namespace AutoMapper\Generator;
 use AutoMapper\Extractor\CustomTransformerExtractor;
 use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Extractor\WriteMutator;
+use AutoMapper\Generator\TransformerResolver\TransformerResolverInterface;
 use AutoMapper\Transformer\AssignedByReferenceTransformerInterface;
 use PhpParser\Node\Stmt;
 
@@ -38,12 +39,14 @@ final readonly class PropertyStatementsGenerator
 
         $fieldValueVariable = $variableRegistry->getFieldValueVariable($propertyMapping);
 
-        if ($propertyMapping->hasCustomTransformer()) {
-            $output = $this->customTransformerExtractor->extract($propertyMapping->transformer, $fieldValueVariable, $variableRegistry->getSourceInput());
+        $transformer = $propertyMapping->getTransformer();
+
+        if (is_string($transformer)) {
+            $output = $this->customTransformerExtractor->extract($transformer, $fieldValueVariable, $variableRegistry->getSourceInput());
             $propStatements = [];
         } else {
             /* Create expression to transform the read value into the wanted written value, depending on the transform it may add new statements to get the correct value */
-            [$output, $propStatements] = $propertyMapping->transformer->transform(
+            [$output, $propStatements] = $transformer->transform(
                 $fieldValueVariable,
                 $variableRegistry->getResult(),
                 $propertyMapping,
@@ -52,14 +55,19 @@ final readonly class PropertyStatementsGenerator
         }
 
         if ($propertyMapping->writeMutator && $propertyMapping->writeMutator->type !== WriteMutator::TYPE_ADDER_AND_REMOVER) {
-            /** Create expression to write the transformed value to the target only if not add / remove mutator, as it's already called by the transformer in this case */
+            /**
+             * Create expression to write the transformed value to the target
+             * only if not add / remove mutator,
+             * as it's already called by the transformer in this case
+             */
             $writeExpression = $propertyMapping->writeMutator->getExpression(
                 $variableRegistry->getResult(),
                 $output,
-                $propertyMapping->transformer instanceof AssignedByReferenceTransformerInterface
-                    ? $propertyMapping->transformer->assignByRef()
+                $transformer instanceof AssignedByReferenceTransformerInterface
+                    ? $transformer->assignByRef()
                     : false
             );
+
             if (null === $writeExpression) {
                 return [];
             }

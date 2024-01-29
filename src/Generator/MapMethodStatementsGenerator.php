@@ -7,9 +7,11 @@ namespace AutoMapper\Generator;
 use AutoMapper\Exception\ReadOnlyTargetException;
 use AutoMapper\Extractor\CustomTransformerExtractor;
 use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
+use AutoMapper\Generator\Shared\CircularReferenceChecker;
 use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
+use AutoMapper\Generator\TransformerResolver\TransformerResolverInterface;
 use AutoMapper\MapperContext;
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataInterface;
 use PhpParser\Comment;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
@@ -29,12 +31,13 @@ final readonly class MapMethodStatementsGenerator
         DiscriminatorStatementsGenerator $discriminatorStatementsGenerator,
         CachedReflectionStatementsGenerator $cachedReflectionStatementsGenerator,
         CustomTransformerExtractor $customTransformerExtractor,
+        private CircularReferenceChecker $circularReferenceChecker,
         private bool $allowReadOnlyTargetToPopulate = false,
     ) {
         $this->createObjectStatementsGenerator = new CreateTargetStatementsGenerator(
             $discriminatorStatementsGenerator,
             $cachedReflectionStatementsGenerator,
-            $customTransformerExtractor
+            $customTransformerExtractor,
         );
         $this->propertyStatementsGenerator = new PropertyStatementsGenerator($customTransformerExtractor);
     }
@@ -152,7 +155,7 @@ final readonly class MapMethodStatementsGenerator
      */
     private function handleCircularReference(MapperGeneratorMetadataInterface $mapperMetadata): array
     {
-        if (!$mapperMetadata->canHaveCircularReference()) {
+        if (!$this->circularReferenceChecker->canHaveCircularReference($mapperMetadata)) {
             return [];
         }
 
@@ -273,7 +276,7 @@ final readonly class MapMethodStatementsGenerator
         $variableRegistry = $mapperMetadata->getVariableRegistry();
 
         $addedDependenciesStatements = [];
-        if ($mapperMetadata->canHaveCircularReference()) {
+        if ($this->circularReferenceChecker->canHaveCircularReference($mapperMetadata)) {
             /*
              * Here we register the result into the context to allow circular dependency, it's done before mapping so if there is a circular dependency, it will be correctly handled
              *

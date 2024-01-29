@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace AutoMapper;
+namespace AutoMapper\MapperMetadata;
 
 use AutoMapper\Extractor\FromSourceMappingExtractor;
 use AutoMapper\Extractor\FromTargetMappingExtractor;
 use AutoMapper\Extractor\SourceTargetMappingExtractor;
+use AutoMapper\Generator\TransformerResolver\TransformerResolverInterface;
 
 /**
  * Metadata factory, used to autoregistering new mapping without creating them.
@@ -29,7 +30,7 @@ final readonly class MapperGeneratorMetadataFactory implements MapperGeneratorMe
     /**
      * Create metadata for a source and target.
      */
-    public function create(MapperGeneratorMetadataRegistryInterface $autoMapperRegister, string $source, string $target): MapperGeneratorMetadataInterface
+    public function create(string $source, string $target): MapperGeneratorMetadataInterface
     {
         $extractor = $this->sourceTargetPropertiesMappingExtractor;
 
@@ -41,7 +42,7 @@ final readonly class MapperGeneratorMetadataFactory implements MapperGeneratorMe
             $extractor = $this->fromSourcePropertiesMappingExtractor;
         }
 
-        $mapperMetadata = new MapperMetadata($autoMapperRegister, $extractor, $source, $target, $this->isReadOnly($target), $this->mapPrivateProperties, $this->classPrefix);
+        $mapperMetadata = new MapperMetadata($extractor, $source, $target, $this->isReadOnly($target), $this->mapPrivateProperties, $this->classPrefix);
         $mapperMetadata->setAttributeChecking($this->attributeChecking);
         $mapperMetadata->setDateTimeFormat($this->dateTimeFormat);
 

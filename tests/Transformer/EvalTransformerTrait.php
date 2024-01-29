@@ -7,7 +7,7 @@ namespace AutoMapper\Tests\Transformer;
 use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Extractor\ReadAccessor;
 use AutoMapper\Generator\UniqueVariableScope;
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataInterface;
 use AutoMapper\Transformer\TransformerInterface;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Param;
@@ -24,9 +24,9 @@ trait EvalTransformerTrait
                 new ReadAccessor(ReadAccessor::TYPE_PROPERTY, 'dummy'),
                 null,
                 null,
-                $transformer,
                 'dummy'
             );
+            $propertyMapping->setTransformer($transformer);
         }
 
         $variableScope = new UniqueVariableScope();

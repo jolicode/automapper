@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator\Shared;
 
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataInterface;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper\Extractor;
 
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataInterface;
+use AutoMapper\Transformer\TransformerInterface;
 
 /**
  * Extracts mapping.
@@ -31,4 +32,6 @@ interface MappingExtractorInterface
      * Extracts write mutator for a given source, target and property.
      */
     public function getWriteMutator(string $source, string $target, string $property, array $context = []): ?WriteMutator;
+
+    public function resolveTransformer(PropertyMapping $propertyMapping): TransformerInterface|string|null;
 }

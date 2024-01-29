@@ -6,7 +6,7 @@ namespace AutoMapper\Generator;
 
 use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\MapperMetadata\MapperGeneratorMetadataInterface;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Scalar;
 use PhpParser\Node\Stmt;

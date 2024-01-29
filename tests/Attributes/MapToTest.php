@@ -10,7 +10,7 @@ use AutoMapper\Tests\Fixtures\User;
 
 class MapToTest extends AutoMapperBaseTest
 {
-    public function testMapTo(): void
+    public function testMapToObject(): void
     {
         $user = $this->autoMapper->map(new UserDTOWithMapTo(), User::class);
 
