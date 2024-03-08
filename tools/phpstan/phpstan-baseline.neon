@@ -91,12 +91,12 @@ parameters:
 			path: ../../src/Extractor/FromSourceMappingExtractor.php
 
 		-
-			message: "#^Parameter \\#1 \\$object_or_class of function is_subclass_of expects object\\|string, string\\|null given\\.$#"
+			message: "#^Parameter \\#1 \\$object_or_class of function is_subclass_of expects object\\|string, class-string\\|null given\\.$#"
 			count: 1
 			path: ../../src/Extractor/FromSourceMappingExtractor.php
 
 		-
-			message: "#^Parameter \\#1 \\$object_or_class of function is_subclass_of expects object\\|string, string\\|null given\\.$#"
+			message: "#^Parameter \\#1 \\$object_or_class of function is_subclass_of expects object\\|string, class-string\\|null given\\.$#"
 			count: 1
 			path: ../../src/Extractor/FromTargetMappingExtractor.php
 
@@ -536,26 +536,26 @@ parameters:
 			path: ../../src/Transformer/CustomTransformer/CustomTransformersRegistry.php
 
 		-
-			message: "#^Parameter \\#1 \\$object_or_class of function is_subclass_of expects object\\|string, string\\|null given\\.$#"
+			message: "#^Parameter \\#1 \\$object_or_class of function is_subclass_of expects object\\|string, class-string\\|null given\\.$#"
 			count: 2
 			path: ../../src/Transformer/DateTimeTransformerFactory.php
 
 		-
-			message: "#^Parameter \\#1 \\$object_or_class of function is_subclass_of expects object\\|string, string\\|null given\\.$#"
+			message: "#^Parameter \\#1 \\$object_or_class of function is_subclass_of expects object\\|string, class-string\\|null given\\.$#"
 			count: 1
 			path: ../../src/Transformer/EnumTransformerFactory.php
 
 		-
-			message: "#^Parameter \\#1 \\$targetClassName of class AutoMapper\\\\Transformer\\\\TargetEnumTransformer constructor expects string, string\\|null given\\.$#"
+			message: "#^Parameter \\#1 \\$targetClassName of class AutoMapper\\\\Transformer\\\\TargetEnumTransformer constructor expects string, class-string\\|null given\\.$#"
 			count: 1
 			path: ../../src/Transformer/EnumTransformerFactory.php
 
 		-
-			message: "#^Parameter \\#1 \\$object_or_class of function is_subclass_of expects object\\|string, string\\|null given\\.$#"
+			message: "#^Parameter \\#1 \\$object_or_class of function is_subclass_of expects object\\|string, class-string\\|null given\\.$#"
 			count: 1
 			path: ../../src/Transformer/ObjectTransformerFactory.php
 
 		-
-			message: "#^Parameter \\#1 \\$className of class AutoMapper\\\\Transformer\\\\StringToSymfonyUidTransformer constructor expects string, string\\|null given\\.$#"
+			message: "#^Parameter \\#1 \\$className of class AutoMapper\\\\Transformer\\\\StringToSymfonyUidTransformer constructor expects string, class-string\\|null given\\.$#"
 			count: 1
 			path: ../../src/Transformer/SymfonyUidTransformerFactory.php
