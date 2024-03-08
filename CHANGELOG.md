@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - [GH#33](https://github.com/jolicode/automapper/pull/33) Allow usage of imported class names in custom transformers
+- [GH#45](https://github.com/jolicode/automapper/pull/45) Fix composer.lock for phpstan and php-cs-fixer tooling
 
 ### Changed
 - [GH#27](https://github.com/jolicode/automapper/pull/27) Use PhpStanExtractor instead of PhpDocExtractor
