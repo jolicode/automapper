@@ -19,9 +19,9 @@ class MapperContextTest extends TestCase
         $context->setAllowedAttributes(['id', 'age']);
         $context->setIgnoredAttributes(['age']);
 
-        self::assertTrue(MapperContext::isAllowedAttribute($context->toArray(), 'id', 1));
-        self::assertFalse(MapperContext::isAllowedAttribute($context->toArray(), 'age', 29));
-        self::assertFalse(MapperContext::isAllowedAttribute($context->toArray(), 'name', 'Baptiste'));
+        self::assertTrue(MapperContext::isAllowedAttribute($context->toArray(), 'id', true));
+        self::assertFalse(MapperContext::isAllowedAttribute($context->toArray(), 'age', true));
+        self::assertFalse(MapperContext::isAllowedAttribute($context->toArray(), 'name', true));
     }
 
     public function testCircularReferenceLimit(): void
@@ -127,7 +127,7 @@ class MapperContextTest extends TestCase
             ],
         ];
 
-        self::assertTrue(MapperContext::isAllowedAttribute($context, 'foo', 1));
+        self::assertTrue(MapperContext::isAllowedAttribute($context, 'foo', true));
         $newContext = MapperContext::withNewContext($context, 'foo');
 
         self::assertEquals(['bar'], $newContext[MapperContext::ALLOWED_ATTRIBUTES]);
@@ -136,6 +136,6 @@ class MapperContextTest extends TestCase
     public function testSkipNullValues(): void
     {
         $context = [MapperContext::SKIP_NULL_VALUES => true];
-        self::assertFalse(MapperContext::isAllowedAttribute($context, 'id', null));
+        self::assertFalse(MapperContext::isAllowedAttribute($context, 'id', false));
     }
 }

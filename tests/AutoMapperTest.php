@@ -31,6 +31,7 @@ use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
 use AutoMapper\Tests\Fixtures\Order;
 use AutoMapper\Tests\Fixtures\PetOwner;
 use AutoMapper\Tests\Fixtures\Transformer\MoneyTransformerFactory;
+use AutoMapper\Tests\Fixtures\Uninitialized;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
 use Symfony\Component\Uid\Ulid;
@@ -1264,6 +1265,16 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertEquals(
             new ClassWithNullablePropertyInConstructor(foo: 1),
             $this->autoMapper->map(['foo' => 1], ClassWithNullablePropertyInConstructor::class)
+        );
+    }
+
+    public function testNoErrorWithUninitializedProperty(): void
+    {
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+
+        self::assertSame(
+            ['bar' => 'bar'],
+            $this->autoMapper->map(new Uninitialized(), 'array', ['skip_null_values' => true])
         );
     }
 }
