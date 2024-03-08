@@ -16,7 +16,7 @@ use Symfony\Component\Serializer\Mapping\ClassDiscriminatorResolverInterface;
 final readonly class ClassDiscriminatorResolver
 {
     public function __construct(
-        private ClassDiscriminatorResolverInterface|null $classDiscriminator = null,
+        private ?ClassDiscriminatorResolverInterface $classDiscriminator = null,
     ) {
     }
 
@@ -33,7 +33,7 @@ final readonly class ClassDiscriminatorResolver
         return true;
     }
 
-    public function propertyMapping(MapperGeneratorMetadataInterface $mapperMetadata): PropertyMapping|null
+    public function propertyMapping(MapperGeneratorMetadataInterface $mapperMetadata): ?PropertyMapping
     {
         $classDiscriminatorMapping = $this->classDiscriminator?->getMappingForClass($mapperMetadata->getTarget());
 

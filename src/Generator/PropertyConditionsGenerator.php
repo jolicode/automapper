@@ -18,7 +18,7 @@ use PhpParser\Node\Scalar;
  */
 final readonly class PropertyConditionsGenerator
 {
-    public function generate(PropertyMapping $propertyMapping): Expr|null
+    public function generate(PropertyMapping $propertyMapping): ?Expr
     {
         $conditions = [];
 
@@ -60,7 +60,7 @@ final readonly class PropertyConditionsGenerator
      * property_exists($source, 'propertyName')
      * ```
      */
-    private function propertyExistsForStdClass(PropertyMapping $propertyMapping): Expr|null
+    private function propertyExistsForStdClass(PropertyMapping $propertyMapping): ?Expr
     {
         $variableRegistry = $propertyMapping->mapperMetadata->getVariableRegistry();
 
@@ -81,7 +81,7 @@ final readonly class PropertyConditionsGenerator
      * array_key_exists('propertyName', $source).
      * ```
      */
-    private function propertyExistsForArray(PropertyMapping $propertyMapping): Expr|null
+    private function propertyExistsForArray(PropertyMapping $propertyMapping): ?Expr
     {
         if (!$propertyMapping->checkExists || 'array' !== $propertyMapping->mapperMetadata->getSource()) {
             return null;
@@ -102,7 +102,7 @@ final readonly class PropertyConditionsGenerator
      * MapperContext::isAllowedAttribute($context, 'propertyName', $source).
      * ```
      */
-    private function isAllowedAttribute(PropertyMapping $propertyMapping): Expr|null
+    private function isAllowedAttribute(PropertyMapping $propertyMapping): ?Expr
     {
         $mapperMetadata = $propertyMapping->mapperMetadata;
 
@@ -132,7 +132,7 @@ final readonly class PropertyConditionsGenerator
      * (null !== $context[MapperContext::GROUPS] ?? null && array_intersect($context[MapperContext::GROUPS] ?? [], ['group1', 'group2']))
      * ```
      */
-    private function sourceGroupsCheck(PropertyMapping $propertyMapping): Expr|null
+    private function sourceGroupsCheck(PropertyMapping $propertyMapping): ?Expr
     {
         if (!$propertyMapping->sourceGroups) {
             return null;
@@ -169,7 +169,7 @@ final readonly class PropertyConditionsGenerator
      * (null !== $context[MapperContext::GROUPS] ?? null && array_intersect($context[MapperContext::GROUPS] ?? [], ['group1', 'group2']))
      * ```
      */
-    private function targetGroupsCheck(PropertyMapping $propertyMapping): Expr|null
+    private function targetGroupsCheck(PropertyMapping $propertyMapping): ?Expr
     {
         if (!$propertyMapping->targetGroups) {
             return null;
@@ -206,7 +206,7 @@ final readonly class PropertyConditionsGenerator
      * ($context[MapperContext::DEPTH] ?? 0) <= $maxDepth
      * ```
      */
-    private function maxDepthCheck(PropertyMapping $propertyMapping): Expr|null
+    private function maxDepthCheck(PropertyMapping $propertyMapping): ?Expr
     {
         if (!$propertyMapping->maxDepth) {
             return null;

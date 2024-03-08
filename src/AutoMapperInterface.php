@@ -20,5 +20,5 @@ interface AutoMapperInterface
      *
      * @return array|object|null The mapped object
      */
-    public function map(array|object $source, string|array|object $target, array $context = []): null|array|object;
+    public function map(array|object $source, string|array|object $target, array $context = []): array|object|null;
 }

@@ -64,7 +64,7 @@ class SourceTargetMappingExtractor extends MappingExtractor
         return $mapping;
     }
 
-    private function toPropertyMapping(MapperGeneratorMetadataInterface $mapperMetadata, string $property, bool $onlyCustomTransformer = false): PropertyMapping|null
+    private function toPropertyMapping(MapperGeneratorMetadataInterface $mapperMetadata, string $property, bool $onlyCustomTransformer = false): ?PropertyMapping
     {
         $targetMutatorConstruct = $this->getWriteMutator($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property, [
             'enable_constructor_extraction' => true,
@@ -106,7 +106,7 @@ class SourceTargetMappingExtractor extends MappingExtractor
         );
     }
 
-    private function guessMaxDepth(MapperMetadataInterface $mapperMetadata, string $property): int|null
+    private function guessMaxDepth(MapperMetadataInterface $mapperMetadata, string $property): ?int
     {
         $maxDepthSource = $this->getMaxDepth($mapperMetadata->getSource(), $property);
         $maxDepthTarget = $this->getMaxDepth($mapperMetadata->getTarget(), $property);

@@ -62,7 +62,7 @@ interface MapperGeneratorMetadataInterface extends MapperMetadataInterface
      */
     public function shouldMapPrivateProperties(): bool;
 
-    public function getCachedTargetReflectionClass(): \ReflectionClass|null; // @phpstan-ignore-line
+    public function getCachedTargetReflectionClass(): ?\ReflectionClass; // @phpstan-ignore-line
 
     /**
      * Fields to set in the constructor: this allows transforming them before the constructor is called.

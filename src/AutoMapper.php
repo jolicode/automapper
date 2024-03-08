@@ -105,7 +105,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
         return null !== $this->getMetadata($source, $target);
     }
 
-    public function map(array|object $source, string|array|object $target, array $context = []): null|array|object
+    public function map(array|object $source, string|array|object $target, array $context = []): array|object|null
     {
         $sourceType = $targetType = null;
 

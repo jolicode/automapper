@@ -29,7 +29,7 @@ final readonly class CreateTargetStatementsGenerator
         private DiscriminatorStatementsGenerator $discriminatorStatementsGenerator,
         private CachedReflectionStatementsGenerator $cachedReflectionStatementsGenerator,
         private CustomTransformerExtractor $customTransformerExtractor,
-        Parser|null $parser = null,
+        ?Parser $parser = null,
     ) {
         $this->parser = $parser ?? (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
     }
@@ -62,7 +62,7 @@ final readonly class CreateTargetStatementsGenerator
         ]);
     }
 
-    private function targetAsArray(MapperGeneratorMetadataInterface $mapperMetadata): Stmt|null
+    private function targetAsArray(MapperGeneratorMetadataInterface $mapperMetadata): ?Stmt
     {
         if ($mapperMetadata->getTarget() !== 'array') {
             return null;
@@ -73,7 +73,7 @@ final readonly class CreateTargetStatementsGenerator
         return new Stmt\Expression(new Expr\Assign($variableRegistry->getResult(), new Expr\Array_()));
     }
 
-    private function sourceAndTargetAsStdClass(MapperGeneratorMetadataInterface $mapperMetadata): Stmt|null
+    private function sourceAndTargetAsStdClass(MapperGeneratorMetadataInterface $mapperMetadata): ?Stmt
     {
         if (\stdClass::class !== $mapperMetadata->getSource() || \stdClass::class !== $mapperMetadata->getTarget()) {
             return null;
@@ -92,7 +92,7 @@ final readonly class CreateTargetStatementsGenerator
         );
     }
 
-    private function targetAsStdClass(MapperGeneratorMetadataInterface $mapperMetadata): Stmt|null
+    private function targetAsStdClass(MapperGeneratorMetadataInterface $mapperMetadata): ?Stmt
     {
         if (\stdClass::class === $mapperMetadata->getSource() || \stdClass::class !== $mapperMetadata->getTarget()) {
             return null;
@@ -196,7 +196,7 @@ final readonly class CreateTargetStatementsGenerator
      *
      * @return array{Stmt, Arg, int}|null
      */
-    private function constructorArgument(PropertyMapping $propertyMapping): array|null
+    private function constructorArgument(PropertyMapping $propertyMapping): ?array
     {
         if (null === $propertyMapping->writeMutatorConstructor || null === ($parameter = $propertyMapping->writeMutatorConstructor->parameter)) {
             return null;
@@ -264,7 +264,7 @@ final readonly class CreateTargetStatementsGenerator
      *
      * @return array{Stmt, Arg, int}|null
      */
-    private function constructorArgumentWithDefaultValue(MapperGeneratorMetadataInterface $mapperMetadata, array $constructArguments, \ReflectionParameter $constructorParameter): array|null
+    private function constructorArgumentWithDefaultValue(MapperGeneratorMetadataInterface $mapperMetadata, array $constructArguments, \ReflectionParameter $constructorParameter): ?array
     {
         if (\array_key_exists($constructorParameter->getPosition(), $constructArguments) || !$constructorParameter->isDefaultValueAvailable()) {
             return null;
@@ -303,7 +303,7 @@ final readonly class CreateTargetStatementsGenerator
      * $result = new Foo();
      * ```
      */
-    private function constructorWithoutArgument(MapperGeneratorMetadataInterface $mapperMetadata): Stmt|null
+    private function constructorWithoutArgument(MapperGeneratorMetadataInterface $mapperMetadata): ?Stmt
     {
         if (!$mapperMetadata->targetIsAUserDefinedClass()
         ) {

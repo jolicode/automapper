@@ -115,7 +115,7 @@ class AutoMapperWithCustomTransformerTest extends AutoMapperBaseTest
         self::assertSame('1985-07-01', $birthDateDateTime->date->format('Y-m-d'));
     }
 
-    private static function createUserDTO(string|null $name = null, string|null $city = null): UserDTO
+    private static function createUserDTO(?string $name = null, ?string $city = null): UserDTO
     {
         $user = new UserDTO();
         $user->id = 666;
@@ -128,7 +128,7 @@ class AutoMapperWithCustomTransformerTest extends AutoMapperBaseTest
         return $user;
     }
 
-    private static function createUser(string|null $name = null, string|null $city = null): User
+    private static function createUser(?string $name = null, ?string $city = null): User
     {
         $user = new User(666, $name ?? 'name', 666);
         $address = new Address();

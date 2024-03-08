@@ -44,7 +44,7 @@ use PhpParser\Node\Stmt;
  */
 final readonly class CachedReflectionStatementsGenerator
 {
-    public function createTargetStatement(MapperGeneratorMetadataInterface $mapperMetadata): Stmt|null
+    public function createTargetStatement(MapperGeneratorMetadataInterface $mapperMetadata): ?Stmt
     {
         if (!$this->supports($mapperMetadata)) {
             return null;
@@ -64,7 +64,7 @@ final readonly class CachedReflectionStatementsGenerator
         )));
     }
 
-    public function mapperConstructorStatement(MapperGeneratorMetadataInterface $mapperMetadata): Stmt\Expression|null
+    public function mapperConstructorStatement(MapperGeneratorMetadataInterface $mapperMetadata): ?Stmt\Expression
     {
         if (!$this->supports($mapperMetadata)) {
             return null;

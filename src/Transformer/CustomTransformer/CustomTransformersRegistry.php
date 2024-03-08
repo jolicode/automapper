@@ -16,7 +16,7 @@ final class CustomTransformersRegistry
     private array $customTransformers = [];
 
     /** @var list<CustomTransformerInterface>|null */
-    private array|null $prioritizedCustomTransformers = null;
+    private ?array $prioritizedCustomTransformers = null;
 
     public function addCustomTransformer(CustomTransformerInterface $customTransformer): void
     {
@@ -31,7 +31,7 @@ final class CustomTransformersRegistry
      *
      * @return class-string<CustomTransformerInterface>|null
      */
-    public function getCustomTransformerClass(MapperMetadataInterface $mapperMetadata, array $sourceTypes, array $targetTypes, string $propertyName): string|null
+    public function getCustomTransformerClass(MapperMetadataInterface $mapperMetadata, array $sourceTypes, array $targetTypes, string $propertyName): ?string
     {
         foreach ($this->prioritizedCustomTransformers() as $customTransformer) {
             if (

@@ -6,7 +6,7 @@ namespace AutoMapper\Tests\Fixtures;
 
 readonly class ClassWithNullablePropertyInConstructor
 {
-    public function __construct(public int $foo, public int|null $bar = null)
+    public function __construct(public int $foo, public ?int $bar = null)
     {
     }
 }

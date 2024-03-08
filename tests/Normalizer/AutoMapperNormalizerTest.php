@@ -95,7 +95,7 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
     {
         $normalizer = new AutoMapperNormalizer(
             new class() implements AutoMapperInterface, AutoMapperRegistryInterface {
-                public function map(null|array|object $source, string|array|object $target, array $context = []): null|array|object
+                public function map(array|object|null $source, string|array|object $target, array $context = []): array|object|null
                 {
                     return $context;
                 }
