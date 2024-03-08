@@ -22,7 +22,7 @@ final readonly class CustomTransformerExtractor
     /**
      * @param class-string<CustomTransformerInterface> $customTransformerClass
      */
-    public function extract(string $customTransformerClass, Expr|null $propertyToTransform, Expr $sourceObject): Expr
+    public function extract(string $customTransformerClass, ?Expr $propertyToTransform, Expr $sourceObject): Expr
     {
         if (!$propertyToTransform && is_a($customTransformerClass, CustomModelTransformerInterface::class, allow_string: true)) {
             throw new \LogicException('CustomModelTransformerInterface must use $propertyToTransform.');

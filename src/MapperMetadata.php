@@ -33,7 +33,7 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
     private array $customMapping = [];
 
     /** @var list<string>|null */
-    private array|null $propertiesInConstructor = null;
+    private ?array $propertiesInConstructor = null;
 
     private VariableRegistry $variableRegistry;
 
@@ -57,7 +57,7 @@ class MapperMetadata implements MapperGeneratorMetadataInterface
         $this->variableRegistry = new VariableRegistry();
     }
 
-    public function getCachedTargetReflectionClass(): \ReflectionClass|null
+    public function getCachedTargetReflectionClass(): ?\ReflectionClass
     {
         return $this->targetReflectionClass;
     }

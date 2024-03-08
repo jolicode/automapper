@@ -45,7 +45,7 @@ final readonly class MapperConstructorGenerator
      * $this->extractCallbacks['propertyName'] = $extractCallback;
      * ```
      */
-    private function extractCallbackForProperty(PropertyMapping $propertyMapping): Stmt\Expression|null
+    private function extractCallbackForProperty(PropertyMapping $propertyMapping): ?Stmt\Expression
     {
         $mapperMetadata = $propertyMapping->mapperMetadata;
 
@@ -69,7 +69,7 @@ final readonly class MapperConstructorGenerator
      * $this->hydrateCallback['propertyName'] = $hydrateCallback;
      * ```
      */
-    private function hydrateCallbackForProperty(PropertyMapping $propertyMapping): Stmt\Expression|null
+    private function hydrateCallbackForProperty(PropertyMapping $propertyMapping): ?Stmt\Expression
     {
         $mapperMetadata = $propertyMapping->mapperMetadata;
 
