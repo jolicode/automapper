@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AutoMapper\Extractor;
 
 use AutoMapper\MapperGeneratorMetadataInterface;
-use AutoMapper\Transformer\CustomTransformer\CustomTransformerInterface;
 use AutoMapper\Transformer\TransformerInterface;
 
 /**
@@ -22,8 +21,7 @@ final readonly class PropertyMapping
         public ?ReadAccessor $readAccessor,
         public ?WriteMutator $writeMutator,
         public ?WriteMutator $writeMutatorConstructor,
-        /** @var TransformerInterface|class-string<CustomTransformerInterface> */
-        public TransformerInterface|string $transformer,
+        public TransformerInterface $transformer,
         public string $property,
         public bool $checkExists = false,
         public ?array $sourceGroups = null,
@@ -41,15 +39,5 @@ final readonly class PropertyMapping
             || $this->sourceIgnored
             || $this->targetIgnored
             || !($shouldMapPrivateProperties || $this->isPublic);
-    }
-
-    /**
-     * @phpstan-assert-if-false TransformerInterface $this->transformer
-     *
-     * @phpstan-assert-if-true string $this->transformer
-     */
-    public function hasCustomTransformer(): bool
-    {
-        return \is_string($this->transformer);
     }
 }

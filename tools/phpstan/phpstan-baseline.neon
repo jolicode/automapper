@@ -1,16 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Call to an undefined method object\\:\\:addCallback\\(\\)\\.$#"
-			count: 1
-			path: ../../src/AutoMapper.php
-
-		-
-			message: "#^Call to an undefined method object\\:\\:injectMappers\\(\\)\\.$#"
-			count: 1
-			path: ../../src/AutoMapper.php
-
-		-
 			message: "#^Cannot access offset string on AutoMapper\\\\MapperGeneratorMetadataInterface\\.$#"
 			count: 2
 			path: ../../src/AutoMapper.php
@@ -18,11 +8,6 @@ parameters:
 		-
 			message: "#^Instantiated class Symfony\\\\Component\\\\Serializer\\\\Mapping\\\\Loader\\\\AnnotationLoader not found\\.$#"
 			count: 2
-			path: ../../src/AutoMapper.php
-
-		-
-			message: "#^Method AutoMapper\\\\AutoMapper\\:\\:getMapper\\(\\) should return AutoMapper\\\\MapperInterface but returns object\\.$#"
-			count: 1
 			path: ../../src/AutoMapper.php
 
 		-
@@ -57,11 +42,6 @@ parameters:
 
 		-
 			message: "#^Parameter \\#3 \\$descriptionExtractors of class Symfony\\\\Component\\\\PropertyInfo\\\\PropertyInfoExtractor constructor expects iterable\\<Symfony\\\\Component\\\\PropertyInfo\\\\PropertyDescriptionExtractorInterface\\>, array\\<int, Symfony\\\\Component\\\\PropertyInfo\\\\Extractor\\\\ReflectionExtractor\\> given\\.$#"
-			count: 1
-			path: ../../src/AutoMapper.php
-
-		-
-			message: "#^Property AutoMapper\\\\AutoMapper\\:\\:\\$mapperRegistry \\(array\\<AutoMapper\\\\GeneratedMapper\\>\\) does not accept array\\<object\\>\\.$#"
 			count: 1
 			path: ../../src/AutoMapper.php
 
@@ -254,26 +234,6 @@ parameters:
 			message: "#^Parameter \\#2 \\$constructArguments of method AutoMapper\\\\Generator\\\\CreateTargetStatementsGenerator\\:\\:constructorArgumentWithDefaultValue\\(\\) expects array\\<PhpParser\\\\Node\\\\Arg\\>, array\\<int\\|string, PhpParser\\\\Node\\\\Arg\\|null\\> given\\.$#"
 			count: 1
 			path: ../../src/Generator/CreateTargetStatementsGenerator.php
-
-		-
-			message: "#^Cannot access property \\$readAccessor on AutoMapper\\\\Extractor\\\\PropertyMapping\\|null\\.$#"
-			count: 1
-			path: ../../src/Generator/Shared/DiscriminatorStatementsGenerator.php
-
-		-
-			message: "#^Cannot access property \\$transformer on AutoMapper\\\\Extractor\\\\PropertyMapping\\|null\\.$#"
-			count: 1
-			path: ../../src/Generator/Shared/DiscriminatorStatementsGenerator.php
-
-		-
-			message: "#^Cannot call method getExpression\\(\\) on AutoMapper\\\\Extractor\\\\ReadAccessor\\|null\\.$#"
-			count: 1
-			path: ../../src/Generator/Shared/DiscriminatorStatementsGenerator.php
-
-		-
-			message: "#^Cannot call method transform\\(\\) on AutoMapper\\\\Transformer\\\\TransformerInterface\\|class\\-string\\<AutoMapper\\\\Transformer\\\\CustomTransformer\\\\CustomTransformerInterface\\>\\.$#"
-			count: 1
-			path: ../../src/Generator/Shared/DiscriminatorStatementsGenerator.php
 
 		-
 			message: "#^Method AutoMapper\\\\Loader\\\\FileLoader\\:\\:addHashToRegistry\\(\\) has parameter \\$className with no type specified\\.$#"

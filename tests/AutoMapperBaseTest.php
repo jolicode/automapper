@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace AutoMapper\Tests;
 
 use AutoMapper\AutoMapper;
-use AutoMapper\Extractor\ClassMethodToCallbackExtractor;
-use AutoMapper\Extractor\CustomTransformerExtractor;
 use AutoMapper\Generator\MapperGenerator;
 use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
 use AutoMapper\Loader\ClassLoaderInterface;
@@ -38,7 +36,6 @@ abstract class AutoMapperBaseTest extends TestCase
         $classMetadataFactory = new ClassMetadataFactory(new AttributeLoader());
 
         $this->loader = new FileLoader(new MapperGenerator(
-            new CustomTransformerExtractor(new ClassMethodToCallbackExtractor()),
             new ClassDiscriminatorResolver(new ClassDiscriminatorFromClassMetadata($classMetadataFactory)),
             $allowReadOnlyTargetToPopulate
         ), __DIR__ . '/cache');

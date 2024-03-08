@@ -9,19 +9,19 @@ use AutoMapper\MapperMetadataInterface;
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-final class ChainTransformerFactory implements TransformerFactoryInterface
+final class ChainTransformerFactory implements TransformerPropertyFactoryInterface, TransformerFactoryInterface
 {
-    /** @var array<int, list<TransformerFactoryInterface>> */
+    /** @var array<int, list<TransformerFactoryInterface|TransformerPropertyFactoryInterface>> */
     private array $factories = [];
 
-    /** @var TransformerFactoryInterface[]|null */
+    /** @var list<TransformerFactoryInterface|TransformerPropertyFactoryInterface>|null */
     private ?array $sorted = null;
 
     /**
      * Biggest priority is MultipleTransformerFactory with 128, so default priority will be bigger in order to
      * be used before it, 256 should be enough.
      */
-    public function addTransformerFactory(TransformerFactoryInterface $transformerFactory, int $priority = 256): void
+    public function addTransformerFactory(TransformerFactoryInterface|TransformerPropertyFactoryInterface $transformerFactory, int $priority = 256): void
     {
         $this->sorted = null;
 
@@ -49,12 +49,35 @@ final class ChainTransformerFactory implements TransformerFactoryInterface
         return false;
     }
 
+    public function getPropertyTransformer(?array $sourceTypes, ?array $targetTypes, MapperMetadataInterface $mapperMetadata, string $property): ?TransformerInterface
+    {
+        $this->sortFactories();
+
+        foreach ($this->sorted ?? [] as $factory) {
+            if ($factory instanceof TransformerPropertyFactoryInterface) {
+                $transformer = $factory->getPropertyTransformer($sourceTypes, $targetTypes, $mapperMetadata, $property);
+            } else {
+                $transformer = $factory->getTransformer($sourceTypes, $targetTypes, $mapperMetadata);
+            }
+
+            if (null !== $transformer) {
+                return $transformer;
+            }
+        }
+
+        return null;
+    }
+
     public function getTransformer(?array $sourceTypes, ?array $targetTypes, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
     {
         $this->sortFactories();
 
         foreach ($this->sorted ?? [] as $factory) {
-            $transformer = $factory->getTransformer($sourceTypes, $targetTypes, $mapperMetadata);
+            $transformer = null;
+
+            if ($factory instanceof TransformerFactoryInterface) {
+                $transformer = $factory->getTransformer($sourceTypes, $targetTypes, $mapperMetadata);
+            }
 
             if (null !== $transformer) {
                 return $transformer;

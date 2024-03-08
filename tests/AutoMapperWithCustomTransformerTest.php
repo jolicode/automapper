@@ -8,6 +8,8 @@ use AutoMapper\Tests\Fixtures\Address;
 use AutoMapper\Tests\Fixtures\AddressDTO;
 use AutoMapper\Tests\Fixtures\BirthDateDateTime;
 use AutoMapper\Tests\Fixtures\BirthDateExploded;
+use AutoMapper\Tests\Fixtures\CityFoo;
+use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\FooDependency;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\FromSourceCustomModelTransformer;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\FromSourceCustomPropertyTransformer;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\FromTargetCustomModelTransformer;
@@ -16,6 +18,7 @@ use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\PrioritizedFromSourc
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\SourceTargetCustomModelTransformer;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\SourceTargetCustomPropertyTransformer;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\SourceTargetMultiFieldsCustomPropertyTransformer;
+use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\TransformerWithDependency;
 use AutoMapper\Tests\Fixtures\User;
 use AutoMapper\Tests\Fixtures\UserDTO;
 
@@ -113,6 +116,21 @@ class AutoMapperWithCustomTransformerTest extends AutoMapperBaseTest
         );
 
         self::assertSame('1985-07-01', $birthDateDateTime->date->format('Y-m-d'));
+    }
+
+    public function testCustomTransformerWithDependency(): void
+    {
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'TransformerWithDependency');
+
+        $this->autoMapper->bindCustomTransformer(new TransformerWithDependency(new FooDependency()));
+
+        $source = new CityFoo();
+        $source->name = 'foo';
+
+        self::assertSame(['name' => 'bar'], $this->autoMapper->map(
+            $source,
+            'array'
+        ));
     }
 
     private static function createUserDTO(?string $name = null, ?string $city = null): UserDTO

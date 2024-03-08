@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper;
 
+use AutoMapper\Transformer\CustomTransformer\CustomTransformerInterface;
+
 /**
  * Class derived for each generated mapper.
  *
@@ -28,6 +30,9 @@ abstract class GeneratedMapper implements MapperInterface
 
     protected $circularReferenceLimit;
 
+    /** @var array<string, CustomTransformerInterface> */
+    protected array $transformers = [];
+
     /**
      * Add a callable for a specific property.
      */
@@ -51,5 +56,13 @@ abstract class GeneratedMapper implements MapperInterface
     public function setCircularReferenceLimit(?int $circularReferenceLimit): void
     {
         $this->circularReferenceLimit = $circularReferenceLimit;
+    }
+
+    /**
+     * @param array<string, CustomTransformerInterface> $transformers
+     */
+    public function setCustomTransformers(array $transformers): void
+    {
+        $this->transformers = $transformers;
     }
 }

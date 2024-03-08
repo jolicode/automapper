@@ -13,6 +13,8 @@ use PhpParser\Node\Stmt;
  * Transformer tell how to transform a property mapping.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @method array{0: Expr, 1: Stmt[]} transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source)
  */
 interface TransformerInterface
 {
@@ -21,5 +23,5 @@ interface TransformerInterface
      *
      * @return array{0: Expr, 1: Stmt[]} First value is the output expression, second value is an array of stmt needed to get the output
      */
-    public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array;
+    public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope, /* Expr\Variable $source */): array;
 }

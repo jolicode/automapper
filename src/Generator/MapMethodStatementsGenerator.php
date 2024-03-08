@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AutoMapper\Generator;
 
 use AutoMapper\Exception\ReadOnlyTargetException;
-use AutoMapper\Extractor\CustomTransformerExtractor;
 use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
 use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
 use AutoMapper\MapperContext;
@@ -28,15 +27,13 @@ final readonly class MapMethodStatementsGenerator
     public function __construct(
         DiscriminatorStatementsGenerator $discriminatorStatementsGenerator,
         CachedReflectionStatementsGenerator $cachedReflectionStatementsGenerator,
-        CustomTransformerExtractor $customTransformerExtractor,
         private bool $allowReadOnlyTargetToPopulate = false,
     ) {
         $this->createObjectStatementsGenerator = new CreateTargetStatementsGenerator(
             $discriminatorStatementsGenerator,
             $cachedReflectionStatementsGenerator,
-            $customTransformerExtractor
         );
-        $this->propertyStatementsGenerator = new PropertyStatementsGenerator($customTransformerExtractor);
+        $this->propertyStatementsGenerator = new PropertyStatementsGenerator();
     }
 
     /**

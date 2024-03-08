@@ -12,33 +12,44 @@ use Symfony\Component\PropertyInfo\Type;
  */
 final class CustomTransformersRegistry
 {
-    /** @var list<CustomTransformerInterface> */
+    /** @var array<string, CustomTransformerInterface> */
     private array $customTransformers = [];
 
-    /** @var list<CustomTransformerInterface>|null */
+    /** @var array<string, CustomTransformerInterface>|null */
     private ?array $prioritizedCustomTransformers = null;
 
-    public function addCustomTransformer(CustomTransformerInterface $customTransformer): void
+    /**
+     * @return array<string, CustomTransformerInterface>
+     */
+    public function getCustomTransformers(): array
     {
-        if (!\in_array($customTransformer, $this->customTransformers, true)) {
-            $this->customTransformers[] = $customTransformer;
-        }
+        return $this->customTransformers;
+    }
+
+    public function addCustomTransformer(CustomTransformerInterface $customTransformer, ?string $id = null): void
+    {
+        $id = $id ?? $customTransformer::class;
+        $this->customTransformers[$id] = $customTransformer;
     }
 
     /**
      * @param Type[] $sourceTypes
      * @param Type[] $targetTypes
      *
-     * @return class-string<CustomTransformerInterface>|null
+     * @return array{string, CustomTransformerInterface}|null
      */
-    public function getCustomTransformerClass(MapperMetadataInterface $mapperMetadata, array $sourceTypes, array $targetTypes, string $propertyName): ?string
+    public function getCustomTransformerClass(MapperMetadataInterface $mapperMetadata, array $sourceTypes, array $targetTypes, string $propertyName): ?array
     {
-        foreach ($this->prioritizedCustomTransformers() as $customTransformer) {
+        /**
+         * @var string                     $id
+         * @var CustomTransformerInterface $customTransformer
+         */
+        foreach ($this->prioritizedCustomTransformers() as $id => $customTransformer) {
             if (
                 ($customTransformer instanceof CustomModelTransformerInterface && $sourceTypes && $targetTypes && $customTransformer->supports($sourceTypes, $targetTypes))
                 || $customTransformer instanceof CustomPropertyTransformerInterface && $customTransformer->supports($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $propertyName)
             ) {
-                return $customTransformer::class;
+                return [$id, $customTransformer];
             }
         }
 
@@ -46,14 +57,14 @@ final class CustomTransformersRegistry
     }
 
     /**
-     * @return list<CustomTransformerInterface>
+     * @return array<string, CustomTransformerInterface>
      */
     private function prioritizedCustomTransformers(): array
     {
         if (null === $this->prioritizedCustomTransformers) {
             $this->prioritizedCustomTransformers = $this->customTransformers;
 
-            usort(
+            uasort(
                 $this->prioritizedCustomTransformers,
                 static function (CustomTransformerInterface $a, CustomTransformerInterface $b): int {
                     $aPriority = $a instanceof PrioritizedCustomTransformerInterface ? $a->getPriority() : 0;

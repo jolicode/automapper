@@ -6,7 +6,6 @@ namespace AutoMapper\Generator;
 
 use AutoMapper\AutoMapperRegistryInterface;
 use AutoMapper\Exception\CompileException;
-use AutoMapper\Extractor\CustomTransformerExtractor;
 use AutoMapper\GeneratedMapper;
 use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
 use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
@@ -31,7 +30,6 @@ final readonly class MapperGenerator
     private MapMethodStatementsGenerator $mapMethodStatementsGenerator;
 
     public function __construct(
-        CustomTransformerExtractor $customTransformerExtractor,
         ClassDiscriminatorResolver $classDiscriminatorResolver,
         bool $allowReadOnlyTargetToPopulate = false,
     ) {
@@ -42,7 +40,6 @@ final readonly class MapperGenerator
         $this->mapMethodStatementsGenerator = new MapMethodStatementsGenerator(
             $discriminatorStatementsGenerator = new DiscriminatorStatementsGenerator($classDiscriminatorResolver),
             $cachedReflectionStatementsGenerator,
-            $customTransformerExtractor,
             $allowReadOnlyTargetToPopulate,
         );
 
