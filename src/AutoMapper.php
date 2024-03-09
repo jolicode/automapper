@@ -64,6 +64,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
         public readonly CustomTransformersRegistry $customTransformersRegistry,
         private readonly ?MapperGeneratorMetadataFactoryInterface $mapperConfigurationFactory = null,
     ) {
+        $this->chainTransformerFactory->setAutoMapperRegistry($this);
     }
 
     public function register(MapperGeneratorMetadataInterface $configuration): void
@@ -149,8 +150,13 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
         return $this->metadata[$source][$target];
     }
 
+    /**
+     * @deprecated since 8.2, will be removed in 9.0.
+     */
     public function bindTransformerFactory(TransformerFactoryInterface $transformerFactory): void
     {
+        trigger_deprecation('jolicode/automapper', '8.2', 'The "%s()" method will be removed in version 9.0, transformer must be injected in the chain transformer factory constructor instead.', __METHOD__);
+
         if (!$this->chainTransformerFactory->hasTransformerFactory($transformerFactory)) {
             $this->chainTransformerFactory->addTransformerFactory($transformerFactory);
         }
@@ -202,7 +208,24 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
 
         $customTransformerRegistry = new CustomTransformersRegistry();
 
-        $transformerFactory = new ChainTransformerFactory();
+        $factories = [
+            new MultipleTransformerFactory(),
+            new NullableTransformerFactory(),
+            new UniqueTypeTransformerFactory(),
+            new DateTimeTransformerFactory(),
+            new BuiltinTransformerFactory(),
+            new ArrayTransformerFactory(),
+            new ObjectTransformerFactory(),
+            new EnumTransformerFactory(),
+            new CustomTransformerFactory($customTransformerRegistry),
+        ];
+
+        if (class_exists(AbstractUid::class)) {
+            $factories[] = new SymfonyUidTransformerFactory();
+        }
+
+        $transformerFactory = new ChainTransformerFactory($factories);
+
         $sourceTargetMappingExtractor = new SourceTargetMappingExtractor(
             $propertyInfoExtractor,
             new MapToContextPropertyInfoExtractorDecorator($reflectionExtractor),
@@ -243,20 +266,6 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
                 $mapPrivateProperties
             ),
         ) : new self($loader, $transformerFactory, $customTransformerRegistry);
-
-        $transformerFactory->addTransformerFactory(new MultipleTransformerFactory($transformerFactory));
-        $transformerFactory->addTransformerFactory(new NullableTransformerFactory($transformerFactory));
-        $transformerFactory->addTransformerFactory(new UniqueTypeTransformerFactory($transformerFactory));
-        $transformerFactory->addTransformerFactory(new DateTimeTransformerFactory());
-        $transformerFactory->addTransformerFactory(new BuiltinTransformerFactory());
-        $transformerFactory->addTransformerFactory(new ArrayTransformerFactory($transformerFactory));
-        $transformerFactory->addTransformerFactory(new ObjectTransformerFactory($autoMapper));
-        $transformerFactory->addTransformerFactory(new EnumTransformerFactory());
-        $transformerFactory->addTransformerFactory(new CustomTransformerFactory($customTransformerRegistry));
-
-        if (class_exists(AbstractUid::class)) {
-            $transformerFactory->addTransformerFactory(new SymfonyUidTransformerFactory());
-        }
 
         return $autoMapper;
     }

@@ -18,7 +18,8 @@ class MultipleTransformerFactoryTest extends TestCase
     public function testGetTransformer(): void
     {
         $chainFactory = new ChainTransformerFactory();
-        $factory = new MultipleTransformerFactory($chainFactory);
+        $factory = new MultipleTransformerFactory();
+        $factory->setChainTransformerFactory($chainFactory);
 
         $chainFactory->addTransformerFactory($factory);
         $chainFactory->addTransformerFactory(new BuiltinTransformerFactory());
@@ -39,7 +40,8 @@ class MultipleTransformerFactoryTest extends TestCase
     public function testNoTransformerIfNoSubTransformer(): void
     {
         $chainFactory = new ChainTransformerFactory();
-        $factory = new MultipleTransformerFactory($chainFactory);
+        $factory = new MultipleTransformerFactory();
+        $factory->setChainTransformerFactory($chainFactory);
 
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
@@ -51,7 +53,8 @@ class MultipleTransformerFactoryTest extends TestCase
     public function testNoTransformer(): void
     {
         $chainFactory = new ChainTransformerFactory();
-        $factory = new MultipleTransformerFactory($chainFactory);
+        $factory = new MultipleTransformerFactory();
+        $factory->setChainTransformerFactory($chainFactory);
 
         $chainFactory->addTransformerFactory($factory);
         $chainFactory->addTransformerFactory(new BuiltinTransformerFactory());

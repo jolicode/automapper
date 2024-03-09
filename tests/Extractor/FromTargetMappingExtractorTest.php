@@ -55,7 +55,17 @@ class FromTargetMappingExtractorTest extends AutoMapperBaseTest
             [$reflectionExtractor]
         );
 
-        $transformerFactory = new ChainTransformerFactory();
+        $transformerFactory = new ChainTransformerFactory([
+            new MultipleTransformerFactory(),
+            new NullableTransformerFactory(),
+            new UniqueTypeTransformerFactory(),
+            new DateTimeTransformerFactory(),
+            new BuiltinTransformerFactory(),
+            new ArrayTransformerFactory(),
+            new ObjectTransformerFactory(),
+        ]);
+
+        $transformerFactory->setAutoMapperRegistry($this->autoMapper);
 
         $this->fromTargetMappingExtractor = new FromTargetMappingExtractor(
             $propertyInfoExtractor,
@@ -64,14 +74,6 @@ class FromTargetMappingExtractorTest extends AutoMapperBaseTest
             $transformerFactory,
             $classMetadataFactory
         );
-
-        $transformerFactory->addTransformerFactory(new MultipleTransformerFactory($transformerFactory));
-        $transformerFactory->addTransformerFactory(new NullableTransformerFactory($transformerFactory));
-        $transformerFactory->addTransformerFactory(new UniqueTypeTransformerFactory($transformerFactory));
-        $transformerFactory->addTransformerFactory(new DateTimeTransformerFactory());
-        $transformerFactory->addTransformerFactory(new BuiltinTransformerFactory());
-        $transformerFactory->addTransformerFactory(new ArrayTransformerFactory($transformerFactory));
-        $transformerFactory->addTransformerFactory(new ObjectTransformerFactory($this->autoMapper));
     }
 
     public function testWithSourceAsArray(): void

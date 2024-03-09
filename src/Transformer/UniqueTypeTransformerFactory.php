@@ -11,12 +11,9 @@ use AutoMapper\MapperMetadataInterface;
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-final readonly class UniqueTypeTransformerFactory implements TransformerFactoryInterface, PrioritizedTransformerFactoryInterface
+final class UniqueTypeTransformerFactory implements TransformerFactoryInterface, PrioritizedTransformerFactoryInterface, ChainTransformerFactoryAwareInterface
 {
-    public function __construct(
-        private ChainTransformerFactory $chainTransformerFactory,
-    ) {
-    }
+    use ChainTransformerFactoryAwareTrait;
 
     public function getTransformer(?array $sourceTypes, ?array $targetTypes, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
     {

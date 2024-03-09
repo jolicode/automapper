@@ -16,7 +16,8 @@ class ArrayTransformerFactoryTest extends TestCase
     public function testGetTransformer(): void
     {
         $chainFactory = new ChainTransformerFactory();
-        $factory = new ArrayTransformerFactory($chainFactory);
+        $factory = new ArrayTransformerFactory();
+        $factory->setChainTransformerFactory($chainFactory);
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
         $transformer = $factory->getTransformer([new Type('array', false, null, true)], [new Type('array', false, null, true)], $mapperMetadata);
@@ -27,7 +28,8 @@ class ArrayTransformerFactoryTest extends TestCase
     public function testNoTransformerTargetNoCollection(): void
     {
         $chainFactory = new ChainTransformerFactory();
-        $factory = new ArrayTransformerFactory($chainFactory);
+        $factory = new ArrayTransformerFactory();
+        $factory->setChainTransformerFactory($chainFactory);
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
         $transformer = $factory->getTransformer([new Type('array', false, null, true)], [new Type('string')], $mapperMetadata);
@@ -38,7 +40,8 @@ class ArrayTransformerFactoryTest extends TestCase
     public function testNoTransformerSourceNoCollection(): void
     {
         $chainFactory = new ChainTransformerFactory();
-        $factory = new ArrayTransformerFactory($chainFactory);
+        $factory = new ArrayTransformerFactory();
+        $factory->setChainTransformerFactory($chainFactory);
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
         $transformer = $factory->getTransformer([new Type('string')], [new Type('array', false, null, true)], $mapperMetadata);
@@ -49,7 +52,8 @@ class ArrayTransformerFactoryTest extends TestCase
     public function testNoTransformerIfNoSubTypeTransformerNoCollection(): void
     {
         $chainFactory = new ChainTransformerFactory();
-        $factory = new ArrayTransformerFactory($chainFactory);
+        $factory = new ArrayTransformerFactory();
+        $factory->setChainTransformerFactory($chainFactory);
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
         $stringType = new Type('string');

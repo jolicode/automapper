@@ -17,7 +17,8 @@ class ObjectTransformerFactoryTest extends TestCase
     {
         $autoMapperRegistry = $this->getMockBuilder(AutoMapperRegistryInterface::class)->getMock();
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
-        $factory = new ObjectTransformerFactory($autoMapperRegistry);
+        $factory = new ObjectTransformerFactory();
+        $factory->setAutoMapperRegistry($autoMapperRegistry);
 
         $autoMapperRegistry
             ->expects($this->any())

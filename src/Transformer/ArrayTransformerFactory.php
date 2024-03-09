@@ -12,12 +12,9 @@ use Symfony\Component\PropertyInfo\Type;
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-final class ArrayTransformerFactory extends AbstractUniqueTypeTransformerFactory implements PrioritizedTransformerFactoryInterface
+final class ArrayTransformerFactory extends AbstractUniqueTypeTransformerFactory implements PrioritizedTransformerFactoryInterface, ChainTransformerFactoryAwareInterface
 {
-    public function __construct(
-        private readonly ChainTransformerFactory $chainTransformerFactory,
-    ) {
-    }
+    use ChainTransformerFactoryAwareTrait;
 
     protected function createTransformer(Type $sourceType, Type $targetType, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
     {
