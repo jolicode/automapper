@@ -22,6 +22,7 @@ use Symfony\Component\PropertyInfo\Extractor\PhpStanExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
+use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 
 /**
@@ -35,7 +36,12 @@ class MapperGeneratorMetadataFactoryTest extends AutoMapperBaseTest
     {
         parent::setUp();
 
-        $classMetadataFactory = new ClassMetadataFactory(new AttributeLoader());
+        if (!class_exists(AttributeLoader::class)) {
+            $classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader());
+        } else {
+            $classMetadataFactory = new ClassMetadataFactory(new AttributeLoader());
+        }
+
         $reflectionExtractor = new ReflectionExtractor(null, null, null, true, ReflectionExtractor::ALLOW_PUBLIC | ReflectionExtractor::ALLOW_PROTECTED | ReflectionExtractor::ALLOW_PRIVATE);
 
         $phpStanExtractor = new PhpStanExtractor();
