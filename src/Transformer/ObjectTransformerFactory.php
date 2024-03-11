@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
-use AutoMapper\AutoMapperRegistryInterface;
+use AutoMapper\AutoMapperRegistryAwareInterface;
+use AutoMapper\AutoMapperRegistryAwareTrait;
 use AutoMapper\MapperMetadataInterface;
 use Symfony\Component\PropertyInfo\Type;
 
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-final class ObjectTransformerFactory extends AbstractUniqueTypeTransformerFactory implements PrioritizedTransformerFactoryInterface
+final class ObjectTransformerFactory extends AbstractUniqueTypeTransformerFactory implements PrioritizedTransformerFactoryInterface, AutoMapperRegistryAwareInterface
 {
-    public function __construct(
-        private readonly AutoMapperRegistryInterface $autoMapper,
-    ) {
-    }
+    use AutoMapperRegistryAwareTrait;
 
     protected function createTransformer(Type $sourceType, Type $targetType, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
     {
@@ -36,7 +34,7 @@ final class ObjectTransformerFactory extends AbstractUniqueTypeTransformerFactor
             $targetTypeName = $targetType->getClassName();
         }
 
-        if (null !== $sourceTypeName && null !== $targetTypeName && $this->autoMapper->hasMapper($sourceTypeName, $targetTypeName)) {
+        if (null !== $sourceTypeName && null !== $targetTypeName && $this->autoMapperRegistry->hasMapper($sourceTypeName, $targetTypeName)) {
             return new ObjectTransformer($sourceType, $targetType);
         }
 
