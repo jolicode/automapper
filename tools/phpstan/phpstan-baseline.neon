@@ -236,6 +236,11 @@ parameters:
 			path: ../../src/Generator/CreateTargetStatementsGenerator.php
 
 		-
+			message: "#^Parameter \\#1 \\$items of class PhpParser\\\\Node\\\\Expr\\\\Array_ constructor expects array\\<PhpParser\\\\Node\\\\ArrayItem\\>, array\\<PhpParser\\\\Node\\\\ArrayItem\\|PhpParser\\\\Node\\\\Expr\\\\ArrayItem\\> given\\.$#"
+			count: 2
+			path: ../../src/Generator/PropertyConditionsGenerator.php
+
+		-
 			message: "#^Method AutoMapper\\\\Loader\\\\FileLoader\\:\\:addHashToRegistry\\(\\) has parameter \\$className with no type specified\\.$#"
 			count: 1
 			path: ../../src/Loader/FileLoader.php
@@ -481,6 +486,11 @@ parameters:
 			path: ../../src/Transformer/AbstractArrayTransformer.php
 
 		-
+			message: "#^Parameter \\#1 \\$items of class PhpParser\\\\Node\\\\Expr\\\\Array_ constructor expects array\\<PhpParser\\\\Node\\\\ArrayItem\\>, array\\<int, PhpParser\\\\Node\\\\ArrayItem\\|PhpParser\\\\Node\\\\Expr\\\\ArrayItem\\> given\\.$#"
+			count: 1
+			path: ../../src/Transformer/BuiltinTransformer.php
+
+		-
 			message: "#^Parameter \\#1 \\$source of method AutoMapper\\\\Transformer\\\\CustomTransformer\\\\CustomPropertyTransformerInterface\\:\\:supports\\(\\) expects 'array'\\|class\\-string, string given\\.$#"
 			count: 1
 			path: ../../src/Transformer/CustomTransformer/CustomTransformersRegistry.php
@@ -514,13 +524,3 @@ parameters:
 			message: "#^Parameter \\#1 \\$className of class AutoMapper\\\\Transformer\\\\StringToSymfonyUidTransformer constructor expects string, string\\|null given\\.$#"
 			count: 1
 			path: ../../src/Transformer/SymfonyUidTransformerFactory.php
-
-		-
-			message: "#^Parameter \\#1 \\$items of class PhpParser\\\\Node\\\\Expr\\\\Array_ constructor expects array\\<PhpParser\\\\Node\\\\ArrayItem\\>, array\\<PhpParser\\\\Node\\\\ArrayItem\\|PhpParser\\\\Node\\\\Expr\\\\ArrayItem\\> given.$#"
-			count: 2
-			path: ../../src/Generator/PropertyConditionsGenerator.php
-
-		-
-			message: "#^Parameter \\#1 \\$items of class PhpParser\\\\Node\\\\Expr\\\\Array_ constructor expects array\\<PhpParser\\\\Node\\\\ArrayItem\\>, array\\<int, PhpParser\\\\Node\\\\ArrayItem\\|PhpParser\\\\Node\\\\Expr\\\\ArrayItem\\> given.$#"
-			count: 1
-			path: ../../src/Transformer/BuiltinTransformer.php

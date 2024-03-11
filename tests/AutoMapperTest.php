@@ -1280,6 +1280,20 @@ class AutoMapperTest extends AutoMapperBaseTest
         );
     }
 
+    public function testMapWithForcedTimeZone(): void
+    {
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+
+        /** @var HasDateTimeImmutable $utc */
+        $utc = $this->autoMapper->map(
+            ['dateTime' => '2024-03-11 17:00:00'],
+            HasDateTimeImmutable::class,
+            [MapperContext::DATETIME_FORMAT => 'Y-m-d H:i:s', MapperContext::DATETIME_FORCE_TIMEZONE => 'Europe/Paris']
+        );
+
+        self::assertEquals(new \DateTimeZone('Europe/Paris'), $utc->dateTime->getTimezone());
+    }
+
     public function testAutoMappingGenerator(): void
     {
         $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
