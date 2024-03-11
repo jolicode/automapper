@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - [GH#27](https://github.com/jolicode/automapper/pull/27) Use PhpStanExtractor instead of PhpDocExtractor
 - [GH#35](https://github.com/jolicode/automapper/pull/35) Refactoring Mapper Generator
+- [GH#47](https://github.com/jolicode/automapper/pull/47) Use directly the custom transformer instead of extracting it as a callback
+- [GH#48](https://github.com/jolicode/automapper/pull/48) Change the way transformer factory are injected to make it work as soon as automapper is created
 
 ### Fixed
 - [GH#33](https://github.com/jolicode/automapper/pull/33) Allow usage of imported class names in custom transformers
