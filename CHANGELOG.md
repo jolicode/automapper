@@ -12,13 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#26](https://github.com/jolicode/automapper/pull/26) Fix mappings involving DateTimeInterface type
 - [GH#37](https://github.com/jolicode/automapper/pull/37) Adds useful phpDoc annotation in generated mappers
 
-### Fixed
-- [GH#33](https://github.com/jolicode/automapper/pull/33) Allow usage of imported class names in custom transformers
-- [GH#45](https://github.com/jolicode/automapper/pull/45) Fix composer.lock for phpstan and php-cs-fixer tooling
-
 ### Changed
 - [GH#27](https://github.com/jolicode/automapper/pull/27) Use PhpStanExtractor instead of PhpDocExtractor
 - [GH#35](https://github.com/jolicode/automapper/pull/35) Refactoring Mapper Generator
+
+### Fixed
+- [GH#33](https://github.com/jolicode/automapper/pull/33) Allow usage of imported class names in custom transformers
+- [GH#45](https://github.com/jolicode/automapper/pull/45) Fix composer.lock for phpstan and php-cs-fixer tooling
+- [GH#44](https://github.com/jolicode/automapper/pull/44) Allow skipping uninitialized property when skipping null values
 
 ## [8.1.0] - 2023-12-14
 ### Added
