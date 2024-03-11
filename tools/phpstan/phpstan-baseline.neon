@@ -346,11 +346,6 @@ parameters:
 			path: ../../src/MapperContext.php
 
 		-
-			message: "#^Method AutoMapper\\\\MapperContext\\:\\:isAllowedAttribute\\(\\) has parameter \\$value with no type specified\\.$#"
-			count: 1
-			path: ../../src/MapperContext.php
-
-		-
 			message: "#^Method AutoMapper\\\\MapperContext\\:\\:setAllowedAttributes\\(\\) has parameter \\$allowedAttributes with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: ../../src/MapperContext.php

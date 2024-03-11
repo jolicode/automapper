@@ -35,12 +35,16 @@ final readonly class PropertyStatementsGenerator
         }
 
         $variableRegistry = $mapperMetadata->getVariableRegistry();
-
         $fieldValueVariable = $variableRegistry->getFieldValueVariable($propertyMapping);
 
+        if ($propertyMapping->readAccessor) {
+            $fieldValueVariable = $propertyMapping->readAccessor->getExpression($variableRegistry->getSourceInput());
+        }
+
         if ($propertyMapping->hasCustomTransformer()) {
-            $output = $this->customTransformerExtractor->extract($propertyMapping->transformer, $fieldValueVariable, $variableRegistry->getSourceInput());
             $propStatements = [];
+
+            $output = $this->customTransformerExtractor->extract($propertyMapping->transformer, $fieldValueVariable, $variableRegistry->getSourceInput());
         } else {
             /* Create expression to transform the read value into the wanted written value, depending on the transform it may add new statements to get the correct value */
             [$output, $propStatements] = $propertyMapping->transformer->transform(

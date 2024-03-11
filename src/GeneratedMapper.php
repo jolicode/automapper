@@ -19,6 +19,9 @@ abstract class GeneratedMapper implements MapperInterface
 
     protected $extractCallbacks = [];
 
+    /** @var callable[] */
+    protected array $extractIsNullCallbacks = [];
+
     protected $cachedTarget;
 
     protected $circularReferenceHandler;

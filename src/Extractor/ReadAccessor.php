@@ -154,6 +154,64 @@ final class ReadAccessor
         throw new CompileException('Invalid accessor for read expression');
     }
 
+    public function getIsNullExpression(Expr\Variable $input): Expr
+    {
+        if (self::TYPE_METHOD === $this->type) {
+            $methodCallExpr = $this->getExpression($input);
+
+            /*
+             * null !== $methodCallExpr
+             */
+            return new Expr\BinaryOp\Identical(
+                new Expr\ConstFetch(new Name('null')),
+                $methodCallExpr,
+            );
+        }
+
+        if (self::TYPE_PROPERTY === $this->type) {
+            if ($this->private) {
+                /*
+                 * When the property is private we use the extract callback that can read this value
+                 *
+                 * @see \AutoMapper\Extractor\ReadAccessor::getExtractIsNullCallback()
+                 *
+                 * $this->extractIsNullCallbacks['property_name']($input)
+                 */
+                return new Expr\FuncCall(
+                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractIsNullCallbacks'), new Scalar\String_($this->accessor)),
+                    [
+                        new Arg($input),
+                    ]
+                );
+            }
+
+            /*
+             * Use the property fetch to read the value
+             *
+             * isset($input->property_name)
+             */
+            return new Expr\Isset_([new Expr\PropertyFetch($input, $this->accessor)]);
+        }
+
+        if (self::TYPE_ARRAY_DIMENSION === $this->type) {
+            /*
+             * Use the array dim fetch to read the value
+             *
+             * isset($input['property_name'])
+             */
+            return new Expr\Isset_([new Expr\ArrayDimFetch($input, new Scalar\String_($this->accessor))]);
+        }
+
+        if (self::TYPE_SOURCE === $this->type) {
+            return new Expr\BinaryOp\Identical(
+                new Expr\ConstFetch(new Name('null')),
+                $input,
+            );
+        }
+
+        throw new CompileException('Invalid accessor for read expression');
+    }
+
     /**
      * Get AST expression for binding closure when dealing with a private property.
      */
@@ -186,6 +244,38 @@ final class ReadAccessor
                                 ? new Expr\PropertyFetch(new Expr\Variable('object'), $this->accessor)
                                 : new Expr\MethodCall(new Expr\Variable('object'), $this->accessor)
                         ),
+                    ],
+                ])
+            ),
+            new Arg(new Expr\ConstFetch(new Name('null'))),
+            new Arg(new Scalar\String_($className)),
+        ]);
+    }
+
+    /**
+     * Get AST expression for binding closure when dealing with a private property.
+     */
+    public function getExtractIsNullCallback(string $className): ?Expr
+    {
+        if ($this->type !== self::TYPE_PROPERTY || !$this->private) {
+            return null;
+        }
+
+        /*
+         * Create extract is null callback for this accessor
+         *
+         *  \Closure::bind(function ($object) {
+         *      return isset($object->property_name);
+         *  }, null, $className)
+         */
+        return new Expr\StaticCall(new Name\FullyQualified(\Closure::class), 'bind', [
+            new Arg(
+                new Expr\Closure([
+                    'params' => [
+                        new Param(new Expr\Variable('object')),
+                    ],
+                    'stmts' => [
+                        new Stmt\Return_(new Expr\Isset_([new Expr\PropertyFetch(new Expr\Variable('object'), $this->accessor)])),
                     ],
                 ])
             ),

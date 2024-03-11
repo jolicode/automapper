@@ -174,10 +174,12 @@ class MapperContext
 
     /**
      * Check whether an attribute is allowed to be mapped.
+     *
+     * @internal
      */
-    public static function isAllowedAttribute(array $context, string $attribute, $value): bool
+    public static function isAllowedAttribute(array $context, string $attribute, bool $valueIsNotNullOrNotUndefined): bool
     {
-        if (($context[self::SKIP_NULL_VALUES] ?? false) && null === $value) {
+        if (($context[self::SKIP_NULL_VALUES] ?? false) && !$valueIsNotNullOrNotUndefined) {
             return false;
         }
 

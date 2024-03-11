@@ -30,6 +30,7 @@ final readonly class MapperConstructorGenerator
 
         foreach ($mapperMetadata->getPropertiesMapping() as $propertyMapping) {
             $constructStatements[] = $this->extractCallbackForProperty($propertyMapping);
+            $constructStatements[] = $this->extractIsNullCallbackForProperty($propertyMapping);
             $constructStatements[] = $this->hydrateCallbackForProperty($propertyMapping);
         }
 
@@ -59,6 +60,30 @@ final readonly class MapperConstructorGenerator
             new Expr\Assign(
                 new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractCallbacks'), new Scalar\String_($propertyMapping->property)),
                 $extractCallback
+            ));
+    }
+
+    /**
+     * Add read callback to the constructor of the generated mapper.
+     *
+     * ```php
+     * $this->extractIsNullCallbacks['propertyName'] = $extractIsNullCallback;
+     * ```
+     */
+    private function extractIsNullCallbackForProperty(PropertyMapping $propertyMapping): ?Stmt\Expression
+    {
+        $mapperMetadata = $propertyMapping->mapperMetadata;
+
+        $extractNullCallback = $propertyMapping->readAccessor?->getExtractIsNullCallback($mapperMetadata->getSource());
+
+        if (!$extractNullCallback) {
+            return null;
+        }
+
+        return new Stmt\Expression(
+            new Expr\Assign(
+                new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractIsNullCallbacks'), new Scalar\String_($propertyMapping->property)),
+                $extractNullCallback
             ));
     }
 

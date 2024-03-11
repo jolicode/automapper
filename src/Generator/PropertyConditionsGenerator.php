@@ -99,7 +99,7 @@ final readonly class PropertyConditionsGenerator
      * In case of supporting attributes checking, we check if the property is allowed to be mapped.
      *
      * ```php
-     * MapperContext::isAllowedAttribute($context, 'propertyName', $source).
+     * MapperContext::isAllowedAttribute($context, 'propertyName', isset($source->field)).
      * ```
      */
     private function isAllowedAttribute(PropertyMapping $propertyMapping): ?Expr
@@ -112,16 +112,10 @@ final readonly class PropertyConditionsGenerator
 
         $variableRegistry = $mapperMetadata->getVariableRegistry();
 
-        /** Create expression on how to read the value from the source */
-        $sourcePropertyAccessor = new Expr\Assign(
-            $variableRegistry->getFieldValueVariable($propertyMapping),
-            $propertyMapping->readAccessor->getExpression($variableRegistry->getSourceInput())
-        );
-
         return new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'isAllowedAttribute', [
             new Arg($variableRegistry->getContext()),
             new Arg(new Scalar\String_($propertyMapping->property)),
-            new Arg($sourcePropertyAccessor),
+            new Arg($propertyMapping->readAccessor->getIsNullExpression($variableRegistry->getSourceInput())),
         ]);
     }
 
