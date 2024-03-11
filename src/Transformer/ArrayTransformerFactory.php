@@ -18,7 +18,7 @@ final class ArrayTransformerFactory extends AbstractUniqueTypeTransformerFactory
 
     protected function createTransformer(Type $sourceType, Type $targetType, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
     {
-        if (!$sourceType->isCollection()) {
+        if (!($sourceType->isCollection() || ($sourceType->getBuiltinType() === Type::BUILTIN_TYPE_OBJECT && $sourceType->getClassName() === \Generator::class))) {
             return null;
         }
 
@@ -27,7 +27,7 @@ final class ArrayTransformerFactory extends AbstractUniqueTypeTransformerFactory
         }
 
         if ([] === $sourceType->getCollectionValueTypes() || [] === $targetType->getCollectionValueTypes()) {
-            return new CopyTransformer();
+            return new DictionaryTransformer(new CopyTransformer());
         }
 
         $subItemTransformer = $this->chainTransformerFactory->getTransformer($sourceType->getCollectionValueTypes(), $targetType->getCollectionValueTypes(), $mapperMetadata);

@@ -7,7 +7,7 @@ namespace AutoMapper\Tests\Transformer;
 use AutoMapper\MapperMetadata;
 use AutoMapper\Transformer\ArrayTransformerFactory;
 use AutoMapper\Transformer\ChainTransformerFactory;
-use AutoMapper\Transformer\CopyTransformer;
+use AutoMapper\Transformer\DictionaryTransformer;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\PropertyInfo\Type;
 
@@ -22,7 +22,7 @@ class ArrayTransformerFactoryTest extends TestCase
 
         $transformer = $factory->getTransformer([new Type('array', false, null, true)], [new Type('array', false, null, true)], $mapperMetadata);
 
-        self::assertInstanceOf(CopyTransformer::class, $transformer);
+        self::assertInstanceOf(DictionaryTransformer::class, $transformer);
     }
 
     public function testNoTransformerTargetNoCollection(): void

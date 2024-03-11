@@ -114,10 +114,18 @@ final class FromSourceMappingExtractor extends MappingExtractor
 
         $builtinType = $type->getBuiltinType();
         $className = $type->getClassName();
+        $collection = $type->isCollection();
 
         if (Type::BUILTIN_TYPE_OBJECT === $type->getBuiltinType() && \stdClass::class !== $type->getClassName()) {
             $builtinType = 'array' === $target ? Type::BUILTIN_TYPE_ARRAY : Type::BUILTIN_TYPE_OBJECT;
             $className = 'array' === $target ? null : \stdClass::class;
+        }
+
+        // Use array for generator
+        if (Type::BUILTIN_TYPE_OBJECT === $type->getBuiltinType() && \Generator::class === $type->getClassName()) {
+            $builtinType = Type::BUILTIN_TYPE_ARRAY;
+            $className = null;
+            $collection = true;
         }
 
         // Use string for datetime
@@ -132,7 +140,7 @@ final class FromSourceMappingExtractor extends MappingExtractor
             $builtinType,
             $type->isNullable(),
             $className,
-            $type->isCollection(),
+            $collection,
             $this->transformType($target, $collectionKeyTypes[0] ?? null),
             $this->transformType($target, $collectionValueTypes[0] ?? null)
         );

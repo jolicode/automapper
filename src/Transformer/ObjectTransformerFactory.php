@@ -55,6 +55,10 @@ final class ObjectTransformerFactory extends AbstractUniqueTypeTransformerFactor
             return false;
         }
 
+        if ($type->getClassName() === \Generator::class) {
+            return false;
+        }
+
         return true;
     }
 
