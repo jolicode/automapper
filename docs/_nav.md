@@ -1,3 +1,3 @@
 - [Quick start](/)
-- [Symfony](/symfony)
+- [With Symfony](/symfony)
 - [Contributing](/contributing)
