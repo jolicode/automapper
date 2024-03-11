@@ -99,7 +99,7 @@ final readonly class PropertyConditionsGenerator
      * In case of supporting attributes checking, we check if the property is allowed to be mapped.
      *
      * ```php
-     * MapperContext::isAllowedAttribute($context, 'propertyName', $source).
+     * MapperContext::isAllowedAttribute($context, 'propertyName', isset($source->field)).
      * ```
      */
     private function isAllowedAttribute(PropertyMapping $propertyMapping): ?Expr
