@@ -20,7 +20,7 @@ use PhpParser\Node\Stmt;
 final readonly class DiscriminatorStatementsGenerator
 {
     public function __construct(
-        private ClassDiscriminatorResolver $classDiscriminatorResolver
+        private ClassDiscriminatorResolver $classDiscriminatorResolver,
     ) {
     }
 
@@ -83,6 +83,10 @@ final readonly class DiscriminatorStatementsGenerator
 
         $propertyMapping = $this->classDiscriminatorResolver->propertyMapping($mapperMetadata);
 
+        if (!$propertyMapping || $propertyMapping->readAccessor === null) {
+            return [];
+        }
+
         $variableRegistry = $mapperMetadata->getVariableRegistry();
 
         // Generate the code that allows to put the type into the output variable,
@@ -91,7 +95,8 @@ final readonly class DiscriminatorStatementsGenerator
             $propertyMapping->readAccessor->getExpression($variableRegistry->getSourceInput()),
             $variableRegistry->getResult(),
             $propertyMapping,
-            $variableRegistry->getUniqueVariableScope()
+            $variableRegistry->getUniqueVariableScope(),
+            $variableRegistry->getSourceInput()
         );
 
         foreach ($this->classDiscriminatorResolver->discriminatorMapperNamesIndexedByTypeValue($mapperMetadata) as $typeValue => $discriminatorMapperName) {

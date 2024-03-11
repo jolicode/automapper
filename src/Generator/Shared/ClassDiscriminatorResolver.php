@@ -25,7 +25,6 @@ final readonly class ClassDiscriminatorResolver
         if (!$mapperMetadata->targetIsAUserDefinedClass()
             || !($propertyMapping = $this->propertyMapping($mapperMetadata))
             || !$propertyMapping->transformer instanceof TransformerInterface
-            || $propertyMapping->hasCustomTransformer()
         ) {
             return false;
         }

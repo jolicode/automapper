@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator;
 
-use AutoMapper\Extractor\CustomTransformerExtractor;
 use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
 use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
@@ -28,7 +27,6 @@ final readonly class CreateTargetStatementsGenerator
     public function __construct(
         private DiscriminatorStatementsGenerator $discriminatorStatementsGenerator,
         private CachedReflectionStatementsGenerator $cachedReflectionStatementsGenerator,
-        private CustomTransformerExtractor $customTransformerExtractor,
         ?Parser $parser = null,
     ) {
         $this->parser = $parser ?? (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
@@ -207,22 +205,11 @@ final readonly class CreateTargetStatementsGenerator
 
         $constructVar = $variableRegistry->getVariableWithUniqueName('constructArg');
 
-        if ($propertyMapping->hasCustomTransformer()) {
-            $propStatements = [];
-            /*
-             * let's extract custom transformer's transform() method in a closure,
-             * and add it as a constructor argument
-             */
-            $output = $this->customTransformerExtractor->extract(
-                $propertyMapping->transformer,
-                $propertyMapping->readAccessor?->getExpression($variableRegistry->getSourceInput()),
-                $variableRegistry->getSourceInput()
-            );
-        } elseif ($propertyMapping->readAccessor) {
+        if ($propertyMapping->readAccessor) {
             $fieldValueExpr = $propertyMapping->readAccessor->getExpression($variableRegistry->getSourceInput());
 
             /* Get extract and transform statements for this property */
-            [$output, $propStatements] = $propertyMapping->transformer->transform($fieldValueExpr, $constructVar, $propertyMapping, $variableRegistry->getUniqueVariableScope());
+            [$output, $propStatements] = $propertyMapping->transformer->transform($fieldValueExpr, $constructVar, $propertyMapping, $variableRegistry->getUniqueVariableScope(), $variableRegistry->getSourceInput());
         } else {
             return null;
         }

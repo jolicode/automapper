@@ -13,7 +13,6 @@ use AutoMapper\MapperGeneratorMetadataFactoryInterface;
 use AutoMapper\Transformer\ArrayTransformerFactory;
 use AutoMapper\Transformer\BuiltinTransformerFactory;
 use AutoMapper\Transformer\ChainTransformerFactory;
-use AutoMapper\Transformer\CustomTransformer\CustomTransformersRegistry;
 use AutoMapper\Transformer\DateTimeTransformerFactory;
 use AutoMapper\Transformer\MultipleTransformerFactory;
 use AutoMapper\Transformer\NullableTransformerFactory;
@@ -37,7 +36,6 @@ class MapperGeneratorMetadataFactoryTest extends AutoMapperBaseTest
         parent::setUp();
 
         $classMetadataFactory = new ClassMetadataFactory(new AttributeLoader());
-        $customTransformerRegistry = new CustomTransformersRegistry();
         $reflectionExtractor = new ReflectionExtractor(null, null, null, true, ReflectionExtractor::ALLOW_PUBLIC | ReflectionExtractor::ALLOW_PROTECTED | ReflectionExtractor::ALLOW_PRIVATE);
 
         $phpStanExtractor = new PhpStanExtractor();
@@ -54,7 +52,6 @@ class MapperGeneratorMetadataFactoryTest extends AutoMapperBaseTest
             $reflectionExtractor,
             $reflectionExtractor,
             $transformerFactory,
-            $customTransformerRegistry,
             $classMetadataFactory
         );
 
@@ -63,7 +60,6 @@ class MapperGeneratorMetadataFactoryTest extends AutoMapperBaseTest
             $reflectionExtractor,
             $reflectionExtractor,
             $transformerFactory,
-            $customTransformerRegistry,
             $classMetadataFactory
         );
 
@@ -72,7 +68,6 @@ class MapperGeneratorMetadataFactoryTest extends AutoMapperBaseTest
             $reflectionExtractor,
             $reflectionExtractor,
             $transformerFactory,
-            $customTransformerRegistry,
             $classMetadataFactory
         );
 

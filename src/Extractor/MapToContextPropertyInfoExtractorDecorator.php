@@ -22,7 +22,7 @@ use Symfony\Component\PropertyInfo\PropertyWriteInfoExtractorInterface;
 final readonly class MapToContextPropertyInfoExtractorDecorator implements PropertyListExtractorInterface, PropertyTypeExtractorInterface, PropertyAccessExtractorInterface, PropertyInitializableExtractorInterface, PropertyReadInfoExtractorInterface, PropertyWriteInfoExtractorInterface, ConstructorArgumentTypeExtractorInterface
 {
     public function __construct(
-        private ReflectionExtractor $decorated
+        private ReflectionExtractor $decorated,
     ) {
     }
 

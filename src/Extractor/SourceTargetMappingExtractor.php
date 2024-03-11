@@ -6,6 +6,7 @@ namespace AutoMapper\Extractor;
 
 use AutoMapper\MapperGeneratorMetadataInterface;
 use AutoMapper\MapperMetadataInterface;
+use AutoMapper\Transformer\TransformerPropertyFactoryInterface;
 use Symfony\Component\PropertyInfo\PropertyReadInfo;
 
 /**
@@ -56,7 +57,7 @@ class SourceTargetMappingExtractor extends MappingExtractor
                 continue;
             }
 
-            if ($propertyMapping = $this->toPropertyMapping($mapperMetadata, $property, onlyCustomTransformer: true)) {
+            if ($propertyMapping = $this->toPropertyMapping($mapperMetadata, $property)) {
                 $mapping[] = $propertyMapping;
             }
         }
@@ -64,7 +65,7 @@ class SourceTargetMappingExtractor extends MappingExtractor
         return $mapping;
     }
 
-    private function toPropertyMapping(MapperGeneratorMetadataInterface $mapperMetadata, string $property, bool $onlyCustomTransformer = false): ?PropertyMapping
+    private function toPropertyMapping(MapperGeneratorMetadataInterface $mapperMetadata, string $property): ?PropertyMapping
     {
         $targetMutatorConstruct = $this->getWriteMutator($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property, [
             'enable_constructor_extraction' => true,
@@ -77,9 +78,9 @@ class SourceTargetMappingExtractor extends MappingExtractor
         $sourceTypes = $this->propertyInfoExtractor->getTypes($mapperMetadata->getSource(), $property) ?? [];
         $targetTypes = $this->propertyInfoExtractor->getTypes($mapperMetadata->getTarget(), $property) ?? [];
 
-        $transformer = $this->customTransformerRegistry->getCustomTransformerClass($mapperMetadata, $sourceTypes, $targetTypes, $property);
-
-        if (null === $transformer && !$onlyCustomTransformer) {
+        if ($this->transformerFactory instanceof TransformerPropertyFactoryInterface) {
+            $transformer = $this->transformerFactory->getPropertyTransformer($sourceTypes, $targetTypes, $mapperMetadata, $property);
+        } else {
             $transformer = $this->transformerFactory->getTransformer($sourceTypes, $targetTypes, $mapperMetadata);
         }
 
@@ -115,7 +116,7 @@ class SourceTargetMappingExtractor extends MappingExtractor
             null !== $maxDepthSource && null !== $maxDepthTarget => min($maxDepthSource, $maxDepthTarget),
             null !== $maxDepthSource => $maxDepthSource,
             null !== $maxDepthTarget => $maxDepthTarget,
-            default => null
+            default => null,
         };
     }
 }

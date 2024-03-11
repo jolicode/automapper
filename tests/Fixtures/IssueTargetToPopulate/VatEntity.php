@@ -41,7 +41,7 @@ class VatEntity
         string $stateCode = null,
         float $standardVatRate = 0,
         float $reducedVatRate = 0,
-        bool $displayIncVatPrices = false
+        bool $displayIncVatPrices = false,
     ) {
         $this->countryCode = $countryCode;
         $this->stateCode = $stateCode;

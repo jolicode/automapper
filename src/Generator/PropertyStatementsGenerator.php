@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator;
 
-use AutoMapper\Extractor\CustomTransformerExtractor;
 use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Extractor\WriteMutator;
 use AutoMapper\Transformer\AssignedByReferenceTransformerInterface;
@@ -18,7 +17,6 @@ final readonly class PropertyStatementsGenerator
     private PropertyConditionsGenerator $propertyConditionsGenerator;
 
     public function __construct(
-        private CustomTransformerExtractor $customTransformerExtractor,
     ) {
         $this->propertyConditionsGenerator = new PropertyConditionsGenerator();
     }
@@ -41,19 +39,14 @@ final readonly class PropertyStatementsGenerator
             $fieldValueVariable = $propertyMapping->readAccessor->getExpression($variableRegistry->getSourceInput());
         }
 
-        if ($propertyMapping->hasCustomTransformer()) {
-            $propStatements = [];
-
-            $output = $this->customTransformerExtractor->extract($propertyMapping->transformer, $fieldValueVariable, $variableRegistry->getSourceInput());
-        } else {
-            /* Create expression to transform the read value into the wanted written value, depending on the transform it may add new statements to get the correct value */
-            [$output, $propStatements] = $propertyMapping->transformer->transform(
-                $fieldValueVariable,
-                $variableRegistry->getResult(),
-                $propertyMapping,
-                $variableRegistry->getUniqueVariableScope()
-            );
-        }
+        /* Create expression to transform the read value into the wanted written value, depending on the transform it may add new statements to get the correct value */
+        [$output, $propStatements] = $propertyMapping->transformer->transform(
+            $fieldValueVariable,
+            $variableRegistry->getResult(),
+            $propertyMapping,
+            $variableRegistry->getUniqueVariableScope(),
+            $variableRegistry->getSourceInput()
+        );
 
         if ($propertyMapping->writeMutator && $propertyMapping->writeMutator->type !== WriteMutator::TYPE_ADDER_AND_REMOVER) {
             /** Create expression to write the transformed value to the target only if not add / remove mutator, as it's already called by the transformer in this case */

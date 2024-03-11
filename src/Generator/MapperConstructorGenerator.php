@@ -17,7 +17,7 @@ use PhpParser\Node\Stmt;
 final readonly class MapperConstructorGenerator
 {
     public function __construct(
-        private CachedReflectionStatementsGenerator $cachedReflectionStatementsGenerator
+        private CachedReflectionStatementsGenerator $cachedReflectionStatementsGenerator,
     ) {
     }
 

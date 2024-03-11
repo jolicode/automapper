@@ -20,8 +20,12 @@ final readonly class SymfonyUidToStringTransformer implements TransformerInterfa
     ) {
     }
 
-    public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
+    public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope, /* Expr\Variable $source */): array
     {
+        if (\func_num_args() < 5) {
+            trigger_deprecation('jolicode/automapper', '8.2', 'The "%s()" method will have a new "Expr\Variable $source" argument in version 9.0, not defining it is deprecated.', __METHOD__);
+        }
+
         /*
          * Create a string from a Symfony Uid object.
          *
