@@ -16,6 +16,7 @@ use AutoMapper\Tests\Fixtures\AddressDTOWithReadonly;
 use AutoMapper\Tests\Fixtures\AddressDTOWithReadonlyPromotedProperty;
 use AutoMapper\Tests\Fixtures\AddressType;
 use AutoMapper\Tests\Fixtures\AddressWithEnum;
+use AutoMapper\Tests\Fixtures\BuiltinClass;
 use AutoMapper\Tests\Fixtures\ClassWithMapToContextAttribute;
 use AutoMapper\Tests\Fixtures\ClassWithNullablePropertyInConstructor;
 use AutoMapper\Tests\Fixtures\ClassWithPrivateProperty;
@@ -1304,5 +1305,15 @@ class AutoMapperTest extends AutoMapperBaseTest
 
         self::assertSame([1, 2, 3, 'foo' => 'bar'], $data->generator);
         self::assertSame([1, 2, 3], $data->array);
+    }
+
+    public function testBuiltinClass(): void
+    {
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+
+        self::assertSame(
+            [],
+            $this->autoMapper->map(new BuiltinClass(new \DateInterval('P1Y')), 'array')
+        );
     }
 }
