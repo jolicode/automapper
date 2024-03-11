@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- [GH#50](https://github.com/jolicode/automapper/pull/50) Support generator mapping
+
+### Changed
+- [GH#36](https://github.com/jolicode/automapper/pull/36) Compatibility with nikic/php-parser v5
+
+### Fixed
+- [GH#52](https://github.com/jolicode/automapper/pull/52) Don't tell we support internal php classes
 
 ## [8.2.0] - 2024-03-11
 ### Added
