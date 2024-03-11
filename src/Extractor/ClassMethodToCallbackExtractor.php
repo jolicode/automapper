@@ -32,7 +32,7 @@ final readonly class ClassMethodToCallbackExtractor
 
     public function __construct(?Parser $parser = null)
     {
-        $this->parser = $parser ?? (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
+        $this->parser = $parser ?? (new ParserFactory())->createForHostVersion();
     }
 
     /**
@@ -77,7 +77,7 @@ final readonly class ClassMethodToCallbackExtractor
 
         return new Expr\FuncCall(
             new Expr\Closure([
-                'stmts' => $classMethod->stmts,
+                'stmts' => $classMethod->stmts ?? [],
                 'params' => $closureParameters,
                 'returnType' => $classMethod->returnType,
             ]),
