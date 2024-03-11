@@ -56,6 +56,10 @@ class UserDTO
      */
     public $languages = [];
 
+    public array $generator = [];
+
+    public array $array = [];
+
     public function setName($name)
     {
         $this->name = $name;

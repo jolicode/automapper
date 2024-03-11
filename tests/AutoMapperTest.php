@@ -20,6 +20,7 @@ use AutoMapper\Tests\Fixtures\ClassWithMapToContextAttribute;
 use AutoMapper\Tests\Fixtures\ClassWithNullablePropertyInConstructor;
 use AutoMapper\Tests\Fixtures\ClassWithPrivateProperty;
 use AutoMapper\Tests\Fixtures\Fish;
+use AutoMapper\Tests\Fixtures\FooGenerator;
 use AutoMapper\Tests\Fixtures\HasDateTime;
 use AutoMapper\Tests\Fixtures\HasDateTimeImmutable;
 use AutoMapper\Tests\Fixtures\HasDateTimeImmutableWithNullValue;
@@ -1276,5 +1277,32 @@ class AutoMapperTest extends AutoMapperBaseTest
             ['bar' => 'bar'],
             $this->autoMapper->map(new Uninitialized(), 'array', ['skip_null_values' => true])
         );
+    }
+
+    public function testAutoMappingGenerator(): void
+    {
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+        $foo = new FooGenerator();
+
+        /** @var Fixtures\BarGenerator $bar */
+        $bar = $this->autoMapper->map($foo, Fixtures\BarGenerator::class);
+
+        // Test mapping to class
+        self::assertInstanceOf(Fixtures\BarGenerator::class, $bar);
+
+        self::assertSame([1, 2, 3, 'foo' => 'bar'], $bar->generator);
+        self::assertSame([1, 2, 3], $bar->array);
+
+        // Test mapping to array
+        $data = $this->autoMapper->map($foo, 'array');
+
+        self::assertSame([1, 2, 3, 'foo' => 'bar'], $data['generator']);
+        self::assertSame([1, 2, 3], $data['array']);
+
+        // Test mapping to stdClass
+        $data = $this->autoMapper->map($foo, \stdClass::class);
+
+        self::assertSame([1, 2, 3, 'foo' => 'bar'], $data->generator);
+        self::assertSame([1, 2, 3], $data->array);
     }
 }
