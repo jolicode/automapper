@@ -36,7 +36,13 @@ final readonly class StringToDateTimeTransformer implements TransformerInterface
         /*
          * Create a \DateTime[Immutable] object from a string.
          *
-         * \DateTimeImmutable::createFromFormat($context[MapperContext::DATETIME_FORMAT] ?? \DateTimeInterface::RFC3339, $input);
+         * ```php
+         * \DateTimeImmutable::createFromFormat(
+         *      $context[MapperContext::DATETIME_FORMAT] ?? \DateTimeInterface::RFC3339,
+         *      $input,
+         *      MapperContext::getForcedTimezone($context)
+         * );
+         * ```
          */
         return [new Expr\StaticCall(new Name\FullyQualified($className), 'createFromFormat', [
             new Arg(
@@ -46,6 +52,9 @@ final readonly class StringToDateTimeTransformer implements TransformerInterface
                 )
             ),
             new Arg($input),
+            new Arg(
+                new Expr\StaticCall(new Name(MapperContext::class), 'getForcedTimezone', [new Arg(new Expr\Variable('context'))])
+            ),
         ]), []];
     }
 }

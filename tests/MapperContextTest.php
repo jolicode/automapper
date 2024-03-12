@@ -138,4 +138,30 @@ class MapperContextTest extends TestCase
         $context = [MapperContext::SKIP_NULL_VALUES => true];
         self::assertFalse(MapperContext::isAllowedAttribute($context, 'id', false));
     }
+
+    /**
+     * @dataProvider forcedTimeZoneProvider
+     */
+    public function testItCanGetTimeZone(array $context, ?\DateTimeZone $expectedTimeZone): void
+    {
+        self::assertEquals(
+            $expectedTimeZone,
+            MapperContext::getForcedTimezone($context)
+        );
+    }
+
+    public static function forcedTimeZoneProvider(): iterable
+    {
+        yield [[], null];
+        yield [[MapperContext::DATETIME_FORCE_TIMEZONE => null], null];
+        yield [[MapperContext::DATETIME_FORCE_TIMEZONE => 'UTC'], new \DateTimeZone('UTC')];
+    }
+
+    public function testItThrowsExceptionWithInvalidTimeZone(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Invalid timezone "foo" passed to automapper context.');
+
+        MapperContext::getForcedTimezone([MapperContext::DATETIME_FORCE_TIMEZONE => 'foo']);
+    }
 }

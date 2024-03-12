@@ -28,6 +28,7 @@ class MapperContext
     public const SKIP_NULL_VALUES = 'skip_null_values';
     public const ALLOW_READONLY_TARGET_TO_POPULATE = 'allow_readonly_target_to_populate';
     public const DATETIME_FORMAT = 'datetime_format';
+    public const DATETIME_FORCE_TIMEZONE = 'datetime_force_timezone';
     public const MAP_TO_ACCESSOR_PARAMETER = 'map_to_accessor_parameter';
 
     private array $context = [
@@ -245,5 +246,23 @@ class MapperContext
         }
 
         return $context;
+    }
+
+    /**
+     * @param array{datetime_force_timezone?: string} $context
+     */
+    public static function getForcedTimezone(array $context): ?\DateTimeZone
+    {
+        $timezone = $context[self::DATETIME_FORCE_TIMEZONE] ?? null;
+
+        if (null === $timezone) {
+            return null;
+        }
+
+        try {
+            return new \DateTimeZone($timezone);
+        } catch (\Exception $e) {
+            throw new \RuntimeException("Invalid timezone \"$timezone\" passed to automapper context.", previous: $e);
+        }
     }
 }

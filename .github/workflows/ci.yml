@@ -38,7 +38,7 @@ jobs:
         uses: ramsey/composer-install@v2
         with:
           composer-options: '--working-dir=tools/phpstan'
-      - name: 'php-cs-fixer check'
+      - name: 'phpstan check'
         run: 'tools/phpstan/vendor/bin/phpstan analyse --configuration=tools/phpstan/phpstan.neon'
   tests:
     runs-on: ubuntu-latest
