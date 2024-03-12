@@ -167,6 +167,9 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
         $this->customTransformersRegistry->addCustomTransformer($customTransformer, $id);
     }
 
+    /**
+     * @param list<TransformerFactoryInterface> $transformerFactories
+     */
     public static function create(
         bool $mapPrivateProperties = false,
         ClassLoaderInterface $loader = null,
@@ -176,6 +179,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
         bool $autoRegister = true,
         string $dateTimeFormat = \DateTimeInterface::RFC3339,
         bool $allowReadOnlyTargetToPopulate = false,
+        array $transformerFactories = [],
     ): self {
         if (class_exists(AttributeLoader::class)) {
             $loaderClass = new AttributeLoader();
@@ -222,6 +226,10 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, Ma
 
         if (class_exists(AbstractUid::class)) {
             $factories[] = new SymfonyUidTransformerFactory();
+        }
+
+        foreach ($transformerFactories as $factory) {
+            $factories[] = $factory;
         }
 
         $transformerFactory = new ChainTransformerFactory($factories);

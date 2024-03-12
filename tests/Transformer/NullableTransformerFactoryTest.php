@@ -24,11 +24,10 @@ class NullableTransformerFactoryTest extends TestCase
 
     public function testGetTransformer(): void
     {
-        $chainFactory = new ChainTransformerFactory();
-        $factory = new NullableTransformerFactory($chainFactory);
+        $chainFactory = new ChainTransformerFactory([new BuiltinTransformerFactory()]);
+        $factory = new NullableTransformerFactory();
+        $factory->setChainTransformerFactory($chainFactory);
 
-        $chainFactory->addTransformerFactory($factory);
-        $chainFactory->addTransformerFactory(new BuiltinTransformerFactory());
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
         $transformer = $factory->getTransformer([new Type('string', true)], [new Type('string')], $mapperMetadata);
@@ -58,11 +57,10 @@ class NullableTransformerFactoryTest extends TestCase
 
     public function testNullTransformerIfSourceTypeNotNullable(): void
     {
-        $chainFactory = new ChainTransformerFactory();
-        $factory = new NullableTransformerFactory($chainFactory);
+        $chainFactory = new ChainTransformerFactory([new BuiltinTransformerFactory()]);
+        $factory = new NullableTransformerFactory();
+        $factory->setChainTransformerFactory($chainFactory);
 
-        $chainFactory->addTransformerFactory($factory);
-        $chainFactory->addTransformerFactory(new BuiltinTransformerFactory());
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
         $transformer = $factory->getTransformer([new Type('string')], [new Type('string')], $mapperMetadata);
@@ -72,11 +70,10 @@ class NullableTransformerFactoryTest extends TestCase
 
     public function testNullTransformerIfMultipleSource(): void
     {
-        $chainFactory = new ChainTransformerFactory();
-        $factory = new NullableTransformerFactory($chainFactory);
+        $chainFactory = new ChainTransformerFactory([new BuiltinTransformerFactory()]);
+        $factory = new NullableTransformerFactory();
+        $factory->setChainTransformerFactory($chainFactory);
 
-        $chainFactory->addTransformerFactory($factory);
-        $chainFactory->addTransformerFactory(new BuiltinTransformerFactory());
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
         $transformer = $factory->getTransformer([new Type('string', true), new Type('string')], [new Type('string')], $mapperMetadata);

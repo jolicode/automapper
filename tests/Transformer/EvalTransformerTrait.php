@@ -32,9 +32,10 @@ trait EvalTransformerTrait
         $variableScope = new UniqueVariableScope();
         $inputName = $variableScope->getUniqueName('input');
         $inputExpr = new Expr\Variable($inputName);
+        $sourceExpr = new Expr\Variable('source');
 
         // we give $inputExpr as $targetExpr since we don't use it there and this is needed by TransformerInterface
-        [$outputExpr, $stmts] = $transformer->transform($inputExpr, $inputExpr, $propertyMapping, $variableScope);
+        [$outputExpr, $stmts] = $transformer->transform($inputExpr, $inputExpr, $propertyMapping, $variableScope, $sourceExpr);
 
         $stmts[] = new Stmt\Return_($outputExpr);
 

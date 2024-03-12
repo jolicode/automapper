@@ -14,7 +14,6 @@ class ChainTransformerFactoryTest extends TestCase
 {
     public function testGetTransformer(): void
     {
-        $chainTransformerFactory = new ChainTransformerFactory();
         $transformer = new CopyTransformer();
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
         $subTransformer = $this
@@ -23,7 +22,8 @@ class ChainTransformerFactoryTest extends TestCase
         ;
 
         $subTransformer->expects($this->any())->method('getTransformer')->willReturn($transformer);
-        $chainTransformerFactory->addTransformerFactory($subTransformer);
+
+        $chainTransformerFactory = new ChainTransformerFactory([$subTransformer]);
 
         $transformerReturned = $chainTransformerFactory->getTransformer([], [], $mapperMetadata);
 
@@ -32,7 +32,6 @@ class ChainTransformerFactoryTest extends TestCase
 
     public function testNoTransformer(): void
     {
-        $chainTransformerFactory = new ChainTransformerFactory();
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
         $subTransformer = $this
             ->getMockBuilder(TransformerFactoryInterface::class)
@@ -40,7 +39,7 @@ class ChainTransformerFactoryTest extends TestCase
         ;
 
         $subTransformer->expects($this->any())->method('getTransformer')->willReturn(null);
-        $chainTransformerFactory->addTransformerFactory($subTransformer);
+        $chainTransformerFactory = new ChainTransformerFactory([$subTransformer]);
 
         $transformerReturned = $chainTransformerFactory->getTransformer([], [], $mapperMetadata);
 

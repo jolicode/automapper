@@ -16,11 +16,9 @@ class UniqueTypeTransformerFactoryTest extends TestCase
 {
     public function testGetTransformer(): void
     {
-        $chainFactory = new ChainTransformerFactory();
-        $factory = new UniqueTypeTransformerFactory($chainFactory);
-
-        $chainFactory->addTransformerFactory($factory);
-        $chainFactory->addTransformerFactory(new BuiltinTransformerFactory());
+        $chainFactory = new ChainTransformerFactory([new BuiltinTransformerFactory()]);
+        $factory = new UniqueTypeTransformerFactory();
+        $factory->setChainTransformerFactory($chainFactory);
 
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
@@ -32,11 +30,9 @@ class UniqueTypeTransformerFactoryTest extends TestCase
 
     public function testNullTransformer(): void
     {
-        $chainFactory = new ChainTransformerFactory();
-        $factory = new UniqueTypeTransformerFactory($chainFactory);
-
-        $chainFactory->addTransformerFactory($factory);
-        $chainFactory->addTransformerFactory(new BuiltinTransformerFactory());
+        $chainFactory = new ChainTransformerFactory([new BuiltinTransformerFactory()]);
+        $factory = new UniqueTypeTransformerFactory();
+        $factory->setChainTransformerFactory($chainFactory);
 
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
