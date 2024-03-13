@@ -34,14 +34,6 @@ abstract class GeneratedMapper implements MapperInterface
     protected array $transformers = [];
 
     /**
-     * Add a callable for a specific property.
-     */
-    public function addCallback(string $name, callable $callback): void
-    {
-        $this->callbacks[$name] = $callback;
-    }
-
-    /**
      * Inject sub mappers.
      */
     public function injectMappers(AutoMapperRegistryInterface $autoMapperRegistry): void

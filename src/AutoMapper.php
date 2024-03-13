@@ -67,11 +67,6 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         $this->mapperRegistry[$className] = $mapper;
 
         $mapper->injectMappers($this);
-
-        //        foreach ($metadata->getCallbacks() as $property => $callback) {
-        //            $mapper->addCallback($property, $callback);
-        //        }
-
         $mapper->setCustomTransformers($this->customTransformersRegistry->getCustomTransformers());
 
         return $this->mapperRegistry[$className];
