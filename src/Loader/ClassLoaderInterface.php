@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Loader;
 
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\Metadata\MapperMetadata;
 
 /**
  * Loads (require) a mapping given metadata.
@@ -13,5 +13,5 @@ use AutoMapper\MapperGeneratorMetadataInterface;
  */
 interface ClassLoaderInterface
 {
-    public function loadClass(MapperGeneratorMetadataInterface $mapperMetadata): void;
+    public function loadClass(MapperMetadata $mapperMetadata): void;
 }

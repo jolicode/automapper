@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Fixtures\Transformer;
 
-use AutoMapper\MapperMetadataInterface;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
 use AutoMapper\Transformer\AbstractUniqueTypeTransformerFactory;
 use AutoMapper\Transformer\TransformerInterface;
 use Money\Money;
@@ -15,7 +17,7 @@ use Symfony\Component\PropertyInfo\Type;
  */
 final class MoneyTransformerFactory extends AbstractUniqueTypeTransformerFactory
 {
-    protected function createTransformer(Type $sourceType, Type $targetType, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
+    protected function createTransformer(Type $sourceType, Type $targetType, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
         $isSourceMoney = $this->isMoneyType($sourceType);
         $isTargetMoney = $this->isMoneyType($targetType);

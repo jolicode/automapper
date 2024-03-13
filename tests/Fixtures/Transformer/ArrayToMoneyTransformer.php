@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Fixtures\Transformer;
 
-use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Generator\UniqueVariableScope;
+use AutoMapper\Metadata\PropertyMetadata;
 use AutoMapper\Transformer\TransformerInterface;
 use Money\Currency;
 use Money\Money;
@@ -21,7 +21,7 @@ use PhpParser\Node\Scalar\String_;
  */
 final class ArrayToMoneyTransformer implements TransformerInterface
 {
-    public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
         return [new Expr\New_(new Name\FullyQualified(Money::class), [
             new Arg(new Expr\ArrayDimFetch($input, new String_('amount'))),

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Tests;
 
 use AutoMapper\AutoMapper;
+use AutoMapper\Configuration;
 use AutoMapper\Exception\CircularReferenceException;
 use AutoMapper\Exception\NoMappingFoundException;
 use AutoMapper\Exception\ReadOnlyTargetException;
@@ -48,11 +49,6 @@ class AutoMapperTest extends AutoMapperBaseTest
     {
         $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
-        $userMetadata = $this->autoMapper->getMetadata(Fixtures\User::class, Fixtures\UserDTO::class);
-        $userMetadata->forMember('yearOfBirth', function (Fixtures\User $user) {
-            return ((int) date('Y')) - ((int) $user->age);
-        });
-
         $address = new Address();
         $address->setCity('Toulon');
         $user = new Fixtures\User(1, 'yolo', '13');
@@ -67,7 +63,6 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertSame(1, $userDto->id);
         self::assertSame('yolo', $userDto->getName());
         self::assertSame(13, $userDto->age);
-        self::assertSame(((int) date('Y')) - 13, $userDto->yearOfBirth);
         self::assertCount(1, $userDto->addresses);
         self::assertInstanceOf(AddressDTO::class, $userDto->address);
         self::assertInstanceOf(AddressDTO::class, $userDto->addresses[0]);
@@ -103,10 +98,10 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testAutoMapperFromArrayCustomDateTime(): void
     {
-        $this->buildAutoMapper(classPrefix: 'CustomDateTime_');
+        $this->buildAutoMapper(classPrefix: 'CustomDateTime_', dateTimeFormat: 'U');
 
-        $dateTime = \DateTime::createFromFormat(\DateTime::RFC3339, '1987-04-30T06:00:00Z');
         $customFormat = 'U';
+        $dateTime = \DateTime::createFromFormat(\DateTime::RFC3339, '1987-04-30T06:00:00Z');
         $user = [
             'id' => 1,
             'address' => [
@@ -114,9 +109,6 @@ class AutoMapperTest extends AutoMapperBaseTest
             ],
             'createdAt' => $dateTime->format($customFormat),
         ];
-
-        $configuration = $this->autoMapper->getMetadata('array', Fixtures\UserDTO::class);
-        $configuration->setDateTimeFormat($customFormat);
 
         /** @var Fixtures\UserDTO $userDto */
         $userDto = $this->autoMapper->map($user, Fixtures\UserDTO::class);
@@ -384,14 +376,12 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testConstructor(): void
     {
-        $autoMapper = AutoMapper::create(loader: $this->loader);
-
         $user = new Fixtures\UserDTO();
         $user->id = 10;
         $user->setName('foo');
         $user->age = 3;
         /** @var Fixtures\UserConstructorDTO $userDto */
-        $userDto = $autoMapper->map($user, Fixtures\UserConstructorDTO::class);
+        $userDto = $this->autoMapper->map($user, Fixtures\UserConstructorDTO::class);
 
         self::assertInstanceOf(Fixtures\UserConstructorDTO::class, $userDto);
         self::assertSame('10', $userDto->getId());
@@ -402,10 +392,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testConstructorNotAllowed(): void
     {
-        $this->buildAutoMapper(classPrefix: 'NotAllowedMapper_');
-
-        $configuration = $this->autoMapper->getMetadata(Fixtures\UserDTO::class, Fixtures\UserConstructorDTO::class);
-        $configuration->setConstructorAllowed(false);
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, allowConstructor: false, classPrefix: 'NotAllowedMapper_');
 
         $user = new Fixtures\UserDTO();
         $user->id = 10;
@@ -438,6 +425,8 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testConstructorDisable(): void
     {
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+
         $user = new Fixtures\UserDTONoName();
         $user->id = 10;
         /** @var Fixtures\UserConstructorDTO $userDto */
@@ -478,11 +467,6 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testObjectToPopulate(): void
     {
-        $configurationUser = $this->autoMapper->getMetadata(Fixtures\User::class, Fixtures\UserDTO::class);
-        $configurationUser->forMember('yearOfBirth', function (Fixtures\User $user) {
-            return ((int) date('Y')) - ((int) $user->age);
-        });
-
         $user = new Fixtures\User(1, 'yolo', '13');
         $userDtoToPopulate = new Fixtures\UserDTO();
 
@@ -493,11 +477,6 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testObjectToPopulateWithoutContext(): void
     {
-        $configurationUser = $this->autoMapper->getMetadata(Fixtures\User::class, Fixtures\UserDTO::class);
-        $configurationUser->forMember('yearOfBirth', function (Fixtures\User $user) {
-            return ((int) date('Y')) - ((int) $user->age);
-        });
-
         $user = new Fixtures\User(1, 'yolo', '13');
         $userDtoToPopulate = new Fixtures\UserDTO();
 
@@ -508,11 +487,6 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testArrayToPopulate(): void
     {
-        $configurationUser = $this->autoMapper->getMetadata(Fixtures\User::class, Fixtures\UserDTO::class);
-        $configurationUser->forMember('yearOfBirth', function (Fixtures\User $user) {
-            return ((int) date('Y')) - ((int) $user->age);
-        });
-
         $user = new Fixtures\User(1, 'yolo', '13');
         $array = [];
         $arrayMapped = $this->autoMapper->map($user, $array);
@@ -581,11 +555,6 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testAllowedAttributes(): void
     {
-        $configurationUser = $this->autoMapper->getMetadata(Fixtures\User::class, Fixtures\UserDTO::class);
-        $configurationUser->forMember('yearOfBirth', function (Fixtures\User $user) {
-            return ((int) date('Y')) - ((int) $user->age);
-        });
-
         $user = new Fixtures\User(1, 'yolo', '13');
         $address = new Address();
         $address->setCity('some city');
@@ -603,57 +572,10 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testIgnoredAttributes(): void
     {
-        $configurationUser = $this->autoMapper->getMetadata(Fixtures\User::class, Fixtures\UserDTO::class);
-        $configurationUser->forMember('yearOfBirth', function (Fixtures\User $user) {
-            return ((int) date('Y')) - ((int) $user->age);
-        });
-
         $user = new Fixtures\User(1, 'yolo', '13');
         $userDto = $this->autoMapper->map($user, Fixtures\UserDTO::class, [MapperContext::IGNORED_ATTRIBUTES => ['name']]);
 
         self::assertNull($userDto->getName());
-    }
-
-    public function testMappingWithTargetObjectWithNoObjectToPopulate(): void
-    {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
-
-        $configurationUser = $this->autoMapper->getMetadata(Fixtures\User::class, Fixtures\UserDTOMerged::class);
-        $configurationUser->forMember('properties', function (Fixtures\User $user, Fixtures\UserDTOMerged $target) {
-            return array_merge($target->getProperties(), [
-                'name' => $user->name,
-                'age' => $user->age,
-            ]);
-        });
-
-        $user = new Fixtures\User(1, 'yolo', '13');
-
-        $userDto = $this->autoMapper->map($user, Fixtures\UserDTOMerged::class);
-
-        self::assertArrayHasKey('name', $userDto->getProperties());
-        self::assertArrayHasKey('age', $userDto->getProperties());
-        self::assertArrayNotHasKey('gender', $userDto->getProperties());
-    }
-
-    public function testMappingWithTargetObjectWithObjectToPopulate(): void
-    {
-        $configurationUser = $this->autoMapper->getMetadata(Fixtures\User::class, Fixtures\UserDTOMerged::class);
-        $configurationUser->forMember('properties', function (Fixtures\User $user, Fixtures\UserDTOMerged $target) {
-            return array_merge($target->getProperties(), [
-                'name' => $user->name,
-                'age' => $user->age,
-            ]);
-        });
-
-        $user = new Fixtures\User(1, 'yolo', '13');
-        $dto = new Fixtures\UserDTOMerged();
-        $dto->setProperties(['gender' => 1]);
-
-        $userDto = $this->autoMapper->map($user, $dto);
-
-        self::assertArrayHasKey('name', $userDto->getProperties());
-        self::assertArrayHasKey('age', $userDto->getProperties());
-        self::assertArrayHasKey('gender', $userDto->getProperties());
     }
 
     public function testNameConverter(): void
@@ -700,7 +622,7 @@ class AutoMapperTest extends AutoMapperBaseTest
             };
         }
 
-        $autoMapper = AutoMapper::create(loader: $this->loader, nameConverter: $nameConverter, classPrefix: 'Mapper2_');
+        $autoMapper = AutoMapper::create(new Configuration(classPrefix: 'Mapper2_'), nameConverter: $nameConverter);
         $user = new Fixtures\User(1, 'yolo', '13');
 
         $userArray = $autoMapper->map($user, 'array');
@@ -751,7 +673,7 @@ class AutoMapperTest extends AutoMapperBaseTest
     {
         self::expectException(NoMappingFoundException::class);
 
-        $automapper = AutoMapper::create(autoRegister: false);
+        $automapper = AutoMapper::create(new Configuration(autoRegister: false, classPrefix: 'NoAutoRegister_'));
         $automapper->getMapper(Fixtures\User::class, Fixtures\UserDTO::class);
     }
 

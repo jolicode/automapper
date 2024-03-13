@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Extractor;
 
+use AutoMapper\Configuration;
 use AutoMapper\Exception\InvalidMappingException;
 use AutoMapper\Extractor\FromTargetMappingExtractor;
-use AutoMapper\MapperMetadata;
+use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Tests\AutoMapperBaseTest;
 use AutoMapper\Tests\Fixtures;
 use AutoMapper\Transformer\ArrayTransformerFactory;
@@ -72,13 +73,11 @@ class FromTargetMappingExtractorTest extends AutoMapperBaseTest
             new ObjectTransformerFactory(),
         ]);
 
-        $transformerFactory->setAutoMapperRegistry($this->autoMapper);
-
         $this->fromTargetMappingExtractor = new FromTargetMappingExtractor(
+            new Configuration(),
             $propertyInfoExtractor,
             $reflectionExtractor,
             $reflectionExtractor,
-            $transformerFactory,
             $classMetadataFactory
         );
     }
@@ -86,30 +85,30 @@ class FromTargetMappingExtractorTest extends AutoMapperBaseTest
     public function testWithSourceAsArray(): void
     {
         $userReflection = new \ReflectionClass(Fixtures\User::class);
-        $mapperMetadata = new MapperMetadata($this->autoMapper, $this->fromTargetMappingExtractor, source: 'array', target: Fixtures\User::class, isTargetReadOnlyClass: false, mapPrivateProperties: true);
+        $mapperMetadata = new MapperMetadata('array', target: Fixtures\User::class);
         $targetPropertiesMapping = $this->fromTargetMappingExtractor->getPropertiesMapping($mapperMetadata);
 
         self::assertCount(\count($userReflection->getProperties()), $targetPropertiesMapping);
         foreach ($targetPropertiesMapping as $propertyMapping) {
-            self::assertTrue($userReflection->hasProperty($propertyMapping->property));
+            self::assertTrue($userReflection->hasProperty($propertyMapping->target->name));
         }
     }
 
     public function testWithSourceAsStdClass(): void
     {
         $userReflection = new \ReflectionClass(Fixtures\User::class);
-        $mapperMetadata = new MapperMetadata($this->autoMapper, $this->fromTargetMappingExtractor, source: 'stdClass', target: Fixtures\User::class, isTargetReadOnlyClass: false, mapPrivateProperties: true);
+        $mapperMetadata = new MapperMetadata('stdClass', target: Fixtures\User::class);
         $targetPropertiesMapping = $this->fromTargetMappingExtractor->getPropertiesMapping($mapperMetadata);
 
         self::assertCount(\count($userReflection->getProperties()), $targetPropertiesMapping);
         foreach ($targetPropertiesMapping as $propertyMapping) {
-            self::assertTrue($userReflection->hasProperty($propertyMapping->property));
+            self::assertTrue($userReflection->hasProperty($propertyMapping->target->name));
         }
     }
 
     public function testWithTargetAsEmpty(): void
     {
-        $mapperMetadata = new MapperMetadata($this->autoMapper, $this->fromTargetMappingExtractor, source: 'array', target: Fixtures\Empty_::class, isTargetReadOnlyClass: false, mapPrivateProperties: true);
+        $mapperMetadata = new MapperMetadata('array', target: Fixtures\Empty_::class);
         $targetPropertiesMapping = $this->fromTargetMappingExtractor->getPropertiesMapping($mapperMetadata);
 
         self::assertCount(0, $targetPropertiesMapping);
@@ -118,12 +117,14 @@ class FromTargetMappingExtractorTest extends AutoMapperBaseTest
     public function testWithTargetAsPrivate(): void
     {
         $privateReflection = new \ReflectionClass(Fixtures\Private_::class);
-        $mapperMetadata = new MapperMetadata($this->autoMapper, $this->fromTargetMappingExtractor, source: 'array', target: Fixtures\Private_::class, isTargetReadOnlyClass: false, mapPrivateProperties: true);
+        $mapperMetadata = new MapperMetadata(source: 'array', target: Fixtures\Private_::class);
+
         $targetPropertiesMapping = $this->fromTargetMappingExtractor->getPropertiesMapping($mapperMetadata);
         self::assertCount(\count($privateReflection->getProperties()), $targetPropertiesMapping);
 
         $this->fromTargetMappingExtractorBootstrap(false);
-        $mapperMetadata = new MapperMetadata($this->autoMapper, $this->fromTargetMappingExtractor, source: 'array', target: Fixtures\Private_::class, isTargetReadOnlyClass: false, mapPrivateProperties: true);
+        $mapperMetadata = new MapperMetadata(source: 'array', target: Fixtures\Private_::class);
+
         $targetPropertiesMapping = $this->fromTargetMappingExtractor->getPropertiesMapping($mapperMetadata);
         self::assertCount(0, $targetPropertiesMapping);
     }
@@ -133,7 +134,7 @@ class FromTargetMappingExtractorTest extends AutoMapperBaseTest
         self::expectException(InvalidMappingException::class);
         self::expectExceptionMessage('Only array or stdClass are accepted as a source');
 
-        $mapperMetadata = new MapperMetadata($this->autoMapper, $this->fromTargetMappingExtractor, source: Fixtures\User::class, target: 'array', isTargetReadOnlyClass: false, mapPrivateProperties: true);
+        $mapperMetadata = new MapperMetadata(source: Fixtures\User::class, target: 'array');
         $this->fromTargetMappingExtractor->getPropertiesMapping($mapperMetadata);
     }
 
@@ -142,7 +143,7 @@ class FromTargetMappingExtractorTest extends AutoMapperBaseTest
         self::expectException(InvalidMappingException::class);
         self::expectExceptionMessage('Only array or stdClass are accepted as a source');
 
-        $mapperMetadata = new MapperMetadata($this->autoMapper, $this->fromTargetMappingExtractor, source: Fixtures\User::class, target: 'stdClass', isTargetReadOnlyClass: false, mapPrivateProperties: true);
+        $mapperMetadata = new MapperMetadata(source: Fixtures\User::class, target: 'stdClass');
         $this->fromTargetMappingExtractor->getPropertiesMapping($mapperMetadata);
     }
 }

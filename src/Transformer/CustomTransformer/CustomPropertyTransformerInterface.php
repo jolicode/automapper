@@ -33,5 +33,5 @@ interface CustomPropertyTransformerInterface extends CustomTransformerInterface
      * @param 'array'|class-string $source
      * @param 'array'|class-string $target
      */
-    public function supports(string $source, string $target, string $propertyName): bool;
+    public function supports(string $source, string $target, string $sourceProperty, string $targetProperty): bool;
 }

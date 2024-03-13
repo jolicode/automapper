@@ -8,7 +8,7 @@ use AutoMapper\Exception\ReadOnlyTargetException;
 use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
 use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
 use AutoMapper\MapperContext;
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\Metadata\GeneratorMetadata;
 use PhpParser\Comment;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
@@ -39,20 +39,20 @@ final readonly class MapMethodStatementsGenerator
     /**
      * @return list<Stmt>
      */
-    public function getStatements(MapperGeneratorMetadataInterface $mapperMetadata): array
+    public function getStatements(GeneratorMetadata $metadata): array
     {
-        $variableRegistry = $mapperMetadata->getVariableRegistry();
+        $variableRegistry = $metadata->variableRegistry;
 
-        $statements = [$this->ifSourceIsNullReturnNull($mapperMetadata)];
-        $statements = [...$statements, ...$this->handleCircularReference($mapperMetadata)];
-        $statements = [...$statements, ...$this->initializeTargetToPopulate($mapperMetadata)];
-        $statements[] = $this->createObjectStatementsGenerator->generate($mapperMetadata, $variableRegistry);
+        $statements = [$this->ifSourceIsNullReturnNull($metadata)];
+        $statements = [...$statements, ...$this->handleCircularReference($metadata)];
+        $statements = [...$statements, ...$this->initializeTargetToPopulate($metadata)];
+        $statements[] = $this->createObjectStatementsGenerator->generate($metadata, $variableRegistry);
 
-        $addedDependenciesStatements = $this->handleDependencies($mapperMetadata);
+        $addedDependenciesStatements = $this->handleDependencies($metadata);
 
         $duplicatedStatements = [];
         $setterStatements = [];
-        foreach ($mapperMetadata->getPropertiesMapping() as $propertyMapping) {
+        foreach ($metadata->propertiesMetadata as $propertyMapping) {
             /**
              * This is the main loop to map the properties from the source to the target, there is 3 main steps in order to generate this code :.
              *
@@ -72,21 +72,21 @@ final readonly class MapMethodStatementsGenerator
              * $this->hydrateCallbacks['propertyName']($target, $this->mappers['SOURCE_TO_TARGET_MAPPER']->map($this->extractCallbacks['propertyName']($source), $context));
              * ```
              */
-            $propStatements = $this->propertyStatementsGenerator->generate($propertyMapping);
+            $propStatements = $this->propertyStatementsGenerator->generate($metadata, $propertyMapping);
 
             /*
              * Dispatch those statements into two categories:
              * - Statements that need to be executed before the constructor, if the property needs to be written in the constructor
              * - Statements that need to be executed after the constructor.
              */
-            if (\in_array($propertyMapping->property, $mapperMetadata->getPropertiesInConstructor(), true)) {
+            if (\in_array($propertyMapping->target->name, $metadata->getPropertiesInConstructor(), true)) {
                 $duplicatedStatements = [...$duplicatedStatements, ...$propStatements];
             } else {
                 $setterStatements = [...$setterStatements, ...$propStatements];
             }
         }
 
-        if (\count($duplicatedStatements) > 0 && \count($mapperMetadata->getPropertiesInConstructor())) {
+        if (\count($duplicatedStatements) > 0 && \count($metadata->getPropertiesInConstructor())) {
             /*
              * Generate else statements when the result is already an object, which means it has already been created,
              * so we need to execute the statements that need to be executed before the constructor since the constructor has already been called
@@ -122,14 +122,12 @@ final readonly class MapMethodStatementsGenerator
      * }
      * ```
      */
-    private function ifSourceIsNullReturnNull(MapperGeneratorMetadataInterface $mapperMetadata): Stmt
+    private function ifSourceIsNullReturnNull(GeneratorMetadata $metadata): Stmt
     {
-        $variableRegistry = $mapperMetadata->getVariableRegistry();
-
         return new Stmt\If_(
-            new Expr\BinaryOp\Identical(new Expr\ConstFetch(new Name('null')), $variableRegistry->getSourceInput()),
+            new Expr\BinaryOp\Identical(new Expr\ConstFetch(new Name('null')), $metadata->variableRegistry->getSourceInput()),
             [
-                'stmts' => [new Stmt\Return_($variableRegistry->getSourceInput())],
+                'stmts' => [new Stmt\Return_($metadata->variableRegistry->getSourceInput())],
             ]
         );
     }
@@ -147,13 +145,13 @@ final readonly class MapMethodStatementsGenerator
      *
      * @return list<Stmt>
      */
-    private function handleCircularReference(MapperGeneratorMetadataInterface $mapperMetadata): array
+    private function handleCircularReference(GeneratorMetadata $metadata): array
     {
-        if (!$mapperMetadata->canHaveCircularReference()) {
+        if (!$metadata->canHaveCircularReference()) {
             return [];
         }
 
-        $variableRegistry = $mapperMetadata->getVariableRegistry();
+        $variableRegistry = $metadata->variableRegistry;
 
         return [
             new Stmt\Expression(
@@ -162,7 +160,7 @@ final readonly class MapMethodStatementsGenerator
                     new Expr\BinaryOp\Concat(new Expr\FuncCall(new Name('spl_object_hash'), [
                         new Arg($variableRegistry->getSourceInput()),
                     ]),
-                        new Scalar\String_($mapperMetadata->getTarget())
+                        new Scalar\String_($metadata->mapperMetadata->target)
                     )
                 )
             ),
@@ -199,9 +197,9 @@ final readonly class MapMethodStatementsGenerator
     /**
      * @return list<Stmt>
      */
-    private function initializeTargetToPopulate(MapperGeneratorMetadataInterface $mapperMetadata): array
+    private function initializeTargetToPopulate(GeneratorMetadata $metadata): array
     {
-        $variableRegistry = $mapperMetadata->getVariableRegistry();
+        $variableRegistry = $metadata->variableRegistry;
         $targetToPopulate = new Expr\ArrayDimFetch($variableRegistry->getContext(), new Scalar\String_(MapperContext::TARGET_TO_POPULATE));
 
         $statements = [];
@@ -218,10 +216,10 @@ final readonly class MapMethodStatementsGenerator
                 $variableRegistry->getResult(),
                 new Expr\BinaryOp\Coalesce($targetToPopulate, new Expr\ConstFetch(new Name('null')))
             ),
-            ['comments' => [new Comment(sprintf('/** @var %s $result */', $mapperMetadata->getTarget() === 'array' ? $mapperMetadata->getTarget() : '\\' . $mapperMetadata->getTarget()))]]
+            ['comments' => [new Comment(sprintf('/** @var %s $result */', $metadata->mapperMetadata->target === 'array' ? $metadata->mapperMetadata->target : '\\' . $metadata->mapperMetadata->target))]]
         );
 
-        if (!$this->allowReadOnlyTargetToPopulate && $mapperMetadata->isTargetReadOnlyClass()) {
+        if (!$this->allowReadOnlyTargetToPopulate && $metadata->isTargetReadOnlyClass()) {
             /*
              * If the target is a read-only class, we throw an exception if the target is not null
              *
@@ -261,16 +259,16 @@ final readonly class MapMethodStatementsGenerator
     /**
      * @return list<Stmt>
      */
-    private function handleDependencies(MapperGeneratorMetadataInterface $mapperMetadata): array
+    private function handleDependencies(GeneratorMetadata $metadata): array
     {
-        if (!$mapperMetadata->getAllDependencies()) {
+        if (!$metadata->getDependencies()) {
             return [];
         }
 
-        $variableRegistry = $mapperMetadata->getVariableRegistry();
+        $variableRegistry = $metadata->variableRegistry;
 
         $addedDependenciesStatements = [];
-        if ($mapperMetadata->canHaveCircularReference()) {
+        if ($metadata->canHaveCircularReference()) {
             /*
              * Here we register the result into the context to allow circular dependency, it's done before mapping so if there is a circular dependency, it will be correctly handled
              *

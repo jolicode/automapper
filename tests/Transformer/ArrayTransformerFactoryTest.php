@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Transformer;
 
-use AutoMapper\MapperMetadata;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
 use AutoMapper\Transformer\ArrayTransformerFactory;
 use AutoMapper\Transformer\ChainTransformerFactory;
 use AutoMapper\Transformer\DictionaryTransformer;
@@ -20,7 +22,9 @@ class ArrayTransformerFactoryTest extends TestCase
         $factory->setChainTransformerFactory($chainFactory);
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
-        $transformer = $factory->getTransformer([new Type('array', false, null, true)], [new Type('array', false, null, true)], $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('array', false, null, true)], 'foo');
+        $targetMapperMetadata = new TargetPropertyMetadata([new Type('array', false, null, true)], 'foo');
+        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertInstanceOf(DictionaryTransformer::class, $transformer);
     }
@@ -32,7 +36,9 @@ class ArrayTransformerFactoryTest extends TestCase
         $factory->setChainTransformerFactory($chainFactory);
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
-        $transformer = $factory->getTransformer([new Type('array', false, null, true)], [new Type('string')], $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('array', false, null, true)], 'foo');
+        $targetMapperMetadata = new TargetPropertyMetadata([new Type('string')], 'foo');
+        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNull($transformer);
     }
@@ -44,7 +50,9 @@ class ArrayTransformerFactoryTest extends TestCase
         $factory->setChainTransformerFactory($chainFactory);
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
-        $transformer = $factory->getTransformer([new Type('string')], [new Type('array', false, null, true)], $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('string')], 'foo');
+        $targetMapperMetadata = new TargetPropertyMetadata([new Type('array', false, null, true)], 'foo');
+        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNull($transformer);
     }
@@ -57,7 +65,10 @@ class ArrayTransformerFactoryTest extends TestCase
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
         $stringType = new Type('string');
-        $transformer = $factory->getTransformer([new Type('array', false, null, true, null, $stringType)], [new Type('array', false, null, true, null, $stringType)], $mapperMetadata);
+
+        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('array', false, null, true, null, $stringType)], 'foo');
+        $targetMapperMetadata = new TargetPropertyMetadata([new Type('array', false, null, true, null, $stringType)], 'foo');
+        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNull($transformer);
     }

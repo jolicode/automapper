@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer\CustomTransformer;
 
-use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Generator\UniqueVariableScope;
+use AutoMapper\Metadata\PropertyMetadata;
 use AutoMapper\Transformer\TransformerInterface;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
@@ -18,7 +18,7 @@ final class CustomModelTransformer implements TransformerInterface
     ) {
     }
 
-    public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope /* Expr\Variable $source */): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope /* Expr\Variable $source */): array
     {
         /*
          * When using a custom transformer, we need to call the transform method of the custom transformer which has been injected into the mapper.

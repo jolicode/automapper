@@ -5,17 +5,9 @@ declare(strict_types=1);
 namespace AutoMapper\Tests;
 
 use AutoMapper\AutoMapper;
-use AutoMapper\Generator\MapperGenerator;
-use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
-use AutoMapper\Loader\ClassLoaderInterface;
-use AutoMapper\Loader\FileLoader;
-use Doctrine\Common\Annotations\AnnotationReader;
+use AutoMapper\Configuration;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
-use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
-use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
-use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 
 /**
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
@@ -23,31 +15,32 @@ use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 abstract class AutoMapperBaseTest extends TestCase
 {
     protected AutoMapper $autoMapper;
-    protected ClassLoaderInterface $loader;
 
     protected function setUp(): void
     {
-        unset($this->autoMapper, $this->loader);
+        unset($this->autoMapper);
         $this->buildAutoMapper();
     }
 
-    protected function buildAutoMapper(bool $allowReadOnlyTargetToPopulate = false, bool $mapPrivatePropertiesAndMethod = false, string $classPrefix = 'Mapper_', array $transformerFactories = []): AutoMapper
-    {
+    protected function buildAutoMapper(
+        bool $allowReadOnlyTargetToPopulate = false,
+        bool $mapPrivatePropertiesAndMethod = false,
+        bool $allowConstructor = true,
+        string $classPrefix = 'Mapper_',
+        array $transformerFactories = [],
+        string $dateTimeFormat = \DateTimeInterface::RFC3339
+    ): AutoMapper {
         $fs = new Filesystem();
         $fs->remove(__DIR__ . '/cache/');
 
-        if (class_exists(AttributeLoader::class)) {
-            $loaderClass = new AttributeLoader();
-        } else {
-            $loaderClass = new AnnotationLoader(new AnnotationReader());
-        }
-        $classMetadataFactory = new ClassMetadataFactory($loaderClass);
+        $configuration = new Configuration(
+            classPrefix: $classPrefix,
+            allowConstructor: $allowConstructor,
+            dateTimeFormat: $dateTimeFormat,
+            mapPrivateProperties: $mapPrivatePropertiesAndMethod,
+            allowReadOnlyTargetToPopulate: $allowReadOnlyTargetToPopulate
+        );
 
-        $this->loader = new FileLoader(new MapperGenerator(
-            new ClassDiscriminatorResolver(new ClassDiscriminatorFromClassMetadata($classMetadataFactory)),
-            $allowReadOnlyTargetToPopulate
-        ), __DIR__ . '/cache');
-
-        return $this->autoMapper = AutoMapper::create($mapPrivatePropertiesAndMethod, $this->loader, classPrefix: $classPrefix, transformerFactories: $transformerFactories);
+        return $this->autoMapper = AutoMapper::create($configuration, cacheDirectory: __DIR__ . '/cache/', transformerFactories: $transformerFactories);
     }
 }

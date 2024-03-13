@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
-use AutoMapper\MapperMetadataInterface;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
 
 /**
  * Reduce array of type to only one type on source and target.
@@ -15,21 +17,24 @@ final class UniqueTypeTransformerFactory implements TransformerFactoryInterface,
 {
     use ChainTransformerFactoryAwareTrait;
 
-    public function getTransformer(?array $sourceTypes, ?array $targetTypes, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
+    public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
-        $nbSourceTypes = $sourceTypes ? \count($sourceTypes) : 0;
-        $nbTargetTypes = $targetTypes ? \count($targetTypes) : 0;
+        $sourceTypes = $source->types;
+        $targetTypes = $target->types;
 
-        if (null === $sourceTypes || 0 === $nbSourceTypes || $nbSourceTypes > 1) {
+        $nbSourceTypes = \count($sourceTypes);
+        $nbTargetTypes = \count($targetTypes);
+
+        if (0 === $nbSourceTypes || $nbSourceTypes > 1) {
             return null;
         }
 
-        if (null === $targetTypes || $nbTargetTypes <= 1) {
+        if ($nbTargetTypes <= 1) {
             return null;
         }
 
         foreach ($targetTypes as $targetType) {
-            $transformer = $this->chainTransformerFactory->getTransformer($sourceTypes, [$targetType], $mapperMetadata);
+            $transformer = $this->chainTransformerFactory->getTransformer($source, $target->withTypes([$targetType]), $mapperMetadata);
 
             if (null !== $transformer) {
                 return $transformer;

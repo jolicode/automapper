@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace AutoMapper\Generator;
 
 use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\Metadata\Dependency;
+use AutoMapper\Metadata\GeneratorMetadata;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Scalar;
@@ -35,11 +36,12 @@ final readonly class InjectMapperMethodStatementsGenerator
     /**
      * @return list<Stmt>
      */
-    public function getStatements(Expr\Variable $automapperRegistryVariable, MapperGeneratorMetadataInterface $mapperMetadata): array
+    public function getStatements(Expr\Variable $automapperRegistryVariable, GeneratorMetadata $metadata): array
     {
         $injectMapperStatements = [];
 
-        foreach ($mapperMetadata->getAllDependencies() as $dependency) {
+        /** @var Dependency $dependency */
+        foreach ($metadata->getDependencies() as $dependency) {
             /*
              * If the transformer has dependencies, we inject the mappers for the dependencies
              * This allows to inject mappers when creating the service instead of resolving them at runtime which is faster
@@ -50,11 +52,11 @@ final readonly class InjectMapperMethodStatementsGenerator
                 new Expr\Assign(
                     new Expr\ArrayDimFetch(
                         new Expr\PropertyFetch(new Expr\Variable('this'), 'mappers'),
-                        new Scalar\String_($dependency->name)
+                        new Scalar\String_($dependency->mapperDependency->name)
                     ),
                     new Expr\MethodCall($automapperRegistryVariable, 'getMapper', [
-                        new Arg(new Scalar\String_($dependency->source)),
-                        new Arg(new Scalar\String_($dependency->target)),
+                        new Arg(new Scalar\String_($dependency->mapperDependency->source)),
+                        new Arg(new Scalar\String_($dependency->mapperDependency->target)),
                     ])
                 )
             );
@@ -62,7 +64,7 @@ final readonly class InjectMapperMethodStatementsGenerator
 
         return [
             ...$injectMapperStatements,
-            ...$this->discriminatorStatementsGenerator->injectMapperStatements($mapperMetadata),
+            ...$this->discriminatorStatementsGenerator->injectMapperStatements($metadata),
         ];
     }
 }

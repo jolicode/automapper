@@ -70,8 +70,8 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
 
     public function testSupportsDenormalization(): void
     {
-        self::assertTrue($this->normalizer->supportsDenormalization(['foo' => 1], 'array'));
-        self::assertTrue($this->normalizer->supportsDenormalization(['foo' => 1], 'json'));
+        self::assertFalse($this->normalizer->supportsDenormalization(['foo' => 1], 'array'));
+        self::assertFalse($this->normalizer->supportsDenormalization(['foo' => 1], 'json'));
 
         $user = ['id' => 1, 'name' => 'Jack', 'age' => 37];
         self::assertTrue($this->normalizer->supportsDenormalization($user, Fixtures\User::class));

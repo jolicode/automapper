@@ -1,11 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Cannot access offset string on AutoMapper\\\\MapperGeneratorMetadataInterface\\.$#"
-			count: 2
-			path: ../../src/AutoMapper.php
-
-		-
 			message: "#^Instantiated class Symfony\\\\Component\\\\Serializer\\\\Mapping\\\\Loader\\\\AnnotationLoader not found\\.$#"
 			count: 2
 			path: ../../src/AutoMapper.php
@@ -37,11 +32,6 @@ parameters:
 
 		-
 			message: "#^Parameter \\#1 \\$loader of class Symfony\\\\Component\\\\Serializer\\\\Mapping\\\\Factory\\\\ClassMetadataFactory constructor expects Symfony\\\\Component\\\\Serializer\\\\Mapping\\\\Loader\\\\LoaderInterface, Symfony\\\\Component\\\\Serializer\\\\Mapping\\\\Loader\\\\AnnotationLoader\\|Symfony\\\\Component\\\\Serializer\\\\Mapping\\\\Loader\\\\AttributeLoader given\\.$#"
-			count: 1
-			path: ../../src/AutoMapper.php
-
-		-
-			message: "#^Parameter \\#3 \\$descriptionExtractors of class Symfony\\\\Component\\\\PropertyInfo\\\\PropertyInfoExtractor constructor expects iterable\\<Symfony\\\\Component\\\\PropertyInfo\\\\PropertyDescriptionExtractorInterface\\>, array\\<int, Symfony\\\\Component\\\\PropertyInfo\\\\Extractor\\\\ReflectionExtractor\\> given\\.$#"
 			count: 1
 			path: ../../src/AutoMapper.php
 
@@ -169,16 +159,6 @@ parameters:
 			message: "#^Method AutoMapper\\\\Extractor\\\\MappingExtractorInterface\\:\\:getWriteMutator\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: ../../src/Extractor/MappingExtractorInterface.php
-
-		-
-			message: "#^Method AutoMapper\\\\Extractor\\\\PropertyMapping\\:\\:__construct\\(\\) has parameter \\$sourceGroups with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/Extractor/PropertyMapping.php
-
-		-
-			message: "#^Method AutoMapper\\\\Extractor\\\\PropertyMapping\\:\\:__construct\\(\\) has parameter \\$targetGroups with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/Extractor/PropertyMapping.php
 
 		-
 			message: "#^Parameter \\#1 \\$class of function class_exists expects string, string\\|null given\\.$#"
@@ -386,41 +366,6 @@ parameters:
 			path: ../../src/MapperContext.php
 
 		-
-			message: "#^Parameter \\#1 \\$objectOrClass of class ReflectionClass constructor expects class\\-string\\<T of object\\>\\|T of object, string given\\.$#"
-			count: 1
-			path: ../../src/MapperGeneratorMetadataFactory.php
-
-		-
-			message: "#^Method AutoMapper\\\\MapperInterface\\:\\:map\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/MapperInterface.php
-
-		-
-			message: "#^Method AutoMapper\\\\MapperMetadata\\:\\:checkCircularMapperConfiguration\\(\\) has parameter \\$checked with no type specified\\.$#"
-			count: 1
-			path: ../../src/MapperMetadata.php
-
-		-
-			message: "#^Method AutoMapper\\\\MapperMetadata\\:\\:getCachedTargetReflectionClass\\(\\) return type with generic class ReflectionClass does not specify its types\\: T$#"
-			count: 1
-			path: ../../src/MapperMetadata.php
-
-		-
-			message: "#^Method AutoMapper\\\\MapperMetadata\\:\\:getPropertiesMapping\\(\\) should return array\\<AutoMapper\\\\Extractor\\\\PropertyMapping\\> but returns array\\<AutoMapper\\\\Extractor\\\\PropertyMapping\\>\\|null\\.$#"
-			count: 1
-			path: ../../src/MapperMetadata.php
-
-		-
-			message: "#^Parameter \\#1 \\$filename of function filemtime expects string, string\\|false given\\.$#"
-			count: 2
-			path: ../../src/MapperMetadata.php
-
-		-
-			message: "#^Property AutoMapper\\\\MapperMetadata\\:\\:\\$targetReflectionClass with generic class ReflectionClass does not specify its types\\: T$#"
-			count: 1
-			path: ../../src/MapperMetadata.php
-
-		-
 			message: "#^Method AutoMapper\\\\Normalizer\\\\AutoMapperNormalizer\\:\\:createAutoMapperContext\\(\\) has parameter \\$serializerContext with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: ../../src/Normalizer/AutoMapperNormalizer.php
@@ -489,16 +434,6 @@ parameters:
 			message: "#^Parameter \\#1 \\$items of class PhpParser\\\\Node\\\\Expr\\\\Array_ constructor expects array\\<PhpParser\\\\Node\\\\ArrayItem\\>, array\\<int, PhpParser\\\\Node\\\\ArrayItem\\|PhpParser\\\\Node\\\\Expr\\\\ArrayItem\\> given\\.$#"
 			count: 1
 			path: ../../src/Transformer/BuiltinTransformer.php
-
-		-
-			message: "#^Parameter \\#1 \\$source of method AutoMapper\\\\Transformer\\\\CustomTransformer\\\\CustomPropertyTransformerInterface\\:\\:supports\\(\\) expects 'array'\\|class\\-string, string given\\.$#"
-			count: 1
-			path: ../../src/Transformer/CustomTransformer/CustomTransformersRegistry.php
-
-		-
-			message: "#^Parameter \\#2 \\$target of method AutoMapper\\\\Transformer\\\\CustomTransformer\\\\CustomPropertyTransformerInterface\\:\\:supports\\(\\) expects 'array'\\|class\\-string, string given\\.$#"
-			count: 1
-			path: ../../src/Transformer/CustomTransformer/CustomTransformersRegistry.php
 
 		-
 			message: "#^Parameter \\#1 \\$object_or_class of function is_subclass_of expects object\\|string, string\\|null given\\.$#"

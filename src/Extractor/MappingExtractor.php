@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Extractor;
 
-use AutoMapper\Transformer\TransformerFactoryInterface;
-use AutoMapper\Transformer\TransformerPropertyFactoryInterface;
+use AutoMapper\Configuration;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyReadInfo;
 use Symfony\Component\PropertyInfo\PropertyReadInfoExtractorInterface;
@@ -22,10 +21,10 @@ use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
 abstract class MappingExtractor implements MappingExtractorInterface
 {
     public function __construct(
+        protected readonly Configuration $configuration,
         protected readonly PropertyInfoExtractorInterface $propertyInfoExtractor,
         protected readonly PropertyReadInfoExtractorInterface $readInfoExtractor,
         protected readonly PropertyWriteInfoExtractorInterface $writeInfoExtractor,
-        protected readonly TransformerFactoryInterface|TransformerPropertyFactoryInterface $transformerFactory,
         private readonly ?ClassMetadataFactoryInterface $classMetadataFactory = null,
     ) {
     }

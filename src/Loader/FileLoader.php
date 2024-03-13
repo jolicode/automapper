@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace AutoMapper\Loader;
 
 use AutoMapper\Generator\MapperGenerator;
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\MetadataRegistry;
 use PhpParser\PrettyPrinter\Standard;
 use PhpParser\PrettyPrinterAbstract;
 
@@ -21,15 +22,16 @@ final class FileLoader implements ClassLoaderInterface
 
     public function __construct(
         private readonly MapperGenerator $generator,
+        private readonly MetadataRegistry $metadataRegistry,
         private readonly string $directory,
         private readonly bool $hotReload = true,
     ) {
         $this->printer = new Standard();
     }
 
-    public function loadClass(MapperGeneratorMetadataInterface $mapperMetadata): void
+    public function loadClass(MapperMetadata $mapperMetadata): void
     {
-        $className = $mapperMetadata->getMapperClassName();
+        $className = $mapperMetadata->className;
         $classPath = $this->directory . \DIRECTORY_SEPARATOR . $className . '.php';
 
         if (!$this->hotReload && file_exists($classPath)) {
@@ -55,15 +57,17 @@ final class FileLoader implements ClassLoaderInterface
     /**
      * @return string The generated class name
      */
-    public function saveMapper(MapperGeneratorMetadataInterface $mapperGeneratorMetadata): string
+    public function saveMapper(MapperMetadata $mapperMetadata): string
     {
-        $className = $mapperGeneratorMetadata->getMapperClassName();
+        $className = $mapperMetadata->className;
         $classPath = $this->directory . \DIRECTORY_SEPARATOR . $className . '.php';
-        $classCode = $this->printer->prettyPrint([$this->generator->generate($mapperGeneratorMetadata)]);
+
+        $generatorMetadata = $this->metadataRegistry->getGeneratorMetadata($mapperMetadata->source, $mapperMetadata->target);
+        $classCode = $this->printer->prettyPrint([$this->generator->generate($generatorMetadata)]);
 
         $this->write($classPath, "<?php\n\n" . $classCode . "\n");
         if ($this->hotReload) {
-            $this->addHashToRegistry($className, $mapperGeneratorMetadata->getHash());
+            $this->addHashToRegistry($className, $mapperMetadata->getHash());
         }
 
         return $className;

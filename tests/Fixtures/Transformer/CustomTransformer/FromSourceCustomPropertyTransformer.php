@@ -9,9 +9,9 @@ use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformerInterface;
 
 final readonly class FromSourceCustomPropertyTransformer implements CustomPropertyTransformerInterface
 {
-    public function supports(string $source, string $target, string $propertyName): bool
+    public function supports(string $source, string $target, string $sourceProperty, string $targetProperty): bool
     {
-        return $source === UserDTO::class && $target === 'array' && $propertyName === 'name';
+        return $source === UserDTO::class && $target === 'array' && $sourceProperty === 'name';
     }
 
     /**

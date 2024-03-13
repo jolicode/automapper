@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
-use AutoMapper\MapperMetadataInterface;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
 use Symfony\Component\PropertyInfo\Type;
 
 /**
@@ -12,7 +14,7 @@ use Symfony\Component\PropertyInfo\Type;
  */
 final class DateTimeTransformerFactory extends AbstractUniqueTypeTransformerFactory implements PrioritizedTransformerFactoryInterface
 {
-    protected function createTransformer(Type $sourceType, Type $targetType, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
+    protected function createTransformer(Type $sourceType, Type $targetType, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
         $isSourceDate = $this->isDateTimeType($sourceType);
         $isTargetDate = $this->isDateTimeType($targetType);
@@ -22,11 +24,11 @@ final class DateTimeTransformerFactory extends AbstractUniqueTypeTransformerFact
         }
 
         if ($isSourceDate) {
-            return $this->createTransformerForSource($targetType, $mapperMetadata);
+            return $this->createTransformerForSource($targetType, $source);
         }
 
         if ($isTargetDate) {
-            return $this->createTransformerForTarget($sourceType, $targetType, $mapperMetadata);
+            return $this->createTransformerForTarget($sourceType, $targetType, $target);
         }
 
         return null;
@@ -43,19 +45,19 @@ final class DateTimeTransformerFactory extends AbstractUniqueTypeTransformerFact
         return new DateTimeInterfaceToImmutableTransformer();
     }
 
-    protected function createTransformerForSource(Type $targetType, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
+    protected function createTransformerForSource(Type $targetType, SourcePropertyMetadata $metadata): ?TransformerInterface
     {
         if (Type::BUILTIN_TYPE_STRING === $targetType->getBuiltinType()) {
-            return new DateTimeToStringTransformer($mapperMetadata->getDateTimeFormat());
+            return new DateTimeToStringTransformer($metadata->dateTimeFormat);
         }
 
         return null;
     }
 
-    protected function createTransformerForTarget(Type $sourceType, Type $targetType, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
+    protected function createTransformerForTarget(Type $sourceType, Type $targetType, TargetPropertyMetadata $metadata): ?TransformerInterface
     {
         if (Type::BUILTIN_TYPE_STRING === $sourceType->getBuiltinType()) {
-            return new StringToDateTimeTransformer($this->getClassName($targetType), $mapperMetadata->getDateTimeFormat());
+            return new StringToDateTimeTransformer($this->getClassName($targetType), $metadata->dateTimeFormat);
         }
 
         return null;

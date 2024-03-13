@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
-use AutoMapper\MapperMetadataInterface;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
 use Symfony\Component\PropertyInfo\Type;
 
 /**
@@ -16,9 +18,6 @@ interface TransformerFactoryInterface
 {
     /**
      * Get transformer to use when mapping from an array of type to another array of type.
-     *
-     * @param Type[]|null $sourceTypes
-     * @param Type[]|null $targetTypes
      */
-    public function getTransformer(?array $sourceTypes, ?array $targetTypes, MapperMetadataInterface $mapperMetadata): ?TransformerInterface;
+    public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface;
 }

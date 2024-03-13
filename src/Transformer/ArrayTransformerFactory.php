@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
-use AutoMapper\MapperMetadataInterface;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
 use Symfony\Component\PropertyInfo\Type;
 
 /**
@@ -16,7 +18,7 @@ final class ArrayTransformerFactory extends AbstractUniqueTypeTransformerFactory
 {
     use ChainTransformerFactoryAwareTrait;
 
-    protected function createTransformer(Type $sourceType, Type $targetType, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
+    protected function createTransformer(Type $sourceType, Type $targetType, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
         if (!($sourceType->isCollection() || ($sourceType->getBuiltinType() === Type::BUILTIN_TYPE_OBJECT && $sourceType->getClassName() === \Generator::class))) {
             return null;
@@ -30,7 +32,7 @@ final class ArrayTransformerFactory extends AbstractUniqueTypeTransformerFactory
             return new DictionaryTransformer(new CopyTransformer());
         }
 
-        $subItemTransformer = $this->chainTransformerFactory->getTransformer($sourceType->getCollectionValueTypes(), $targetType->getCollectionValueTypes(), $mapperMetadata);
+        $subItemTransformer = $this->chainTransformerFactory->getTransformer($source->withTypes($sourceType->getCollectionValueTypes()), $target->withTypes($targetType->getCollectionValueTypes()), $mapperMetadata);
 
         if (null !== $subItemTransformer) {
             $sourceCollectionKeyTypes = $sourceType->getCollectionKeyTypes();

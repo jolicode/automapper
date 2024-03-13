@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
-use AutoMapper\MapperMetadataInterface;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
 
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
@@ -13,16 +15,18 @@ final class MultipleTransformerFactory implements TransformerFactoryInterface, P
 {
     use ChainTransformerFactoryAwareTrait;
 
-    public function getTransformer(?array $sourceTypes, ?array $targetTypes, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
+    public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
-        if (null === $sourceTypes || \count($sourceTypes) <= 1) {
+        $sourceTypes = $source->types;
+
+        if (\count($sourceTypes) <= 1) {
             return null;
         }
 
         $transformers = [];
 
         foreach ($sourceTypes as $sourceType) {
-            $transformer = $this->chainTransformerFactory->getTransformer([$sourceType], $targetTypes, $mapperMetadata);
+            $transformer = $this->chainTransformerFactory->getTransformer($source->withTypes([$sourceType]), $target, $mapperMetadata);
 
             if (null !== $transformer) {
                 $transformers[] = [

@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer\CustomTransformer;
 
-use AutoMapper\MapperMetadataInterface;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
 use AutoMapper\Transformer\PrioritizedTransformerFactoryInterface;
+use AutoMapper\Transformer\TransformerFactoryInterface;
 use AutoMapper\Transformer\TransformerInterface;
-use AutoMapper\Transformer\TransformerPropertyFactoryInterface;
-use Symfony\Component\PropertyInfo\Type;
 
-final class CustomTransformerFactory implements PrioritizedTransformerFactoryInterface, TransformerPropertyFactoryInterface
+final class CustomTransformerFactory implements PrioritizedTransformerFactoryInterface, TransformerFactoryInterface
 {
     public function __construct(
         private readonly CustomTransformersRegistry $customTransformersRegistry,
@@ -22,17 +23,12 @@ final class CustomTransformerFactory implements PrioritizedTransformerFactoryInt
         return 256;
     }
 
-    /**
-     * @param Type[]|null $sourceTypes
-     * @param Type[]|null $targetTypes
-     */
-    public function getPropertyTransformer(?array $sourceTypes, ?array $targetTypes, MapperMetadataInterface $mapperMetadata, string $property): ?TransformerInterface
+    public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $metadata): ?TransformerInterface
     {
-        if (null === $sourceTypes || null === $targetTypes) {
-            return null;
-        }
+        $sourceTypes = $source->types;
+        $targetTypes = $target->types;
 
-        $customTransformer = $this->customTransformersRegistry->getCustomTransformerClass($mapperMetadata, $sourceTypes, $targetTypes, $property);
+        $customTransformer = $this->customTransformersRegistry->getCustomTransformerClass($metadata, $sourceTypes, $targetTypes, $source->name, $target->name);
 
         if (null === $customTransformer) {
             return null;

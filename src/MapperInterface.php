@@ -14,8 +14,8 @@ namespace AutoMapper;
 interface MapperInterface
 {
     /**
-     * @param mixed $value   Value to map
-     * @param array $context Options mapper have access to
+     * @param mixed                $value   Value to map
+     * @param array<string, mixed> $context Options mapper have access to
      *
      * @return mixed The mapped value
      */

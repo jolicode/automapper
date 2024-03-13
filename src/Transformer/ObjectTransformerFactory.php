@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
-use AutoMapper\AutoMapperRegistryAwareInterface;
-use AutoMapper\AutoMapperRegistryAwareTrait;
-use AutoMapper\MapperMetadataInterface;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
 use Symfony\Component\PropertyInfo\Type;
 
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-final class ObjectTransformerFactory extends AbstractUniqueTypeTransformerFactory implements PrioritizedTransformerFactoryInterface, AutoMapperRegistryAwareInterface
+final class ObjectTransformerFactory extends AbstractUniqueTypeTransformerFactory implements PrioritizedTransformerFactoryInterface
 {
-    use AutoMapperRegistryAwareTrait;
-
-    protected function createTransformer(Type $sourceType, Type $targetType, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
+    protected function createTransformer(Type $sourceType, Type $targetType, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
         // Only deal with source type being an object or an array that is not a collection
         if (!$this->isObjectType($sourceType) || !$this->isObjectType($targetType)) {
@@ -34,7 +32,7 @@ final class ObjectTransformerFactory extends AbstractUniqueTypeTransformerFactor
             $targetTypeName = $targetType->getClassName();
         }
 
-        if (null !== $sourceTypeName && null !== $targetTypeName && $this->autoMapperRegistry->hasMapper($sourceTypeName, $targetTypeName)) {
+        if (null !== $sourceTypeName && null !== $targetTypeName) {
             return new ObjectTransformer($sourceType, $targetType);
         }
 

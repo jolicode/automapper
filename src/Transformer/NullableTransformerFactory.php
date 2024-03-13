@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
-use AutoMapper\MapperMetadataInterface;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
 use Symfony\Component\PropertyInfo\Type;
 
 /**
@@ -14,11 +16,14 @@ final class NullableTransformerFactory implements TransformerFactoryInterface, P
 {
     use ChainTransformerFactoryAwareTrait;
 
-    public function getTransformer(?array $sourceTypes, ?array $targetTypes, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
+    public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
-        $nbSourceTypes = $sourceTypes ? \count($sourceTypes) : 0;
+        $sourceTypes = $source->types;
+        $targetTypes = $target->types;
 
-        if (null === $sourceTypes || 0 === $nbSourceTypes || $nbSourceTypes > 1) {
+        $nbSourceTypes = \count($sourceTypes);
+
+        if (0 === $nbSourceTypes || $nbSourceTypes > 1) {
             return null;
         }
 
@@ -30,7 +35,7 @@ final class NullableTransformerFactory implements TransformerFactoryInterface, P
 
         $isTargetNullable = false;
 
-        foreach ($targetTypes ?? [] as $targetType) {
+        foreach ($targetTypes as $targetType) {
             if ($targetType->isNullable()) {
                 $isTargetNullable = true;
 
@@ -38,14 +43,16 @@ final class NullableTransformerFactory implements TransformerFactoryInterface, P
             }
         }
 
-        $subTransformer = $this->chainTransformerFactory->getTransformer([new Type(
+        $source = $source->withTypes([new Type(
             $propertyType->getBuiltinType(),
             false,
             $propertyType->getClassName(),
             $propertyType->isCollection(),
             $propertyType->getCollectionKeyTypes(),
             $propertyType->getCollectionValueTypes()
-        )], $targetTypes, $mapperMetadata);
+        )]);
+
+        $subTransformer = $this->chainTransformerFactory->getTransformer($source, $target, $mapperMetadata);
 
         if (null === $subTransformer) {
             return null;

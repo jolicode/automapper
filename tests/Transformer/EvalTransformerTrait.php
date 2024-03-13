@@ -4,28 +4,33 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Transformer;
 
-use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Extractor\ReadAccessor;
 use AutoMapper\Generator\UniqueVariableScope;
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\Metadata\PropertyMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
 use AutoMapper\Transformer\TransformerInterface;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Param;
 use PhpParser\Node\Stmt;
 use PhpParser\PrettyPrinter\Standard;
+use Symfony\Component\PropertyInfo\Type;
 
 trait EvalTransformerTrait
 {
-    private function createTransformerFunction(TransformerInterface $transformer, PropertyMapping $propertyMapping = null): \Closure
+    private function createTransformerFunction(TransformerInterface $transformer, PropertyMetadata $propertyMapping = null): \Closure
     {
         if (null === $propertyMapping) {
-            $propertyMapping = new PropertyMapping(
-                $this->createMock(MapperGeneratorMetadataInterface::class),
-                new ReadAccessor(ReadAccessor::TYPE_PROPERTY, 'dummy'),
-                null,
-                null,
-                $transformer,
-                'dummy'
+            $propertyMapping = new PropertyMetadata(
+                new SourcePropertyMetadata(
+                    [new Type('string')],
+                    'dummy',
+                    new ReadAccessor(ReadAccessor::TYPE_PROPERTY, 'dummy'),
+                ),
+                new TargetPropertyMetadata(
+                    [new Type('string')],
+                    'dummy',
+                ),
             );
         }
 
@@ -50,7 +55,7 @@ trait EvalTransformerTrait
         return eval($code);
     }
 
-    private function evalTransformer(TransformerInterface $transformer, mixed $input, PropertyMapping $propertyMapping = null): mixed
+    private function evalTransformer(TransformerInterface $transformer, mixed $input, PropertyMetadata $propertyMapping = null): mixed
     {
         $function = $this->createTransformerFunction($transformer, $propertyMapping);
 

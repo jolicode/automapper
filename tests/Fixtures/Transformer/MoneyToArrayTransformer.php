@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Fixtures\Transformer;
 
-use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Generator\UniqueVariableScope;
+use AutoMapper\Metadata\PropertyMetadata;
 use AutoMapper\Transformer\TransformerInterface;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Scalar\String_;
@@ -18,7 +18,7 @@ use PhpParser\Node\Stmt\Expression;
  */
 final class MoneyToArrayTransformer implements TransformerInterface
 {
-    public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
     {
         $moneyVar = new Expr\Variable($uniqueVariableScope->getUniqueName('money'));
 

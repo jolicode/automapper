@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Transformer;
 
-use AutoMapper\MapperMetadata;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
 use AutoMapper\Transformer\BuiltinTransformerFactory;
 use AutoMapper\Transformer\ChainTransformerFactory;
 use AutoMapper\Transformer\NullableTransformer;
@@ -30,25 +32,33 @@ class NullableTransformerFactoryTest extends TestCase
 
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
-        $transformer = $factory->getTransformer([new Type('string', true)], [new Type('string')], $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('string', true)], 'foo');
+        $targetMapperMetadata = new TargetPropertyMetadata([new Type('string')], 'foo');
+        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNotNull($transformer);
         self::assertInstanceOf(NullableTransformer::class, $transformer);
         self::assertFalse($this->isTargetNullableProperty->getValue($transformer));
 
-        $transformer = $factory->getTransformer([new Type('string', true)], [new Type('string', true)], $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('string', true)], 'foo');
+        $targetMapperMetadata = new TargetPropertyMetadata([new Type('string', true)], 'foo');
+        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNotNull($transformer);
         self::assertInstanceOf(NullableTransformer::class, $transformer);
         self::assertTrue($this->isTargetNullableProperty->getValue($transformer));
 
-        $transformer = $factory->getTransformer([new Type('string', true)], [new Type('string'), new Type('int', true)], $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('string', true)], 'foo');
+        $targetMapperMetadata = new TargetPropertyMetadata([new Type('string'), new Type('int', true)], 'foo');
+        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNotNull($transformer);
         self::assertInstanceOf(NullableTransformer::class, $transformer);
         self::assertTrue($this->isTargetNullableProperty->getValue($transformer));
 
-        $transformer = $factory->getTransformer([new Type('string', true)], [new Type('string'), new Type('int')], $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('string', true)], 'foo');
+        $targetMapperMetadata = new TargetPropertyMetadata([new Type('string'), new Type('int')], 'foo');
+        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNotNull($transformer);
         self::assertInstanceOf(NullableTransformer::class, $transformer);
@@ -63,7 +73,9 @@ class NullableTransformerFactoryTest extends TestCase
 
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
-        $transformer = $factory->getTransformer([new Type('string')], [new Type('string')], $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('string')], 'foo');
+        $targetMapperMetadata = new TargetPropertyMetadata([new Type('string')], 'foo');
+        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNull($transformer);
     }
@@ -76,7 +88,9 @@ class NullableTransformerFactoryTest extends TestCase
 
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
-        $transformer = $factory->getTransformer([new Type('string', true), new Type('string')], [new Type('string')], $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('string', true), new Type('string')], 'foo');
+        $targetMapperMetadata = new TargetPropertyMetadata([new Type('string')], 'foo');
+        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNull($transformer);
     }

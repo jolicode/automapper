@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator\Shared;
 
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\Metadata\GeneratorMetadata;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
@@ -44,15 +44,15 @@ use PhpParser\Node\Stmt;
  */
 final readonly class CachedReflectionStatementsGenerator
 {
-    public function createTargetStatement(MapperGeneratorMetadataInterface $mapperMetadata): ?Stmt
+    public function createTargetStatement(GeneratorMetadata $metadata): ?Stmt
     {
-        if (!$this->supports($mapperMetadata)) {
+        if (!$this->supports($metadata)) {
             return null;
         }
 
-        $variableRegistry = $mapperMetadata->getVariableRegistry();
+        $variableRegistry = $metadata->variableRegistry;
 
-        if ($mapperMetadata->isTargetCloneable()) {
+        if ($metadata->isTargetCloneable()) {
             return new Stmt\Expression(
                 new Expr\Assign($variableRegistry->getResult(), new Expr\Clone_(new Expr\PropertyFetch(new Expr\Variable('this'), 'cachedTarget')))
             );
@@ -64,17 +64,17 @@ final readonly class CachedReflectionStatementsGenerator
         )));
     }
 
-    public function mapperConstructorStatement(MapperGeneratorMetadataInterface $mapperMetadata): ?Stmt\Expression
+    public function mapperConstructorStatement(GeneratorMetadata $metadata): ?Stmt\Expression
     {
-        if (!$this->supports($mapperMetadata)) {
+        if (!$this->supports($metadata)) {
             return null;
         }
 
-        if ($mapperMetadata->isTargetCloneable()) {
+        if ($metadata->isTargetCloneable()) {
             return new Stmt\Expression(new Expr\Assign(
                 new Expr\PropertyFetch(new Expr\Variable('this'), 'cachedTarget'),
                 new Expr\MethodCall(new Expr\New_(new Name\FullyQualified(\ReflectionClass::class), [
-                    new Arg(new Scalar\String_($mapperMetadata->getTarget())),
+                    new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
                 ]), 'newInstanceWithoutConstructor')
             ));
         }
@@ -82,19 +82,19 @@ final readonly class CachedReflectionStatementsGenerator
         return new Stmt\Expression(new Expr\Assign(
             new Expr\PropertyFetch(new Expr\Variable('this'), 'cachedTarget'),
             new Expr\New_(new Name\FullyQualified(\ReflectionClass::class), [
-                new Arg(new Scalar\String_($mapperMetadata->getTarget())),
+                new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
             ])
         ));
     }
 
-    private function supports(MapperGeneratorMetadataInterface $mapperMetadata): bool
+    private function supports(GeneratorMetadata $metadata): bool
     {
-        if (!$mapperMetadata->targetIsAUserDefinedClass()) {
+        if (!$metadata->isTargetUserDefined()) {
             return false;
         }
 
-        $targetConstructor = $mapperMetadata->getCachedTargetReflectionClass()?->getConstructor();
+        $targetConstructor = $metadata->mapperMetadata->targetReflectionClass?->getConstructor();
 
-        return $targetConstructor && !$mapperMetadata->hasConstructor();
+        return $targetConstructor && !$metadata->hasConstructor();
     }
 }
