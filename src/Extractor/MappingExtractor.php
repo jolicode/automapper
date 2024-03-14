@@ -38,24 +38,6 @@ abstract class MappingExtractor implements MappingExtractorInterface
         return $this->propertyInfoExtractor->getProperties($class) ?? [];
     }
 
-    public function isIgnoredSourceProperty(string $class, string $property): bool
-    {
-        if ($class === 'array' || $class === \stdClass::class) {
-            return false;
-        }
-
-        return !$this->propertyInfoExtractor->isReadable($class, $property);
-    }
-
-    public function isIgnoredTargetProperty(string $class, string $property): bool
-    {
-        if ($class === 'array' || $class === \stdClass::class) {
-            return false;
-        }
-
-        return !$this->propertyInfoExtractor->isWritable($class, $property);
-    }
-
     public function getReadAccessor(string $source, string $target, string $property): ?ReadAccessor
     {
         $readInfo = $this->readInfoExtractor->getReadInfo($source, $property);
