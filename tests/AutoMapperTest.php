@@ -36,6 +36,10 @@ use AutoMapper\Tests\Fixtures\PetOwner;
 use AutoMapper\Tests\Fixtures\Transformer\MoneyTransformerFactory;
 use AutoMapper\Tests\Fixtures\Uninitialized;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\Ignore;
+use Symfony\Component\Serializer\Attribute\MaxDepth;
+use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
 use Symfony\Component\Uid\Ulid;
 use Symfony\Component\Uid\Uuid;
@@ -234,6 +238,10 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testGroupsSourceTarget(): void
     {
+        if (!class_exists(Groups::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
         $foo = new Fixtures\Foo();
         $foo->setId(10);
 
@@ -265,6 +273,10 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testGroupsToArray(): void
     {
+        if (!class_exists(Groups::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
         $foo = new Fixtures\Foo();
         $foo->setId(10);
 
@@ -440,6 +452,10 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testMaxDepth(): void
     {
+        if (!class_exists(MaxDepth::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
         $foo = new Fixtures\FooMaxDepth(0, new Fixtures\FooMaxDepth(1, new Fixtures\FooMaxDepth(2, new Fixtures\FooMaxDepth(3, new Fixtures\FooMaxDepth(4)))));
         $fooArray = $this->autoMapper->map($foo, 'array');
 
@@ -450,6 +466,10 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testIgnoreInSource(): void
     {
+        if (!class_exists(Ignore::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
         $foo = new Fixtures\FooIgnore();
         $foo->id = 5;
         $fooArray = $this->autoMapper->map($foo, 'array');
@@ -459,6 +479,10 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testIgnoreInTarget(): void
     {
+        if (!class_exists(Ignore::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
         $foo = new Fixtures\Foo();
         $fooIgnore = $this->autoMapper->map($foo, Fixtures\FooIgnore::class);
 
@@ -580,6 +604,10 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testNameConverter(): void
     {
+        if (!interface_exists(AdvancedNameConverterInterface::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
         if (Kernel::MAJOR_VERSION < 6) {
             $nameConverter = new class() implements AdvancedNameConverterInterface {
                 public function normalize($propertyName, ?string $class = null, ?string $format = null, array $context = [])
@@ -650,6 +678,10 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testDiscriminator(): void
     {
+        if (!class_exists(ClassDiscriminatorFromClassMetadata::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
         $this->buildAutoMapper(classPrefix: 'Discriminator');
 
         $data = [
@@ -867,6 +899,10 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testAdderAndRemoverWithClass(): void
     {
+        if (!class_exists(ClassDiscriminatorFromClassMetadata::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
         $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
         $petOwner = [
@@ -888,6 +924,10 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testAdderAndRemoverWithInstance(): void
     {
+        if (!class_exists(ClassDiscriminatorFromClassMetadata::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
         $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
         $fish = new Fish();

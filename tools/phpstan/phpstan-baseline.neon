@@ -1,11 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Instantiated class Symfony\\\\Component\\\\Serializer\\\\Mapping\\\\Loader\\\\AnnotationLoader not found\\.$#"
-			count: 2
-			path: ../../src/AutoMapper.php
-
-		-
 			message: "#^Method AutoMapper\\\\AutoMapper\\:\\:map\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: ../../src/AutoMapper.php
@@ -56,21 +51,6 @@ parameters:
 			path: ../../src/AutoMapperInterface.php
 
 		-
-			message: "#^Method AutoMapper\\\\Extractor\\\\FromSourceMappingExtractor\\:\\:getWriteMutator\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/Extractor/FromSourceMappingExtractor.php
-
-		-
-			message: "#^Parameter \\#1 \\$object_or_class of function is_subclass_of expects object\\|string, string\\|null given\\.$#"
-			count: 1
-			path: ../../src/Extractor/FromSourceMappingExtractor.php
-
-		-
-			message: "#^Parameter \\#1 \\$object_or_class of function is_subclass_of expects object\\|string, string\\|null given\\.$#"
-			count: 1
-			path: ../../src/Extractor/FromTargetMappingExtractor.php
-
-		-
 			message: "#^Method AutoMapper\\\\Extractor\\\\MapToContextPropertyInfoExtractorDecorator\\:\\:getProperties\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: ../../src/Extractor/MapToContextPropertyInfoExtractorDecorator.php
@@ -116,59 +96,9 @@ parameters:
 			path: ../../src/Extractor/MapToContextPropertyInfoExtractorDecorator.php
 
 		-
-			message: "#^Method AutoMapper\\\\Extractor\\\\MappingExtractor\\:\\:getGroups\\(\\) has parameter \\$class with no type specified\\.$#"
-			count: 1
-			path: ../../src/Extractor/MappingExtractor.php
-
-		-
-			message: "#^Method AutoMapper\\\\Extractor\\\\MappingExtractor\\:\\:getGroups\\(\\) has parameter \\$property with no type specified\\.$#"
-			count: 1
-			path: ../../src/Extractor/MappingExtractor.php
-
-		-
-			message: "#^Method AutoMapper\\\\Extractor\\\\MappingExtractor\\:\\:getGroups\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/Extractor/MappingExtractor.php
-
-		-
-			message: "#^Method AutoMapper\\\\Extractor\\\\MappingExtractor\\:\\:getMaxDepth\\(\\) has parameter \\$class with no type specified\\.$#"
-			count: 1
-			path: ../../src/Extractor/MappingExtractor.php
-
-		-
-			message: "#^Method AutoMapper\\\\Extractor\\\\MappingExtractor\\:\\:getMaxDepth\\(\\) has parameter \\$property with no type specified\\.$#"
-			count: 1
-			path: ../../src/Extractor/MappingExtractor.php
-
-		-
-			message: "#^Method AutoMapper\\\\Extractor\\\\MappingExtractor\\:\\:getWriteMutator\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/Extractor/MappingExtractor.php
-
-		-
-			message: "#^Method AutoMapper\\\\Extractor\\\\MappingExtractor\\:\\:isIgnoredProperty\\(\\) has parameter \\$class with no type specified\\.$#"
-			count: 1
-			path: ../../src/Extractor/MappingExtractor.php
-
-		-
-			message: "#^Method AutoMapper\\\\Extractor\\\\MappingExtractor\\:\\:isIgnoredProperty\\(\\) has parameter \\$property with no type specified\\.$#"
-			count: 1
-			path: ../../src/Extractor/MappingExtractor.php
-
-		-
-			message: "#^Method AutoMapper\\\\Extractor\\\\MappingExtractorInterface\\:\\:getWriteMutator\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/Extractor/MappingExtractorInterface.php
-
-		-
 			message: "#^Parameter \\#1 \\$class of function class_exists expects string, string\\|null given\\.$#"
 			count: 1
 			path: ../../src/Extractor/ReadAccessor.php
-
-		-
-			message: "#^Cannot access property \\$type on AutoMapper\\\\Extractor\\\\WriteMutator\\|null\\.$#"
-			count: 1
-			path: ../../src/Extractor/SourceTargetMappingExtractor.php
 
 		-
 			message: "#^Property AutoMapper\\\\GeneratedMapper\\:\\:\\$cachedTarget has no type specified\\.$#"

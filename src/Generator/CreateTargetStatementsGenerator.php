@@ -199,10 +199,6 @@ final readonly class CreateTargetStatementsGenerator
         $constructVar = $variableRegistry->getVariableWithUniqueName('constructArg');
         $fieldValueExpr = $propertyMapping->source->accessor?->getExpression($variableRegistry->getSourceInput());
 
-        if (null === $propertyMapping->transformer) {
-            return null;
-        }
-
         if (null === $fieldValueExpr) {
             if (!($propertyMapping->transformer instanceof CustomPropertyTransformer)) {
                 return null;
