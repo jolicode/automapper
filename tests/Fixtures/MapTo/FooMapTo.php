@@ -10,8 +10,14 @@ class FooMapTo
 {
     public function __construct(
         #[MapTo(Bar::class, name: 'bar')]
-        #[MapTo(Bar::class, name: 'baz')]
+        #[MapTo(name: 'baz')]
+        #[MapTo('array', transformer: self::class . '::testTransform')]
         public string $foo
     ) {
+    }
+
+    public static function testTransform($value)
+    {
+        return strtoupper($value);
     }
 }

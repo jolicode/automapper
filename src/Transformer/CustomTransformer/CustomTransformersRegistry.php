@@ -32,6 +32,11 @@ final class CustomTransformersRegistry
         $this->customTransformers[$id] = $customTransformer;
     }
 
+    public function getCustomTransformer(string $id): ?CustomTransformerInterface
+    {
+        return $this->customTransformers[$id] ?? null;
+    }
+
     /**
      * @param Type[] $sourceTypes
      * @param Type[] $targetTypes

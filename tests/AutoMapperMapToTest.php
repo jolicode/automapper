@@ -21,4 +21,15 @@ class AutoMapperMapToTest extends AutoMapperBaseTest
         $this->assertSame('foo', $bar->bar);
         $this->assertSame('foo', $bar->baz);
     }
+
+    public function testMapToArray()
+    {
+        $foo = new FooMapTo('foo');
+        $bar = $this->autoMapper->map($foo, 'array');
+
+        $this->assertIsArray($bar);
+        $this->assertArrayNotHasKey('bar', $bar);
+        $this->assertSame('foo', $bar['baz']);
+        $this->assertSame('FOO', $bar['foo']);
+    }
 }

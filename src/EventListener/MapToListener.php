@@ -9,10 +9,16 @@ use AutoMapper\Event\GenerateMapperEvent;
 use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\Event\SourcePropertyMetadata;
 use AutoMapper\Event\TargetPropertyMetadata;
+use AutoMapper\Transformer\CallableTransformer;
+use AutoMapper\Transformer\CustomTransformer\CustomModelTransformer;
+use AutoMapper\Transformer\CustomTransformer\CustomModelTransformerInterface;
+use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformer;
+use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformerInterface;
+use AutoMapper\Transformer\CustomTransformer\CustomTransformersRegistry;
 
-class MapToMapperListener
+final readonly class MapToListener
 {
-    public function __construct()
+    public function __construct(private CustomTransformersRegistry $customTransformersRegistry)
     {
     }
 
@@ -45,7 +51,19 @@ class MapToMapperListener
                 $transformer = null;
 
                 if ($mapToAttributeInstance->transformer !== null) {
-                    // @TODO create transformer
+                    $callableName = null;
+
+                    if (\is_string($mapToAttributeInstance->transformer) && $customTransformer = $this->customTransformersRegistry->getCustomTransformer($mapToAttributeInstance->transformer)) {
+                        if ($customTransformer instanceof CustomModelTransformerInterface) {
+                            $transformer = new CustomModelTransformer($mapToAttributeInstance->transformer);
+                        }
+
+                        if ($customTransformer instanceof CustomPropertyTransformerInterface) {
+                            $transformer = new CustomPropertyTransformer($mapToAttributeInstance->transformer);
+                        }
+                    } elseif (@\is_callable($mapToAttributeInstance->transformer, false, $callableName) && $callableName !== null) {
+                        $transformer = new CallableTransformer($callableName);
+                    }
                 }
 
                 $property = new PropertyMetadataEvent(
