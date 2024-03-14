@@ -769,9 +769,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testCustomTransformerFromArrayToObject(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
-
-        $this->autoMapper->bindTransformerFactory(new MoneyTransformerFactory());
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, transformerFactories: [new MoneyTransformerFactory()]);
 
         $data = [
             'id' => 4582,
@@ -790,7 +788,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testCustomTransformerFromObjectToArray(): void
     {
-        $this->autoMapper->bindTransformerFactory(new MoneyTransformerFactory());
+        $this->buildAutoMapper(transformerFactories: [new MoneyTransformerFactory()]);
 
         $order = new Order();
         $order->id = 4582;
@@ -806,7 +804,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testCustomTransformerFromObjectToObject(): void
     {
-        $this->autoMapper->bindTransformerFactory(new MoneyTransformerFactory());
+        $this->buildAutoMapper(transformerFactories: [new MoneyTransformerFactory()]);
 
         $order = new Order();
         $order->id = 4582;
