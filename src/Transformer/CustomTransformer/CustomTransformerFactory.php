@@ -11,6 +11,9 @@ use AutoMapper\Transformer\PrioritizedTransformerFactoryInterface;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use AutoMapper\Transformer\TransformerInterface;
 
+/**
+ * @internal
+ */
 final class CustomTransformerFactory implements PrioritizedTransformerFactoryInterface, TransformerFactoryInterface
 {
     public function __construct(

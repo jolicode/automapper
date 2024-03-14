@@ -14,6 +14,8 @@ use PhpParser\Node\Name;
  * Transform a scalar into a BackendEnum.
  *
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
+ *
+ * @internal
  */
 final readonly class TargetEnumTransformer implements TransformerInterface
 {

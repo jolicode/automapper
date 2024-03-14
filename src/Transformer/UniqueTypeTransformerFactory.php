@@ -12,6 +12,8 @@ use AutoMapper\Metadata\TargetPropertyMetadata;
  * Reduce array of type to only one type on source and target.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 final class UniqueTypeTransformerFactory implements TransformerFactoryInterface, PrioritizedTransformerFactoryInterface, ChainTransformerFactoryAwareInterface
 {

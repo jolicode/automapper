@@ -14,6 +14,8 @@ use PhpParser\PrettyPrinterAbstract;
  * Use file system to load mapper, and persist them using a registry.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ *  @internal
  */
 final class FileLoader implements ClassLoaderInterface
 {

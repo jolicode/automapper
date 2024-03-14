@@ -14,6 +14,8 @@ use PhpParser\Node\Name;
  * Transform DateTimeInterface to DateTimeImmutable.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 final class DateTimeInterfaceToImmutableTransformer implements TransformerInterface
 {

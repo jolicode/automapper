@@ -13,6 +13,8 @@ use PhpParser\Node\Stmt;
  * Transformer tell how to transform a property mapping.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 interface TransformerInterface
 {

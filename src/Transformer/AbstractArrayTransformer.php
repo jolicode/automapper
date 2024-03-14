@@ -13,6 +13,8 @@ use PhpParser\Node\Stmt;
 
 /**
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
+ *
+ * @internal
  */
 abstract readonly class AbstractArrayTransformer implements TransformerInterface, DependentTransformerInterface
 {

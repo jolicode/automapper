@@ -10,6 +10,8 @@ use AutoMapper\Metadata\TargetPropertyMetadata;
 
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 final class ChainTransformerFactory implements TransformerFactoryInterface
 {

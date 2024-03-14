@@ -12,6 +12,8 @@ use PhpParser\Node\Expr;
  * Transform a BackendEnum into a scalar.
  *
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
+ *
+ * @internal
  */
 final class SourceEnumTransformer implements TransformerInterface
 {

@@ -12,6 +12,8 @@ use PhpParser\Node\Expr;
  * Does not do any transformation, output = input.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 final class CopyTransformer implements TransformerInterface
 {

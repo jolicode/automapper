@@ -6,6 +6,9 @@ namespace AutoMapper\Metadata;
 
 use AutoMapper\AutoMapper;
 
+/**
+ * @internal
+ */
 class MapperMetadata
 {
     public string $className;

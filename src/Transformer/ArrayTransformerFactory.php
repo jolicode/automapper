@@ -13,6 +13,8 @@ use Symfony\Component\PropertyInfo\Type;
  * Create a decorated transformer to handle array type.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 final class ArrayTransformerFactory extends AbstractUniqueTypeTransformerFactory implements PrioritizedTransformerFactoryInterface, ChainTransformerFactoryAwareInterface
 {

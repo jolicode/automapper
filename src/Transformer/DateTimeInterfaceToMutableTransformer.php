@@ -14,6 +14,8 @@ use PhpParser\Node\Name;
  * Transform DateTimeInterface to DateTime.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 final class DateTimeInterfaceToMutableTransformer implements TransformerInterface
 {

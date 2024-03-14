@@ -14,6 +14,8 @@ use PhpParser\Node\Stmt;
  * Tansformer decorator to handle null values.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 final readonly class NullableTransformer implements TransformerInterface, DependentTransformerInterface
 {

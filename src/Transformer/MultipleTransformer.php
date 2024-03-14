@@ -19,6 +19,8 @@ use Symfony\Component\PropertyInfo\Type;
  * It will always use the first target type possible for transformation
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 final class MultipleTransformer implements TransformerInterface, DependentTransformerInterface
 {

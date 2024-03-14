@@ -14,6 +14,8 @@ use PhpParser\Node\Name;
  * Transform a string to a Symfony Uid object.
  *
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
+ *
+ * @internal
  */
 final readonly class StringToSymfonyUidTransformer implements TransformerInterface
 {

@@ -8,6 +8,8 @@ namespace AutoMapper\Transformer;
  * Allows to use a chain transformer factory.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 interface ChainTransformerFactoryAwareInterface
 {

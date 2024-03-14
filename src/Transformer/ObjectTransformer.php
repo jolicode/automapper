@@ -17,6 +17,8 @@ use Symfony\Component\PropertyInfo\Type;
  * Transform to an object which can be mapped by AutoMapper (sub mapping).
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 final readonly class ObjectTransformer implements TransformerInterface, DependentTransformerInterface, AssignedByReferenceTransformerInterface
 {

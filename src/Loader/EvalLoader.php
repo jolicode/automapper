@@ -14,6 +14,8 @@ use PhpParser\PrettyPrinterAbstract;
  * Use eval to load mappers.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ *  @internal
  */
 final readonly class EvalLoader implements ClassLoaderInterface
 {

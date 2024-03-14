@@ -11,6 +11,8 @@ use Symfony\Component\PropertyInfo\Type;
 
 /**
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
+ *
+ * @internal
  */
 final class EnumTransformerFactory extends AbstractUniqueTypeTransformerFactory implements PrioritizedTransformerFactoryInterface
 {

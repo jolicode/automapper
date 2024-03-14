@@ -16,6 +16,8 @@ use Symfony\Component\Uid\Uuid;
  * Transform Symfony Uid to the same object.
  *
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
+ *
+ * @internal
  */
 final class SymfonyUidCopyTransformer implements TransformerInterface
 {

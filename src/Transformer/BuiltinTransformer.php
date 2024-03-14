@@ -18,6 +18,8 @@ use Symfony\Component\PropertyInfo\Type;
  * Built in transformer to handle PHP scalar types.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 final readonly class BuiltinTransformer implements TransformerInterface
 {

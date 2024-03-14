@@ -11,6 +11,8 @@ use Symfony\Component\PropertyInfo\Type;
 
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 final class DateTimeTransformerFactory extends AbstractUniqueTypeTransformerFactory implements PrioritizedTransformerFactoryInterface
 {

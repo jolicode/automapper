@@ -11,6 +11,9 @@ use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Scalar;
 
+/**
+ * @internal
+ */
 final readonly class CustomModelTransformer implements TransformerInterface
 {
     public function __construct(

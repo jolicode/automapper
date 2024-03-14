@@ -15,6 +15,8 @@ use PhpParser\Node\Scalar;
  * Transform a \DateTimeInterface object to a string.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 final class DateTimeToStringTransformer implements TransformerInterface
 {

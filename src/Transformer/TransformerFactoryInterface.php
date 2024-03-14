@@ -13,6 +13,8 @@ use Symfony\Component\PropertyInfo\Type;
  * Create transformer.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 interface TransformerFactoryInterface
 {

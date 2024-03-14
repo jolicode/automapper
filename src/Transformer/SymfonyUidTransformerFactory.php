@@ -13,6 +13,8 @@ use Symfony\Component\Uid\Ulid;
 
 /**
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
+ *
+ * @internal
  */
 final class SymfonyUidTransformerFactory extends AbstractUniqueTypeTransformerFactory implements PrioritizedTransformerFactoryInterface
 {

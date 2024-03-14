@@ -12,6 +12,8 @@ use PhpParser\Node\Expr;
  * Transform an Enum into a copied Enum.
  *
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
+ *
+ * @internal
  */
 final class CopyEnumTransformer implements TransformerInterface
 {
