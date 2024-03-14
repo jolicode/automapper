@@ -35,7 +35,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
     public const RELEASE_VERSION = 0;
     public const EXTRA_VERSION = 'DEV';
 
-    /** @var GeneratedMapper[] */
+    /** @var array<GeneratedMapper<object, object>|GeneratedMapper<array<mixed>, object>|GeneratedMapper<object, array<mixed>>> */
     private array $mapperRegistry = [];
 
     public function __construct(
@@ -46,8 +46,13 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
     }
 
     /**
-     * @param class-string<object>|'array' $source
-     * @param class-string<object>|'array' $target
+     * @template Source of object
+     * @template Target of object
+     *
+     * @param class-string<Source>|'array' $source
+     * @param class-string<Target>|'array' $target
+     *
+     * @return ($source is class-string ? ($target is 'array' ? MapperInterface<Source, array<mixed>> : MapperInterface<Source, Target>) : MapperInterface<array<mixed>, Target>)
      */
     public function getMapper(string $source, string $target): MapperInterface
     {
@@ -55,6 +60,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         $className = $metadata->className;
 
         if (\array_key_exists($className, $this->mapperRegistry)) {
+            /** @var GeneratedMapper<Source, Target>|GeneratedMapper<array<mixed>, Target>|GeneratedMapper<Source, array<mixed>> */
             return $this->mapperRegistry[$className];
         }
 
@@ -62,18 +68,25 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
             $this->classLoader->loadClass($metadata);
         }
 
-        /** @var GeneratedMapper $mapper */
+        /** @var GeneratedMapper<Source, Target>|GeneratedMapper<array<mixed>, Target>|GeneratedMapper<Source, array<mixed>> $mapper */
         $mapper = new $className();
         $this->mapperRegistry[$className] = $mapper;
 
         $mapper->injectMappers($this);
         $mapper->setCustomTransformers($this->customTransformersRegistry->getCustomTransformers());
 
+        /** @var GeneratedMapper<Source, Target>|GeneratedMapper<array<mixed>, Target>|GeneratedMapper<Source, array<mixed>> */
         return $this->mapperRegistry[$className];
     }
 
     /**
-     * @param class-string<object>|array|object $target
+     * @template Source of object
+     * @template Target of object
+     *
+     * @param Source|array<mixed>                              $source
+     * @param class-string<Target>|'array'|array<mixed>|Target $target
+     *
+     * @return ($target is class-string|Target ? Target|null : array<mixed>|null)
      */
     public function map(array|object $source, string|array|object $target, array $context = []): array|object|null
     {

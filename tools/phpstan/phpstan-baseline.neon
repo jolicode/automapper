@@ -11,26 +11,6 @@ parameters:
 			path: ../../src/AutoMapper.php
 
 		-
-			message: "#^Method AutoMapper\\\\AutoMapper\\:\\:map\\(\\) has parameter \\$source with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/AutoMapper.php
-
-		-
-			message: "#^Method AutoMapper\\\\AutoMapper\\:\\:map\\(\\) has parameter \\$target with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/AutoMapper.php
-
-		-
-			message: "#^Method AutoMapper\\\\AutoMapper\\:\\:map\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/AutoMapper.php
-
-		-
-			message: "#^Method AutoMapper\\\\AutoMapper\\:\\:map\\(\\) should return array\\|object\\|null but returns mixed\\.$#"
-			count: 1
-			path: ../../src/AutoMapper.php
-
-		-
 			message: "#^Parameter \\#1 \\$loader of class Symfony\\\\Component\\\\Serializer\\\\Mapping\\\\Factory\\\\ClassMetadataFactory constructor expects Symfony\\\\Component\\\\Serializer\\\\Mapping\\\\Loader\\\\LoaderInterface, Symfony\\\\Component\\\\Serializer\\\\Mapping\\\\Loader\\\\AnnotationLoader\\|Symfony\\\\Component\\\\Serializer\\\\Mapping\\\\Loader\\\\AttributeLoader given\\.$#"
 			count: 1
 			path: ../../src/AutoMapper.php

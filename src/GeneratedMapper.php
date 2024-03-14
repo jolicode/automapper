@@ -10,6 +10,11 @@ use AutoMapper\Transformer\CustomTransformer\CustomTransformerInterface;
  * Class derived for each generated mapper.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @template Source of object|array<mixed>
+ * @template Target of object|array<mixed>
+ *
+ * @implements MapperInterface<Source, Target>
  */
 abstract class GeneratedMapper implements MapperInterface
 {
