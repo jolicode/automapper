@@ -22,10 +22,6 @@ interface MappingExtractorInterface
      */
     public function getProperties(string $class): iterable;
 
-    public function isIgnoredSourceProperty(string $class, string $property): bool;
-
-    public function isIgnoredTargetProperty(string $class, string $property): bool;
-
     /**
      * @return array{0: Type[], 1: Type[]}
      */

@@ -31,56 +31,6 @@ parameters:
 			path: ../../src/AutoMapperInterface.php
 
 		-
-			message: "#^Method AutoMapper\\\\Extractor\\\\MapToContextPropertyInfoExtractorDecorator\\:\\:getProperties\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/Extractor/MapToContextPropertyInfoExtractorDecorator.php
-
-		-
-			message: "#^Method AutoMapper\\\\Extractor\\\\MapToContextPropertyInfoExtractorDecorator\\:\\:getReadInfo\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/Extractor/MapToContextPropertyInfoExtractorDecorator.php
-
-		-
-			message: "#^Method AutoMapper\\\\Extractor\\\\MapToContextPropertyInfoExtractorDecorator\\:\\:getTypes\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/Extractor/MapToContextPropertyInfoExtractorDecorator.php
-
-		-
-			message: "#^Method AutoMapper\\\\Extractor\\\\MapToContextPropertyInfoExtractorDecorator\\:\\:getWriteInfo\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/Extractor/MapToContextPropertyInfoExtractorDecorator.php
-
-		-
-			message: "#^Method AutoMapper\\\\Extractor\\\\MapToContextPropertyInfoExtractorDecorator\\:\\:isInitializable\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/Extractor/MapToContextPropertyInfoExtractorDecorator.php
-
-		-
-			message: "#^Method AutoMapper\\\\Extractor\\\\MapToContextPropertyInfoExtractorDecorator\\:\\:isReadable\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/Extractor/MapToContextPropertyInfoExtractorDecorator.php
-
-		-
-			message: "#^Method AutoMapper\\\\Extractor\\\\MapToContextPropertyInfoExtractorDecorator\\:\\:isWritable\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/Extractor/MapToContextPropertyInfoExtractorDecorator.php
-
-		-
-			message: "#^Method AutoMapper\\\\Extractor\\\\MapToContextPropertyInfoExtractorDecorator\\:\\:isWritable\\(\\) should return bool but returns bool\\|null\\.$#"
-			count: 1
-			path: ../../src/Extractor/MapToContextPropertyInfoExtractorDecorator.php
-
-		-
-			message: "#^Parameter \\#1 \\$objectOrClass of class ReflectionClass constructor expects class\\-string\\<T of object\\>\\|T of object, string given\\.$#"
-			count: 1
-			path: ../../src/Extractor/MapToContextPropertyInfoExtractorDecorator.php
-
-		-
-			message: "#^Parameter \\#1 \\$class of function class_exists expects string, string\\|null given\\.$#"
-			count: 1
-			path: ../../src/Extractor/ReadAccessor.php
-
-		-
 			message: "#^Property AutoMapper\\\\GeneratedMapper\\:\\:\\$cachedTarget has no type specified\\.$#"
 			count: 1
 			path: ../../src/GeneratedMapper.php

@@ -8,13 +8,13 @@ use AutoMapper\Configuration;
 use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\Event\SourcePropertyMetadata as SourcePropertyMetadataEvent;
 use AutoMapper\Event\TargetPropertyMetadata as TargetPropertyMetadataEvent;
+use AutoMapper\EventListener\MapToContextListener;
 use AutoMapper\EventListener\Symfony\AdvancedNameConverterListener;
 use AutoMapper\EventListener\Symfony\SerializerGroupListener;
 use AutoMapper\EventListener\Symfony\SerializerIgnoreListener;
 use AutoMapper\EventListener\Symfony\SerializerMaxDepthListener;
 use AutoMapper\Extractor\FromSourceMappingExtractor;
 use AutoMapper\Extractor\FromTargetMappingExtractor;
-use AutoMapper\Extractor\MapToContextPropertyInfoExtractorDecorator;
 use AutoMapper\Extractor\SourceTargetMappingExtractor;
 use AutoMapper\Transformer\ArrayTransformerFactory;
 use AutoMapper\Transformer\BuiltinTransformerFactory;
@@ -203,10 +203,7 @@ final class MetadataRegistry
             }
 
             if (null === $propertyMappedEvent->ignored) {
-                $propertyMappedEvent->ignored =
-                    $extractor->isIgnoredSourceProperty($mapperMetadata->source, $propertyMappedEvent->source->name)
-                    || $extractor->isIgnoredTargetProperty($mapperMetadata->target, $propertyMappedEvent->target->name)
-                ;
+                $propertyMappedEvent->ignored = $propertyMappedEvent->source->accessor === null || ($propertyMappedEvent->target->writeMutator === null && $propertyMappedEvent->target->writeMutatorConstructor === null);
             }
 
             $propertiesMapping[] = new PropertyMetadata(
@@ -252,10 +249,12 @@ final class MetadataRegistry
             $eventDispatcher->addListener(PropertyMetadataEvent::class, new SerializerIgnoreListener($classMetadataFactory));
         }
 
+        $eventDispatcher->addListener(PropertyMetadataEvent::class, new MapToContextListener($reflectionExtractor));
+
         $propertyInfoExtractor = new PropertyInfoExtractor(
             listExtractors: [$reflectionExtractor],
             typeExtractors: [$phpStanExtractor, $reflectionExtractor],
-            accessExtractors: [new MapToContextPropertyInfoExtractorDecorator($reflectionExtractor)]
+            accessExtractors: [$reflectionExtractor]
         );
 
         // Create transformer factories
@@ -284,7 +283,7 @@ final class MetadataRegistry
         $sourceTargetMappingExtractor = new SourceTargetMappingExtractor(
             $configuration,
             $propertyInfoExtractor,
-            new MapToContextPropertyInfoExtractorDecorator($reflectionExtractor),
+            $reflectionExtractor,
             $reflectionExtractor,
         );
 
@@ -298,7 +297,7 @@ final class MetadataRegistry
         $fromSourceMappingExtractor = new FromSourceMappingExtractor(
             $configuration,
             $propertyInfoExtractor,
-            new MapToContextPropertyInfoExtractorDecorator($reflectionExtractor),
+            $reflectionExtractor,
             $reflectionExtractor,
         );
 
