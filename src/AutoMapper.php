@@ -132,17 +132,25 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
     ): self {
         if (class_exists(AttributeLoader::class)) {
             $loaderClass = new AttributeLoader();
-        } elseif (class_exists(AnnotationReader::class)) {
+        } elseif (class_exists(AnnotationReader::class) && class_exists(AnnotationLoader::class)) {
             $loaderClass = new AnnotationLoader(new AnnotationReader());
         } else {
-            $loaderClass = new AnnotationLoader();
+            $loaderClass = null;
         }
-        $classMetadataFactory = new ClassMetadataFactory($loaderClass);
+
+        $classMetadataFactory = null;
+        $classDiscriminatorFromClassMetadata = null;
+
+        if (class_exists(ClassMetadataFactory::class) && $loaderClass !== null) {
+            $classMetadataFactory = new ClassMetadataFactory($loaderClass);
+            $classDiscriminatorFromClassMetadata = new ClassDiscriminatorFromClassMetadata($classMetadataFactory);
+        }
+
         $customTransformerRegistry = new CustomTransformersRegistry();
-        $metadataRegistry = MetadataRegistry::create($configuration, $customTransformerRegistry, $classMetadataFactory, $nameConverter, $transformerFactories);
+        $metadataRegistry = MetadataRegistry::create($configuration, $customTransformerRegistry, $transformerFactories, $classMetadataFactory, $nameConverter);
 
         $mapperGenerator = new MapperGenerator(
-            new ClassDiscriminatorResolver(new ClassDiscriminatorFromClassMetadata($classMetadataFactory)),
+            new ClassDiscriminatorResolver($classDiscriminatorFromClassMetadata),
             $configuration->allowReadOnlyTargetToPopulate,
             !$configuration->autoRegister,
         );

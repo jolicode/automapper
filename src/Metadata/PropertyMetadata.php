@@ -15,20 +15,17 @@ use AutoMapper\Transformer\TransformerInterface;
  */
 final class PropertyMetadata
 {
-    public ?TransformerInterface $transformer = null;
-
     public function __construct(
         public readonly SourcePropertyMetadata $source,
         public readonly TargetPropertyMetadata $target,
+        public TransformerInterface $transformer,
+        public bool $isIgnored = false,
         public ?int $maxDepth = null,
     ) {
     }
 
-    public function shouldIgnoreProperty(bool $shouldMapPrivateProperties = true): bool
+    public function shouldIgnoreProperty(): bool
     {
-        return !$this->target->writeMutator
-            || $this->source->ignored
-            || $this->target->ignored
-            || !($shouldMapPrivateProperties || $this->source->isPublic);
+        return !$this->target->writeMutator || $this->isIgnored;
     }
 }

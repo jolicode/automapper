@@ -28,7 +28,7 @@ final readonly class PropertyStatementsGenerator
      */
     public function generate(GeneratorMetadata $metadata, PropertyMetadata $propertyMapping): array
     {
-        if ($propertyMapping->shouldIgnoreProperty() || $propertyMapping->transformer === null) {
+        if ($propertyMapping->shouldIgnoreProperty()) {
             return [];
         }
 

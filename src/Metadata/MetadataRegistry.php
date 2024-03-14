@@ -5,6 +5,13 @@ declare(strict_types=1);
 namespace AutoMapper\Metadata;
 
 use AutoMapper\Configuration;
+use AutoMapper\Event\PropertyMetadataEvent;
+use AutoMapper\Event\SourcePropertyMetadata as SourcePropertyMetadataEvent;
+use AutoMapper\Event\TargetPropertyMetadata as TargetPropertyMetadataEvent;
+use AutoMapper\EventListener\Symfony\AdvancedNameConverterListener;
+use AutoMapper\EventListener\Symfony\SerializerGroupListener;
+use AutoMapper\EventListener\Symfony\SerializerIgnoreListener;
+use AutoMapper\EventListener\Symfony\SerializerMaxDepthListener;
 use AutoMapper\Extractor\FromSourceMappingExtractor;
 use AutoMapper\Extractor\FromTargetMappingExtractor;
 use AutoMapper\Extractor\MapToContextPropertyInfoExtractorDecorator;
@@ -23,6 +30,8 @@ use AutoMapper\Transformer\ObjectTransformerFactory;
 use AutoMapper\Transformer\SymfonyUidTransformerFactory;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use AutoMapper\Transformer\UniqueTypeTransformerFactory;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\PropertyInfo\Extractor\PhpStanExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
@@ -47,6 +56,7 @@ final class MetadataRegistry
         private readonly FromSourceMappingExtractor $fromSourcePropertiesMappingExtractor,
         private readonly FromTargetMappingExtractor $fromTargetPropertiesMappingExtractor,
         private readonly TransformerFactoryInterface $transformerFactory,
+        private readonly EventDispatcherInterface $eventDispatcher,
         private readonly string $classPrefix = 'Mapper_',
     ) {
     }
@@ -105,22 +115,107 @@ final class MetadataRegistry
             $extractor = $this->fromSourcePropertiesMappingExtractor;
         }
 
+        $propertyEvents = [];
+
+        // First get properties from the source
+        foreach ($extractor->getProperties($mapperMetadata->source) as $property) {
+            $propertyEvent = new PropertyMetadataEvent($mapperMetadata, new SourcePropertyMetadataEvent($property), new TargetPropertyMetadataEvent($property));
+
+            $this->eventDispatcher->dispatch($propertyEvent);
+
+            $propertyEvents[$propertyEvent->target->name] = $propertyEvent;
+        }
+
+        foreach ($extractor->getProperties($mapperMetadata->target) as $property) {
+            if (isset($propertyEvents[$property])) {
+                continue;
+            }
+
+            $propertyEvent = new PropertyMetadataEvent($mapperMetadata, new SourcePropertyMetadataEvent($property), new TargetPropertyMetadataEvent($property));
+
+            $this->eventDispatcher->dispatch($propertyEvent);
+
+            $propertyEvents[$propertyEvent->target->name] = $propertyEvent;
+        }
+
         $propertiesMapping = [];
 
-        foreach ($extractor->getPropertiesMapping($mapperMetadata) as $propertyMapping) {
-            // @TODO Here do event to allow to change the property mapping before getting the transformer
+        foreach ($propertyEvents as $propertyMappedEvent) {
+            [$sourceTypes, $targetTypes] = $extractor->getTypes($mapperMetadata->source, $propertyMappedEvent->source->name, $mapperMetadata->target, $propertyMappedEvent->target->name);
 
-            if (null === $propertyMapping->transformer) {
-                $transformer = $this->transformerFactory->getTransformer($propertyMapping->source, $propertyMapping->target, $mapperMetadata);
+            // Create the source property metadata
+            if ($propertyMappedEvent->source->types === null) {
+                $propertyMappedEvent->source->types = $sourceTypes;
+            }
+
+            if ($propertyMappedEvent->source->accessor === null) {
+                $propertyMappedEvent->source->accessor = $extractor->getReadAccessor($mapperMetadata->source, $mapperMetadata->target, $propertyMappedEvent->source->name);
+            }
+
+            if ($propertyMappedEvent->source->checkExists === null) {
+                $propertyMappedEvent->source->checkExists = $extractor->getCheckExists($mapperMetadata->source, $propertyMappedEvent->source->name);
+            }
+
+            if ($propertyMappedEvent->source->extractGroupsIfNull && $propertyMappedEvent->source->groups === null) {
+                $propertyMappedEvent->source->groups = $extractor->getGroups($mapperMetadata->source, $propertyMappedEvent->source->name);
+            }
+
+            if ($propertyMappedEvent->source->dateTimeFormat === null) {
+                $propertyMappedEvent->source->dateTimeFormat = $extractor->getDateTimeFormat($mapperMetadata->source, $propertyMappedEvent->source->name);
+            }
+
+            // Create the target property metadata
+            if ($propertyMappedEvent->target->types === null) {
+                $propertyMappedEvent->target->types = $targetTypes;
+            }
+
+            if ($propertyMappedEvent->target->writeMutator === null) {
+                $propertyMappedEvent->target->writeMutator = $extractor->getWriteMutator($mapperMetadata->source, $mapperMetadata->target, $propertyMappedEvent->target->name, [
+                    'enable_constructor_extraction' => false,
+                ]);
+            }
+
+            if ($propertyMappedEvent->target->writeMutatorConstructor === null) {
+                $propertyMappedEvent->target->writeMutatorConstructor = $extractor->getWriteMutator($mapperMetadata->source, $mapperMetadata->target, $propertyMappedEvent->target->name, [
+                    'enable_constructor_extraction' => true,
+                ]);
+            }
+
+            if ($propertyMappedEvent->target->extractGroupsIfNull && $propertyMappedEvent->target->groups === null) {
+                $propertyMappedEvent->target->groups = $extractor->getGroups($mapperMetadata->target, $propertyMappedEvent->target->name);
+            }
+
+            if ($propertyMappedEvent->target->dateTimeFormat === null) {
+                $propertyMappedEvent->target->dateTimeFormat = $extractor->getDateTimeFormat($mapperMetadata->target, $propertyMappedEvent->target->name);
+            }
+
+            $sourcePropertyMetadata = SourcePropertyMetadata::fromEvent($propertyMappedEvent->source);
+            $targetPropertyMetadata = TargetPropertyMetadata::fromEvent($propertyMappedEvent->target);
+
+            if (null === $propertyMappedEvent->transformer) {
+                $transformer = $this->transformerFactory->getTransformer($sourcePropertyMetadata, $targetPropertyMetadata, $mapperMetadata);
 
                 if (null === $transformer) {
                     continue;
                 }
 
-                $propertyMapping->transformer = $transformer;
+                $propertyMappedEvent->transformer = $transformer;
             }
 
-            $propertiesMapping[] = $propertyMapping;
+            if (null === $propertyMappedEvent->ignored) {
+                $propertyMappedEvent->ignored =
+                    $extractor->isIgnoredSourceProperty($mapperMetadata->source, $propertyMappedEvent->source->name)
+                    || $extractor->isIgnoredTargetProperty($mapperMetadata->target, $propertyMappedEvent->target->name)
+                ;
+            }
+
+            $propertiesMapping[] = new PropertyMetadata(
+                $sourcePropertyMetadata,
+                $targetPropertyMetadata,
+                $propertyMappedEvent->transformer,
+                $propertyMappedEvent->ignored,
+                $propertyMappedEvent->maxDepth,
+            );
         }
 
         return new GeneratorMetadata($mapperMetadata, $propertiesMapping, $this->configuration->attributeChecking, $this->configuration->allowConstructor);
@@ -132,9 +227,9 @@ final class MetadataRegistry
     public static function create(
         Configuration $configuration,
         CustomTransformersRegistry $customTransformerRegistry,
-        ClassMetadataFactory $classMetadataFactory,
-        AdvancedNameConverterInterface $nameConverter = null,
         array $transformerFactories = [],
+        ClassMetadataFactory $classMetadataFactory = null,
+        AdvancedNameConverterInterface $nameConverter = null,
     ): self {
         // Create property info extractors
         $flags = ReflectionExtractor::ALLOW_PUBLIC;
@@ -145,6 +240,17 @@ final class MetadataRegistry
 
         $reflectionExtractor = new ReflectionExtractor(accessFlags: $flags);
         $phpStanExtractor = new PhpStanExtractor();
+        $eventDispatcher = new EventDispatcher();
+
+        if (null !== $nameConverter) {
+            $eventDispatcher->addListener(PropertyMetadataEvent::class, new AdvancedNameConverterListener($nameConverter));
+        }
+
+        if (null !== $classMetadataFactory) {
+            $eventDispatcher->addListener(PropertyMetadataEvent::class, new SerializerMaxDepthListener($classMetadataFactory));
+            $eventDispatcher->addListener(PropertyMetadataEvent::class, new SerializerGroupListener($classMetadataFactory));
+            $eventDispatcher->addListener(PropertyMetadataEvent::class, new SerializerIgnoreListener($classMetadataFactory));
+        }
 
         $propertyInfoExtractor = new PropertyInfoExtractor(
             listExtractors: [$reflectionExtractor],
@@ -180,7 +286,6 @@ final class MetadataRegistry
             $propertyInfoExtractor,
             new MapToContextPropertyInfoExtractorDecorator($reflectionExtractor),
             $reflectionExtractor,
-            $classMetadataFactory
         );
 
         $fromTargetMappingExtractor = new FromTargetMappingExtractor(
@@ -188,8 +293,6 @@ final class MetadataRegistry
             $propertyInfoExtractor,
             $reflectionExtractor,
             $reflectionExtractor,
-            $classMetadataFactory,
-            $nameConverter
         );
 
         $fromSourceMappingExtractor = new FromSourceMappingExtractor(
@@ -197,8 +300,6 @@ final class MetadataRegistry
             $propertyInfoExtractor,
             new MapToContextPropertyInfoExtractorDecorator($reflectionExtractor),
             $reflectionExtractor,
-            $classMetadataFactory,
-            $nameConverter
         );
 
         return new self(
@@ -207,6 +308,7 @@ final class MetadataRegistry
             $fromSourceMappingExtractor,
             $fromTargetMappingExtractor,
             $transformerFactory,
+            $eventDispatcher,
             $configuration->classPrefix,
         );
     }

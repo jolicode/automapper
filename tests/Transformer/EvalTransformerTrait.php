@@ -31,13 +31,13 @@ trait EvalTransformerTrait
                     [new Type('string')],
                     'dummy',
                 ),
+                $transformer,
             );
         }
 
         $variableScope = new UniqueVariableScope();
         $inputName = $variableScope->getUniqueName('input');
         $inputExpr = new Expr\Variable($inputName);
-        $sourceExpr = new Expr\Variable('source');
 
         // we give $inputExpr as $targetExpr since we don't use it there and this is needed by TransformerInterface
         [$outputExpr, $stmts] = $transformer->transform($inputExpr, $inputExpr, $propertyMapping, $variableScope, new Expr\Variable('source'));
