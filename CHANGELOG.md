@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - [GH#54](https://github.com/jolicode/automapper/pull/54) Introduce `MapperContext::DATETIME_FORCE_TIMEZONE`
 
+### Fixed
+- [GH#55](https://github.com/jolicode/automapper/pull/55) Remove most of deprecations in tests
+
 ## [8.2.1] - 2024-03-11
 ### Changed
 - [GH#50](https://github.com/jolicode/automapper/pull/50) Support generator mapping
