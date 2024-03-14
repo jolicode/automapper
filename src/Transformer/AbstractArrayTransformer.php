@@ -23,17 +23,8 @@ abstract readonly class AbstractArrayTransformer implements TransformerInterface
 
     abstract protected function getAssignExpr(Expr $valuesVar, Expr $outputVar, Expr $loopKeyVar, bool $assignByRef): Expr;
 
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, /* Expr\Variable $source */): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): array
     {
-        if (\func_num_args() < 5) {
-            trigger_deprecation('jolicode/automapper', '8.2', 'The "%s()" method will have a new "Expr\Variable $source" argument in version 9.0, not defining it is deprecated.', __METHOD__);
-
-            $source = new Expr\Variable('value');
-        } else {
-            /** @var Expr\Variable $source */
-            $source = func_get_arg(4);
-        }
-
         /**
          * $values = [];.
          */

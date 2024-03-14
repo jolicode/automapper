@@ -11,14 +11,14 @@ use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Scalar;
 
-final class CustomModelTransformer implements TransformerInterface
+final readonly class CustomModelTransformer implements TransformerInterface
 {
     public function __construct(
-        private readonly string $customTransformerId,
+        private string $customTransformerId,
     ) {
     }
 
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope /* Expr\Variable $source */): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): array
     {
         /*
          * When using a custom transformer, we need to call the transform method of the custom transformer which has been injected into the mapper.

@@ -40,7 +40,7 @@ trait EvalTransformerTrait
         $sourceExpr = new Expr\Variable('source');
 
         // we give $inputExpr as $targetExpr since we don't use it there and this is needed by TransformerInterface
-        [$outputExpr, $stmts] = $transformer->transform($inputExpr, $inputExpr, $propertyMapping, $variableScope, $sourceExpr);
+        [$outputExpr, $stmts] = $transformer->transform($inputExpr, $inputExpr, $propertyMapping, $variableScope, new Expr\Variable('source'));
 
         $stmts[] = new Stmt\Return_($outputExpr);
 

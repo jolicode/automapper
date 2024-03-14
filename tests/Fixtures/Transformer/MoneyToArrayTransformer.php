@@ -18,7 +18,7 @@ use PhpParser\Node\Stmt\Expression;
  */
 final class MoneyToArrayTransformer implements TransformerInterface
 {
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): array
     {
         $moneyVar = new Expr\Variable($uniqueVariableScope->getUniqueName('money'));
 
