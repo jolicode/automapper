@@ -9,6 +9,7 @@ use AutoMapper\Event\GenerateMapperEvent;
 use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\Event\SourcePropertyMetadata;
 use AutoMapper\Event\TargetPropertyMetadata;
+use AutoMapper\Exception\BadMapDefinitionException;
 use AutoMapper\Transformer\CallableTransformer;
 use AutoMapper\Transformer\CustomTransformer\CustomModelTransformer;
 use AutoMapper\Transformer\CustomTransformer\CustomModelTransformerInterface;
@@ -76,7 +77,7 @@ final readonly class MapToListener
                 );
 
                 if (isset($event->properties[$property->target->name])) {
-                    // @TODO throw exception
+                    throw new BadMapDefinitionException(sprintf('There is already a MapTo attribute with target "%s" in class "%s".', $property->target->name, $event->mapperMetadata->source));
                 }
 
                 $event->properties[$property->target->name] = $property;

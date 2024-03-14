@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests;
 
+use AutoMapper\Exception\BadMapDefinitionException;
+use AutoMapper\Tests\Fixtures\MapTo\BadMapTo;
 use AutoMapper\Tests\Fixtures\MapTo\Bar;
 use AutoMapper\Tests\Fixtures\MapTo\FooMapTo;
 
@@ -31,5 +33,13 @@ class AutoMapperMapToTest extends AutoMapperBaseTest
         $this->assertArrayNotHasKey('bar', $bar);
         $this->assertSame('foo', $bar['baz']);
         $this->assertSame('FOO', $bar['foo']);
+    }
+
+    public function testBadDefinitionOnSameTargetProperty()
+    {
+        $foo = new BadMapTo('foo');
+
+        $this->expectException(BadMapDefinitionException::class);
+        $this->autoMapper->map($foo, 'array');
     }
 }
