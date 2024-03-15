@@ -10,14 +10,17 @@ namespace AutoMapper;
  * Each specific mapper should implements this interface
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @template Source of object|array<mixed>
+ * @template Target of object|array<mixed>
  */
 interface MapperInterface
 {
     /**
-     * @param mixed $value   Value to map
-     * @param array $context Options mapper have access to
+     * @param Source               $value   Value to map
+     * @param array<string, mixed> $context Options mapper have access to
      *
-     * @return mixed The mapped value
+     * @return Target|null The mapped value
      */
     public function &map(mixed $value, array $context = []): mixed;
 }

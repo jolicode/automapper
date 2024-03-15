@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace AutoMapper\Extractor;
 
+use AutoMapper\Configuration;
 use AutoMapper\Exception\InvalidMappingException;
-use AutoMapper\MapperGeneratorMetadataInterface;
-use AutoMapper\Transformer\TransformerFactoryInterface;
-use AutoMapper\Transformer\TransformerPropertyFactoryInterface;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\PropertyMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyReadInfo;
 use Symfony\Component\PropertyInfo\PropertyReadInfoExtractorInterface;
@@ -30,21 +32,24 @@ final class FromSourceMappingExtractor extends MappingExtractor
     private const ALLOWED_TARGETS = ['array', \stdClass::class];
 
     public function __construct(
+        Configuration $configuration,
         PropertyInfoExtractorInterface $propertyInfoExtractor,
         PropertyReadInfoExtractorInterface $readInfoExtractor,
         PropertyWriteInfoExtractorInterface $writeInfoExtractor,
-        TransformerFactoryInterface|TransformerPropertyFactoryInterface $transformerFactory,
         ClassMetadataFactoryInterface $classMetadataFactory = null,
         private readonly ?AdvancedNameConverterInterface $nameConverter = null,
     ) {
-        parent::__construct($propertyInfoExtractor, $readInfoExtractor, $writeInfoExtractor, $transformerFactory, $classMetadataFactory);
+        parent::__construct($configuration, $propertyInfoExtractor, $readInfoExtractor, $writeInfoExtractor, $classMetadataFactory);
     }
 
-    public function getPropertiesMapping(MapperGeneratorMetadataInterface $mapperMetadata): array
+    /**
+     * @return PropertyMetadata[]
+     */
+    public function getPropertiesMapping(MapperMetadata $mapperMetadata): array
     {
-        $sourceProperties = $this->propertyInfoExtractor->getProperties($mapperMetadata->getSource());
+        $sourceProperties = $this->propertyInfoExtractor->getProperties($mapperMetadata->source);
 
-        if (!\in_array($mapperMetadata->getTarget(), self::ALLOWED_TARGETS, true)) {
+        if (!\in_array($mapperMetadata->target, self::ALLOWED_TARGETS, true)) {
             throw new InvalidMappingException('Only array or stdClass are accepted as a target');
         }
 
@@ -56,11 +61,11 @@ final class FromSourceMappingExtractor extends MappingExtractor
         $mapping = [];
 
         foreach ($sourceProperties as $property) {
-            if (!$this->propertyInfoExtractor->isReadable($mapperMetadata->getSource(), $property)) {
+            if (!$this->propertyInfoExtractor->isReadable($mapperMetadata->source, $property)) {
                 continue;
             }
 
-            $sourceTypes = $this->propertyInfoExtractor->getTypes($mapperMetadata->getSource(), $property);
+            $sourceTypes = $this->propertyInfoExtractor->getTypes($mapperMetadata->source, $property);
 
             if (null === $sourceTypes) {
                 $sourceTypes = [new Type(Type::BUILTIN_TYPE_NULL)]; // if no types found, we force a null type
@@ -69,37 +74,42 @@ final class FromSourceMappingExtractor extends MappingExtractor
             $targetTypes = [];
 
             foreach ($sourceTypes as $type) {
-                $targetType = $this->transformType($mapperMetadata->getTarget(), $type);
+                $targetType = $this->transformType($mapperMetadata->target, $type);
 
                 if ($targetType) {
                     $targetTypes[] = $targetType;
                 }
             }
 
-            if ($this->transformerFactory instanceof TransformerPropertyFactoryInterface) {
-                $transformer = $this->transformerFactory->getPropertyTransformer($sourceTypes, $targetTypes, $mapperMetadata, $property);
-            } else {
-                $transformer = $this->transformerFactory->getTransformer($sourceTypes, $targetTypes, $mapperMetadata);
-            }
-
-            if (null === $transformer) {
-                continue;
-            }
-
-            $mapping[] = new PropertyMapping(
-                $mapperMetadata,
-                $this->getReadAccessor($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property),
-                $this->getWriteMutator($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property),
-                null,
-                $transformer,
+            $sourceProperty = new SourcePropertyMetadata(
+                $sourceTypes,
                 $property,
+                $this->getReadAccessor($mapperMetadata->source, $mapperMetadata->target, $property),
                 false,
-                $this->getGroups($mapperMetadata->getSource(), $property),
-                $this->getGroups($mapperMetadata->getTarget(), $property),
-                $this->getMaxDepth($mapperMetadata->getSource(), $property),
-                $this->isIgnoredProperty($mapperMetadata->getSource(), $property),
-                $this->isIgnoredProperty($mapperMetadata->getTarget(), $property),
-                PropertyReadInfo::VISIBILITY_PUBLIC === ($this->readInfoExtractor->getReadInfo($mapperMetadata->getSource(), $property)?->getVisibility() ?? PropertyReadInfo::VISIBILITY_PUBLIC),
+                $this->getGroups($mapperMetadata->source, $property),
+                $this->isIgnoredProperty($mapperMetadata->source, $property),
+                PropertyReadInfo::VISIBILITY_PUBLIC === ($this->readInfoExtractor->getReadInfo($mapperMetadata->source, $property)?->getVisibility() ?? PropertyReadInfo::VISIBILITY_PUBLIC),
+                dateTimeFormat: $this->configuration->dateTimeFormat,
+            );
+
+            $targetPropertyName = $property;
+
+            if (null !== $this->nameConverter) {
+                $targetPropertyName = $this->nameConverter->normalize($property, $mapperMetadata->source);
+            }
+
+            $targetProperty = new TargetPropertyMetadata(
+                $targetTypes,
+                $targetPropertyName,
+                $this->getWriteMutator($mapperMetadata->source, $mapperMetadata->target, $targetPropertyName),
+                null,
+                dateTimeFormat: $this->configuration->dateTimeFormat,
+            );
+
+            $mapping[] = new PropertyMetadata(
+                $sourceProperty,
+                $targetProperty,
+                $this->getMaxDepth($mapperMetadata->source, $property),
             );
         }
 

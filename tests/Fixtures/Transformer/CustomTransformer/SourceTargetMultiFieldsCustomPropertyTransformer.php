@@ -10,9 +10,9 @@ use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformerInterface;
 
 final readonly class SourceTargetMultiFieldsCustomPropertyTransformer implements CustomPropertyTransformerInterface
 {
-    public function supports(string $source, string $target, string $propertyName): bool
+    public function supports(string $source, string $target, string $sourceProperty, string $targetProperty): bool
     {
-        return $source === BirthDateExploded::class && $target === BirthDateDateTime::class && $propertyName === 'date';
+        return $source === BirthDateExploded::class && $target === BirthDateDateTime::class && $targetProperty === 'date';
     }
 
     /**

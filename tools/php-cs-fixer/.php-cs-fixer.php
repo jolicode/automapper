@@ -22,6 +22,7 @@ return (new PhpCsFixer\Config())
         'declare_strict_types' => true,
         'no_trailing_comma_in_singleline' => false,
         'function_declaration' => ['trailing_comma_single_line' => true],
+        'phpdoc_to_comment' => ['allow_before_return_statement' => true],
     ])
     ->setFinder($finder)
 ;

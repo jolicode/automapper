@@ -13,9 +13,9 @@ final readonly class TransformerWithDependency implements CustomPropertyTransfor
     {
     }
 
-    public function supports(string $source, string $target, string $propertyName): bool
+    public function supports(string $source, string $target, string $sourceProperty, string $targetProperty): bool
     {
-        return $source === CityFoo::class && $target === 'array' && $propertyName === 'name';
+        return $source === CityFoo::class && $target === 'array' && $sourceProperty === 'name';
     }
 
     public function transform(mixed $source): string

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper\Extractor;
 
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\PropertyMetadata;
 
 /**
  * Extracts mapping.
@@ -18,9 +19,9 @@ interface MappingExtractorInterface
     /**
      * Extracts properties mapped for a given source and target.
      *
-     * @return PropertyMapping[]
+     * @return list<PropertyMetadata>
      */
-    public function getPropertiesMapping(MapperGeneratorMetadataInterface $mapperMetadata): array;
+    public function getPropertiesMapping(MapperMetadata $mapperMetadata): array;
 
     /**
      * Extracts read accessor for a given source, target and property.

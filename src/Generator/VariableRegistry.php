@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator;
 
-use AutoMapper\Extractor\PropertyMapping;
 use PhpParser\Node\Expr\Variable;
 
 /**
@@ -18,9 +17,6 @@ final class VariableRegistry
     private Variable $result;
     private Variable $hashVariable;
     private Variable $contextVariable;
-
-    /** @var array<string, array<string, Variable>> */
-    private array $fieldValueVariables = [];
 
     public function __construct()
     {
@@ -55,12 +51,6 @@ final class VariableRegistry
     public function getContext(): Variable
     {
         return $this->contextVariable;
-    }
-
-    public function getFieldValueVariable(PropertyMapping $propertyMapping): Variable
-    {
-        return $this->fieldValueVariables[$propertyMapping->mapperMetadata->getMapperClassName()][$propertyMapping->property]
-            ??= $this->getVariableWithUniqueName('fieldValue');
     }
 
     public function getVariableWithUniqueName(string $name): Variable

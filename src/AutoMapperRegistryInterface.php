@@ -14,20 +14,13 @@ namespace AutoMapper;
 interface AutoMapperRegistryInterface
 {
     /**
-     * Gets a specific mapper for a source type and a target type.
+     * @template Source of object
+     * @template Target of object
      *
-     * @param string $source Source type
-     * @param string $target Target type
+     * @param class-string<Source>|'array' $source
+     * @param class-string<Target>|'array' $target
      *
-     * @return MapperInterface return associated mapper
+     * @return ($source is class-string ? ($target is 'array' ? MapperInterface<Source, array<mixed>> : MapperInterface<Source, Target>) : MapperInterface<array<mixed>, Target>)
      */
     public function getMapper(string $source, string $target): MapperInterface;
-
-    /**
-     * Does a specific mapper exist.
-     *
-     * @param string $source Source type
-     * @param string $target Target type
-     */
-    public function hasMapper(string $source, string $target): bool;
 }

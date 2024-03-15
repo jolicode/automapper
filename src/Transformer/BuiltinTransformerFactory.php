@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
-use AutoMapper\MapperMetadataInterface;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
 use Symfony\Component\PropertyInfo\Type;
 
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 final class BuiltinTransformerFactory implements TransformerFactoryInterface, PrioritizedTransformerFactoryInterface
 {
@@ -23,17 +27,19 @@ final class BuiltinTransformerFactory implements TransformerFactoryInterface, Pr
         Type::BUILTIN_TYPE_STRING,
     ];
 
-    public function getTransformer(?array $sourceTypes, ?array $targetTypes, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
+    public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
-        $nbSourceTypes = $sourceTypes ? \count($sourceTypes) : 0;
+        $sourceTypes = $source->types;
+        $targetTypes = $target->types;
+        $nbSourceTypes = \count($sourceTypes);
 
-        if (null === $sourceTypes || 0 === $nbSourceTypes || $nbSourceTypes > 1 || !$sourceTypes[0] instanceof Type) {
+        if (0 === $nbSourceTypes || $nbSourceTypes > 1 || !$sourceTypes[0] instanceof Type) {
             return null;
         }
 
         $propertyType = $sourceTypes[0];
 
-        if (null !== $targetTypes && \in_array($propertyType->getBuiltinType(), self::BUILTIN, true)) {
+        if (\in_array($propertyType->getBuiltinType(), self::BUILTIN, true)) {
             return new BuiltinTransformer($propertyType, $targetTypes);
         }
 

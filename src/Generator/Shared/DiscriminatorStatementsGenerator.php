@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator\Shared;
 
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\Metadata\GeneratorMetadata;
+use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformer;
 use AutoMapper\Transformer\TransformerInterface;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
@@ -27,13 +28,13 @@ final readonly class DiscriminatorStatementsGenerator
     /**
      * @return list<Stmt>
      */
-    public function injectMapperStatements(MapperGeneratorMetadataInterface $mapperMetadata): array
+    public function injectMapperStatements(GeneratorMetadata $metadata): array
     {
-        if (!$this->supports($mapperMetadata)) {
+        if (!$this->supports($metadata)) {
             return [];
         }
 
-        $discriminatorMapperNames = $this->classDiscriminatorResolver->discriminatorMapperNames($mapperMetadata);
+        $discriminatorMapperNames = $this->classDiscriminatorResolver->discriminatorMapperNames($metadata);
 
         $injectMapperStatements = [];
 
@@ -54,7 +55,7 @@ final readonly class DiscriminatorStatementsGenerator
                         new Scalar\String_($discriminatorMapperName)
                     ),
                     new Expr\MethodCall(new Expr\Variable('autoMapperRegistry'), 'getMapper', [
-                        new Arg(new Scalar\String_($mapperMetadata->getSource())),
+                        new Arg(new Scalar\String_($metadata->mapperMetadata->source)),
                         new Arg(new Scalar\String_($typeTarget)),
                     ])
                 )
@@ -75,31 +76,39 @@ final readonly class DiscriminatorStatementsGenerator
      *  }
      * ```
      */
-    public function createTargetStatements(MapperGeneratorMetadataInterface $mapperMetadata): array
+    public function createTargetStatements(GeneratorMetadata $metadata): array
     {
-        if (!$this->supports($mapperMetadata)) {
+        if (!$this->supports($metadata)) {
             return [];
         }
 
-        $propertyMapping = $this->classDiscriminatorResolver->propertyMapping($mapperMetadata);
+        $propertyMapping = $this->classDiscriminatorResolver->propertyMapping($metadata);
 
-        if (!$propertyMapping || $propertyMapping->readAccessor === null) {
+        if (!$propertyMapping || $propertyMapping->transformer === null) {
             return [];
         }
 
-        $variableRegistry = $mapperMetadata->getVariableRegistry();
+        $variableRegistry = $metadata->variableRegistry;
+        $fieldValueExpr = $propertyMapping->source->accessor?->getExpression($variableRegistry->getSourceInput());
+        if (null === $fieldValueExpr) {
+            if (!($propertyMapping->transformer instanceof CustomPropertyTransformer)) {
+                return [];
+            }
+
+            $fieldValueExpr = $variableRegistry->getSourceInput();
+        }
 
         // Generate the code that allows to put the type into the output variable,
         // so we are able to determine which mapper to use
         [$output, $createObjectStatements] = $propertyMapping->transformer->transform(
-            $propertyMapping->readAccessor->getExpression($variableRegistry->getSourceInput()),
+            $fieldValueExpr,
             $variableRegistry->getResult(),
             $propertyMapping,
             $variableRegistry->getUniqueVariableScope(),
             $variableRegistry->getSourceInput()
         );
 
-        foreach ($this->classDiscriminatorResolver->discriminatorMapperNamesIndexedByTypeValue($mapperMetadata) as $typeValue => $discriminatorMapperName) {
+        foreach ($this->classDiscriminatorResolver->discriminatorMapperNamesIndexedByTypeValue($metadata) as $typeValue => $discriminatorMapperName) {
             $createObjectStatements[] = new Stmt\If_(
                 new Expr\BinaryOp\Identical(new Scalar\String_($typeValue), $output),
                 [
@@ -125,13 +134,13 @@ final readonly class DiscriminatorStatementsGenerator
         return $createObjectStatements;
     }
 
-    private function supports(MapperGeneratorMetadataInterface $mapperMetadata): bool
+    private function supports(GeneratorMetadata $metadata): bool
     {
-        if (!$this->classDiscriminatorResolver->hasClassDiscriminator($mapperMetadata)) {
+        if (!$this->classDiscriminatorResolver->hasClassDiscriminator($metadata)) {
             return false;
         }
 
-        $propertyMapping = $this->classDiscriminatorResolver->propertyMapping($mapperMetadata);
+        $propertyMapping = $this->classDiscriminatorResolver->propertyMapping($metadata);
 
         return $propertyMapping && $propertyMapping->transformer instanceof TransformerInterface;
     }

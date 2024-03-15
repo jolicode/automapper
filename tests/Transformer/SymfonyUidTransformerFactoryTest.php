@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Transformer;
 
-use AutoMapper\MapperMetadata;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
 use AutoMapper\Transformer\SymfonyUidCopyTransformer;
 use AutoMapper\Transformer\SymfonyUidTransformerFactory;
 use PHPUnit\Framework\TestCase;
@@ -17,8 +19,10 @@ class SymfonyUidTransformerFactoryTest extends TestCase
     {
         $factory = new SymfonyUidTransformerFactory();
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('object', false, null)], 'foo');
+        $targetMapperMetadata = new TargetPropertyMetadata([new Type('object', false, null)], 'foo');
 
-        $transformer = $factory->getTransformer([new Type('object', false, null)], [new Type('object', false, null)], $mapperMetadata);
+        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNull($transformer);
     }
@@ -27,12 +31,10 @@ class SymfonyUidTransformerFactoryTest extends TestCase
     {
         $factory = new SymfonyUidTransformerFactory();
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('object', false, Ulid::class)], 'foo');
+        $targetMapperMetadata = new TargetPropertyMetadata([new Type('object', false, Ulid::class)], 'foo');
 
-        $transformer = $factory->getTransformer(
-            [new Type('object', false, Ulid::class)],
-            [new Type('object', false, Ulid::class)],
-            $mapperMetadata
-        );
+        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNotNull($transformer);
         self::assertInstanceOf(SymfonyUidCopyTransformer::class, $transformer);

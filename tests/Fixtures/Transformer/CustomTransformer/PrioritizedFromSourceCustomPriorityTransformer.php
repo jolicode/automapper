@@ -10,9 +10,9 @@ use AutoMapper\Transformer\CustomTransformer\PrioritizedCustomTransformerInterfa
 
 final readonly class PrioritizedFromSourceCustomPriorityTransformer implements CustomPropertyTransformerInterface, PrioritizedCustomTransformerInterface
 {
-    public function supports(string $source, string $target, string $propertyName): bool
+    public function supports(string $source, string $target, string $sourceProperty, string $targetProperty): bool
     {
-        return $source === UserDTO::class && $target === 'array' && $propertyName === 'address';
+        return $source === UserDTO::class && $target === 'array' && $sourceProperty === 'address';
     }
 
     /**

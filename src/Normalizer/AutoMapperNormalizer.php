@@ -50,12 +50,12 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
             return false;
         }
 
-        return $this->autoMapper->hasMapper($data::class, 'array');
+        return true;
     }
 
     public function supportsDenormalization(mixed $data, string $type, string $format = null, array $context = []): bool
     {
-        return $this->autoMapper->hasMapper('array', $type);
+        return class_exists($type);
     }
 
     public function getSupportedTypes(?string $format): array
