@@ -12,8 +12,9 @@ use PhpParser\Node\Scalar;
 
 class CallableTransformer implements TransformerInterface
 {
-    public function __construct(private string $callable)
-    {
+    public function __construct(
+        private string $callable
+    ) {
     }
 
     public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): array

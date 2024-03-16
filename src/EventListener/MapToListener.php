@@ -19,8 +19,9 @@ use AutoMapper\Transformer\CustomTransformer\CustomTransformersRegistry;
 
 final readonly class MapToListener
 {
-    public function __construct(private CustomTransformersRegistry $customTransformersRegistry)
-    {
+    public function __construct(
+        private CustomTransformersRegistry $customTransformersRegistry
+    ) {
     }
 
     public function __invoke(GenerateMapperEvent $event): void
@@ -34,7 +35,7 @@ final readonly class MapToListener
         foreach ($properties as $reflectionProperty) {
             $mapToAttributes = $reflectionProperty->getAttributes(MapTo::class);
 
-            if (empty($mapToAttributes)) {
+            if (0 === \count($mapToAttributes)) {
                 continue;
             }
 
@@ -76,7 +77,7 @@ final readonly class MapToListener
                     $mapToAttributeInstance->ignore,
                 );
 
-                if (isset($event->properties[$property->target->name])) {
+                if (\array_key_exists($property->target->name, $event->properties)) {
                     throw new BadMapDefinitionException(sprintf('There is already a MapTo attribute with target "%s" in class "%s".', $property->target->name, $event->mapperMetadata->source));
                 }
 
