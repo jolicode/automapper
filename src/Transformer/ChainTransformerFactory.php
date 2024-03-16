@@ -18,8 +18,9 @@ final class ChainTransformerFactory implements TransformerFactoryInterface
     /**
      * @param array<TransformerFactoryInterface> $factories
      */
-    public function __construct(private array $factories = [])
-    {
+    public function __construct(
+        private array $factories = []
+    ) {
         foreach ($this->factories as $factory) {
             if ($factory instanceof ChainTransformerFactoryAwareInterface) {
                 $factory->setChainTransformerFactory($this);

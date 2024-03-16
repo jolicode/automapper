@@ -9,8 +9,9 @@ use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformerInterface;
 
 final readonly class TransformerWithDependency implements CustomPropertyTransformerInterface
 {
-    public function __construct(private FooDependency $fooDependency)
-    {
+    public function __construct(
+        private FooDependency $fooDependency
+    ) {
     }
 
     public function supports(string $source, string $target, string $sourceProperty, string $targetProperty): bool

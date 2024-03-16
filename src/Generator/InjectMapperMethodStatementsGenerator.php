@@ -29,8 +29,9 @@ use PhpParser\Node\Stmt;
  */
 final readonly class InjectMapperMethodStatementsGenerator
 {
-    public function __construct(private DiscriminatorStatementsGenerator $discriminatorStatementsGenerator)
-    {
+    public function __construct(
+        private DiscriminatorStatementsGenerator $discriminatorStatementsGenerator
+    ) {
     }
 
     /**

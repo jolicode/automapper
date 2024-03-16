@@ -9,8 +9,9 @@ use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 
 final readonly class SerializerMaxDepthListener
 {
-    public function __construct(private ClassMetadataFactory $classMetadataFactory)
-    {
+    public function __construct(
+        private ClassMetadataFactory $classMetadataFactory
+    ) {
     }
 
     public function __invoke(PropertyMetadataEvent $event): void

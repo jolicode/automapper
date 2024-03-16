@@ -8,6 +8,7 @@ $finder = (new PhpCsFixer\Finder())
 
 return (new PhpCsFixer\Config())
     ->setRiskyAllowed(true)
+    ->registerCustomFixers((new PhpCsFixerCustomFixers\Fixers()))
     ->setRules([
         '@Symfony' => true,
         '@Symfony:risky' => true,
@@ -23,6 +24,7 @@ return (new PhpCsFixer\Config())
         'no_trailing_comma_in_singleline' => false,
         'function_declaration' => ['trailing_comma_single_line' => true],
         'phpdoc_to_comment' => ['allow_before_return_statement' => true],
+        PhpCsFixerCustomFixers\Fixer\MultilinePromotedPropertiesFixer::name() => true,
     ])
     ->setFinder($finder)
 ;

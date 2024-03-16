@@ -9,8 +9,9 @@ use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
 
 final readonly class AdvancedNameConverterListener
 {
-    public function __construct(private AdvancedNameConverterInterface $nameConverter)
-    {
+    public function __construct(
+        private AdvancedNameConverterInterface $nameConverter
+    ) {
     }
 
     public function __invoke(PropertyMetadataEvent $event): void

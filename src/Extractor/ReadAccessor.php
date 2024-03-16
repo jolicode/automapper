@@ -35,7 +35,8 @@ final class ReadAccessor
         private readonly string $accessor,
         private readonly ?string $sourceClass = null,
         private readonly bool $private = false,
-        private readonly ?string $name = null, // will be the name of the property if different from accessor
+        private readonly ?string $name = null,
+        // will be the name of the property if different from accessor
         private readonly array $context = [],
     ) {
         if (self::TYPE_METHOD === $this->type && null === $this->sourceClass) {
