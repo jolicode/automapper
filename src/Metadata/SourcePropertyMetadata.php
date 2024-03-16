@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Metadata;
 
+use AutoMapper\Event\SourcePropertyMetadata as SourcePropertyMetadataEvent;
 use AutoMapper\Extractor\ReadAccessor;
 use Symfony\Component\PropertyInfo\Type;
 
@@ -26,8 +27,6 @@ final readonly class SourcePropertyMetadata
         public ?ReadAccessor $accessor = null,
         public bool $checkExists = false,
         public ?array $groups = null,
-        public bool $ignored = false,
-        public bool $isPublic = false,
         public string $dateTimeFormat = \DateTimeInterface::RFC3339,
     ) {
     }
@@ -37,6 +36,18 @@ final readonly class SourcePropertyMetadata
      */
     public function withTypes(array $types): self
     {
-        return new self($types, $this->name, $this->accessor, $this->checkExists, $this->groups, $this->ignored, $this->isPublic);
+        return new self($types, $this->name, $this->accessor, $this->checkExists, $this->groups);
+    }
+
+    public static function fromEvent(SourcePropertyMetadataEvent $metadata): self
+    {
+        return new self(
+            $metadata->types ?? [],
+            $metadata->name,
+            $metadata->accessor,
+            $metadata->checkExists ?? false,
+            $metadata->groups,
+            $metadata->dateTimeFormat ?? \DateTimeInterface::RFC3339,
+        );
     }
 }

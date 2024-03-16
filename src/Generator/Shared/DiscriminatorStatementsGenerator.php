@@ -84,7 +84,7 @@ final readonly class DiscriminatorStatementsGenerator
 
         $propertyMapping = $this->classDiscriminatorResolver->propertyMapping($metadata);
 
-        if (!$propertyMapping || $propertyMapping->transformer === null) {
+        if (!$propertyMapping) {
             return [];
         }
 

@@ -14,6 +14,7 @@ use AutoMapper\Tests\Fixtures;
 use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 /**
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
@@ -24,6 +25,10 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
 
     protected function setUp(): void
     {
+        if (!interface_exists(NormalizerInterface::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
         parent::setUp();
         $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
         $this->normalizer = new AutoMapperNormalizer($this->autoMapper);

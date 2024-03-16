@@ -21,12 +21,10 @@ use AutoMapper\Transformer\MultipleTransformerFactory;
 use AutoMapper\Transformer\NullableTransformerFactory;
 use AutoMapper\Transformer\ObjectTransformerFactory;
 use AutoMapper\Transformer\UniqueTypeTransformerFactory;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\PropertyInfo\Extractor\PhpStanExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
-use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
-use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
-use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 
 /**
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
@@ -40,12 +38,6 @@ class MetadataRegistryTest extends AutoMapperBaseTest
         parent::setUp();
 
         $configuration = new Configuration();
-
-        if (!class_exists(AttributeLoader::class)) {
-            $classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader());
-        } else {
-            $classMetadataFactory = new ClassMetadataFactory(new AttributeLoader());
-        }
 
         $reflectionExtractor = new ReflectionExtractor(null, null, null, true, ReflectionExtractor::ALLOW_PUBLIC | ReflectionExtractor::ALLOW_PROTECTED | ReflectionExtractor::ALLOW_PRIVATE);
 
@@ -72,7 +64,6 @@ class MetadataRegistryTest extends AutoMapperBaseTest
             $propertyInfoExtractor,
             $reflectionExtractor,
             $reflectionExtractor,
-            $classMetadataFactory
         );
 
         $fromTargetMappingExtractor = new FromTargetMappingExtractor(
@@ -80,7 +71,6 @@ class MetadataRegistryTest extends AutoMapperBaseTest
             $propertyInfoExtractor,
             $reflectionExtractor,
             $reflectionExtractor,
-            $classMetadataFactory
         );
 
         $fromSourceMappingExtractor = new FromSourceMappingExtractor(
@@ -88,7 +78,6 @@ class MetadataRegistryTest extends AutoMapperBaseTest
             $propertyInfoExtractor,
             $reflectionExtractor,
             $reflectionExtractor,
-            $classMetadataFactory
         );
 
         $this->registry = new MetadataRegistry(
@@ -97,6 +86,7 @@ class MetadataRegistryTest extends AutoMapperBaseTest
             $fromSourceMappingExtractor,
             $fromTargetMappingExtractor,
             $transformerFactory,
+            new EventDispatcher(),
         );
     }
 

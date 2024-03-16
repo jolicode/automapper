@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\Extractor;
 
-use AutoMapper\Attribute\MapToContext;
 use AutoMapper\Exception\CompileException;
 use AutoMapper\MapperContext;
 use PhpParser\Node\Arg;
@@ -28,12 +27,16 @@ final class ReadAccessor
     public const TYPE_ARRAY_DIMENSION = 3;
     public const TYPE_SOURCE = 4;
 
+    /**
+     * @param array<string, string> $context
+     */
     public function __construct(
         private readonly int $type,
         private readonly string $accessor,
         private readonly ?string $sourceClass = null,
         private readonly bool $private = false,
         private readonly ?string $name = null, // will be the name of the property if different from accessor
+        private readonly array $context = [],
     ) {
         if (self::TYPE_METHOD === $this->type && null === $this->sourceClass) {
             throw new \InvalidArgumentException('Source class must be provided when using "method" type.');
@@ -50,43 +53,35 @@ final class ReadAccessor
         if (self::TYPE_METHOD === $this->type) {
             $methodCallArguments = [];
 
-            if (\PHP_VERSION_ID >= 80000 && class_exists($this->sourceClass)) {
-                $parameters = (new \ReflectionMethod($this->sourceClass, $this->accessor))->getParameters();
-
-                foreach ($parameters as $parameter) {
-                    if ($attribute = ($parameter->getAttributes(MapToContext::class)[0] ?? null)) {
-                        /*
-                         * Create method call argument to read value from context and throw exception if not found
-                         *
-                         * $context['map_to_accessor_parameter']['some_key'] ?? throw new \InvalidArgumentException('error message');
-                         */
-                        $methodCallArguments[] = new Arg(
-                            new Expr\BinaryOp\Coalesce(
-                                new Expr\ArrayDimFetch(
-                                    new Expr\ArrayDimFetch(
-                                        new Expr\Variable('context'),
-                                        new Scalar\String_(MapperContext::MAP_TO_ACCESSOR_PARAMETER)
+            foreach ($this->context as $parameter => $context) {
+                /*
+                 * Create method call argument to read value from context and throw exception if not found
+                 *
+                 * $context['map_to_accessor_parameter']['some_key'] ?? throw new \InvalidArgumentException('error message');
+                 */
+                $methodCallArguments[] = new Arg(
+                    new Expr\BinaryOp\Coalesce(
+                        new Expr\ArrayDimFetch(
+                            new Expr\ArrayDimFetch(
+                                new Expr\Variable('context'),
+                                new Scalar\String_(MapperContext::MAP_TO_ACCESSOR_PARAMETER)
+                            ),
+                            new Scalar\String_($context)
+                        ),
+                        new Expr\Throw_(
+                            new Expr\New_(
+                                new Name\FullyQualified(\InvalidArgumentException::class),
+                                [
+                                    new Arg(
+                                        new Scalar\String_(
+                                            "Parameter \"\${$parameter}\" of method \"{$this->sourceClass}\"::\"{$this->accessor}()\" is configured to be mapped to context but no value was found in the context."
+                                        )
                                     ),
-                                    new Scalar\String_($attribute->newInstance()->contextName)
-                                ),
-                                new Expr\Throw_(
-                                    new Expr\New_(
-                                        new Name\FullyQualified(\InvalidArgumentException::class),
-                                        [
-                                            new Arg(
-                                                new Scalar\String_(
-                                                    "Parameter \"\${$parameter->getName()}\" of method \"{$this->sourceClass}\"::\"{$this->accessor}()\" is configured to be mapped to context but no value was found in the context."
-                                                )
-                                            ),
-                                        ]
-                                    )
-                                )
+                                ]
                             )
-                        );
-                    } elseif (!$parameter->isDefaultValueAvailable()) {
-                        throw new \InvalidArgumentException("Accessors method \"{$this->sourceClass}\"::\"{$this->accessor}()\" parameters must have either a default value or the #[MapToContext] attribute.");
-                    }
-                }
+                        )
+                    )
+                );
             }
 
             if ($this->private) {
