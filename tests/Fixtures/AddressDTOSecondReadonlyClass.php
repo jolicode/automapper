@@ -6,7 +6,9 @@ namespace AutoMapper\Tests\Fixtures;
 
 readonly class AddressDTOSecondReadonlyClass
 {
-    public function __construct(public string $city, public string $postalCode)
-    {
+    public function __construct(
+        public string $city,
+        public string $postalCode
+    ) {
     }
 }
