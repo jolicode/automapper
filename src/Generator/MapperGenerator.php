@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Generator;
 
 use AutoMapper\AutoMapperRegistryInterface;
+use AutoMapper\Configuration;
 use AutoMapper\Exception\CompileException;
 use AutoMapper\Exception\NoMappingFoundException;
 use AutoMapper\GeneratedMapper;
@@ -30,11 +31,11 @@ final readonly class MapperGenerator
     private MapperConstructorGenerator $mapperConstructorGenerator;
     private InjectMapperMethodStatementsGenerator $injectMapperMethodStatementsGenerator;
     private MapMethodStatementsGenerator $mapMethodStatementsGenerator;
+    private bool $disableGeneratedMapper;
 
     public function __construct(
         ClassDiscriminatorResolver $classDiscriminatorResolver,
-        bool $allowReadOnlyTargetToPopulate = false,
-        private bool $disableGeneratedMapper = false,
+        Configuration $configuration,
     ) {
         $this->mapperConstructorGenerator = new MapperConstructorGenerator(
             $cachedReflectionStatementsGenerator = new CachedReflectionStatementsGenerator()
@@ -43,12 +44,14 @@ final readonly class MapperGenerator
         $this->mapMethodStatementsGenerator = new MapMethodStatementsGenerator(
             $discriminatorStatementsGenerator = new DiscriminatorStatementsGenerator($classDiscriminatorResolver),
             $cachedReflectionStatementsGenerator,
-            $allowReadOnlyTargetToPopulate,
+            $configuration->allowReadOnlyTargetToPopulate,
         );
 
         $this->injectMapperMethodStatementsGenerator = new InjectMapperMethodStatementsGenerator(
             $discriminatorStatementsGenerator
         );
+
+        $this->disableGeneratedMapper = !$configuration->autoRegister;
     }
 
     /**

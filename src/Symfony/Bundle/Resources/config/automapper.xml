@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <service id="AutoMapper\AutoMapper">
+            <argument type="service" id="AutoMapper\Loader\ClassLoaderInterface" />
+            <argument type="service" id="AutoMapper\Transformer\CustomTransformer\CustomTransformersRegistry" />
+            <argument type="service" id="AutoMapper\Metadata\MetadataRegistry" />
+        </service>
+        <service id="AutoMapper\AutoMapperInterface" alias="AutoMapper\AutoMapper" public="true" />
+        <service id="AutoMapper\AutoMapperRegistryInterface" alias="AutoMapper\AutoMapper" public="true" />
+
+        <service id="AutoMapper\Loader\EvalLoader">
+            <argument type="service" id="AutoMapper\Generator\MapperGenerator" />
+            <argument type="service" id="AutoMapper\Metadata\MetadataRegistry" />
+        </service>
+
+        <service id="AutoMapper\Loader\FileLoader">
+            <argument type="service" id="AutoMapper\Generator\MapperGenerator" />
+            <argument type="service" id="AutoMapper\Metadata\MetadataRegistry" />
+            <argument>%kernel.cache_dir%/automapper</argument>
+            <argument></argument> <!-- Hot reload -->
+        </service>
+
+        <service id="AutoMapper\Loader\ClassLoaderInterface" alias="AutoMapper\Loader\FileLoader" />
+
+        <service id="AutoMapper\Configuration">
+            <argument>Symfony_Mapper_</argument>
+        </service>
+    </services>
+</container>

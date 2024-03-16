@@ -57,7 +57,6 @@ final class MetadataRegistry
         private readonly FromTargetMappingExtractor $fromTargetPropertiesMappingExtractor,
         private readonly TransformerFactoryInterface $transformerFactory,
         private readonly EventDispatcherInterface $eventDispatcher,
-        private readonly string $classPrefix = 'Mapper_',
     ) {
     }
 
@@ -70,7 +69,7 @@ final class MetadataRegistry
     public function getMapperMetadata(string $source, string $target): MapperMetadata
     {
         if (!isset($this->mapperMetadata[$source][$target])) {
-            $this->mapperMetadata[$source][$target] = new MapperMetadata($source, $target, $this->classPrefix);
+            $this->mapperMetadata[$source][$target] = new MapperMetadata($source, $target, $this->configuration->classPrefix);
         }
 
         return $this->mapperMetadata[$source][$target];
@@ -308,7 +307,6 @@ final class MetadataRegistry
             $fromTargetMappingExtractor,
             $transformerFactory,
             $eventDispatcher,
-            $configuration->classPrefix,
         );
     }
 }

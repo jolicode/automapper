@@ -3,5 +3,6 @@ vendor/
 .php-cs-fixer.cache
 .phpunit.result.cache
 tests/cache/
+tests/Bundle/Resources/var
 tools/phpstan/cache/
 site/

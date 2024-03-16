@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <service id="AutoMapper\Generator\MapperGenerator">
+            <argument type="service" id="AutoMapper\Generator\Shared\ClassDiscriminatorResolver" />
+            <argument type="service" id="AutoMapper\Configuration" />
+        </service>
+
+        <service id="AutoMapper\Generator\Shared\ClassDiscriminatorResolver">
+            <argument type="service" id="automapper.mapping.class_discriminator_from_class_metadata" />
+        </service>
+
+        <service id="automapper.mapping.class_discriminator_from_class_metadata" class="Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata">
+            <argument type="service" id="serializer.mapping.class_metadata_factory" />
+        </service>
+    </services>
+</container>
