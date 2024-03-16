@@ -6,8 +6,9 @@ namespace AutoMapper\Tests\Fixtures;
 
 class ClassWithPrivateProperty
 {
-    public function __construct(private string $foo)
-    {
+    public function __construct(
+        private string $foo
+    ) {
     }
 
     private function getBar(): string

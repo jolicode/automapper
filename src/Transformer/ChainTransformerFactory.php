@@ -18,8 +18,9 @@ final class ChainTransformerFactory implements TransformerPropertyFactoryInterfa
     /**
      * @param array<TransformerFactoryInterface|TransformerPropertyFactoryInterface> $factories
      */
-    public function __construct(private array $factories = [])
-    {
+    public function __construct(
+        private array $factories = []
+    ) {
         foreach ($this->factories as $factory) {
             if ($factory instanceof ChainTransformerFactoryAwareInterface) {
                 $factory->setChainTransformerFactory($this);
@@ -61,8 +62,10 @@ final class ChainTransformerFactory implements TransformerPropertyFactoryInterfa
         if (!$transformerFactory instanceof PrioritizedTransformerFactoryInterface) {
             /** @var TransformerFactoryInterface|TransformerPropertyFactoryInterface $transformerFactory */
             $transformerFactory = new class($transformerFactory, $priority) implements TransformerFactoryInterface, TransformerPropertyFactoryInterface, PrioritizedTransformerFactoryInterface {
-                public function __construct(private readonly TransformerFactoryInterface|TransformerPropertyFactoryInterface $transformerFactory, private readonly int $priority)
-                {
+                public function __construct(
+                    private readonly TransformerFactoryInterface|TransformerPropertyFactoryInterface $transformerFactory,
+                    private readonly int $priority
+                ) {
                 }
 
                 public function getTransformer(?array $sourceTypes, ?array $targetTypes, MapperMetadataInterface $mapperMetadata): ?TransformerInterface

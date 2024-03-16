@@ -6,7 +6,8 @@ namespace AutoMapper\Tests\Fixtures;
 
 class BuiltinClass
 {
-    public function __construct(public \DateInterval $dateInterval)
-    {
+    public function __construct(
+        public \DateInterval $dateInterval
+    ) {
     }
 }
