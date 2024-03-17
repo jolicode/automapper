@@ -25,6 +25,7 @@ class AutoMapperMapToTest extends AutoMapperBaseTest
         $this->assertInstanceOf(Bar::class, $bar);
         $this->assertSame('foo', $bar->bar);
         $this->assertSame('foo', $bar->baz);
+        $this->assertSame('foo', $bar->from);
     }
 
     public function testMapToArray()

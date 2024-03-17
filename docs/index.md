@@ -166,6 +166,24 @@ class InputUser
 }
 ```
 
+#### Using the `#[MapFrom]` attribute
+
+You can use the `#[MapFrom]` attribute to specify the source name of a property. It works the same way as the `#[MapTo]`
+attribute but for the source class. This is useful when the source is an array or a `stdClass` object.
+
+```php
+class InputUser
+{
+  public function __construct(
+    public readonly string $firstName,
+    public readonly string $lastName,
+    #[MapFrom(name: 'userAge', source: 'array')]
+    public readonly int $age,
+  ) {
+  }
+}
+```
+
 #### Using a custom transformer
 
 You can use a custom transformer to transform the value of a property. This is useful when you need to transform the
