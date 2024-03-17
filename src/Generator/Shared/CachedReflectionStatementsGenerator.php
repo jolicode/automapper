@@ -93,8 +93,12 @@ final readonly class CachedReflectionStatementsGenerator
             return false;
         }
 
+        if ($metadata->mapperMetadata->lazyGhostClassName !== null) {
+            return true;
+        }
+
         $targetConstructor = $metadata->mapperMetadata->targetReflectionClass?->getConstructor();
 
-        return $targetConstructor && !$metadata->hasConstructor();
+        return $targetConstructor !== null;
     }
 }

@@ -21,7 +21,8 @@
         "nikic/php-parser": "^4.18 || ^5.0",
         "symfony/event-dispatcher": "^5.4 || ^6.0 || ^7.0",
         "symfony/deprecation-contracts": "^2.2|^3.0",
-        "symfony/property-info": "^5.4.23 || ^6.2.10 || ^7.0"
+        "symfony/property-info": "^5.4.23 || ^6.2.10 || ^7.0",
+        "symfony/var-exporter": "^5.4.23 || ^6.2.10 || ^7.0"
     },
     "require-dev": {
         "doctrine/annotations": "~1.0",

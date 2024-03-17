@@ -9,6 +9,7 @@ use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\MetadataRegistry;
 use PhpParser\PrettyPrinter\Standard;
 use PhpParser\PrettyPrinterAbstract;
+use Symfony\Component\VarExporter\ProxyHelper;
 
 /**
  * Use file system to load mapper, and persist them using a registry.
@@ -34,15 +35,23 @@ final class FileLoader implements ClassLoaderInterface
     public function loadClass(MapperMetadata $mapperMetadata): void
     {
         $className = $mapperMetadata->className;
-        $classPath = $this->directory . \DIRECTORY_SEPARATOR . $className . '.php';
+        $lazyGhostClassName = $mapperMetadata->lazyGhostClassName;
 
-        if (!$this->hotReload && file_exists($classPath)) {
+        $classPath = $this->directory . \DIRECTORY_SEPARATOR . $className . '.php';
+        $lazyGhostClassPath = $lazyGhostClassName ? $this->directory . \DIRECTORY_SEPARATOR . $lazyGhostClassName . '.php' : null;
+
+        if (!$this->hotReload && file_exists($classPath) && (null === $lazyGhostClassPath || file_exists($lazyGhostClassPath))) {
+            if ($lazyGhostClassPath) {
+                require $lazyGhostClassPath;
+            }
+
             require $classPath;
 
             return;
         }
 
         $shouldSaveMapper = true;
+
         if ($this->hotReload) {
             $registry = $this->getRegistry();
             $hash = $mapperMetadata->getHash();
@@ -51,6 +60,10 @@ final class FileLoader implements ClassLoaderInterface
 
         if ($shouldSaveMapper) {
             $this->saveMapper($mapperMetadata);
+        }
+
+        if ($lazyGhostClassPath) {
+            require $lazyGhostClassPath;
         }
 
         require $classPath;
@@ -62,7 +75,15 @@ final class FileLoader implements ClassLoaderInterface
     public function saveMapper(MapperMetadata $mapperMetadata): string
     {
         $className = $mapperMetadata->className;
+
         $classPath = $this->directory . \DIRECTORY_SEPARATOR . $className . '.php';
+
+        if ($mapperMetadata->targetReflectionClass !== null && $mapperMetadata->lazyGhostClassName !== null) {
+            $lazyGhostClassPath = $this->directory . \DIRECTORY_SEPARATOR . $mapperMetadata->lazyGhostClassName . '.php';
+            $lazyGhostClassCode = 'class ' . $mapperMetadata->lazyGhostClassName . ProxyHelper::generateLazyGhost($mapperMetadata->targetReflectionClass);
+
+            $this->write($lazyGhostClassPath, "<?php\n\n" . $lazyGhostClassCode . "\n");
+        }
 
         $generatorMetadata = $this->metadataRegistry->getGeneratorMetadata($mapperMetadata->source, $mapperMetadata->target);
         $classCode = $this->printer->prettyPrint([$this->generator->generate($generatorMetadata)]);

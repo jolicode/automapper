@@ -63,11 +63,21 @@ final readonly class MapperGenerator
             throw new NoMappingFoundException('No mapper found for source ' . $metadata->mapperMetadata->source . ' and target ' . $metadata->mapperMetadata->target);
         }
 
-        return (new Builder\Class_($metadata->mapperMetadata->className))
+        [$constructorStatements, $duplicatedStatements, $setterStatements] = $this->mapMethodStatementsGenerator->getMappingStatements($metadata);
+
+        $builder = (new Builder\Class_($metadata->mapperMetadata->className))
             ->makeFinal()
             ->extend(GeneratedMapper::class)
             ->addStmt($this->constructorMethod($metadata))
-            ->addStmt($this->mapMethod($metadata))
+            ->addStmt($this->mapMethod($metadata, $duplicatedStatements, \count($constructorStatements) > 0))
+        ;
+
+        if (\count($constructorStatements) > 0) {
+            $builder = $builder->addStmt($this->doConstructMethod($metadata, $constructorStatements));
+        }
+
+        return $builder
+            ->addStmt($this->doMapMethod($metadata, $setterStatements))
             ->addStmt($this->injectMappersMethod($metadata))
             ->getNode();
     }
@@ -101,8 +111,10 @@ final readonly class MapperGenerator
      *   ... // statements
      * }
      * ```
+     *
+     * @param list<Stmt> $duplicatedStatements
      */
-    private function mapMethod(GeneratorMetadata $metadata): Stmt\ClassMethod
+    private function mapMethod(GeneratorMetadata $metadata, array $duplicatedStatements, bool $callDoConstruct): Stmt\ClassMethod
     {
         return (new Builder\Method('map'))
             ->makePublic()
@@ -110,7 +122,7 @@ final readonly class MapperGenerator
             ->makeReturnByRef()
             ->addParam(new Param($metadata->variableRegistry->getSourceInput()))
             ->addParam(new Param($metadata->variableRegistry->getContext(), default: new Expr\Array_(), type: new Name('array')))
-            ->addStmts($this->mapMethodStatementsGenerator->getStatements($metadata))
+            ->addStmts($this->mapMethodStatementsGenerator->getStatements($metadata, $duplicatedStatements, $callDoConstruct))
             ->setDocComment(
                 sprintf(
                     '/** @param %s $%s */',
@@ -118,6 +130,52 @@ final readonly class MapperGenerator
                     'value'
                 )
             )
+            ->getNode();
+    }
+
+    /**
+     * Create the doConstruct method for this mapper.
+     *
+     * ```php
+     * public function doConstruct($value, &$result, array $context = []): void
+     *   ... // statements
+     * }
+     * ```
+     *
+     * @param list<Stmt> $constructorStatements
+     */
+    private function doConstructMethod(GeneratorMetadata $metadata, array $constructorStatements): Stmt\ClassMethod
+    {
+        return (new Builder\Method('doConstruct'))
+            ->makePrivate()
+            ->setReturnType('void')
+            ->addParam(new Param($metadata->variableRegistry->getSourceInput()))
+            ->addParam(new Param($metadata->variableRegistry->getResult()))
+            ->addParam(new Param($metadata->variableRegistry->getContext(), default: new Expr\Array_(), type: new Name('array')))
+            ->addStmts($constructorStatements)
+            ->getNode();
+    }
+
+    /**
+     * Create the doMap method for this mapper.
+     *
+     * ```php
+     * private function doMap($value, &$result, array $context = []): void {
+     *   ... // statements
+     * }
+     * ```
+     *
+     * @param list<Stmt> $setterStatements
+     */
+    private function doMapMethod(GeneratorMetadata $metadata, array $setterStatements): Stmt\ClassMethod
+    {
+        return (new Builder\Method('doMap'))
+            ->makePrivate()
+            ->setReturnType('void')
+            ->addParam(new Param($metadata->variableRegistry->getSourceInput()))
+            ->addParam(new Param($metadata->variableRegistry->getResult(), byRef: true))
+            ->addParam(new Param($metadata->variableRegistry->getContext(), default: new Expr\Array_(), type: new Name('array')))
+            ->addStmts($setterStatements)
             ->getNode();
     }
 
