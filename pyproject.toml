@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "automapper-doc"
+version = "0.1.0"
+description = "Documentation for jolicode/automapper"
+authors = ["Joel Wurtz <joel.wurtz@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+mkdocs = "^1.5.3"
+mkdocs-material = "^9.5.13"
+markdown-callouts = "^0.4.0"
+mkdocs-literate-nav = "^0.6.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
