@@ -54,17 +54,44 @@ final readonly class MapToListener
 
                 if ($mapToAttributeInstance->transformer !== null) {
                     $callableName = null;
+                    $transformerCallable = $mapToAttributeInstance->transformer;
 
-                    if (\is_string($mapToAttributeInstance->transformer) && $customTransformer = $this->customTransformersRegistry->getCustomTransformer($mapToAttributeInstance->transformer)) {
+                    if ($transformerCallable instanceof \Closure) {
+                        // This is not supported because we cannot generate code from a closure
+                        // However this should never be possible since attributes does not allow to pass a closure
+                        // Let's keep this check for future proof
+                        throw new BadMapDefinitionException('Closure transformer is not supported.');
+                    }
+
+                    if (\is_string($transformerCallable) && $customTransformer = $this->customTransformersRegistry->getCustomTransformer($transformerCallable)) {
                         if ($customTransformer instanceof CustomModelTransformerInterface) {
-                            $transformer = new CustomModelTransformer($mapToAttributeInstance->transformer);
+                            $transformer = new CustomModelTransformer($transformerCallable);
                         }
 
                         if ($customTransformer instanceof CustomPropertyTransformerInterface) {
-                            $transformer = new CustomPropertyTransformer($mapToAttributeInstance->transformer);
+                            $transformer = new CustomPropertyTransformer($transformerCallable);
                         }
-                    } elseif (@\is_callable($mapToAttributeInstance->transformer, false, $callableName) && $callableName !== null) {
+                    } elseif (\is_callable($transformerCallable, false, $callableName)) {
                         $transformer = new CallableTransformer($callableName);
+                    } elseif (\is_string($transformerCallable)) {
+                        // Check the method exist on the class
+                        if (!method_exists($event->mapperMetadata->source, $transformerCallable)) {
+                            if (class_exists($transformerCallable)) {
+                                throw new BadMapDefinitionException(sprintf('Transformer "%s" targeted by MapTo transformer does not exist on class "%s", did you register it ?.', $transformerCallable, $event->mapperMetadata->source));
+                            }
+
+                            throw new BadMapDefinitionException(sprintf('Method "%s" targeted by MapTo transformer does not exist on class "%s".', $transformerCallable, $event->mapperMetadata->source));
+                        }
+
+                        $reflMethod = new \ReflectionMethod($event->mapperMetadata->source, $transformerCallable);
+
+                        if ($reflMethod->isStatic()) {
+                            $transformer = new CallableTransformer($event->mapperMetadata->source . '::' . $transformerCallable);
+                        } else {
+                            $transformer = new CallableTransformer($transformerCallable, true);
+                        }
+                    } else {
+                        throw new BadMapDefinitionException(sprintf('Callable "%s" targeted by MapTo transformer on class "%s" is not valid.', json_encode($transformerCallable), $event->mapperMetadata->source));
                     }
                 }
 
