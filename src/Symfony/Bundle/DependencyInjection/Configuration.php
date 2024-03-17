@@ -20,6 +20,13 @@ readonly class Configuration implements ConfigurationInterface
         /* @phpstan-ignore-next-line */
         $rootNode
             ->children()
+                ->scalarNode('class_prefix')->defaultValue('Symfony_Mapper_')->end()
+                ->booleanNode('allow_constructor')->defaultTrue()->end()
+                ->scalarNode('date_time_format')->defaultValue(\DateTimeInterface::RFC3339)->end()
+                ->booleanNode('check_attributes')->defaultTrue()->end()
+                ->booleanNode('auto_register')->defaultTrue()->end()
+                ->booleanNode('map_private_properties')->defaultTrue()->end()
+                ->booleanNode('allow_readonly_target_to_populate')->defaultFalse()->end()
                 ->booleanNode('normalizer')->defaultFalse()->end()
                 ->booleanNode('serializer')->defaultValue(interface_exists(SerializerInterface::class))->end()
                 ->scalarNode('name_converter')->defaultNull()->end()
@@ -27,7 +34,6 @@ readonly class Configuration implements ConfigurationInterface
                 ->scalarNode('date_time_format')->defaultValue(\DateTimeInterface::RFC3339)->end()
                 ->booleanNode('hot_reload')->defaultValue('%kernel.debug%')->end()
                 ->booleanNode('map_private_properties')->defaultFalse()->end()
-                ->booleanNode('allow_readonly_target_to_populate')->defaultFalse()->end()
                 ->arrayNode('warmup')
                     ->arrayPrototype()
                         ->children()

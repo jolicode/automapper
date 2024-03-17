@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Symfony\Bundle\DependencyInjection;
 
+use AutoMapper\Configuration as AutoMapperConfiguration;
 use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\EventListener\Symfony\AdvancedNameConverterListener;
 use AutoMapper\Loader\FileLoader;
@@ -46,6 +47,16 @@ class AutoMapperExtension extends Extension
         $loader->load('metadata.php');
         $loader->load('symfony.php');
         $loader->load('transformers.php');
+
+        $container->getDefinition(AutoMapperConfiguration::class)
+            ->setArgument('$classPrefix', $config['class_prefix'])
+            ->setArgument('$allowConstructor', $config['allow_constructor'])
+            ->setArgument('$dateTimeFormat', $config['date_time_format'])
+            ->setArgument('$attributeChecking', $config['check_attributes'])
+            ->setArgument('$autoRegister', $config['auto_register'])
+            ->setArgument('$mapPrivateProperties', $config['map_private_properties'])
+            ->setArgument('$allowReadOnlyTargetToPopulate', $config['allow_readonly_target_to_populate'])
+        ;
 
         $container->getDefinition(FileLoader::class)->replaceArgument(3, $config['hot_reload']);
         $container->registerForAutoconfiguration(CustomTransformerInterface::class)->addTag('automapper.custom_transformer');

@@ -42,6 +42,5 @@ return static function (ContainerConfigurator $container) {
             ->alias(ClassLoaderInterface::class, FileLoader::class)
 
         ->set(Configuration::class)
-            ->args(['Symfony_Mapper_'])
     ;
 };
