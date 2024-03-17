@@ -4,3 +4,4 @@ vendor/
 .phpunit.result.cache
 tests/cache/
 tools/phpstan/cache/
+site/
