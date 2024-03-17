@@ -151,8 +151,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
 
         $mapperGenerator = new MapperGenerator(
             new ClassDiscriminatorResolver($classDiscriminatorFromClassMetadata),
-            $configuration->allowReadOnlyTargetToPopulate,
-            !$configuration->autoRegister,
+            $configuration,
         );
 
         if (null === $cacheDirectory) {
