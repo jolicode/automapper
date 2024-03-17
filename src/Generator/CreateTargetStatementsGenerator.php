@@ -91,6 +91,9 @@ final readonly class CreateTargetStatementsGenerator
             )
         );
 
+        /** @var class-string<ClosureUse> $closureUseClass */
+        $closureUseClass = class_exists(ClosureUse::class) ? ClosureUse::class : Arg::class;
+
         return new Stmt\If_(new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'shouldLazyLoad', [
             new Arg($variableRegistry->getContext()),
         ]), [
@@ -102,8 +105,8 @@ final readonly class CreateTargetStatementsGenerator
                         ],
                         'stmts' => $closureStatements,
                         'uses' => [
-                            new ClosureUse($variableRegistry->getSourceInput()),
-                            new ClosureUse($variableRegistry->getContext()),
+                            new $closureUseClass($variableRegistry->getSourceInput()),
+                            new $closureUseClass($variableRegistry->getContext()),
                         ],
                     ])),
                 ]))),

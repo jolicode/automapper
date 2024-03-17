@@ -102,6 +102,12 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertSame('yolo', $userDto->getName());
         self::assertSame(13, $userDto->age);
         self::assertCount(1, $userDto->addresses);
+
+        // Sub object are also lazy loaded
+        self::assertNotSame(AddressDTO::class, $userDto->address::class);
+        self::assertInstanceOf(LazyObjectInterface::class, $userDto->address);
+        self::assertFalse($userDto->address->isLazyObjectInitialized());
+
         self::assertInstanceOf(AddressDTO::class, $userDto->address);
         self::assertInstanceOf(AddressDTO::class, $userDto->addresses[0]);
         self::assertSame('Toulon', $userDto->address->city);
