@@ -35,8 +35,11 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
     public const RELEASE_VERSION = 0;
     public const EXTRA_VERSION = 'DEV';
 
+    public const DEBUG_OBJECT = 'debug_object';
+
     /** @var array<GeneratedMapper<object, object>|GeneratedMapper<array<mixed>, object>|GeneratedMapper<object, array<mixed>>> */
     private array $mapperRegistry = [];
+    private ?AutoMapperDebug $debug = null;
 
     public function __construct(
         private readonly ClassLoaderInterface $classLoader,
@@ -57,9 +60,16 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
     public function getMapper(string $source, string $target): MapperInterface
     {
         $metadata = $this->metadataRegistry->getMapperMetadata($source, $target);
+        if ($this->debug instanceof AutoMapperDebug) {
+            $this->debug->mapperClassName = $metadata->className;
+        }
         $className = $metadata->className;
 
         if (\array_key_exists($className, $this->mapperRegistry)) {
+            if ($this->debug instanceof AutoMapperDebug) {
+                $this->debug->mapperWasAlreadyGenerated = true;
+            }
+
             /** @var GeneratedMapper<Source, Target>|GeneratedMapper<array<mixed>, Target>|GeneratedMapper<Source, array<mixed>> */
             return $this->mapperRegistry[$className];
         }
@@ -85,6 +95,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
      *
      * @param Source|array<mixed>                              $source
      * @param class-string<Target>|'array'|array<mixed>|Target $target
+     * @param array{debug_object?: AutoMapperDebug|null}       $context
      *
      * @return ($target is class-string|Target ? Target|null : array<mixed>|null)
      */
@@ -109,11 +120,22 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
             $targetType = $target;
         }
 
+        if (\array_key_exists(self::DEBUG_OBJECT, $context) && $context[self::DEBUG_OBJECT] instanceof AutoMapperDebug) {
+            $this->debug = $context[self::DEBUG_OBJECT];
+            $this->debug->mapperGuessedSource = $sourceType;
+            $this->debug->mapperGuessedTarget = $targetType;
+        }
+
         if ('array' === $sourceType && 'array' === $targetType) {
             throw new NoMappingFoundException('Cannot map this value, both source and target are array.');
         }
 
-        return $this->getMapper($sourceType, $targetType)->map($source, $context);
+        $output = $this->getMapper($sourceType, $targetType)->map($source, $context);
+        if ($this->debug instanceof AutoMapperDebug) {
+            $this->debug = null;
+        }
+
+        return $output;
     }
 
     public function bindCustomTransformer(CustomTransformerInterface $customTransformer, ?string $id = null): void

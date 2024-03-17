@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Tests;
 
 use AutoMapper\AutoMapper;
+use AutoMapper\AutoMapperDebug;
 use AutoMapper\Configuration;
 use AutoMapper\Exception\CircularReferenceException;
 use AutoMapper\Exception\NoMappingFoundException;
@@ -1289,5 +1290,32 @@ class AutoMapperTest extends AutoMapperBaseTest
             [],
             $this->autoMapper->map(new BuiltinClass(new \DateInterval('P1Y')), 'array')
         );
+    }
+
+    public function testDebug(): void
+    {
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+
+        $source = new Fixtures\IssueTargetToPopulate\VatModel();
+        $source->setCountryCode('fr');
+        $source->setStandardVatRate(21.0);
+        $source->setReducedVatRate(5.5);
+        $source->setDisplayIncVatPrices(true);
+
+        $target = new Fixtures\IssueTargetToPopulate\VatEntity('en');
+        $target->setId(1);
+
+        $debug = new AutoMapperDebug();
+        $this->autoMapper->map($source, $target, [AutoMapper::DEBUG_OBJECT => $debug]);
+
+        self::assertInstanceOf(AutoMapperDebug::class, $debug);
+        self::assertEquals(Fixtures\IssueTargetToPopulate\VatModel::class, $debug->mapperGuessedSource);
+        self::assertEquals(Fixtures\IssueTargetToPopulate\VatEntity::class, $debug->mapperGuessedTarget);
+        self::assertFalse($debug->mapperWasAlreadyGenerated);
+        self::assertEquals('Mapper_AutoMapper_Tests_Fixtures_IssueTargetToPopulate_VatModel_AutoMapper_Tests_Fixtures_IssueTargetToPopulate_VatEntity', $debug->mapperClassName);
+
+        $debug = new AutoMapperDebug();
+        $this->autoMapper->map($source, $target, [AutoMapper::DEBUG_OBJECT => $debug]);
+        self::assertTrue($debug->mapperWasAlreadyGenerated);
     }
 }
