@@ -6,6 +6,7 @@ namespace AutoMapper\Generator;
 
 use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
 use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
+use AutoMapper\Lazy\LazyMap;
 use AutoMapper\MapperContext;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\PropertyMetadata;
@@ -48,11 +49,11 @@ final readonly class CreateTargetStatementsGenerator
     {
         $createObjectStatements = [];
 
+        $createObjectStatements[] = $this->lazyLoadStatement($metadata, $variableRegistry, $callDoConstruct);
         $createObjectStatements[] = $this->targetAsArray($metadata);
         $createObjectStatements[] = $this->sourceAndTargetAsStdClass($metadata);
         $createObjectStatements[] = $this->targetAsStdClass($metadata);
         $createObjectStatements = [...$createObjectStatements, ...$this->discriminatorStatementsGenerator->createTargetStatements($metadata)];
-        $createObjectStatements[] = $this->lazyLoadStatement($metadata, $variableRegistry, $callDoConstruct);
         $createObjectStatements[] = $this->cachedReflectionStatementsGenerator->createTargetStatement($metadata);
         $createObjectStatements[] = $this->constructorWithoutArgument($metadata);
 
@@ -69,17 +70,9 @@ final readonly class CreateTargetStatementsGenerator
 
     private function lazyLoadStatement(GeneratorMetadata $metadata, VariableRegistry $variableRegistry, bool $callDoConstruct): ?Stmt
     {
-        if ($metadata->mapperMetadata->lazyGhostClassName === null) {
-            return null;
-        }
-
-        $closureStatements = [];
-
-        if ($callDoConstruct) {
-            $closureStatements[] = $this->doConstructStatement($variableRegistry);
-        }
-
-        $closureStatements[] = new Stmt\Expression(
+        /** @var class-string<ClosureUse> $closureUseClass */
+        $closureUseClass = class_exists(ClosureUse::class) ? ClosureUse::class : Arg::class;
+        $doMapStmt = new Stmt\Expression(
             new Expr\MethodCall(
                 new Expr\Variable('this'),
                 'doMap',
@@ -91,8 +84,40 @@ final readonly class CreateTargetStatementsGenerator
             )
         );
 
-        /** @var class-string<ClosureUse> $closureUseClass */
-        $closureUseClass = class_exists(ClosureUse::class) ? ClosureUse::class : Arg::class;
+        if ($metadata->mapperMetadata->lazyGhostClassName === null) {
+            if ($metadata->mapperMetadata->target === 'array') {
+                return new Stmt\If_(new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'shouldLazyLoad', [
+                    new Arg($variableRegistry->getContext()),
+                ]), [
+                    'stmts' => [
+                        new Stmt\Expression(new Expr\Assign($variableRegistry->getResult(), new Expr\New_(
+                            new Name\FullyQualified(LazyMap::class), [
+                            new Arg(new Expr\Closure([
+                                'params' => [
+                                    new Param($variableRegistry->getResult(), byRef: true),
+                                ],
+                                'stmts' => [$doMapStmt],
+                                'uses' => [
+                                    new $closureUseClass($variableRegistry->getSourceInput()),
+                                    new $closureUseClass($variableRegistry->getContext()),
+                                ],
+                            ])),
+                        ]))),
+                        new Stmt\Return_($variableRegistry->getResult()),
+                    ],
+                ]);
+            }
+
+            return null;
+        }
+
+        $closureStatements = [];
+
+        if ($callDoConstruct) {
+            $closureStatements[] = $this->doConstructStatement($variableRegistry);
+        }
+
+        $closureStatements[] = $doMapStmt;
 
         return new Stmt\If_(new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'shouldLazyLoad', [
             new Arg($variableRegistry->getContext()),

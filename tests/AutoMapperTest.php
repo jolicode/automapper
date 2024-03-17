@@ -178,6 +178,22 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertIsString($userData['createdAt']);
     }
 
+    public function testAutoMapperToArrayLazy(): void
+    {
+        $address = new Address();
+        $address->setCity('Toulon');
+        $user = new Fixtures\User(1, 'yolo', '13');
+        $user->address = $address;
+        $user->addresses[] = $address;
+
+        $userData = $this->autoMapper->map($user, 'array', [MapperContext::LAZY_MAPPING => true]);
+
+        self::assertInstanceOf(\ArrayAccess::class, $userData);
+        self::assertEquals(1, $userData['id']);
+        self::assertInstanceOf(\ArrayAccess::class, $userData['address']);
+        self::assertIsString($userData['createdAt']);
+    }
+
     public function testAutoMapperFromStdObject(): void
     {
         $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
