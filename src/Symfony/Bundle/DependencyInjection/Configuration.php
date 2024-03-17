@@ -7,6 +7,7 @@ namespace AutoMapper\Symfony\Bundle\DependencyInjection;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 
 readonly class Configuration implements ConfigurationInterface
 {
@@ -20,6 +21,7 @@ readonly class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->booleanNode('normalizer')->defaultFalse()->end()
+                ->booleanNode('serializer')->defaultValue(interface_exists(SerializerInterface::class))->end()
                 ->scalarNode('name_converter')->defaultNull()->end()
                 ->scalarNode('cache_dir')->defaultValue('%kernel.cache_dir%/automapper')->end()
                 ->scalarNode('date_time_format')->defaultValue(\DateTimeInterface::RFC3339)->end()

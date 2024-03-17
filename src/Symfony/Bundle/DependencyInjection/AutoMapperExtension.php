@@ -18,6 +18,7 @@ use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Uid\AbstractUid;
 
 class AutoMapperExtension extends Extension
@@ -53,6 +54,14 @@ class AutoMapperExtension extends Extension
             $container
                 ->getDefinition(SymfonyUidTransformerFactory::class)
                 ->addTag('automapper.transformer_factory', ['priority' => '-1004']);
+        }
+
+        if ($config['serializer']) {
+            if (!interface_exists(SerializerInterface::class)) {
+                throw new \LogicException('The "symfony/serializer" component is required to use the "serializer" feature.');
+            }
+
+            $loader->load('event_serializer.php');
         }
 
         if ($config['normalizer']) {
