@@ -82,6 +82,113 @@ dump($automapper->map(new InputUser('John', 'Doe', 28), DatabaseUser::class));
 
 The mapping process could be extended in multiple ways.
 
+#### Using the `#[MapTo]` attribute
+
+You can use the `#[MapTo]` attribute to specify the target name of a property. This is useful when the property name is 
+different in the source and target classes.
+
+```php
+class InputUser
+{
+  public function __construct(
+    public readonly string $firstName,
+    public readonly string $lastName,
+    #[MapTo(name: 'userAge')]
+    public readonly int $age,
+  ) {
+  }
+}
+```
+
+This will map the `age` property to the `userAge` property in the all the target classes. If you want to map the `age`
+to a specific target class, you can use the `#[MapTo]` target argument to specify the target class.
+
+```php
+class InputUser
+{
+  public function __construct(
+    public readonly string $firstName,
+    public readonly string $lastName,
+    #[MapTo(name: 'userAge', target: DatabaseUser::class)]
+    public readonly int $age,
+  ) {
+  }
+}
+```
+
+#### Ignoring a field
+
+You can ignore a field by using the `#[MapTo]` attribute.
+
+```php
+class InputUser
+{
+  public function __construct(
+    public readonly string $firstName,
+    public readonly string $lastName,
+    #[MapTo(ignore: true, target: DatabaseUser::class)]
+    public readonly int $age,
+  ) {
+  }
+}
+```
+
+Ignoring a field can be useful when mapping a field to an array, as by default the `#[MapTo]` attribute with a specific
+name will add the field to the mapping but does not replace it, by example:
+
+```php
+class InputUser
+{
+  public function __construct(
+    public readonly string $firstName,
+    public readonly string $lastName,
+    #[MapTo(name: 'userAge', target: 'array')]
+    public readonly int $age,
+  ) {
+  }
+}
+```
+
+When mapping a `InputUser` to an array, it will have both `age` and `userAge` fields. You can ignore the `age` field,
+by using the `#[MapTo]` attribute:
+
+```php
+class InputUser
+{
+  public function __construct(
+    public readonly string $firstName,
+    public readonly string $lastName,
+    #[MapTo(name: 'userAge', target: 'array')]
+    #[MapTo(ignore: true, target: 'array')]
+    public readonly int $age,
+  ) {
+  }
+}
+```
+
+#### Using a custom transformer
+
+You can use a custom transformer to transform the value of a property. This is useful when you need to transform the
+value of a property before mapping it to the target class.
+
+```php
+class InputUser
+{
+  public function __construct(
+    public readonly string $firstName,
+    public readonly string $lastName,
+    #[MapTo(name: 'yearOfBirth', target: DatabaseUser::class, transformer: 'transformToYear')]
+    public readonly int $age,
+  ) {
+  }
+
+  public static function transformToYear(int $age): int
+  {
+    return (new \DateTime())->format('Y') - $age;
+  }
+}
+```
+
 #### Map manually a single property
 
 You can override the mapping of a single property by leveraging `AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformerInterface`.
@@ -104,6 +211,28 @@ class BirthDateUserTransformer implements CustomPropertyTransformerInterface
     }
 }
 ```
+
+You can also use this custom transformer with the `#[MapTo]` attribute:
+
+```php
+class InputUser
+{
+  public function __construct(
+    public readonly string $firstName,
+    public readonly string $lastName,
+    #[MapTo(name: 'birthDate', target: DatabaseUser::class, transformer: BirthDateUserTransformer::class)]
+    #[MapTo(ignore: true, target: DatabaseUser::class)]
+    public readonly int $birthYear,
+    #[MapTo(ignore: true, target: DatabaseUser::class)]
+    public readonly int $birthMonth,
+    #[MapTo(ignore: true, target: DatabaseUser::class)]
+    public readonly int $birthDay,
+  ) {
+  }
+}
+```
+
+By doing this it will not evaluate the `support` method of the `BirthDateUserTransformer` and will use the transformer directly
 
 #### Map manually a whole object
 
