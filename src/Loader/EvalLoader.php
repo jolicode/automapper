@@ -9,6 +9,7 @@ use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\MetadataRegistry;
 use PhpParser\PrettyPrinter\Standard;
 use PhpParser\PrettyPrinterAbstract;
+use Symfony\Component\VarExporter\ProxyHelper;
 
 /**
  * Use eval to load mappers.
@@ -30,6 +31,11 @@ final readonly class EvalLoader implements ClassLoaderInterface
 
     public function loadClass(MapperMetadata $mapperMetadata): void
     {
+        if ($mapperMetadata->targetReflectionClass !== null && $mapperMetadata->lazyGhostClassName !== null) {
+            $lazyGhostClass = 'class ' . $mapperMetadata->lazyGhostClassName . ProxyHelper::generateLazyGhost($mapperMetadata->targetReflectionClass);
+            eval($lazyGhostClass);
+        }
+
         $class = $this->generator->generate($this->metadataRegistry->getGeneratorMetadata($mapperMetadata->source, $mapperMetadata->target));
 
         eval($this->printer->prettyPrint([$class]));
