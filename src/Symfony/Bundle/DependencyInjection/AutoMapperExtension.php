@@ -14,7 +14,7 @@ use AutoMapper\Transformer\SymfonyUidTransformerFactory;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -36,15 +36,15 @@ class AutoMapperExtension extends Extension
         $configuration = $this->getConfiguration($configs, $container);
         $config = $this->processConfiguration($configuration, $configs);
 
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader = new PhpFileLoader($container, new FileLocator(__DIR__ . '/../config'));
 
-        $loader->load('automapper.xml');
-        $loader->load('custom_transformers.xml');
-        $loader->load('event.xml');
-        $loader->load('generator.xml');
-        $loader->load('metadata.xml');
-        $loader->load('symfony.xml');
-        $loader->load('transformers.xml');
+        $loader->load('automapper.php');
+        $loader->load('custom_transformers.php');
+        $loader->load('event.php');
+        $loader->load('generator.php');
+        $loader->load('metadata.php');
+        $loader->load('symfony.php');
+        $loader->load('transformers.php');
 
         $container->getDefinition(FileLoader::class)->replaceArgument(3, $config['hot_reload']);
         $container->registerForAutoconfiguration(CustomTransformerInterface::class)->addTag('automapper.custom_transformer');
@@ -60,7 +60,7 @@ class AutoMapperExtension extends Extension
                 throw new \LogicException('The "symfony/serializer" component is required to use the "normalizer" feature.');
             }
 
-            $loader->load('normalizer.xml');
+            $loader->load('normalizer.php');
         }
 
         if (null !== $config['name_converter']) {
