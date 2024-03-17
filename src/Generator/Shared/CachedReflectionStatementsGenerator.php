@@ -95,6 +95,6 @@ final readonly class CachedReflectionStatementsGenerator
 
         $targetConstructor = $metadata->mapperMetadata->targetReflectionClass?->getConstructor();
 
-        return $targetConstructor && !$metadata->hasConstructor();
+        return $targetConstructor !== null;
     }
 }

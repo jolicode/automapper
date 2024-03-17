@@ -101,6 +101,47 @@ class AutoMapperTest extends AutoMapperTestCase
         self::assertSame(20.10, $userDto->money[0]);
     }
 
+    public function testAutoMappingLazy(): void
+    {
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+
+        $address = new Address();
+        $address->setCity('Toulon');
+        $user = new Fixtures\User(1, 'yolo', '13');
+        $user->address = $address;
+        $user->addresses[] = $address;
+        $user->money = 20.10;
+
+        $userDto = $this->autoMapper->map($user, Fixtures\UserDTO::class, [MapperContext::LAZY_MAPPING => true]);
+        $reflectionClass = new \ReflectionClass($userDto);
+
+        self::assertSame(Fixtures\UserDTO::class, $userDto::class);
+        self::assertTrue($reflectionClass->isUninitializedLazyObject($userDto));
+
+        self::assertSame(1, $userDto->id);
+        self::assertSame('yolo', $userDto->getName());
+        self::assertSame(13, $userDto->age);
+        self::assertCount(1, $userDto->addresses);
+
+        self::assertFalse($reflectionClass->isUninitializedLazyObject($userDto));
+
+        // Sub object are also lazy loaded
+        self::assertSame(AddressDTO::class, $userDto->address::class);
+
+        $reflectionClassAddress = new \ReflectionClass($userDto->address);
+        self::assertTrue($reflectionClassAddress->isUninitializedLazyObject($userDto->address));
+
+        self::assertInstanceOf(AddressDTO::class, $userDto->address);
+        self::assertInstanceOf(AddressDTO::class, $userDto->addresses[0]);
+        self::assertSame('Toulon', $userDto->address->city);
+        self::assertSame('Toulon', $userDto->addresses[0]->city);
+        self::assertIsArray($userDto->money);
+        self::assertCount(1, $userDto->money);
+        self::assertSame(20.10, $userDto->money[0]);
+
+        self::assertFalse($reflectionClassAddress->isUninitializedLazyObject($userDto->address));
+    }
+
     public function testAutoMapperFromArray(): void
     {
         AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
@@ -158,6 +199,22 @@ class AutoMapperTest extends AutoMapperTestCase
         self::assertIsArray($userData);
         self::assertEquals(1, $userData['id']);
         self::assertIsArray($userData['address']);
+        self::assertIsString($userData['createdAt']);
+    }
+
+    public function testAutoMapperToArrayLazy(): void
+    {
+        $address = new Address();
+        $address->setCity('Toulon');
+        $user = new Fixtures\User(1, 'yolo', '13');
+        $user->address = $address;
+        $user->addresses[] = $address;
+
+        $userData = $this->autoMapper->map($user, 'array', [MapperContext::LAZY_MAPPING => true]);
+
+        self::assertInstanceOf(\ArrayAccess::class, $userData);
+        self::assertEquals(1, $userData['id']);
+        self::assertInstanceOf(\ArrayAccess::class, $userData['address']);
         self::assertIsString($userData['createdAt']);
     }
 
@@ -944,8 +1001,6 @@ class AutoMapperTest extends AutoMapperTestCase
     /**
      * @param class-string<HasDateTime|HasDateTimeWithNullValue|HasDateTimeImmutable|HasDateTimeImmutableWithNullValue|HasDateTimeInterfaceWithImmutableInstance|HasDateTimeInterfaceWithNullValue> $from
      * @param class-string<HasDateTime|HasDateTimeWithNullValue|HasDateTimeImmutable|HasDateTimeImmutableWithNullValue|HasDateTimeInterfaceWithImmutableInstance|HasDateTimeInterfaceWithNullValue> $to
-     *
-     * @dataProvider dateTimeMappingProvider
      */
     #[DataProvider('dateTimeMappingProvider')]
     public function testDateTimeMapping(
