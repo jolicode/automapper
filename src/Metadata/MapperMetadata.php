@@ -14,10 +14,10 @@ class MapperMetadata
     public string $className;
 
     /** @var \ReflectionClass<object>|null */
-    public ?\ReflectionClass $sourceReflectionClass;
+    public readonly ?\ReflectionClass $sourceReflectionClass;
 
     /** @var \ReflectionClass<object>|null */
-    public ?\ReflectionClass $targetReflectionClass;
+    public readonly ?\ReflectionClass $targetReflectionClass;
 
     /**
      * @param class-string<object>|'array' $source

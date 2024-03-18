@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace AutoMapper\Metadata;
 
 use AutoMapper\Configuration;
+use AutoMapper\Event\GenerateMapperEvent;
 use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\Event\SourcePropertyMetadata as SourcePropertyMetadataEvent;
 use AutoMapper\Event\TargetPropertyMetadata as TargetPropertyMetadataEvent;
 use AutoMapper\EventListener\MapToContextListener;
+use AutoMapper\EventListener\MapToListener;
 use AutoMapper\EventListener\Symfony\AdvancedNameConverterListener;
 use AutoMapper\EventListener\Symfony\SerializerGroupListener;
 use AutoMapper\EventListener\Symfony\SerializerIgnoreListener;
@@ -116,6 +118,9 @@ final class MetadataRegistry
 
         $propertyEvents = [];
 
+        $mapperEvent = new GenerateMapperEvent($mapperMetadata);
+        $this->eventDispatcher->dispatch($mapperEvent);
+
         // First get properties from the source
         foreach ($extractor->getProperties($mapperMetadata->source) as $property) {
             $propertyEvent = new PropertyMetadataEvent($mapperMetadata, new SourcePropertyMetadataEvent($property), new TargetPropertyMetadataEvent($property));
@@ -132,6 +137,12 @@ final class MetadataRegistry
 
             $propertyEvent = new PropertyMetadataEvent($mapperMetadata, new SourcePropertyMetadataEvent($property), new TargetPropertyMetadataEvent($property));
 
+            $this->eventDispatcher->dispatch($propertyEvent);
+
+            $propertyEvents[$propertyEvent->target->name] = $propertyEvent;
+        }
+
+        foreach ($mapperEvent->properties as $propertyEvent) {
             $this->eventDispatcher->dispatch($propertyEvent);
 
             $propertyEvents[$propertyEvent->target->name] = $propertyEvent;
@@ -249,6 +260,7 @@ final class MetadataRegistry
         }
 
         $eventDispatcher->addListener(PropertyMetadataEvent::class, new MapToContextListener($reflectionExtractor));
+        $eventDispatcher->addListener(GenerateMapperEvent::class, new MapToListener($customTransformerRegistry));
 
         $propertyInfoExtractor = new PropertyInfoExtractor(
             listExtractors: [$reflectionExtractor],
