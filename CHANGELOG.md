@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - [GH#55](https://github.com/jolicode/automapper/pull/55) Remove most of deprecations in tests
+- [GH#69](https://github.com/jolicode/automapper/pull/69) Allow to handle union types with several objects
 
 ## [8.2.1] - 2024-03-11
 ### Changed
