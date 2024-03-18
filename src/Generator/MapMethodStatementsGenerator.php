@@ -52,7 +52,7 @@ final readonly class MapMethodStatementsGenerator
 
         $duplicatedStatements = [];
         $setterStatements = [];
-        foreach ($metadata->propertiesMetadata as $propertyMapping) {
+        foreach ($metadata->propertiesMetadata as $propertyMetadata) {
             /**
              * This is the main loop to map the properties from the source to the target, there is 3 main steps in order to generate this code :.
              *
@@ -72,14 +72,14 @@ final readonly class MapMethodStatementsGenerator
              * $this->hydrateCallbacks['propertyName']($target, $this->mappers['SOURCE_TO_TARGET_MAPPER']->map($this->extractCallbacks['propertyName']($source), $context));
              * ```
              */
-            $propStatements = $this->propertyStatementsGenerator->generate($metadata, $propertyMapping);
+            $propStatements = $this->propertyStatementsGenerator->generate($metadata, $propertyMetadata);
 
             /*
              * Dispatch those statements into two categories:
              * - Statements that need to be executed before the constructor, if the property needs to be written in the constructor
              * - Statements that need to be executed after the constructor.
              */
-            if (\in_array($propertyMapping->target->name, $metadata->getPropertiesInConstructor(), true)) {
+            if (\in_array($propertyMetadata->target->name, $metadata->getPropertiesInConstructor(), true)) {
                 $duplicatedStatements = [...$duplicatedStatements, ...$propStatements];
             } else {
                 $setterStatements = [...$setterStatements, ...$propStatements];

@@ -82,16 +82,16 @@ final readonly class DiscriminatorStatementsGenerator
             return [];
         }
 
-        $propertyMapping = $this->classDiscriminatorResolver->propertyMapping($metadata);
+        $propertyMetadata = $this->classDiscriminatorResolver->getDiscriminatorPropertyMetadata($metadata);
 
-        if (!$propertyMapping) {
+        if (!$propertyMetadata) {
             return [];
         }
 
         $variableRegistry = $metadata->variableRegistry;
-        $fieldValueExpr = $propertyMapping->source->accessor?->getExpression($variableRegistry->getSourceInput());
+        $fieldValueExpr = $propertyMetadata->source->accessor?->getExpression($variableRegistry->getSourceInput());
         if (null === $fieldValueExpr) {
-            if (!($propertyMapping->transformer instanceof CustomPropertyTransformer)) {
+            if (!($propertyMetadata->transformer instanceof CustomPropertyTransformer)) {
                 return [];
             }
 
@@ -100,10 +100,10 @@ final readonly class DiscriminatorStatementsGenerator
 
         // Generate the code that allows to put the type into the output variable,
         // so we are able to determine which mapper to use
-        [$output, $createObjectStatements] = $propertyMapping->transformer->transform(
+        [$output, $createObjectStatements] = $propertyMetadata->transformer->transform(
             $fieldValueExpr,
             $variableRegistry->getResult(),
-            $propertyMapping,
+            $propertyMetadata,
             $variableRegistry->getUniqueVariableScope(),
             $variableRegistry->getSourceInput()
         );
@@ -140,8 +140,8 @@ final readonly class DiscriminatorStatementsGenerator
             return false;
         }
 
-        $propertyMapping = $this->classDiscriminatorResolver->propertyMapping($metadata);
+        $propertyMetadata = $this->classDiscriminatorResolver->getDiscriminatorPropertyMetadata($metadata);
 
-        return $propertyMapping && $propertyMapping->transformer instanceof TransformerInterface;
+        return $propertyMetadata && $propertyMetadata->transformer instanceof TransformerInterface;
     }
 }

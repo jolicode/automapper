@@ -23,8 +23,8 @@ final readonly class ClassDiscriminatorResolver
     public function hasClassDiscriminator(GeneratorMetadata $metadata): bool
     {
         if (!$metadata->isTargetUserDefined()
-            || !($propertyMapping = $this->propertyMapping($metadata))
-            || !$propertyMapping->transformer instanceof TransformerInterface
+            || !($propertyMetadata = $this->getDiscriminatorPropertyMetadata($metadata))
+            || !$propertyMetadata->transformer instanceof TransformerInterface
         ) {
             return false;
         }
@@ -32,7 +32,7 @@ final readonly class ClassDiscriminatorResolver
         return true;
     }
 
-    public function propertyMapping(GeneratorMetadata $metadata): ?PropertyMetadata
+    public function getDiscriminatorPropertyMetadata(GeneratorMetadata $metadata): ?PropertyMetadata
     {
         $classDiscriminatorMapping = $this->classDiscriminator?->getMappingForClass($metadata->mapperMetadata->target);
 

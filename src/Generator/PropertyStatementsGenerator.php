@@ -26,17 +26,17 @@ final readonly class PropertyStatementsGenerator
     /**
      * @return list<Stmt>
      */
-    public function generate(GeneratorMetadata $metadata, PropertyMetadata $propertyMapping): array
+    public function generate(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): array
     {
-        if ($propertyMapping->shouldIgnoreProperty()) {
+        if ($propertyMetadata->shouldIgnoreProperty()) {
             return [];
         }
 
         $variableRegistry = $metadata->variableRegistry;
-        $fieldValueExpr = $propertyMapping->source->accessor?->getExpression($variableRegistry->getSourceInput());
+        $fieldValueExpr = $propertyMetadata->source->accessor?->getExpression($variableRegistry->getSourceInput());
 
         if (null === $fieldValueExpr) {
-            if (!($propertyMapping->transformer instanceof CustomPropertyTransformer)) {
+            if (!($propertyMetadata->transformer instanceof CustomPropertyTransformer)) {
                 return [];
             }
 
@@ -44,21 +44,21 @@ final readonly class PropertyStatementsGenerator
         }
 
         /* Create expression to transform the read value into the wanted written value, depending on the transform it may add new statements to get the correct value */
-        [$output, $propStatements] = $propertyMapping->transformer->transform(
+        [$output, $propStatements] = $propertyMetadata->transformer->transform(
             $fieldValueExpr,
             $variableRegistry->getResult(),
-            $propertyMapping,
+            $propertyMetadata,
             $variableRegistry->getUniqueVariableScope(),
             $variableRegistry->getSourceInput()
         );
 
-        if ($propertyMapping->target->writeMutator && $propertyMapping->target->writeMutator->type !== WriteMutator::TYPE_ADDER_AND_REMOVER) {
+        if ($propertyMetadata->target->writeMutator && $propertyMetadata->target->writeMutator->type !== WriteMutator::TYPE_ADDER_AND_REMOVER) {
             /** Create expression to write the transformed value to the target only if not add / remove mutator, as it's already called by the transformer in this case */
-            $writeExpression = $propertyMapping->target->writeMutator->getExpression(
+            $writeExpression = $propertyMetadata->target->writeMutator->getExpression(
                 $variableRegistry->getResult(),
                 $output,
-                $propertyMapping->transformer instanceof AssignedByReferenceTransformerInterface
-                    ? $propertyMapping->transformer->assignByRef()
+                $propertyMetadata->transformer instanceof AssignedByReferenceTransformerInterface
+                    ? $propertyMetadata->transformer->assignByRef()
                     : false
             );
             if (null === $writeExpression) {
@@ -68,7 +68,7 @@ final readonly class PropertyStatementsGenerator
             $propStatements[] = new Stmt\Expression($writeExpression);
         }
 
-        $condition = $this->propertyConditionsGenerator->generate($metadata, $propertyMapping);
+        $condition = $this->propertyConditionsGenerator->generate($metadata, $propertyMetadata);
 
         if ($condition) {
             $propStatements = [

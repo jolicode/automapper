@@ -114,7 +114,7 @@ final readonly class CreateTargetStatementsGenerator
         $constructArguments = [];
         $createObjectStatements = [];
 
-        foreach ($metadata->propertiesMetadata as $propertyMapping) {
+        foreach ($metadata->propertiesMetadata as $propertyMetadata) {
             /*
              * This is the main loop to map the properties from the source to the target in the constructor, there is 2 main steps in order to generated this code :
              *
@@ -131,7 +131,7 @@ final readonly class CreateTargetStatementsGenerator
              * $constructArg1 = $this->mappers['SOURCE_TO_TARGET_MAPPER']->map($this->extractCallbacks['propertyName']($source), $context);
              * $result = new Foo($constructArg1);
              */
-            $constructorArgumentResult = $this->constructorArgument($metadata, $propertyMapping);
+            $constructorArgumentResult = $this->constructorArgument($metadata, $propertyMetadata);
 
             if (!$constructorArgumentResult) {
                 continue;
@@ -189,18 +189,18 @@ final readonly class CreateTargetStatementsGenerator
      *
      * @return array{Stmt, Arg, int}|null
      */
-    private function constructorArgument(GeneratorMetadata $metadata, PropertyMetadata $propertyMapping): ?array
+    private function constructorArgument(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?array
     {
-        if (null === $propertyMapping->target->writeMutatorConstructor || null === ($parameter = $propertyMapping->target->writeMutatorConstructor->parameter)) {
+        if (null === $propertyMetadata->target->writeMutatorConstructor || null === ($parameter = $propertyMetadata->target->writeMutatorConstructor->parameter)) {
             return null;
         }
 
         $variableRegistry = $metadata->variableRegistry;
         $constructVar = $variableRegistry->getVariableWithUniqueName('constructArg');
-        $fieldValueExpr = $propertyMapping->source->accessor?->getExpression($variableRegistry->getSourceInput());
+        $fieldValueExpr = $propertyMetadata->source->accessor?->getExpression($variableRegistry->getSourceInput());
 
         if (null === $fieldValueExpr) {
-            if (!($propertyMapping->transformer instanceof CustomPropertyTransformer)) {
+            if (!($propertyMetadata->transformer instanceof CustomPropertyTransformer)) {
                 return null;
             }
 
@@ -208,7 +208,7 @@ final readonly class CreateTargetStatementsGenerator
         }
 
         /* Get extract and transform statements for this property */
-        [$output, $propStatements] = $propertyMapping->transformer->transform($fieldValueExpr, $constructVar, $propertyMapping, $variableRegistry->getUniqueVariableScope(), $variableRegistry->getSourceInput());
+        [$output, $propStatements] = $propertyMetadata->transformer->transform($fieldValueExpr, $constructVar, $propertyMetadata, $variableRegistry->getUniqueVariableScope(), $variableRegistry->getSourceInput());
 
         $propStatements[] = new Stmt\Expression(new Expr\Assign($constructVar, $output));
 
@@ -216,13 +216,13 @@ final readonly class CreateTargetStatementsGenerator
             new Stmt\If_(new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'hasConstructorArgument', [
                 new Arg($variableRegistry->getContext()),
                 new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
-                new Arg(new Scalar\String_($propertyMapping->target->name)),
+                new Arg(new Scalar\String_($propertyMetadata->target->name)),
             ]), [
                 'stmts' => [
                     new Stmt\Expression(new Expr\Assign($constructVar, new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'getConstructorArgument', [
                         new Arg($variableRegistry->getContext()),
                         new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
-                        new Arg(new Scalar\String_($propertyMapping->target->name)),
+                        new Arg(new Scalar\String_($propertyMetadata->target->name)),
                     ]))),
                 ],
                 'else' => new Stmt\Else_($propStatements),
