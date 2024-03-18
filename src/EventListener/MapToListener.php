@@ -18,11 +18,15 @@ use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformer;
 use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformerInterface;
 use AutoMapper\Transformer\CustomTransformer\CustomTransformersRegistry;
 use AutoMapper\Transformer\TransformerInterface;
+use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
+use Symfony\Component\String\Inflector\EnglishInflector;
+use Symfony\Component\String\Inflector\InflectorInterface;
 
 final readonly class MapToListener
 {
     public function __construct(
-        private CustomTransformersRegistry $customTransformersRegistry
+        private CustomTransformersRegistry $customTransformersRegistry,
+        private InflectorInterface $inflector = new EnglishInflector(),
     ) {
     }
 
@@ -55,29 +59,56 @@ final readonly class MapToListener
                 /** @var MapTo $mapToAttributeInstance */
                 $mapToAttributeInstance = $mapToAttribute->newInstance();
 
-                if ($mapToAttributeInstance->target !== null && $event->mapperMetadata->target !== $mapToAttributeInstance->target) {
-                    continue;
-                }
-
-                $sourceProperty = new SourcePropertyMetadata($reflectionProperty->getName());
-                $targetProperty = new TargetPropertyMetadata($mapToAttributeInstance->name ?? $reflectionProperty->getName());
-
-                $property = new PropertyMetadataEvent(
-                    $event->mapperMetadata,
-                    $sourceProperty,
-                    $targetProperty,
-                    $mapToAttributeInstance->maxDepth,
-                    $this->getTransformerFromMapAttribute($event->mapperMetadata->source, $mapToAttributeInstance),
-                    $mapToAttributeInstance->ignore,
-                );
-
-                if (\array_key_exists($property->target->name, $event->properties)) {
-                    throw new BadMapDefinitionException(sprintf('There is already a MapTo attribute with target "%s" in class "%s".', $property->target->name, $event->mapperMetadata->source));
-                }
-
-                $event->properties[$property->target->name] = $property;
+                $this->addPropertyFromSource($event, $mapToAttributeInstance, $reflectionProperty->getName());
             }
         }
+
+        $methods = $event->mapperMetadata->sourceReflectionClass->getMethods();
+
+        foreach ($methods as $reflectionMethod) {
+            $mapToAttributes = $reflectionMethod->getAttributes(MapTo::class);
+
+            if (0 === \count($mapToAttributes)) {
+                continue;
+            }
+
+            foreach ($mapToAttributes as $mapToAttribute) {
+                /** @var MapTo $mapToAttributeInstance */
+                $mapToAttributeInstance = $mapToAttribute->newInstance();
+                $name = $this->getPropertyName($reflectionMethod->getName(), $properties);
+
+                if (null === $name) {
+                    $name = $reflectionMethod->getName();
+                }
+
+                $this->addPropertyFromSource($event, $mapToAttributeInstance, $name);
+            }
+        }
+    }
+
+    private function addPropertyFromSource(GenerateMapperEvent $event, MapTo $mapTo, string $name): void
+    {
+        if ($mapTo->target !== null && $event->mapperMetadata->target !== $mapTo->target) {
+            return;
+        }
+
+        $sourceProperty = new SourcePropertyMetadata($name);
+        $targetProperty = new TargetPropertyMetadata($mapTo->name ?? $name);
+
+        $property = new PropertyMetadataEvent(
+            $event->mapperMetadata,
+            $sourceProperty,
+            $targetProperty,
+            $mapTo->maxDepth,
+            $this->getTransformerFromMapAttribute($event->mapperMetadata->source, $mapTo),
+            $mapTo->ignore,
+        );
+
+        if (\array_key_exists($property->target->name, $event->properties)) {
+            throw new BadMapDefinitionException(sprintf('There is already a MapTo attribute with target "%s" in class "%s".', $property->target->name, $event->mapperMetadata->source));
+        }
+
+        $event->properties[$property->target->name] = $property;
     }
 
     private function setPropertiesFromTarget(GenerateMapperEvent $event): void
@@ -99,29 +130,56 @@ final readonly class MapToListener
                 /** @var MapFrom $mapFromAttributeInstance */
                 $mapFromAttributeInstance = $mapFromAttribute->newInstance();
 
-                if ($mapFromAttributeInstance->source !== null && $event->mapperMetadata->source !== $mapFromAttributeInstance->source) {
-                    continue;
-                }
-
-                $sourceProperty = new SourcePropertyMetadata($mapFromAttributeInstance->name ?? $reflectionProperty->getName());
-                $targetProperty = new TargetPropertyMetadata($reflectionProperty->getName());
-
-                $property = new PropertyMetadataEvent(
-                    $event->mapperMetadata,
-                    $sourceProperty,
-                    $targetProperty,
-                    $mapFromAttributeInstance->maxDepth,
-                    $this->getTransformerFromMapAttribute($event->mapperMetadata->target, $mapFromAttributeInstance),
-                    $mapFromAttributeInstance->ignore,
-                );
-
-                if (\array_key_exists($property->target->name, $event->properties)) {
-                    throw new BadMapDefinitionException(sprintf('There is already a MapTo or MapFrom attribute with target "%s" in class "%s" or class "%s".', $property->target->name, $event->mapperMetadata->source, $event->mapperMetadata->target));
-                }
-
-                $event->properties[$property->target->name] = $property;
+                $this->addPropertyFromTarget($event, $mapFromAttributeInstance, $reflectionProperty->getName());
             }
         }
+
+        $methods = $event->mapperMetadata->targetReflectionClass->getMethods();
+
+        foreach ($methods as $reflectionMethod) {
+            $mapFromAttributes = $reflectionMethod->getAttributes(MapFrom::class);
+
+            if (0 === \count($mapFromAttributes)) {
+                continue;
+            }
+
+            foreach ($mapFromAttributes as $mapFromAttribute) {
+                /** @var MapFrom $mapFromAttributeInstance */
+                $mapFromAttributeInstance = $mapFromAttribute->newInstance();
+                $name = $this->getPropertyName($reflectionMethod->getName(), $properties);
+
+                if (null === $name) {
+                    $name = $reflectionMethod->getName();
+                }
+
+                $this->addPropertyFromTarget($event, $mapFromAttributeInstance, $name);
+            }
+        }
+    }
+
+    private function addPropertyFromTarget(GenerateMapperEvent $event, MapFrom $mapFrom, string $name): void
+    {
+        if ($mapFrom->source !== null && $event->mapperMetadata->source !== $mapFrom->source) {
+            return;
+        }
+
+        $sourceProperty = new SourcePropertyMetadata($mapFrom->name ?? $name);
+        $targetProperty = new TargetPropertyMetadata($name);
+
+        $property = new PropertyMetadataEvent(
+            $event->mapperMetadata,
+            $sourceProperty,
+            $targetProperty,
+            $mapFrom->maxDepth,
+            $this->getTransformerFromMapAttribute($event->mapperMetadata->target, $mapFrom),
+            $mapFrom->ignore,
+        );
+
+        if (\array_key_exists($property->target->name, $event->properties)) {
+            throw new BadMapDefinitionException(sprintf('There is already a MapTo or MapFrom attribute with target "%s" in class "%s" or class "%s".', $property->target->name, $event->mapperMetadata->source, $event->mapperMetadata->target));
+        }
+
+        $event->properties[$property->target->name] = $property;
     }
 
     private function getTransformerFromMapAttribute(string $class, MapTo|MapFrom $attribute): ?TransformerInterface
@@ -172,5 +230,31 @@ final readonly class MapToListener
         }
 
         return $transformer;
+    }
+
+    /**
+     * @param \ReflectionProperty[] $reflectionProperties
+     */
+    private function getPropertyName(string $methodName, array $reflectionProperties): ?string
+    {
+        $pattern = implode('|', array_merge(ReflectionExtractor::$defaultAccessorPrefixes, ReflectionExtractor::$defaultMutatorPrefixes));
+
+        if ('' !== $pattern && preg_match('/^(' . $pattern . ')(.+)$/i', $methodName, $matches)) {
+            if (!\in_array($matches[1], ReflectionExtractor::$defaultArrayMutatorPrefixes)) {
+                return lcfirst($matches[2]);
+            }
+
+            foreach ($reflectionProperties as $reflectionProperty) {
+                foreach ($this->inflector->singularize($reflectionProperty->name) as $name) {
+                    if (strtolower($name) === strtolower($matches[2])) {
+                        return $reflectionProperty->name;
+                    }
+                }
+            }
+
+            return lcfirst($matches[2]);
+        }
+
+        return null;
     }
 }

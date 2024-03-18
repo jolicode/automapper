@@ -20,6 +20,17 @@ class FooMapTo
     ) {
     }
 
+    #[MapTo('array', ignore: true)]
+    public function getA(): string
+    {
+        return 'a';
+    }
+
+    public function getD(): string
+    {
+        return 'd';
+    }
+
     public static function transformFromIsCallable($value)
     {
         return 'transformFromIsCallable_' . $value;
