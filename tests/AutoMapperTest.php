@@ -30,6 +30,9 @@ use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithImmutableInstance;
 use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithMutableInstance;
 use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithNullValue;
 use AutoMapper\Tests\Fixtures\HasDateTimeWithNullValue;
+use AutoMapper\Tests\Fixtures\ObjectsUnion\Bar;
+use AutoMapper\Tests\Fixtures\ObjectsUnion\Foo;
+use AutoMapper\Tests\Fixtures\ObjectsUnion\ObjectsUnionProperty;
 use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
 use AutoMapper\Tests\Fixtures\Order;
 use AutoMapper\Tests\Fixtures\PetOwner;
@@ -1288,6 +1291,19 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertSame(
             [],
             $this->autoMapper->map(new BuiltinClass(new \DateInterval('P1Y')), 'array')
+        );
+    }
+
+    public function testObjectsUnion(): void
+    {
+        self::assertSame(
+            ['prop' => ['bar' => 'bar']],
+            $this->autoMapper->map(new ObjectsUnionProperty(new Bar('bar')), 'array')
+        );
+
+        self::assertSame(
+            ['prop' => ['foo' => 'foo']],
+            $this->autoMapper->map(new ObjectsUnionProperty(new Foo('foo')), 'array')
         );
     }
 }
