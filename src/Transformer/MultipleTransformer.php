@@ -70,6 +70,10 @@ final class MultipleTransformer implements TransformerInterface, DependentTransf
          *     $output = (bool) $input;
          *  }
          *
+         *  if (is_object($input) && $input instanceof SomeClass::class) {
+         *     $output = [...expression from transformer...];
+         *  }
+         *
          */
         foreach ($this->transformers as $transformerData) {
             $transformer = $transformerData['transformer'];
@@ -78,13 +82,23 @@ final class MultipleTransformer implements TransformerInterface, DependentTransf
             [$transformerOutput, $transformerStatements] = $transformer->transform($input, $target, $propertyMapping, $uniqueVariableScope, $source);
 
             $assignClass = ($transformer instanceof AssignedByReferenceTransformerInterface && $transformer->assignByRef()) ? Expr\AssignRef::class : Expr\Assign::class;
+
+            $condition = new Expr\FuncCall(
+                new Name(self::CONDITION_MAPPING[$type->getBuiltinType()]),
+                [
+                    new Arg($input),
+                ]
+            );
+
+            if ($type->getBuiltinType() === Type::BUILTIN_TYPE_OBJECT) {
+                $condition = new Expr\BinaryOp\BooleanAnd(
+                    $condition,
+                    new Expr\Instanceof_($input, new Name\FullyQualified($type->getClassName())) // @phpstan-ignore-line $type->getClassName() cannot be null here
+                );
+            }
+
             $statements[] = new Stmt\If_(
-                new Expr\FuncCall(
-                    new Name(self::CONDITION_MAPPING[$type->getBuiltinType()]),
-                    [
-                        new Arg($input),
-                    ]
-                ),
+                $condition,
                 [
                     'stmts' => array_merge(
                         $transformerStatements, [
