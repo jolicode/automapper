@@ -9,6 +9,7 @@ use AutoMapper\Event\GenerateMapperEvent;
 use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\Event\SourcePropertyMetadata as SourcePropertyMetadataEvent;
 use AutoMapper\Event\TargetPropertyMetadata as TargetPropertyMetadataEvent;
+use AutoMapper\EventListener\MapFromListener;
 use AutoMapper\EventListener\MapToContextListener;
 use AutoMapper\EventListener\MapToListener;
 use AutoMapper\EventListener\Symfony\AdvancedNameConverterListener;
@@ -261,6 +262,7 @@ final class MetadataRegistry
 
         $eventDispatcher->addListener(PropertyMetadataEvent::class, new MapToContextListener($reflectionExtractor));
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapToListener($customTransformerRegistry));
+        $eventDispatcher->addListener(GenerateMapperEvent::class, new MapFromListener($customTransformerRegistry));
 
         $propertyInfoExtractor = new PropertyInfoExtractor(
             listExtractors: [$reflectionExtractor],

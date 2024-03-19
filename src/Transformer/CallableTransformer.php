@@ -10,6 +10,9 @@ use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Scalar;
 
+/**
+ * @internal
+ */
 class CallableTransformer implements TransformerInterface
 {
     public function __construct(
