@@ -45,12 +45,12 @@ use Symfony\Component\Uid\AbstractUid;
  */
 class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface, MapperGeneratorMetadataRegistryInterface
 {
-    public const VERSION = '8.2.2';
-    public const VERSION_ID = 80202;
+    public const VERSION = '8.3.0-DEV';
+    public const VERSION_ID = 80300;
     public const MAJOR_VERSION = 8;
-    public const MINOR_VERSION = 2;
-    public const RELEASE_VERSION = 2;
-    public const EXTRA_VERSION = '';
+    public const MINOR_VERSION = 3;
+    public const RELEASE_VERSION = 0;
+    public const EXTRA_VERSION = 'DEV';
 
     /** @var MapperGeneratorMetadataInterface[] */
     private array $metadata = [];
