@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Fixtures\Transformer\CustomTransformer;
 
+use AutoMapper\Metadata\TypesMatching;
 use AutoMapper\Tests\Fixtures\Address;
 use AutoMapper\Tests\Fixtures\AddressDTO;
 use AutoMapper\Transformer\CustomTransformer\CustomModelTransformerInterface;
@@ -11,9 +12,15 @@ use Symfony\Component\PropertyInfo\Type;
 
 final readonly class SourceTargetCustomModelTransformer implements CustomModelTransformerInterface
 {
-    public function supports(array $sourceTypes, array $targetTypes): bool
+    public function supports(TypesMatching $types): bool
     {
-        return $this->sourceIsAddressDTO($sourceTypes) && $this->targetIsAddress($targetTypes);
+        $sourceUniqueType = $types->getSourceUniqueType();
+
+        if (null === $sourceUniqueType) {
+            return false;
+        }
+
+        return $sourceUniqueType->getClassName() === AddressDTO::class && $this->targetIsAddress($types[$sourceUniqueType] ?? []);
     }
 
     /**
@@ -24,20 +31,6 @@ final readonly class SourceTargetCustomModelTransformer implements CustomModelTr
         $source->city = "{$source->city} from custom model transformer";
 
         return Address::fromDTO($source);
-    }
-
-    /**
-     * @param Type[] $sourceTypes
-     */
-    private function sourceIsAddressDTO(array $sourceTypes): bool
-    {
-        foreach ($sourceTypes as $sourceType) {
-            if ($sourceType->getClassName() === AddressDTO::class) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**

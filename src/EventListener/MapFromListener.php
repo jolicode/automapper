@@ -59,6 +59,7 @@ final readonly class MapFromListener extends MapListener
             $event->mapperMetadata,
             $sourceProperty,
             $targetProperty,
+            null,
             $mapFrom->maxDepth,
             $this->getTransformerFromMapAttribute($event->mapperMetadata->target, $mapFrom),
             $mapFrom->ignore,

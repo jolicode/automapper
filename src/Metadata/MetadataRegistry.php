@@ -152,13 +152,7 @@ final class MetadataRegistry
         $propertiesMapping = [];
 
         foreach ($propertyEvents as $propertyMappedEvent) {
-            [$sourceTypes, $targetTypes] = $extractor->getTypes($mapperMetadata->source, $propertyMappedEvent->source->name, $mapperMetadata->target, $propertyMappedEvent->target->name);
-
             // Create the source property metadata
-            if ($propertyMappedEvent->source->types === null) {
-                $propertyMappedEvent->source->types = $sourceTypes;
-            }
-
             if ($propertyMappedEvent->source->accessor === null) {
                 $propertyMappedEvent->source->accessor = $extractor->getReadAccessor($mapperMetadata->source, $mapperMetadata->target, $propertyMappedEvent->source->name);
             }
@@ -176,10 +170,6 @@ final class MetadataRegistry
             }
 
             // Create the target property metadata
-            if ($propertyMappedEvent->target->types === null) {
-                $propertyMappedEvent->target->types = $targetTypes;
-            }
-
             if ($propertyMappedEvent->target->writeMutator === null) {
                 $propertyMappedEvent->target->writeMutator = $extractor->getWriteMutator($mapperMetadata->source, $mapperMetadata->target, $propertyMappedEvent->target->name, [
                     'enable_constructor_extraction' => false,
@@ -203,8 +193,12 @@ final class MetadataRegistry
             $sourcePropertyMetadata = SourcePropertyMetadata::fromEvent($propertyMappedEvent->source);
             $targetPropertyMetadata = TargetPropertyMetadata::fromEvent($propertyMappedEvent->target);
 
+            if (null === $propertyMappedEvent->types) {
+                $propertyMappedEvent->types = $extractor->getTypes($mapperMetadata->source, $propertyMappedEvent->source->name, $mapperMetadata->target, $propertyMappedEvent->target->name);
+            }
+
             if (null === $propertyMappedEvent->transformer) {
-                $transformer = $this->transformerFactory->getTransformer($sourcePropertyMetadata, $targetPropertyMetadata, $mapperMetadata);
+                $transformer = $this->transformerFactory->getTransformer($propertyMappedEvent->types, $sourcePropertyMetadata, $targetPropertyMetadata, $mapperMetadata);
 
                 if (null === $transformer) {
                     continue;
@@ -220,6 +214,7 @@ final class MetadataRegistry
             $propertiesMapping[] = new PropertyMetadata(
                 $sourcePropertyMetadata,
                 $targetPropertyMetadata,
+                $propertyMappedEvent->types,
                 $propertyMappedEvent->transformer,
                 $propertyMappedEvent->ignored,
                 $propertyMappedEvent->maxDepth,

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Extractor;
 
 use AutoMapper\Configuration;
+use AutoMapper\Metadata\TypesMatching;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyReadInfoExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyWriteInfoExtractorInterface;
@@ -30,20 +31,20 @@ final class FromTargetMappingExtractor extends MappingExtractor
         parent::__construct($configuration, $propertyInfoExtractor, $readInfoExtractor, $writeInfoExtractor);
     }
 
-    public function getTypes(string $source, string $sourceProperty, string $target, string $targetProperty): array
+    public function getTypes(string $source, string $sourceProperty, string $target, string $targetProperty): TypesMatching
     {
+        $types = new TypesMatching();
         $targetTypes = $this->propertyInfoExtractor->getTypes($target, $targetProperty) ?? [];
-        $sourceTypes = [];
 
         foreach ($targetTypes as $type) {
             $sourceType = $this->transformType($source, $type);
 
             if ($sourceType) {
-                $sourceTypes[] = $sourceType;
+                $types[$sourceType] = [$type];
             }
         }
 
-        return [$sourceTypes, $targetTypes];
+        return $types;
     }
 
     public function getReadAccessor(string $source, string $target, string $property): ?ReadAccessor

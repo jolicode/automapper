@@ -7,6 +7,7 @@ namespace AutoMapper\Transformer;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
+use AutoMapper\Metadata\TypesMatching;
 use Symfony\Component\PropertyInfo\Type;
 
 /**
@@ -18,20 +19,21 @@ use Symfony\Component\PropertyInfo\Type;
  */
 abstract class AbstractUniqueTypeTransformerFactory implements TransformerFactoryInterface
 {
-    public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
+    public function getTransformer(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
-        $sourceTypes = $source->types;
-        $targetTypes = $target->types;
+        $sourceType = $types->getSourceUniqueType();
 
-        if (0 === \count($sourceTypes) || \count($sourceTypes) > 1 || !$sourceTypes[0] instanceof Type) {
+        if (null === $sourceType) {
             return null;
         }
 
-        if (0 === \count($targetTypes) || \count($targetTypes) > 1 || !$targetTypes[0] instanceof Type) {
+        $targetType = $types->getTargetUniqueType($sourceType);
+
+        if (null === $targetType) {
             return null;
         }
 
-        return $this->createTransformer($sourceTypes[0], $targetTypes[0], $source, $target, $mapperMetadata);
+        return $this->createTransformer($sourceType, $targetType, $source, $target, $mapperMetadata);
     }
 
     abstract protected function createTransformer(Type $sourceType, Type $targetType, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface;

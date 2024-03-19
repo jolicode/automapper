@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer\CustomTransformer;
 
-use Symfony\Component\PropertyInfo\Type;
+use AutoMapper\Metadata\TypesMatching;
 
 /**
  * This interface should be implemented to handle custom transformations for a whole model (object or array)
@@ -31,9 +31,5 @@ use Symfony\Component\PropertyInfo\Type;
  */
 interface CustomModelTransformerInterface extends CustomTransformerInterface
 {
-    /**
-     * @param Type[] $sourceTypes
-     * @param Type[] $targetTypes
-     */
-    public function supports(array $sourceTypes, array $targetTypes): bool;
+    public function supports(TypesMatching $types): bool;
 }

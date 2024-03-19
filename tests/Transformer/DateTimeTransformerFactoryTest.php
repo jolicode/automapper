@@ -7,6 +7,7 @@ namespace AutoMapper\Tests\Transformer;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
+use AutoMapper\Metadata\TypesMatching;
 use AutoMapper\Transformer\DateTimeInterfaceToImmutableTransformer;
 use AutoMapper\Transformer\DateTimeInterfaceToMutableTransformer;
 use AutoMapper\Transformer\DateTimeToStringTransformer;
@@ -22,23 +23,26 @@ class DateTimeTransformerFactoryTest extends TestCase
         $factory = new DateTimeTransformerFactory();
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
-        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('object', false, \DateTime::class)], 'foo');
-        $targetMapperMetadata = new TargetPropertyMetadata([new Type('object', false, \DateTime::class)], 'foo');
-        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata('foo');
+        $targetMapperMetadata = new TargetPropertyMetadata('foo');
+        $types = TypesMatching::fromSourceAndTargetTypes([new Type('object', false, \DateTime::class)], [new Type('object', false, \DateTime::class)], );
+        $transformer = $factory->getTransformer($types, $sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNotNull($transformer);
         self::assertInstanceOf(DateTimeInterfaceToMutableTransformer::class, $transformer);
 
-        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('object', false, \DateTime::class)], 'foo');
-        $targetMapperMetadata = new TargetPropertyMetadata([new Type('string')], 'foo');
-        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata('foo');
+        $targetMapperMetadata = new TargetPropertyMetadata('foo');
+        $types = TypesMatching::fromSourceAndTargetTypes([new Type('object', false, \DateTime::class)], [new Type('string')], );
+        $transformer = $factory->getTransformer($types, $sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNotNull($transformer);
         self::assertInstanceOf(DateTimeToStringTransformer::class, $transformer);
 
-        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('string')], 'foo');
-        $targetMapperMetadata = new TargetPropertyMetadata([new Type('object', false, \DateTime::class)], 'foo');
-        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata('foo');
+        $targetMapperMetadata = new TargetPropertyMetadata('foo');
+        $types = TypesMatching::fromSourceAndTargetTypes([new Type('string')], [new Type('object', false, \DateTime::class)], );
+        $transformer = $factory->getTransformer($types, $sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNotNull($transformer);
         self::assertInstanceOf(StringToDateTimeTransformer::class, $transformer);
@@ -49,9 +53,10 @@ class DateTimeTransformerFactoryTest extends TestCase
         $factory = new DateTimeTransformerFactory();
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
-        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('object', false, \DateTimeImmutable::class)], 'foo');
-        $targetMapperMetadata = new TargetPropertyMetadata([new Type('object', false, \DateTime::class)], 'foo');
-        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata('foo');
+        $targetMapperMetadata = new TargetPropertyMetadata('foo');
+        $types = TypesMatching::fromSourceAndTargetTypes([new Type('object', false, \DateTimeImmutable::class)], [new Type('object', false, \DateTime::class)], );
+        $transformer = $factory->getTransformer($types, $sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNotNull($transformer);
         self::assertInstanceOf(DateTimeInterfaceToMutableTransformer::class, $transformer);
@@ -62,9 +67,10 @@ class DateTimeTransformerFactoryTest extends TestCase
         $factory = new DateTimeTransformerFactory();
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
-        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('object', false, \DateTime::class)], 'foo');
-        $targetMapperMetadata = new TargetPropertyMetadata([new Type('object', false, \DateTimeImmutable::class)], 'foo');
-        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata('foo');
+        $targetMapperMetadata = new TargetPropertyMetadata('foo');
+        $types = TypesMatching::fromSourceAndTargetTypes([new Type('object', false, \DateTime::class)], [new Type('object', false, \DateTimeImmutable::class)], );
+        $transformer = $factory->getTransformer($types, $sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNotNull($transformer);
         self::assertInstanceOf(DateTimeInterfaceToImmutableTransformer::class, $transformer);
@@ -75,21 +81,24 @@ class DateTimeTransformerFactoryTest extends TestCase
         $factory = new DateTimeTransformerFactory();
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
 
-        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('string')], 'foo');
-        $targetMapperMetadata = new TargetPropertyMetadata([new Type('string')], 'foo');
-        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata('foo');
+        $targetMapperMetadata = new TargetPropertyMetadata('foo');
+        $types = TypesMatching::fromSourceAndTargetTypes([new Type('string')], [new Type('string')], );
+        $transformer = $factory->getTransformer($types, $sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNull($transformer);
 
-        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('object', false, \DateTime::class)], 'foo');
-        $targetMapperMetadata = new TargetPropertyMetadata([new Type('bool')], 'foo');
-        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata('foo');
+        $targetMapperMetadata = new TargetPropertyMetadata('foo');
+        $types = TypesMatching::fromSourceAndTargetTypes([new Type('object', false, \DateTime::class)], [new Type('bool')], );
+        $transformer = $factory->getTransformer($types, $sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNull($transformer);
 
-        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('bool')], 'foo');
-        $targetMapperMetadata = new TargetPropertyMetadata([new Type('object', false, \DateTime::class)], 'foo');
-        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata('foo');
+        $targetMapperMetadata = new TargetPropertyMetadata('foo');
+        $types = TypesMatching::fromSourceAndTargetTypes([new Type('bool')], [new Type('object', false, \DateTime::class)], );
+        $transformer = $factory->getTransformer($types, $sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNull($transformer);
     }
