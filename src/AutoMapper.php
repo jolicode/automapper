@@ -28,10 +28,10 @@ use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
  */
 class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
 {
-    public const VERSION = '8.3.0-DEV';
-    public const VERSION_ID = 80300;
-    public const MAJOR_VERSION = 8;
-    public const MINOR_VERSION = 3;
+    public const VERSION = '9.0.0-DEV';
+    public const VERSION_ID = 90000;
+    public const MAJOR_VERSION = 9;
+    public const MINOR_VERSION = 0;
     public const RELEASE_VERSION = 0;
     public const EXTRA_VERSION = 'DEV';
 
