@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace AutoMapper\EventListener\Symfony;
 
 use AutoMapper\Event\PropertyMetadataEvent;
-use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
+use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
 
 final readonly class SerializerMaxDepthListener
 {
     public function __construct(
-        private ClassMetadataFactory $classMetadataFactory
+        private ClassMetadataFactoryInterface $classMetadataFactory
     ) {
     }
 
