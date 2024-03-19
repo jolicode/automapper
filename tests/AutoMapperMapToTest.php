@@ -46,6 +46,17 @@ class AutoMapperMapToTest extends AutoMapperBaseTest
         $this->assertSame('bar', $bar['transformFromCustomTransformerService']);
     }
 
+    public function testMapFromArray()
+    {
+        $foo = ['b' => 'foo', 'bar' => 'bar', 'baz' => 'baz', 'foo' => 'foo'];
+        $bar = $this->autoMapper->map($foo, Bar::class);
+
+        $this->assertSame('bar', $bar->bar);
+        $this->assertSame('baz', $bar->baz);
+        $this->assertSame('foo', $bar->from);
+        $this->assertSame('', $bar->getB());
+    }
+
     public function testBadDefinitionOnSameTargetProperty()
     {
         $foo = new BadMapTo('foo');

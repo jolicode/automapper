@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Attribute;
 
 /**
- * Configures a property to map to.
+ * Configures a property to map from.
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
 final readonly class MapFrom
