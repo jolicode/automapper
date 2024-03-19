@@ -62,6 +62,10 @@ final class ObjectTransformerFactory extends AbstractUniqueTypeTransformerFactor
             return true;
         }
 
+        if (!class_exists($class)) {
+            return false;
+        }
+
         $reflectionClass = new \ReflectionClass($class);
 
         if ($reflectionClass->isInternal()) {
