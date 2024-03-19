@@ -19,7 +19,7 @@ use PhpParser\Node\Stmt;
 abstract readonly class AbstractArrayTransformer implements TransformerInterface, DependentTransformerInterface
 {
     public function __construct(
-        private TransformerInterface $itemTransformer,
+        protected TransformerInterface $itemTransformer,
     ) {
     }
 

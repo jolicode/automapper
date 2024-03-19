@@ -9,6 +9,7 @@ use AutoMapper\MapperContext;
 use AutoMapper\Metadata\PropertyMetadata;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
+use PhpParser\Node\Name\FullyQualified;
 use PhpParser\Node\Scalar;
 
 /**
@@ -18,7 +19,7 @@ use PhpParser\Node\Scalar;
  *
  * @internal
  */
-final class DateTimeToStringTransformer implements TransformerInterface
+final class DateTimeToStringTransformer implements TransformerInterface, CheckTypeInterface
 {
     public function __construct(
         private readonly string $format = \DateTimeInterface::RFC3339,
@@ -40,5 +41,10 @@ final class DateTimeToStringTransformer implements TransformerInterface
                 )
             ),
         ]), []];
+    }
+
+    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): ?Expr
+    {
+        return new Expr\Instanceof_($input, new FullyQualified(\DateTimeInterface::class));
     }
 }

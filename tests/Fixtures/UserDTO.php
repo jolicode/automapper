@@ -60,6 +60,9 @@ class UserDTO
 
     public array $array = [];
 
+    /** @var \DateTimeInterface[]|int[] */
+    public array $times = [];
+
     public function setName($name)
     {
         $this->name = $name;

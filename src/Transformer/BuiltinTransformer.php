@@ -21,7 +21,7 @@ use Symfony\Component\PropertyInfo\Type;
  *
  * @internal
  */
-final readonly class BuiltinTransformer implements TransformerInterface
+final readonly class BuiltinTransformer implements TransformerInterface, CheckTypeInterface
 {
     private const CAST_MAPPING = [
         Type::BUILTIN_TYPE_BOOL => [
@@ -58,6 +58,19 @@ final readonly class BuiltinTransformer implements TransformerInterface
         ],
         Type::BUILTIN_TYPE_CALLABLE => [],
         Type::BUILTIN_TYPE_RESOURCE => [],
+    ];
+
+    private const CONDITION_MAPPING = [
+        Type::BUILTIN_TYPE_BOOL => 'is_bool',
+        Type::BUILTIN_TYPE_INT => 'is_int',
+        Type::BUILTIN_TYPE_FLOAT => 'is_float',
+        Type::BUILTIN_TYPE_STRING => 'is_string',
+        Type::BUILTIN_TYPE_NULL => 'is_null',
+        Type::BUILTIN_TYPE_ARRAY => 'is_array',
+        Type::BUILTIN_TYPE_OBJECT => 'is_object',
+        Type::BUILTIN_TYPE_RESOURCE => 'is_resource',
+        Type::BUILTIN_TYPE_CALLABLE => 'is_callable',
+        Type::BUILTIN_TYPE_ITERABLE => 'is_iterable',
     ];
 
     public function __construct(
@@ -100,6 +113,25 @@ final readonly class BuiltinTransformer implements TransformerInterface
 
         /* When there is no possibility to cast we assume that the mutator will be able to handle the value */
         return [$input, []];
+    }
+
+    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): ?Expr
+    {
+        $condition = new Expr\FuncCall(
+            new Name(self::CONDITION_MAPPING[$this->sourceType->getBuiltinType()]),
+            [
+                new Arg($input),
+            ]
+        );
+
+        if ($this->sourceType->getBuiltinType() === Type::BUILTIN_TYPE_OBJECT) {
+            $condition = new Expr\BinaryOp\BooleanAnd(
+                $condition,
+                new Expr\Instanceof_($input, new Name\FullyQualified($type->getClassName())) // @phpstan-ignore-line $type->getClassName() cannot be null here
+            );
+        }
+
+        return $condition;
     }
 
     private function toArray(Expr $input): Expr
