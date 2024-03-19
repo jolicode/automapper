@@ -126,7 +126,7 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
             AbstractNormalizer::GROUPS => ['foo'],
             AbstractNormalizer::ATTRIBUTES => ['foo'],
             AbstractNormalizer::IGNORED_ATTRIBUTES => ['foo'],
-            AbstractNormalizer::OBJECT_TO_POPULATE => 'some-object',
+            AbstractNormalizer::OBJECT_TO_POPULATE => [],
             AbstractNormalizer::CIRCULAR_REFERENCE_LIMIT => 1,
             AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => 'circular-reference-handler',
             DateTimeNormalizer::FORMAT_KEY => 'Y-m-d',
@@ -139,7 +139,7 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
                 MapperContext::GROUPS => ['foo'],
                 MapperContext::ALLOWED_ATTRIBUTES => ['foo'],
                 MapperContext::IGNORED_ATTRIBUTES => ['foo'],
-                MapperContext::TARGET_TO_POPULATE => 'some-object',
+                MapperContext::TARGET_TO_POPULATE => [],
                 MapperContext::CIRCULAR_REFERENCE_LIMIT => 1,
                 MapperContext::CIRCULAR_REFERENCE_HANDLER => 'circular-reference-handler',
                 MapperContext::DATETIME_FORMAT => 'Y-m-d',
@@ -147,6 +147,12 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
             ],
             $context
         );
+
+        $context = $normalizer->normalize(new Fixtures\User(1, 'Jack', 37), 'array', [
+            AbstractNormalizer::OBJECT_TO_POPULATE => 'bad-object',
+        ]);
+
+        self::assertSame([], $context);
     }
 
     public function testItUsesSerializerDateFormatBasedOnSerializerContext(): void

@@ -68,6 +68,10 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
         $context = [];
 
         foreach (self::SERIALIZER_CONTEXT_MAPPING as $serializerContextName => $autoMapperContextName) {
+            if (!\array_key_exists($serializerContextName, $serializerContext)) {
+                continue;
+            }
+
             $context[$autoMapperContextName] = $serializerContext[$serializerContextName] ?? null;
             unset($serializerContext[$serializerContextName]);
         }
@@ -80,6 +84,12 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
             }
 
             unset($serializerContext[AbstractNormalizer::DEFAULT_CONSTRUCTOR_ARGUMENTS]);
+        }
+
+        if (\array_key_exists(MapperContext::TARGET_TO_POPULATE, $context)) {
+            if (!\is_object($context[MapperContext::TARGET_TO_POPULATE]) && !\is_array($context[MapperContext::TARGET_TO_POPULATE])) {
+                unset($context[MapperContext::TARGET_TO_POPULATE]);
+            }
         }
 
         return $context + $serializerContext;
