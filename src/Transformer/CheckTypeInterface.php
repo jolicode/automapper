@@ -13,5 +13,13 @@ use PhpParser\Node\Expr;
  */
 interface CheckTypeInterface
 {
+    /**
+     * Return an expression to check the input type at runtime.
+     *
+     * As an example for a string type:
+     * ```php
+     * is_string($input)
+     * ```
+     */
     public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): ?Expr;
 }

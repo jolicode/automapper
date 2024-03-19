@@ -56,13 +56,12 @@ final readonly class MapToListener extends MapListener
         $targetProperty = new TargetPropertyMetadata($mapTo->name ?? $name);
 
         $property = new PropertyMetadataEvent(
-            $event->mapperMetadata,
-            $sourceProperty,
-            $targetProperty,
-            null,
-            $mapTo->maxDepth,
-            $this->getTransformerFromMapAttribute($event->mapperMetadata->source, $mapTo),
-            $mapTo->ignore,
+            mapperMetadata: $event->mapperMetadata,
+            source: $sourceProperty,
+            target: $targetProperty,
+            maxDepth: $mapTo->maxDepth,
+            transformer: $this->getTransformerFromMapAttribute($event->mapperMetadata->source, $mapTo),
+            ignored: $mapTo->ignore,
         );
 
         if (\array_key_exists($property->target->name, $event->properties)) {
