@@ -13,6 +13,10 @@ use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\ArrayItem as OldArrayItem;
 use PhpParser\Node\Name;
 use PhpParser\Node\Scalar;
+use PhpParser\Node\Stmt;
+use PhpParser\Parser;
+use PhpParser\ParserFactory;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 /**
  * We generate a list of conditions that will allow the field to be mapped to the target.
@@ -21,6 +25,15 @@ use PhpParser\Node\Scalar;
  */
 final readonly class PropertyConditionsGenerator
 {
+    private Parser $parser;
+
+    public function __construct(
+        private ExpressionLanguage $expressionLanguage = new ExpressionLanguage(),
+        Parser $parser = null,
+    ) {
+        $this->parser = $parser ?? (new ParserFactory())->createForHostVersion();
+    }
+
     public function generate(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
     {
         $conditions = [];
@@ -32,6 +45,7 @@ final readonly class PropertyConditionsGenerator
         $conditions[] = $this->targetGroupsCheck($metadata, $propertyMetadata);
         $conditions[] = $this->noGroupsCheck($metadata, $propertyMetadata);
         $conditions[] = $this->maxDepthCheck($metadata, $propertyMetadata);
+        $conditions[] = $this->customCondition($metadata, $propertyMetadata);
 
         $conditions = array_values(array_filter($conditions));
 
@@ -253,5 +267,24 @@ final readonly class PropertyConditionsGenerator
             ),
             new Scalar\LNumber($propertyMetadata->maxDepth)
         );
+    }
+
+    /**
+     * When there is a if condition we check if the condition is true.
+     */
+    private function customCondition(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
+    {
+        if (null === $propertyMetadata->if) {
+            return null;
+        }
+
+        $expression = $this->expressionLanguage->compile($propertyMetadata->if, ['value' => 'source', 'context']);
+        $expr = $this->parser->parse('<?php ' . $expression . ';')[0] ?? null;
+
+        if ($expr instanceof Stmt\Expression) {
+            return $expr->expr;
+        }
+
+        throw new \LogicException('Cannot create condition from expression "' . $propertyMetadata->if . "'");
     }
 }

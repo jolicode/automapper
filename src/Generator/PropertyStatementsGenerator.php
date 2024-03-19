@@ -10,6 +10,7 @@ use AutoMapper\Metadata\PropertyMetadata;
 use AutoMapper\Transformer\AssignedByReferenceTransformerInterface;
 use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformer;
 use PhpParser\Node\Stmt;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 /**
  * @internal
@@ -19,8 +20,9 @@ final readonly class PropertyStatementsGenerator
     private PropertyConditionsGenerator $propertyConditionsGenerator;
 
     public function __construct(
+        ExpressionLanguage $expressionLanguage = new ExpressionLanguage()
     ) {
-        $this->propertyConditionsGenerator = new PropertyConditionsGenerator();
+        $this->propertyConditionsGenerator = new PropertyConditionsGenerator($expressionLanguage);
     }
 
     /**

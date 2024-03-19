@@ -21,6 +21,7 @@ final class PropertyMetadataEvent
         public ?int $maxDepth = null,
         public ?TransformerInterface $transformer = null,
         public ?bool $ignored = null,
+        public ?string $if = null,
     ) {
     }
 }

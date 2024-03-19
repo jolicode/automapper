@@ -18,6 +18,7 @@ use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
 use PhpParser\Node\Param;
 use PhpParser\Node\Stmt;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 /**
  * Generates code for a mapping class.
@@ -36,6 +37,7 @@ final readonly class MapperGenerator
     public function __construct(
         ClassDiscriminatorResolver $classDiscriminatorResolver,
         Configuration $configuration,
+        ExpressionLanguage $expressionLanguage = new ExpressionLanguage()
     ) {
         $this->mapperConstructorGenerator = new MapperConstructorGenerator(
             $cachedReflectionStatementsGenerator = new CachedReflectionStatementsGenerator()
@@ -44,6 +46,7 @@ final readonly class MapperGenerator
         $this->mapMethodStatementsGenerator = new MapMethodStatementsGenerator(
             $discriminatorStatementsGenerator = new DiscriminatorStatementsGenerator($classDiscriminatorResolver),
             $cachedReflectionStatementsGenerator,
+            $expressionLanguage,
             $configuration->allowReadOnlyTargetToPopulate,
         );
 

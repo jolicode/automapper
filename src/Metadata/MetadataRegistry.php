@@ -218,6 +218,7 @@ final class MetadataRegistry
                 $propertyMappedEvent->transformer,
                 $propertyMappedEvent->ignored,
                 $propertyMappedEvent->maxDepth,
+                $propertyMappedEvent->if,
             );
         }
 

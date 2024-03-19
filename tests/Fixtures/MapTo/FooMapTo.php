@@ -20,6 +20,9 @@ class FooMapTo
     ) {
     }
 
+    #[MapTo('array', if: 'source.foo == "foo"')]
+    public string $if = 'if';
+
     #[MapTo('array', ignore: true)]
     public function getA(): string
     {

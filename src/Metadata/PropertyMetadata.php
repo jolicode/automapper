@@ -22,6 +22,7 @@ final class PropertyMetadata
         public TransformerInterface $transformer,
         public bool $isIgnored = false,
         public ?int $maxDepth = null,
+        public ?string $if = null,
     ) {
     }
 

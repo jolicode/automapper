@@ -62,6 +62,7 @@ final readonly class MapToListener extends MapListener
             maxDepth: $mapTo->maxDepth,
             transformer: $this->getTransformerFromMapAttribute($event->mapperMetadata->source, $mapTo),
             ignored: $mapTo->ignore,
+            if: $mapTo->if,
         );
 
         if (\array_key_exists($property->target->name, $event->properties)) {
