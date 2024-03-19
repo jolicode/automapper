@@ -6,6 +6,9 @@ namespace AutoMapper\Extractor;
 
 use Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface;
 
+/**
+ * @internal
+ */
 final readonly class ReadWriteTypeExtractor implements PropertyTypeExtractorInterface
 {
     public const READ_ACCESSOR = 'read_accessor';
