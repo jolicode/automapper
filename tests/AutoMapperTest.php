@@ -140,6 +140,20 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertIsString($userData['createdAt']);
     }
 
+    public function testAutoMapperToArrayGroups(): void
+    {
+        $address = new Address();
+        $address->setCity('Toulon');
+        $user = new Fixtures\User(1, 'yolo', '13');
+        $user->address = $address;
+        $user->addresses[] = $address;
+
+        $userData = $this->autoMapper->map($user, 'array', [MapperContext::GROUPS => ['dummy']]);
+
+        self::assertIsArray($userData);
+        self::assertEmpty($userData);
+    }
+
     public function testAutoMapperFromStdObject(): void
     {
         $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);

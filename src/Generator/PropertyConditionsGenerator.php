@@ -30,6 +30,7 @@ final readonly class PropertyConditionsGenerator
         $conditions[] = $this->isAllowedAttribute($metadata, $propertyMetadata);
         $conditions[] = $this->sourceGroupsCheck($metadata, $propertyMetadata);
         $conditions[] = $this->targetGroupsCheck($metadata, $propertyMetadata);
+        $conditions[] = $this->noGroupsCheck($metadata, $propertyMetadata);
         $conditions[] = $this->maxDepthCheck($metadata, $propertyMetadata);
 
         $conditions = array_values(array_filter($conditions));
@@ -201,6 +202,32 @@ final readonly class PropertyConditionsGenerator
                     return new $arrayItemClass(new Scalar\String_($group));
                 }, $propertyMetadata->target->groups))),
             ])
+        );
+    }
+
+    /**
+     * When there is no groups associated to the target property or source property we check if the context has the same groups.
+     *
+     * ```php
+     * (!array_key_exists(MapperContext::GROUPS, $context) || !$context[MapperContext::GROUPS])
+     * ```
+     */
+    private function noGroupsCheck(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
+    {
+        if ($propertyMetadata->target->groups || $propertyMetadata->source->groups) {
+            return null;
+        }
+
+        return new Expr\BinaryOp\BooleanOr(
+            new Expr\BooleanNot(
+                new Expr\FuncCall(new Name('array_key_exists'), [
+                    new Arg(new Scalar\String_(MapperContext::GROUPS)),
+                    new Arg($metadata->variableRegistry->getContext()),
+                ])
+            ),
+            new Expr\BooleanNot(
+                new Expr\ArrayDimFetch($metadata->variableRegistry->getContext(), new Scalar\String_(MapperContext::GROUPS))
+            )
         );
     }
 
