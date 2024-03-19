@@ -13,14 +13,14 @@ use AutoMapper\Loader\ClassLoaderInterface;
 use AutoMapper\Loader\EvalLoader;
 use AutoMapper\Loader\FileLoader;
 use AutoMapper\Metadata\MetadataRegistry;
-use AutoMapper\Transformer\CustomTransformer\CustomTransformersRegistry;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
 
 return static function (ContainerConfigurator $container) {
     $container->services()
         ->set(AutoMapper::class)
             ->args([
                 service(ClassLoaderInterface::class),
-                service(CustomTransformersRegistry::class),
+                service(PropertyTransformerRegistry::class),
                 service(MetadataRegistry::class),
             ])
             ->alias(AutoMapperInterface::class, AutoMapper::class)->public()

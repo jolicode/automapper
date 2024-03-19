@@ -12,7 +12,7 @@ use AutoMapper\Extractor\ReadAccessor;
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
  *
- * @internal
+ * @experimental
  */
 final readonly class SourcePropertyMetadata
 {

@@ -8,7 +8,9 @@ use AutoMapper\Extractor\WriteMutator;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\PropertyMetadata;
 use AutoMapper\Transformer\AssignedByReferenceTransformerInterface;
-use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformer;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformer;
+use PhpParser\Node\Expr;
+use PhpParser\Node\Name;
 use PhpParser\Node\Stmt;
 
 /**
@@ -36,11 +38,11 @@ final readonly class PropertyStatementsGenerator
         $fieldValueExpr = $propertyMetadata->source->accessor?->getExpression($variableRegistry->getSourceInput());
 
         if (null === $fieldValueExpr) {
-            if (!($propertyMetadata->transformer instanceof CustomPropertyTransformer)) {
+            if (!($propertyMetadata->transformer instanceof PropertyTransformer)) {
                 return [];
             }
 
-            $fieldValueExpr = $variableRegistry->getSourceInput();
+            $fieldValueExpr = new Expr\ConstFetch(new Name('null'));
         }
 
         /* Create expression to transform the read value into the wanted written value, depending on the transform it may add new statements to get the correct value */

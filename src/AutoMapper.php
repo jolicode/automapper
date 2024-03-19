@@ -11,8 +11,8 @@ use AutoMapper\Loader\ClassLoaderInterface;
 use AutoMapper\Loader\EvalLoader;
 use AutoMapper\Loader\FileLoader;
 use AutoMapper\Metadata\MetadataRegistry;
-use AutoMapper\Transformer\CustomTransformer\CustomTransformerInterface;
-use AutoMapper\Transformer\CustomTransformer\CustomTransformersRegistry;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
@@ -40,8 +40,8 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
 
     public function __construct(
         private readonly ClassLoaderInterface $classLoader,
-        public readonly CustomTransformersRegistry $customTransformersRegistry,
-        public readonly MetadataRegistry $metadataRegistry,
+        private readonly PropertyTransformerRegistry $propertyTransformerRegistry,
+        private readonly MetadataRegistry $metadataRegistry,
     ) {
     }
 
@@ -73,7 +73,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         $this->mapperRegistry[$className] = $mapper;
 
         $mapper->injectMappers($this);
-        $mapper->setCustomTransformers($this->customTransformersRegistry->getCustomTransformers());
+        $mapper->setPropertyTransformers($this->propertyTransformerRegistry->getPropertyTransformers());
 
         /** @var GeneratedMapper<Source, Target>|GeneratedMapper<array<mixed>, Target>|GeneratedMapper<Source, array<mixed>> */
         return $this->mapperRegistry[$className];
@@ -116,19 +116,16 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         return $this->getMapper($sourceType, $targetType)->map($source, $context);
     }
 
-    public function bindCustomTransformer(CustomTransformerInterface $customTransformer, ?string $id = null): void
-    {
-        $this->customTransformersRegistry->addCustomTransformer($customTransformer, $id);
-    }
-
     /**
-     * @param TransformerFactoryInterface[] $transformerFactories
+     * @param TransformerFactoryInterface[]                  $transformerFactories
+     * @param iterable<string, PropertyTransformerInterface> $propertyTransformers
      */
     public static function create(
         Configuration $configuration = new Configuration(),
         string $cacheDirectory = null,
         AdvancedNameConverterInterface $nameConverter = null,
         array $transformerFactories = [],
+        iterable $propertyTransformers = [],
     ): self {
         if (class_exists(AttributeLoader::class)) {
             $loaderClass = new AttributeLoader();
@@ -146,7 +143,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
             $classDiscriminatorFromClassMetadata = new ClassDiscriminatorFromClassMetadata($classMetadataFactory);
         }
 
-        $customTransformerRegistry = new CustomTransformersRegistry();
+        $customTransformerRegistry = new PropertyTransformerRegistry($propertyTransformers);
         $metadataRegistry = MetadataRegistry::create($configuration, $customTransformerRegistry, $transformerFactories, $classMetadataFactory, $nameConverter);
 
         $mapperGenerator = new MapperGenerator(

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Metadata;
 
 use AutoMapper\Generator\VariableRegistry;
-use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformer;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 
 /**
  * @internal
@@ -100,7 +100,7 @@ final class GeneratorMetadata
                 return false;
             }
 
-            if (null === $propertyMapping->source->accessor && !($propertyMapping->transformer instanceof CustomPropertyTransformer)) {
+            if (null === $propertyMapping->source->accessor && !($propertyMapping->transformer instanceof PropertyTransformerInterface)) {
                 return false;
             }
         }

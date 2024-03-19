@@ -7,12 +7,15 @@ namespace AutoMapper\Metadata;
 use Symfony\Component\PropertyInfo\Type;
 
 /**
- * @internal
+ * @experimental
  *
  * @extends \SplObjectStorage<Type, Type[]>
  */
 final class TypesMatching extends \SplObjectStorage
 {
+    /**
+     * Return the source Type if there is only one in the SplObjectStorage, null otherwise.
+     */
     public function getSourceUniqueType(): ?Type
     {
         if (0 === \count($this) || \count($this) > 1) {
@@ -30,6 +33,9 @@ final class TypesMatching extends \SplObjectStorage
         return $sourceType;
     }
 
+    /**
+     * Return a target Type given a source Type if there is only one in the SplObjectStorage, null otherwise.
+     */
     public function getTargetUniqueType(Type $sourceType): ?Type
     {
         $targetTypes = $this[$sourceType] ?? [];

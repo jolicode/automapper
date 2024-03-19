@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Fixtures\Transformer\CustomTransformer;
 
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
 use AutoMapper\Metadata\TypesMatching;
 use AutoMapper\Tests\Fixtures\AddressDTO;
-use AutoMapper\Transformer\CustomTransformer\CustomModelTransformerInterface;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerSupportInterface;
 use Symfony\Component\PropertyInfo\Type;
 
-final readonly class FromSourceCustomModelTransformer implements CustomModelTransformerInterface
+final readonly class FromSourceCustomModelTransformer implements PropertyTransformerInterface, PropertyTransformerSupportInterface
 {
-    public function supports(TypesMatching $types): bool
+    public function supports(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool
     {
         $sourceUniqueType = $types->getSourceUniqueType();
 
@@ -22,10 +26,10 @@ final readonly class FromSourceCustomModelTransformer implements CustomModelTran
         return $sourceUniqueType->getClassName() === AddressDTO::class && $this->targetIsArray($types[$sourceUniqueType] ?? []);
     }
 
-    public function transform(object|array $source): mixed
+    public function transform(mixed $value, object|array $source, array $context): mixed
     {
         return [
-            'city' => "{$source->city} set by custom model transformer",
+            'city' => "{$value->city} set by custom model transformer",
             'street' => 'street set by custom model transformer',
         ];
     }

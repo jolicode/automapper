@@ -28,6 +28,7 @@ abstract class AutoMapperBaseTest extends TestCase
         bool $allowConstructor = true,
         string $classPrefix = 'Mapper_',
         array $transformerFactories = [],
+        array $propertyTransformers = [],
         string $dateTimeFormat = \DateTimeInterface::RFC3339
     ): AutoMapper {
         $fs = new Filesystem();
@@ -41,6 +42,6 @@ abstract class AutoMapperBaseTest extends TestCase
             allowReadOnlyTargetToPopulate: $allowReadOnlyTargetToPopulate
         );
 
-        return $this->autoMapper = AutoMapper::create($configuration, cacheDirectory: __DIR__ . '/cache/', transformerFactories: $transformerFactories);
+        return $this->autoMapper = AutoMapper::create($configuration, cacheDirectory: __DIR__ . '/cache/', transformerFactories: $transformerFactories, propertyTransformers: $propertyTransformers);
     }
 }

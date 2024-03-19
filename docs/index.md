@@ -207,87 +207,77 @@ class InputUser
 }
 ```
 
-#### Map manually a single property
+#### Transform a property with dependencies
 
-You can override the mapping of a single property by leveraging `AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformerInterface`.
-It can be useful if you need to map several properties from the source to a unique property in the target. 
+You can use the `AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface` to create a specific transformer.
+It can be useful if you need to use dependencies to transform a property.
 
 ```php
-class BirthDateUserTransformer implements CustomPropertyTransformerInterface
+final readonly class UrlTransformer implements PropertyTransformerInterface
 {
-    public function supports(string $source, string $target, string $propertyName): bool
+    public function __construct(private UrlGenerator $urlGenerator)
     {
-        return $source === InputUser::class && $target === DatabaseUser::class && $propertyName === 'birthDate';
     }
 
-    /**
-     * @param InputUser $source
-     */
-    public function transform(object $source): \DateTimeImmutable
+    public function transform(mixed $value, object|array $source, array $context): mixed
     {
-        return new \DateTimeImmutable("{$source->birthYear}-{$source->birthMonth}-{$source->birthDay}");
+        return $this->urlGenerator->generate('get_resource', $value);
     }
 }
 ```
 
-You can also use this custom transformer with the `#[MapTo]` attribute:
+You also need to register this transformer within the `AutoMapper` instance:
 
 ```php
-class InputUser
+$automapper = \AutoMapper\AutoMapper::create(propertyTransformers: [new UrlTransformer(new UrlGenerator()]);
+```
+
+Now you can use this transformer using the `#[MapTo]` or `#[MapFrom]` attribute:
+
+```php
+class Resource
 {
-  public function __construct(
-    public readonly string $firstName,
-    public readonly string $lastName,
-    #[MapTo(name: 'birthDate', target: DatabaseUser::class, transformer: BirthDateUserTransformer::class)]
-    #[MapTo(ignore: true, target: DatabaseUser::class)]
-    public readonly int $birthYear,
-    #[MapTo(ignore: true, target: DatabaseUser::class)]
-    public readonly int $birthMonth,
-    #[MapTo(ignore: true, target: DatabaseUser::class)]
-    public readonly int $birthDay,
-  ) {
-  }
+    public function __construct(
+        #[MapTo('array', transformer: UrlTransformer::class)]
+        public string $id,
+    ) {
+    }
 }
 ```
 
-By doing this it will not evaluate the `support` method of the `BirthDateUserTransformer` and will use the transformer directly
+#### Using transformer for multiple properties
 
-#### Map manually a whole object
-
-In order to customize the mapping of a whole object, you can leverage `AutoMapper\Transformer\CustomTransformer\CustomModelTransformerInterface`.
-You have then full control over the transformation between two types:
+If you always have the same behavior for transforming properties, i.e. all id fields must be urls, you can also use the
+`AutoMapper\Transformer\PropertyTransformer\PropertyTransformerSupportInterface` to automatically register the transformer.
 
 ```php
-use Symfony\Component\PropertyInfo\Type;
-
-class InputUserToDatabaseUserCustomTransformer implements CustomModelTransformerInterface
+final readonly class UrlTransformer implements PropertyTransformerInterface, PropertyTransformerSupportInterface
 {
-    public function supports(array $sourceTypes, array $targetTypes): bool
+    public function __construct(private UrlGenerator $urlGenerator)
     {
-        return $this->hasType($sourceTypes, DatabaseUser::class) && $this->hasType($targetTypes, OutputUser::class);
-    }
-
-    /**
-     * @param DatabaseUser $source
-     */
-    public function transform(object $source): OutputUser
-    {
-        return OutputUser::fromDatabaserUser($source);
     }
     
-    /**
-     * @param Type[] $types
-     * @param class-string $class
-     */
-    private function hasType(array $types, string $class): bool
+    public function supports(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool
     {
-        foreach ($types as $type) {
-            if ($type->getClassName() === $class) {
-                return true;
-            }
+        // Transform to url every property named `id` which is mapped to an array and where the source type can only be a string
+        $sourceType = $types->getSourceUniqueType();
+        
+        if ($sourceType === null) {
+            return false;
         }
         
-        return false;
-    }      
+        return $sourceType->getBuiltinType() === 'string' && $mapperMetadata->target === 'array' && $source->name === 'id';
+    }
+
+    public function transform(mixed $value, object|array $source, array $context): mixed
+    {
+        return $this->urlGenerator->generate('get_resource', $value);
+    }
 }
 ```
+
+By doing this you don't need to specify the transformer in the `#[MapTo]` or `#[MapFrom]` attribute for every property.
+If an attribute is specified for a property, it will not evaluate the `supports` method of the transformer.
+
+Please note that `supports` method is only called when creating the Mapper, not on runtime, if you use a service inside
+this method it will not be called each time you map a property.

@@ -22,14 +22,14 @@ use AutoMapper\Extractor\SourceTargetMappingExtractor;
 use AutoMapper\Transformer\ArrayTransformerFactory;
 use AutoMapper\Transformer\BuiltinTransformerFactory;
 use AutoMapper\Transformer\ChainTransformerFactory;
-use AutoMapper\Transformer\CustomTransformer\CustomTransformerFactory;
-use AutoMapper\Transformer\CustomTransformer\CustomTransformersRegistry;
 use AutoMapper\Transformer\DateTimeTransformerFactory;
 use AutoMapper\Transformer\DependentTransformerInterface;
 use AutoMapper\Transformer\EnumTransformerFactory;
 use AutoMapper\Transformer\MultipleTransformerFactory;
 use AutoMapper\Transformer\NullableTransformerFactory;
 use AutoMapper\Transformer\ObjectTransformerFactory;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerFactory;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
 use AutoMapper\Transformer\SymfonyUidTransformerFactory;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use AutoMapper\Transformer\UniqueTypeTransformerFactory;
@@ -208,7 +208,7 @@ final class MetadataRegistry
             }
 
             if (null === $propertyMappedEvent->ignored) {
-                $propertyMappedEvent->ignored = $propertyMappedEvent->source->accessor === null || ($propertyMappedEvent->target->writeMutator === null && $propertyMappedEvent->target->writeMutatorConstructor === null);
+                $propertyMappedEvent->ignored = false;
             }
 
             $propertiesMapping[] = new PropertyMetadata(
@@ -229,7 +229,7 @@ final class MetadataRegistry
      */
     public static function create(
         Configuration $configuration,
-        CustomTransformersRegistry $customTransformerRegistry,
+        PropertyTransformerRegistry $customTransformerRegistry,
         array $transformerFactories = [],
         ClassMetadataFactory $classMetadataFactory = null,
         AdvancedNameConverterInterface $nameConverter = null,
@@ -275,7 +275,7 @@ final class MetadataRegistry
             new ArrayTransformerFactory(),
             new ObjectTransformerFactory(),
             new EnumTransformerFactory(),
-            new CustomTransformerFactory($customTransformerRegistry),
+            new PropertyTransformerFactory($customTransformerRegistry),
         ];
 
         if (class_exists(AbstractUid::class)) {
