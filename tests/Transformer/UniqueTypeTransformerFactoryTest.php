@@ -7,6 +7,7 @@ namespace AutoMapper\Tests\Transformer;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
+use AutoMapper\Metadata\TypesMatching;
 use AutoMapper\Transformer\BuiltinTransformer;
 use AutoMapper\Transformer\BuiltinTransformerFactory;
 use AutoMapper\Transformer\ChainTransformerFactory;
@@ -23,10 +24,11 @@ class UniqueTypeTransformerFactoryTest extends TestCase
         $factory->setChainTransformerFactory($chainFactory);
 
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
-        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('string')], 'foo');
-        $targetMapperMetadata = new TargetPropertyMetadata([new Type('string'), new Type('string')], 'foo');
+        $sourceMapperMetadata = new SourcePropertyMetadata('foo');
+        $targetMapperMetadata = new TargetPropertyMetadata('foo');
+        $types = TypesMatching::fromSourceAndTargetTypes([new Type('string')], [new Type('string'), new Type('string')]);
 
-        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
+        $transformer = $factory->getTransformer($types, $sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNotNull($transformer);
         self::assertInstanceOf(BuiltinTransformer::class, $transformer);
@@ -39,28 +41,32 @@ class UniqueTypeTransformerFactoryTest extends TestCase
         $factory->setChainTransformerFactory($chainFactory);
 
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
-        $sourceMapperMetadata = new SourcePropertyMetadata([], 'foo');
-        $targetMapperMetadata = new TargetPropertyMetadata([], 'foo');
+        $sourceMapperMetadata = new SourcePropertyMetadata('foo');
+        $targetMapperMetadata = new TargetPropertyMetadata('foo');
+        $types = TypesMatching::fromSourceAndTargetTypes([], []);
 
-        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
-
-        self::assertNull($transformer);
-
-        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('string')], 'foo');
-        $targetMapperMetadata = new TargetPropertyMetadata([], 'foo');
-        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
+        $transformer = $factory->getTransformer($types, $sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNull($transformer);
 
-        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('string'), new Type('string')], 'foo');
-        $targetMapperMetadata = new TargetPropertyMetadata([], 'foo');
-        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata('foo');
+        $targetMapperMetadata = new TargetPropertyMetadata('foo');
+        $types = TypesMatching::fromSourceAndTargetTypes([new Type('string')], []);
+        $transformer = $factory->getTransformer($types, $sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNull($transformer);
 
-        $sourceMapperMetadata = new SourcePropertyMetadata([new Type('string')], 'foo');
-        $targetMapperMetadata = new TargetPropertyMetadata([], 'foo');
-        $transformer = $factory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata('foo');
+        $targetMapperMetadata = new TargetPropertyMetadata('foo');
+        $types = TypesMatching::fromSourceAndTargetTypes([new Type('string'), new Type('string')], []);
+        $transformer = $factory->getTransformer($types, $sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
+
+        self::assertNull($transformer);
+
+        $sourceMapperMetadata = new SourcePropertyMetadata('foo');
+        $targetMapperMetadata = new TargetPropertyMetadata('foo');
+        $types = TypesMatching::fromSourceAndTargetTypes([new Type('string')], []);
+        $transformer = $factory->getTransformer($types, $sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNull($transformer);
     }

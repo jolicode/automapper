@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper\Extractor;
 
+use AutoMapper\Metadata\TypesMatching;
+
 /**
  * Extracts mapping between two objects, only gives properties that have the same name.
  *
@@ -13,11 +15,11 @@ namespace AutoMapper\Extractor;
  */
 class SourceTargetMappingExtractor extends MappingExtractor
 {
-    public function getTypes(string $source, string $sourceProperty, string $target, string $targetProperty): array
+    public function getTypes(string $source, string $sourceProperty, string $target, string $targetProperty): TypesMatching
     {
         $sourceTypes = $this->propertyInfoExtractor->getTypes($source, $sourceProperty) ?? [];
         $targetTypes = $this->propertyInfoExtractor->getTypes($target, $targetProperty) ?? [];
 
-        return [$sourceTypes, $targetTypes];
+        return TypesMatching::fromSourceAndTargetTypes($sourceTypes, $targetTypes);
     }
 }

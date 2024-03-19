@@ -7,6 +7,7 @@ namespace AutoMapper\Transformer\CustomTransformer;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
+use AutoMapper\Metadata\TypesMatching;
 use AutoMapper\Transformer\PrioritizedTransformerFactoryInterface;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use AutoMapper\Transformer\TransformerInterface;
@@ -26,12 +27,9 @@ final class CustomTransformerFactory implements PrioritizedTransformerFactoryInt
         return 256;
     }
 
-    public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $metadata): ?TransformerInterface
+    public function getTransformer(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
-        $sourceTypes = $source->types;
-        $targetTypes = $target->types;
-
-        $customTransformer = $this->customTransformersRegistry->getCustomTransformerClass($metadata, $sourceTypes, $targetTypes, $source->name, $target->name);
+        $customTransformer = $this->customTransformersRegistry->getCustomTransformerClass($mapperMetadata, $types, $source->name, $target->name);
 
         if (null === $customTransformer) {
             return null;

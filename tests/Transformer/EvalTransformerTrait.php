@@ -9,6 +9,7 @@ use AutoMapper\Generator\UniqueVariableScope;
 use AutoMapper\Metadata\PropertyMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
+use AutoMapper\Metadata\TypesMatching;
 use AutoMapper\Transformer\TransformerInterface;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Param;
@@ -23,14 +24,13 @@ trait EvalTransformerTrait
         if (null === $propertyMapping) {
             $propertyMapping = new PropertyMetadata(
                 new SourcePropertyMetadata(
-                    [new Type('string')],
                     'dummy',
                     new ReadAccessor(ReadAccessor::TYPE_PROPERTY, 'dummy'),
                 ),
                 new TargetPropertyMetadata(
-                    [new Type('string')],
                     'dummy',
                 ),
+                TypesMatching::fromSourceAndTargetTypes([new Type('string')], [new Type('string')]),
                 $transformer,
             );
         }

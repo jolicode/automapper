@@ -20,7 +20,7 @@ use Symfony\Component\PropertyInfo\Type;
  *
  * @internal
  */
-final readonly class ObjectTransformer implements TransformerInterface, DependentTransformerInterface, AssignedByReferenceTransformerInterface
+final readonly class ObjectTransformer implements TransformerInterface, DependentTransformerInterface, AssignedByReferenceTransformerInterface, CheckTypeInterface
 {
     public function __construct(
         private Type $sourceType,
@@ -47,6 +47,20 @@ final readonly class ObjectTransformer implements TransformerInterface, Dependen
                 new Arg(new Scalar\String_($propertyMapping->source->name)),
             ])),
         ]), []];
+    }
+
+    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): ?Expr
+    {
+        if ($this->sourceType->getClassName() !== null) {
+            return new Expr\Instanceof_($input, new Name\FullyQualified($this->sourceType->getClassName()));
+        }
+
+        return new Expr\FuncCall(
+            new Name('is_object'),
+            [
+                new Arg($input),
+            ]
+        );
     }
 
     public function assignByRef(): bool

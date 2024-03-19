@@ -1320,4 +1320,22 @@ class AutoMapperTest extends AutoMapperBaseTest
             $this->autoMapper->map(new ObjectsUnionProperty(new Foo('foo')), 'array')
         );
     }
+
+    public function testMultipleArray(): void
+    {
+        $now = new \DateTimeImmutable();
+        $userDto = new Fixtures\UserDTO();
+        $userDto->times = [$now, $now];
+
+        $user = $this->autoMapper->map($userDto, 'array');
+
+        self::assertSame([$now->format(\DateTimeInterface::RFC3339), $now->format(\DateTimeInterface::RFC3339)], $user['times']);
+
+        $userDto = new Fixtures\UserDTO();
+        $userDto->times = [0, 1];
+
+        $user = $this->autoMapper->map($userDto, 'array');
+
+        self::assertSame([0, 1], $user['times']);
+    }
 }

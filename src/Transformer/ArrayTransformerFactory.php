@@ -7,6 +7,7 @@ namespace AutoMapper\Transformer;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
+use AutoMapper\Metadata\TypesMatching;
 use Symfony\Component\PropertyInfo\Type;
 
 /**
@@ -34,7 +35,9 @@ final class ArrayTransformerFactory extends AbstractUniqueTypeTransformerFactory
             return new DictionaryTransformer(new CopyTransformer());
         }
 
-        $subItemTransformer = $this->chainTransformerFactory->getTransformer($source->withTypes($sourceType->getCollectionValueTypes()), $target->withTypes($targetType->getCollectionValueTypes()), $mapperMetadata);
+        $types = TypesMatching::fromSourceAndTargetTypes($sourceType->getCollectionValueTypes(), $targetType->getCollectionValueTypes());
+
+        $subItemTransformer = $this->chainTransformerFactory->getTransformer($types, $source, $target, $mapperMetadata);
 
         if (null !== $subItemTransformer) {
             $sourceCollectionKeyTypes = $sourceType->getCollectionKeyTypes();

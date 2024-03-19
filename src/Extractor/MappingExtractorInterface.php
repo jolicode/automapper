@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Extractor;
 
-use Symfony\Component\PropertyInfo\Type;
+use AutoMapper\Metadata\TypesMatching;
 
 /**
  * Extracts mapping.
@@ -22,10 +22,7 @@ interface MappingExtractorInterface
      */
     public function getProperties(string $class): iterable;
 
-    /**
-     * @return array{0: Type[], 1: Type[]}
-     */
-    public function getTypes(string $source, string $sourceProperty, string $target, string $targetProperty): array;
+    public function getTypes(string $source, string $sourceProperty, string $target, string $targetProperty): TypesMatching;
 
     public function getDateTimeFormat(string $class, string $property): string;
 

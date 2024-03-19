@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Transformer\CustomTransformer;
 
 use AutoMapper\Metadata\MapperMetadata;
-use Symfony\Component\PropertyInfo\Type;
+use AutoMapper\Metadata\TypesMatching;
 
 /**
  * @internal
@@ -38,12 +38,9 @@ final class CustomTransformersRegistry
     }
 
     /**
-     * @param Type[] $sourceTypes
-     * @param Type[] $targetTypes
-     *
      * @return array{string, CustomTransformerInterface}|null
      */
-    public function getCustomTransformerClass(MapperMetadata $mapperMetadata, array $sourceTypes, array $targetTypes, string $sourceProperty, string $targetProperty): ?array
+    public function getCustomTransformerClass(MapperMetadata $mapperMetadata, TypesMatching $types, string $sourceProperty, string $targetProperty): ?array
     {
         /**
          * @var string                     $id
@@ -51,7 +48,7 @@ final class CustomTransformersRegistry
          */
         foreach ($this->prioritizedCustomTransformers() as $id => $customTransformer) {
             if (
-                ($customTransformer instanceof CustomModelTransformerInterface && $sourceTypes && $targetTypes && $customTransformer->supports($sourceTypes, $targetTypes))
+                ($customTransformer instanceof CustomModelTransformerInterface && $customTransformer->supports($types))
                 || ($customTransformer instanceof CustomPropertyTransformerInterface && $customTransformer->supports($mapperMetadata->source, $mapperMetadata->target, $sourceProperty, $targetProperty))
             ) {
                 return [$id, $customTransformer];

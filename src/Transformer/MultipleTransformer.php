@@ -6,9 +6,7 @@ namespace AutoMapper\Transformer;
 
 use AutoMapper\Generator\UniqueVariableScope;
 use AutoMapper\Metadata\PropertyMetadata;
-use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
-use PhpParser\Node\Name;
 use PhpParser\Node\Stmt;
 use Symfony\Component\PropertyInfo\Type;
 
@@ -24,19 +22,6 @@ use Symfony\Component\PropertyInfo\Type;
  */
 final class MultipleTransformer implements TransformerInterface, DependentTransformerInterface
 {
-    private const CONDITION_MAPPING = [
-        Type::BUILTIN_TYPE_BOOL => 'is_bool',
-        Type::BUILTIN_TYPE_INT => 'is_int',
-        Type::BUILTIN_TYPE_FLOAT => 'is_float',
-        Type::BUILTIN_TYPE_STRING => 'is_string',
-        Type::BUILTIN_TYPE_NULL => 'is_null',
-        Type::BUILTIN_TYPE_ARRAY => 'is_array',
-        Type::BUILTIN_TYPE_OBJECT => 'is_object',
-        Type::BUILTIN_TYPE_RESOURCE => 'is_resource',
-        Type::BUILTIN_TYPE_CALLABLE => 'is_callable',
-        Type::BUILTIN_TYPE_ITERABLE => 'is_iterable',
-    ];
-
     /**
      * @param array<array{transformer: TransformerInterface, type: Type}> $transformers
      */
@@ -75,31 +60,24 @@ final class MultipleTransformer implements TransformerInterface, DependentTransf
             [$transformerOutput, $transformerStatements] = $transformer->transform($input, $target, $propertyMapping, $uniqueVariableScope, $source);
 
             $assignClass = ($transformer instanceof AssignedByReferenceTransformerInterface && $transformer->assignByRef()) ? Expr\AssignRef::class : Expr\Assign::class;
+            $condition = null;
 
-            $condition = new Expr\FuncCall(
-                new Name(self::CONDITION_MAPPING[$type->getBuiltinType()]),
-                [
-                    new Arg($input),
-                ]
-            );
-
-            if ($type->getBuiltinType() === Type::BUILTIN_TYPE_OBJECT) {
-                $condition = new Expr\BinaryOp\BooleanAnd(
-                    $condition,
-                    new Expr\Instanceof_($input, new Name\FullyQualified($type->getClassName())) // @phpstan-ignore-line $type->getClassName() cannot be null here
-                );
+            if ($transformer instanceof CheckTypeInterface) {
+                $condition = $transformer->getCheckExpression($input, $target, $propertyMapping, $uniqueVariableScope, $source);
             }
 
-            $statements[] = new Stmt\If_(
-                $condition,
-                [
-                    'stmts' => array_merge(
-                        $transformerStatements, [
-                            new Stmt\Expression(new $assignClass($output, $transformerOutput)),
-                        ]
-                    ),
-                ]
-            );
+            if ($condition) {
+                $statements[] = new Stmt\If_(
+                    $condition,
+                    [
+                        'stmts' => array_merge(
+                            $transformerStatements, [
+                                new Stmt\Expression(new $assignClass($output, $transformerOutput)),
+                            ]
+                        ),
+                    ]
+                );
+            }
         }
 
         return [$output, $statements];

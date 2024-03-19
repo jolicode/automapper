@@ -7,6 +7,7 @@ namespace AutoMapper\Transformer;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
+use AutoMapper\Metadata\TypesMatching;
 use Symfony\Component\PropertyInfo\Type;
 
 /**
@@ -27,20 +28,18 @@ final class BuiltinTransformerFactory implements TransformerFactoryInterface, Pr
         Type::BUILTIN_TYPE_STRING,
     ];
 
-    public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
+    public function getTransformer(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
-        $sourceTypes = $source->types;
-        $targetTypes = $target->types;
-        $nbSourceTypes = \count($sourceTypes);
+        $sourceType = $types->getSourceUniqueType();
 
-        if (0 === $nbSourceTypes || $nbSourceTypes > 1 || !$sourceTypes[0] instanceof Type) {
+        if (null === $sourceType) {
             return null;
         }
 
-        $propertyType = $sourceTypes[0];
+        $targetTypes = $types[$sourceType] ?? [];
 
-        if (\in_array($propertyType->getBuiltinType(), self::BUILTIN, true)) {
-            return new BuiltinTransformer($propertyType, $targetTypes);
+        if (\in_array($sourceType->getBuiltinType(), self::BUILTIN, true)) {
+            return new BuiltinTransformer($sourceType, $targetTypes);
         }
 
         return null;

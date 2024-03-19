@@ -7,6 +7,7 @@ namespace AutoMapper\Tests\Transformer;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
+use AutoMapper\Metadata\TypesMatching;
 use AutoMapper\Transformer\ChainTransformerFactory;
 use AutoMapper\Transformer\CopyTransformer;
 use AutoMapper\Transformer\TransformerFactoryInterface;
@@ -27,9 +28,10 @@ class ChainTransformerFactoryTest extends TestCase
 
         $chainTransformerFactory = new ChainTransformerFactory([$subTransformer]);
 
-        $sourceMapperMetadata = new SourcePropertyMetadata([], 'foo');
-        $targetMapperMetadata = new TargetPropertyMetadata([], 'foo');
-        $transformerReturned = $chainTransformerFactory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata('foo');
+        $targetMapperMetadata = new TargetPropertyMetadata('foo');
+        $types = TypesMatching::fromSourceAndTargetTypes([], []);
+        $transformerReturned = $chainTransformerFactory->getTransformer($types, $sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertSame($transformer, $transformerReturned);
     }
@@ -45,9 +47,10 @@ class ChainTransformerFactoryTest extends TestCase
         $subTransformer->expects($this->any())->method('getTransformer')->willReturn(null);
         $chainTransformerFactory = new ChainTransformerFactory([$subTransformer]);
 
-        $sourceMapperMetadata = new SourcePropertyMetadata([], 'foo');
-        $targetMapperMetadata = new TargetPropertyMetadata([], 'foo');
-        $transformerReturned = $chainTransformerFactory->getTransformer($sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata('foo');
+        $targetMapperMetadata = new TargetPropertyMetadata('foo');
+        $types = TypesMatching::fromSourceAndTargetTypes([], []);
+        $transformerReturned = $chainTransformerFactory->getTransformer($types, $sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNull($transformerReturned);
     }
