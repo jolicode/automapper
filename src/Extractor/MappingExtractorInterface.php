@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper\Extractor;
 
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
 use AutoMapper\Metadata\TypesMatching;
 
 /**
@@ -22,7 +24,7 @@ interface MappingExtractorInterface
      */
     public function getProperties(string $class): iterable;
 
-    public function getTypes(string $source, string $sourceProperty, string $target, string $targetProperty): TypesMatching;
+    public function getTypes(string $source, SourcePropertyMetadata $sourceProperty, string $target, TargetPropertyMetadata $targetProperty): TypesMatching;
 
     public function getDateTimeFormat(string $class, string $property): string;
 

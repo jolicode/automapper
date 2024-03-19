@@ -21,6 +21,7 @@ use AutoMapper\Tests\Fixtures\BuiltinClass;
 use AutoMapper\Tests\Fixtures\ClassWithMapToContextAttribute;
 use AutoMapper\Tests\Fixtures\ClassWithNullablePropertyInConstructor;
 use AutoMapper\Tests\Fixtures\ClassWithPrivateProperty;
+use AutoMapper\Tests\Fixtures\DifferentSetterGetterType;
 use AutoMapper\Tests\Fixtures\Fish;
 use AutoMapper\Tests\Fixtures\FooGenerator;
 use AutoMapper\Tests\Fixtures\HasDateTime;
@@ -1337,5 +1338,13 @@ class AutoMapperTest extends AutoMapperBaseTest
         $user = $this->autoMapper->map($userDto, 'array');
 
         self::assertSame([0, 1], $user['times']);
+    }
+
+    public function testDifferentSetterGetterType(): void
+    {
+        $object = new DifferentSetterGetterType(AddressType::FLAT);
+        $array = $this->autoMapper->map($object, 'array');
+
+        self::assertSame(['address' => 'flat', 'addressDocBlock' => 'flat'], $array);
     }
 }

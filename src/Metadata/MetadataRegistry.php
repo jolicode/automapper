@@ -18,6 +18,7 @@ use AutoMapper\EventListener\Symfony\SerializerIgnoreListener;
 use AutoMapper\EventListener\Symfony\SerializerMaxDepthListener;
 use AutoMapper\Extractor\FromSourceMappingExtractor;
 use AutoMapper\Extractor\FromTargetMappingExtractor;
+use AutoMapper\Extractor\ReadWriteTypeExtractor;
 use AutoMapper\Extractor\SourceTargetMappingExtractor;
 use AutoMapper\Transformer\ArrayTransformerFactory;
 use AutoMapper\Transformer\BuiltinTransformerFactory;
@@ -194,7 +195,7 @@ final class MetadataRegistry
             $targetPropertyMetadata = TargetPropertyMetadata::fromEvent($propertyMappedEvent->target);
 
             if (null === $propertyMappedEvent->types) {
-                $propertyMappedEvent->types = $extractor->getTypes($mapperMetadata->source, $propertyMappedEvent->source->name, $mapperMetadata->target, $propertyMappedEvent->target->name);
+                $propertyMappedEvent->types = $extractor->getTypes($mapperMetadata->source, $sourcePropertyMetadata, $mapperMetadata->target, $targetPropertyMetadata);
             }
 
             if (null === $propertyMappedEvent->transformer) {
@@ -261,7 +262,7 @@ final class MetadataRegistry
 
         $propertyInfoExtractor = new PropertyInfoExtractor(
             listExtractors: [$reflectionExtractor],
-            typeExtractors: [$phpStanExtractor, $reflectionExtractor],
+            typeExtractors: [new ReadWriteTypeExtractor(), $phpStanExtractor, $reflectionExtractor],
             accessExtractors: [$reflectionExtractor]
         );
 

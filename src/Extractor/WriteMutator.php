@@ -11,6 +11,7 @@ use PhpParser\Node\Name;
 use PhpParser\Node\Param;
 use PhpParser\Node\Scalar;
 use PhpParser\Node\Stmt;
+use Symfony\Component\PropertyInfo\Type;
 
 /**
  * Writes mutator tell how to write to a property.
@@ -21,6 +22,8 @@ use PhpParser\Node\Stmt;
  */
 final class WriteMutator
 {
+    use GetTypeTrait;
+
     public const TYPE_METHOD = 1;
     public const TYPE_PROPERTY = 2;
     public const TYPE_ARRAY_DIMENSION = 3;
@@ -126,5 +129,72 @@ final class WriteMutator
             new Arg(new Expr\ConstFetch(new Name('null'))),
             new Arg(new Scalar\String_($className)),
         ]);
+    }
+
+    /**
+     * @return Type[]|null
+     */
+    public function getTypes(string $target): ?array
+    {
+        if (self::TYPE_METHOD === $this->type && class_exists($target)) {
+            try {
+                $reflectionMethod = new \ReflectionMethod($target, $this->name);
+
+                if ($types = $this->extractFromDocBlock(
+                    $reflectionMethod->getDocComment(),
+                    $target,
+                    $reflectionMethod->getDeclaringClass()->getName(),
+                    $this->name,
+                    '@param'
+                )) {
+                    return $types;
+                }
+
+                $parameters = $reflectionMethod->getParameters();
+
+                if (empty($parameters)) {
+                    return null;
+                }
+
+                $firstParameter = $parameters[0];
+                $reflectionType = $firstParameter->getType();
+
+                if (null === $reflectionType) {
+                    return null;
+                }
+
+                return $this->extractFromReflectionType($reflectionType, $reflectionMethod->getDeclaringClass());
+            } catch (\ReflectionException $e) {
+                return null;
+            }
+        }
+
+        if (self::TYPE_PROPERTY === $this->type && class_exists($target)) {
+            try {
+                $reflectionProperty = new \ReflectionProperty($target, $this->name);
+
+                if ($types = $this->extractFromDocBlock(
+                    $reflectionProperty->getDocComment(),
+                    $target,
+                    $reflectionProperty->getDeclaringClass()->getName(),
+                    $this->name,
+                    '@var'
+                )) {
+                    return $types;
+                }
+
+                $reflectionType = $reflectionProperty->getType();
+
+                if ($reflectionType === null) {
+                    return null;
+                }
+
+                return $this->extractFromReflectionType($reflectionType, $reflectionProperty->getDeclaringClass());
+            } catch (\ReflectionException $e) {
+                return null;
+            }
+        }
+
+        return null;
     }
 }
