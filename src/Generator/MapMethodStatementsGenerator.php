@@ -15,6 +15,7 @@ use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
 use PhpParser\Node\Scalar;
 use PhpParser\Node\Stmt;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 /**
  * @internal
@@ -27,13 +28,14 @@ final readonly class MapMethodStatementsGenerator
     public function __construct(
         DiscriminatorStatementsGenerator $discriminatorStatementsGenerator,
         CachedReflectionStatementsGenerator $cachedReflectionStatementsGenerator,
+        ExpressionLanguage $expressionLanguage = new ExpressionLanguage(),
         private bool $allowReadOnlyTargetToPopulate = false,
     ) {
         $this->createObjectStatementsGenerator = new CreateTargetStatementsGenerator(
             $discriminatorStatementsGenerator,
             $cachedReflectionStatementsGenerator,
         );
-        $this->propertyStatementsGenerator = new PropertyStatementsGenerator();
+        $this->propertyStatementsGenerator = new PropertyStatementsGenerator($expressionLanguage);
     }
 
     /**

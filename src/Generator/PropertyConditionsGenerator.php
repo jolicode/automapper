@@ -13,6 +13,10 @@ use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\ArrayItem as OldArrayItem;
 use PhpParser\Node\Name;
 use PhpParser\Node\Scalar;
+use PhpParser\Node\Stmt;
+use PhpParser\Parser;
+use PhpParser\ParserFactory;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 /**
  * We generate a list of conditions that will allow the field to be mapped to the target.
@@ -21,6 +25,15 @@ use PhpParser\Node\Scalar;
  */
 final readonly class PropertyConditionsGenerator
 {
+    private Parser $parser;
+
+    public function __construct(
+        private ExpressionLanguage $expressionLanguage = new ExpressionLanguage(),
+        Parser $parser = null,
+    ) {
+        $this->parser = $parser ?? (new ParserFactory())->createForHostVersion();
+    }
+
     public function generate(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
     {
         $conditions = [];
@@ -32,6 +45,7 @@ final readonly class PropertyConditionsGenerator
         $conditions[] = $this->targetGroupsCheck($metadata, $propertyMetadata);
         $conditions[] = $this->noGroupsCheck($metadata, $propertyMetadata);
         $conditions[] = $this->maxDepthCheck($metadata, $propertyMetadata);
+        $conditions[] = $this->customCondition($metadata, $propertyMetadata);
 
         $conditions = array_values(array_filter($conditions));
 
@@ -253,5 +267,75 @@ final readonly class PropertyConditionsGenerator
             ),
             new Scalar\LNumber($propertyMetadata->maxDepth)
         );
+    }
+
+    /**
+     * When there is a if condition we check if the condition is true.
+     */
+    private function customCondition(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
+    {
+        if (null === $propertyMetadata->if) {
+            return null;
+        }
+
+        $callableName = null;
+
+        if (\is_callable($propertyMetadata->if, false, $callableName)) {
+            if (\function_exists($callableName)) {
+                // Get arguments count of the function
+                $reflectionFunction = new \ReflectionFunction($callableName);
+                $argumentsCount = $reflectionFunction->getNumberOfRequiredParameters();
+
+                if ($argumentsCount === 1) {
+                    return new Expr\FuncCall(
+                        new Name($callableName),
+                        [
+                            new Arg(new Expr\Variable('value')),
+                        ]
+                    );
+                } elseif ($argumentsCount > 2) {
+                    throw new \LogicException('Callable condition must have 1 or 2 arguments required, but it has ' . $argumentsCount);
+                }
+            }
+
+            return new Expr\FuncCall(
+                new Name($callableName),
+                [
+                    new Arg(new Expr\Variable('value')),
+                    new Arg(new Expr\Variable('context')),
+                ]
+            );
+        } elseif ($metadata->mapperMetadata->sourceReflectionClass !== null && $metadata->mapperMetadata->sourceReflectionClass->hasMethod($propertyMetadata->if)) {
+            $reflectionMethod = $metadata->mapperMetadata->sourceReflectionClass->getMethod($propertyMetadata->if);
+
+            if ($reflectionMethod->isStatic()) {
+                return new Expr\StaticCall(
+                    new Name\FullyQualified($metadata->mapperMetadata->source),
+                    $propertyMetadata->if,
+                    [
+                        new Arg(new Expr\Variable('value')),
+                        new Arg(new Expr\Variable('context')),
+                    ]
+                );
+            }
+
+            return new Expr\MethodCall(
+                new Expr\Variable('value'),
+                $propertyMetadata->if,
+                [
+                    new Arg(new Expr\Variable('value')),
+                    new Arg(new Expr\Variable('context')),
+                ]
+            );
+        }
+
+        $expression = $this->expressionLanguage->compile($propertyMetadata->if, ['value' => 'source', 'context']);
+        $expr = $this->parser->parse('<?php ' . $expression . ';')[0] ?? null;
+
+        if ($expr instanceof Stmt\Expression) {
+            return $expr->expr;
+        }
+
+        throw new \LogicException('Cannot use callback or create expression language condition from expression "' . $propertyMetadata->if . "'");
     }
 }

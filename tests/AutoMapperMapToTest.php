@@ -45,6 +45,28 @@ class AutoMapperMapToTest extends AutoMapperBaseTest
         $this->assertSame('transformFromStringInstance_foo', $bar['transformFromStringInstance']);
         $this->assertSame('transformFromStringStatic_foo', $bar['transformFromStringStatic']);
         $this->assertSame('bar', $bar['transformFromCustomTransformerService']);
+        $this->assertSame('if', $bar['if']);
+        $this->assertSame('if', $bar['ifCallableStatic']);
+        $this->assertSame('if', $bar['ifCallable']);
+        $this->assertSame('if', $bar['ifCallableOther']);
+
+        $foo = new FooMapTo('bar');
+        $this->autoMapper->bindCustomTransformer(new TransformerWithDependency(new FooDependency()));
+        $bar = $this->autoMapper->map($foo, 'array');
+
+        $this->assertIsArray($bar);
+        $this->assertArrayNotHasKey('bar', $bar);
+        $this->assertArrayNotHasKey('a', $bar);
+        $this->assertArrayNotHasKey('if', $bar);
+        $this->assertArrayNotHasKey('ifCallableStatic', $bar);
+        $this->assertArrayNotHasKey('ifCallable', $bar);
+        $this->assertSame('if', $bar['ifCallableOther']);
+        $this->assertSame('bar', $bar['baz']);
+        $this->assertSame('bar', $bar['foo']);
+        $this->assertSame('transformFromIsCallable_bar', $bar['transformFromIsCallable']);
+        $this->assertSame('transformFromStringInstance_bar', $bar['transformFromStringInstance']);
+        $this->assertSame('transformFromStringStatic_bar', $bar['transformFromStringStatic']);
+        $this->assertSame('bar', $bar['transformFromCustomTransformerService']);
     }
 
     public function testMapFromArray()

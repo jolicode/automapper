@@ -12,6 +12,7 @@ use AutoMapper\Transformer\PropertyTransformer\PropertyTransformer;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 /**
  * @internal
@@ -21,8 +22,9 @@ final readonly class PropertyStatementsGenerator
     private PropertyConditionsGenerator $propertyConditionsGenerator;
 
     public function __construct(
+        ExpressionLanguage $expressionLanguage = new ExpressionLanguage()
     ) {
-        $this->propertyConditionsGenerator = new PropertyConditionsGenerator();
+        $this->propertyConditionsGenerator = new PropertyConditionsGenerator($expressionLanguage);
     }
 
     /**
