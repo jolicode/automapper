@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- [GH#61](https://github.com/jolicode/automapper/pull/61) Add event system during code generation, make serializer optional thanks to it
+- [GH#63](https://github.com/jolicode/automapper/pull/63) Merge bundle directly into automapper, will replace automapper-bundle
+- [GH#59](https://github.com/jolicode/automapper/pull/59) Add MapTo & MapFrom attributes
+- [GH#78](https://github.com/jolicode/automapper/pull/78) Add MapTo & MapFrom listeners to bundle
+- [GH#80](https://github.com/jolicode/automapper/pull/80) Add if feature to MapTo / MapFrom attributes
+- [GH#81](https://github.com/jolicode/automapper/pull/81) Allow map to / from attribute in class when declaring a transformer and a name
+
+### Changed
+- [GH#56](https://github.com/jolicode/automapper/pull/56) Refactor metadata
+- [GH#68](https://github.com/jolicode/automapper/pull/68) Allow to use sf 5.4 for most things, remove useless deps / suggests
+- [GH#71](https://github.com/jolicode/automapper/pull/71) Use interface for class metadata factory
+- [GH#75](https://github.com/jolicode/automapper/pull/75) Types: better matching between types to better handle multiple types
+- [GH#79](https://github.com/jolicode/automapper/pull/79) Refactor the way to create custom transformer
+
+### Fixed
+- [GH#70](https://github.com/jolicode/automapper/pull/70) Split map to / map from, fix from array
+- [GH#73](https://github.com/jolicode/automapper/pull/73) Don't map unexisting context, fix target to populate
+- [GH#72](https://github.com/jolicode/automapper/pull/72) Don't map property if groups specified and no groups attached
+- [GH#74](https://github.com/jolicode/automapper/pull/74) Check class exists when checking reflection class in object transformer factory
+- [GH#77](https://github.com/jolicode/automapper/pull/77) Try to get types from read accessor / write mutator first
+
 ## [8.2.2] - 2024-03-19
 ### Added
 - [GH#54](https://github.com/jolicode/automapper/pull/54) Introduce `MapperContext::DATETIME_FORCE_TIMEZONE`
