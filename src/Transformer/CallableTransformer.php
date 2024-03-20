@@ -18,6 +18,7 @@ class CallableTransformer implements TransformerInterface, AllowNullValueTransfo
     public function __construct(
         private string $callable,
         private bool $callableIsMethodFromSource = false,
+        private bool $callableIsMethodFromTarget = false,
     ) {
     }
 
@@ -26,6 +27,18 @@ class CallableTransformer implements TransformerInterface, AllowNullValueTransfo
         if ($this->callableIsMethodFromSource) {
             $newInput = new Expr\MethodCall(
                 $source,
+                $this->callable,
+                [
+                    new Arg($input),
+                ]
+            );
+
+            return [$newInput, []];
+        }
+
+        if ($this->callableIsMethodFromTarget) {
+            $newInput = new Expr\MethodCall(
+                new Expr\Variable('result'),
                 $this->callable,
                 [
                     new Arg($input),

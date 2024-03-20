@@ -11,6 +11,12 @@ class Bar
     #[MapFrom(source: 'array', ignore: true)]
     private string $b = '';
 
+    #[MapFrom(source: 'array', transformer: 'transformC')]
+    public string $c = '';
+
+    #[MapFrom(source: 'array', transformer: 'transformDStatic')]
+    public string $d = '';
+
     public function __construct(
         public string $bar,
         public string $baz,
@@ -28,5 +34,15 @@ class Bar
     public function getB(): string
     {
         return $this->b;
+    }
+
+    public function transformC(string $c): string
+    {
+        return 'transformC_' . $c;
+    }
+
+    public static function transformDStatic(string $c): string
+    {
+        return 'transformDStatic_' . $c;
     }
 }
