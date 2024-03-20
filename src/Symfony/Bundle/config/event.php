@@ -19,10 +19,10 @@ return static function (ContainerConfigurator $container) {
             ->args([service('automapper.property_info.reflection_extractor')])
             ->tag('kernel.event_listener', ['event' => PropertyMetadataEvent::class, 'priority' => 64])
         ->set(MapToListener::class)
-            ->args([service(PropertyTransformerRegistry::class)])
+            ->args([service(PropertyTransformerRegistry::class), service('automapper.expression_language')])
             ->tag('kernel.event_listener', ['event' => GenerateMapperEvent::class, 'priority' => 64])
         ->set(MapFromListener::class)
-            ->args([service(PropertyTransformerRegistry::class)])
+            ->args([service(PropertyTransformerRegistry::class), service('automapper.expression_language')])
             ->tag('kernel.event_listener', ['event' => GenerateMapperEvent::class, 'priority' => 32])
 
         ->set(AdvancedNameConverterListener::class)

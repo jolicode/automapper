@@ -8,10 +8,13 @@ use AutoMapper\Attribute\MapFrom;
 use AutoMapper\Attribute\MapTo;
 use AutoMapper\Exception\BadMapDefinitionException;
 use AutoMapper\Transformer\CallableTransformer;
+use AutoMapper\Transformer\ExpressionLanguageTransformer;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformer;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
 use AutoMapper\Transformer\TransformerInterface;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use Symfony\Component\ExpressionLanguage\SyntaxError;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\String\Inflector\EnglishInflector;
 use Symfony\Component\String\Inflector\InflectorInterface;
@@ -23,6 +26,7 @@ abstract readonly class MapListener
 {
     public function __construct(
         private PropertyTransformerRegistry $propertyTransformerRegistry,
+        private ExpressionLanguage $expressionLanguage,
         private InflectorInterface $inflector = new EnglishInflector(),
     ) {
     }
@@ -46,16 +50,7 @@ abstract readonly class MapListener
                 $transformer = new PropertyTransformer($transformerCallable);
             } elseif (\is_callable($transformerCallable, false, $callableName)) {
                 $transformer = new CallableTransformer($callableName);
-            } elseif (\is_string($transformerCallable)) {
-                // Check the method exist on the class
-                if (!method_exists($class, $transformerCallable)) {
-                    if (class_exists($transformerCallable)) {
-                        throw new BadMapDefinitionException(sprintf('Transformer "%s" targeted by %s transformer does not exist on class "%s", did you register it ?.', $transformerCallable, $attribute::class, $class));
-                    }
-
-                    throw new BadMapDefinitionException(sprintf('Method "%s" targeted by %s transformer does not exist on class "%s".', $transformerCallable, $attribute::class, $class));
-                }
-
+            } elseif (\is_string($transformerCallable) && method_exists($class, $transformerCallable)) {
                 $reflMethod = new \ReflectionMethod($class, $transformerCallable);
 
                 if ($reflMethod->isStatic()) {
@@ -63,6 +58,14 @@ abstract readonly class MapListener
                 } else {
                     $transformer = new CallableTransformer($transformerCallable, $fromSource, !$fromSource);
                 }
+            } elseif (\is_string($transformerCallable)) {
+                try {
+                    $expression = $this->expressionLanguage->compile($transformerCallable, ['value' => 'source', 'context']);
+                } catch (SyntaxError $e) {
+                    throw new BadMapDefinitionException(sprintf('Transformer "%s" targeted by %s transformer on class "%s" is not valid.', $transformerCallable, $attribute::class, $class), 0, $e);
+                }
+
+                $transformer = new ExpressionLanguageTransformer($expression);
             } else {
                 throw new BadMapDefinitionException(sprintf('Callable "%s" targeted by %s transformer on class "%s" is not valid.', json_encode($transformerCallable), $attribute::class, $class));
             }

@@ -11,10 +11,12 @@ use AutoMapper\Loader\ClassLoaderInterface;
 use AutoMapper\Loader\EvalLoader;
 use AutoMapper\Loader\FileLoader;
 use AutoMapper\Metadata\MetadataRegistry;
+use AutoMapper\Symfony\ExpressionLanguageProvider;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
@@ -42,6 +44,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         private readonly ClassLoaderInterface $classLoader,
         private readonly PropertyTransformerRegistry $propertyTransformerRegistry,
         private readonly MetadataRegistry $metadataRegistry,
+        private readonly ?ExpressionLanguageProvider $expressionLanguageProvider = null,
     ) {
     }
 
@@ -74,6 +77,10 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
 
         $mapper->injectMappers($this);
         $mapper->setPropertyTransformers($this->propertyTransformerRegistry->getPropertyTransformers());
+
+        if (null !== $this->expressionLanguageProvider) {
+            $mapper->setExpressionLanguageProvider($this->expressionLanguageProvider);
+        }
 
         /** @var GeneratedMapper<Source, Target>|GeneratedMapper<array<mixed>, Target>|GeneratedMapper<Source, array<mixed>> */
         return $this->mapperRegistry[$className];
@@ -126,6 +133,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         AdvancedNameConverterInterface $nameConverter = null,
         array $transformerFactories = [],
         iterable $propertyTransformers = [],
+        ExpressionLanguageProvider $expressionLanguageProvider = null,
     ): self {
         if (class_exists(AttributeLoader::class)) {
             $loaderClass = new AttributeLoader();
@@ -133,6 +141,12 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
             $loaderClass = new AnnotationLoader(new AnnotationReader());
         } else {
             $loaderClass = null;
+        }
+
+        $expressionLanguage = new ExpressionLanguage();
+
+        if (null !== $expressionLanguageProvider) {
+            $expressionLanguage->registerProvider($expressionLanguageProvider);
         }
 
         $classMetadataFactory = null;
@@ -144,11 +158,12 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         }
 
         $customTransformerRegistry = new PropertyTransformerRegistry($propertyTransformers);
-        $metadataRegistry = MetadataRegistry::create($configuration, $customTransformerRegistry, $transformerFactories, $classMetadataFactory, $nameConverter);
+        $metadataRegistry = MetadataRegistry::create($configuration, $customTransformerRegistry, $transformerFactories, $classMetadataFactory, $nameConverter, $expressionLanguage);
 
         $mapperGenerator = new MapperGenerator(
             new ClassDiscriminatorResolver($classDiscriminatorFromClassMetadata),
             $configuration,
+            $expressionLanguage,
         );
 
         if (null === $cacheDirectory) {
@@ -157,6 +172,6 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
             $loader = new FileLoader($mapperGenerator, $metadataRegistry, $cacheDirectory);
         }
 
-        return new self($loader, $customTransformerRegistry, $metadataRegistry);
+        return new self($loader, $customTransformerRegistry, $metadataRegistry, $expressionLanguageProvider);
     }
 }

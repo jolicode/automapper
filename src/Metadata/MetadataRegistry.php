@@ -36,6 +36,7 @@ use AutoMapper\Transformer\TransformerFactoryInterface;
 use AutoMapper\Transformer\UniqueTypeTransformerFactory;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\PropertyInfo\Extractor\PhpStanExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
@@ -232,6 +233,7 @@ final class MetadataRegistry
         array $transformerFactories = [],
         ClassMetadataFactory $classMetadataFactory = null,
         AdvancedNameConverterInterface $nameConverter = null,
+        ExpressionLanguage $expressionLanguage = new ExpressionLanguage(),
     ): self {
         // Create property info extractors
         $flags = ReflectionExtractor::ALLOW_PUBLIC;
@@ -255,8 +257,8 @@ final class MetadataRegistry
         }
 
         $eventDispatcher->addListener(PropertyMetadataEvent::class, new MapToContextListener($reflectionExtractor));
-        $eventDispatcher->addListener(GenerateMapperEvent::class, new MapToListener($customTransformerRegistry));
-        $eventDispatcher->addListener(GenerateMapperEvent::class, new MapFromListener($customTransformerRegistry));
+        $eventDispatcher->addListener(GenerateMapperEvent::class, new MapToListener($customTransformerRegistry, $expressionLanguage));
+        $eventDispatcher->addListener(GenerateMapperEvent::class, new MapFromListener($customTransformerRegistry, $expressionLanguage));
 
         $propertyInfoExtractor = new PropertyInfoExtractor(
             listExtractors: [$reflectionExtractor],

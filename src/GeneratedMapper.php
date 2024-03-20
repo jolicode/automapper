@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper;
 
+use AutoMapper\Symfony\ExpressionLanguageProvider;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 
 /**
@@ -38,6 +39,8 @@ abstract class GeneratedMapper implements MapperInterface
     /** @var array<string, PropertyTransformerInterface> */
     protected array $transformers = [];
 
+    protected ?ExpressionLanguageProvider $expressionLanguageProvider = null;
+
     /**
      * Inject sub mappers.
      */
@@ -61,5 +64,10 @@ abstract class GeneratedMapper implements MapperInterface
     public function setPropertyTransformers(array $transformers): void
     {
         $this->transformers = $transformers;
+    }
+
+    public function setExpressionLanguageProvider(ExpressionLanguageProvider $expressionLanguageProvider): void
+    {
+        $this->expressionLanguageProvider = $expressionLanguageProvider;
     }
 }

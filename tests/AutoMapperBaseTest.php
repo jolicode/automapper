@@ -6,6 +6,7 @@ namespace AutoMapper\Tests;
 
 use AutoMapper\AutoMapper;
 use AutoMapper\Configuration;
+use AutoMapper\Symfony\ExpressionLanguageProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -29,19 +30,26 @@ abstract class AutoMapperBaseTest extends TestCase
         string $classPrefix = 'Mapper_',
         array $transformerFactories = [],
         array $propertyTransformers = [],
-        string $dateTimeFormat = \DateTimeInterface::RFC3339
+        string $dateTimeFormat = \DateTimeInterface::RFC3339,
+        ?ExpressionLanguageProvider $expressionLanguageProvider = null,
     ): AutoMapper {
-        $fs = new Filesystem();
-        $fs->remove(__DIR__ . '/cache/');
+        //        $fs = new Filesystem();
+        //        $fs->remove(__DIR__ . '/cache/');
 
         $configuration = new Configuration(
             classPrefix: $classPrefix,
             allowConstructor: $allowConstructor,
             dateTimeFormat: $dateTimeFormat,
             mapPrivateProperties: $mapPrivatePropertiesAndMethod,
-            allowReadOnlyTargetToPopulate: $allowReadOnlyTargetToPopulate
+            allowReadOnlyTargetToPopulate: $allowReadOnlyTargetToPopulate,
         );
 
-        return $this->autoMapper = AutoMapper::create($configuration, cacheDirectory: __DIR__ . '/cache/', transformerFactories: $transformerFactories, propertyTransformers: $propertyTransformers);
+        return $this->autoMapper = AutoMapper::create(
+            $configuration,
+            cacheDirectory: __DIR__ . '/cache/',
+            transformerFactories: $transformerFactories,
+            propertyTransformers: $propertyTransformers,
+            expressionLanguageProvider: $expressionLanguageProvider,
+        );
     }
 }

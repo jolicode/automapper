@@ -8,6 +8,7 @@ use AutoMapper\Attribute\MapTo;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\TransformerWithDependency;
 
 #[MapTo('array', name: 'externalProperty', transformer: 'transformExternalProperty', groups: ['group1'])]
+#[MapTo('array', name: 'transformWithExpressionFunction', transformer: "transformerWithDependency().transform('foo', source, context)")]
 class FooMapTo
 {
     public function __construct(
@@ -17,6 +18,7 @@ class FooMapTo
         #[MapTo('array', name: 'transformFromStringInstance', transformer: 'transformFromStringInstance')]
         #[MapTo('array', name: 'transformFromStringStatic', transformer: 'transformFromStringStatic')]
         #[MapTo('array', name: 'transformFromCustomTransformerService', transformer: TransformerWithDependency::class)]
+        #[MapTo('array', name: 'transformFromExpressionLanguage', transformer: "source.foo === 'foo' ? 'transformed' : 'not transformed'")]
         public string $foo
     ) {
     }

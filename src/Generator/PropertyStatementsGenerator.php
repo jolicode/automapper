@@ -22,7 +22,7 @@ final readonly class PropertyStatementsGenerator
     private PropertyConditionsGenerator $propertyConditionsGenerator;
 
     public function __construct(
-        ExpressionLanguage $expressionLanguage = new ExpressionLanguage()
+        ExpressionLanguage $expressionLanguage
     ) {
         $this->propertyConditionsGenerator = new PropertyConditionsGenerator($expressionLanguage);
     }

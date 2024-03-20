@@ -28,7 +28,7 @@ final readonly class MapMethodStatementsGenerator
     public function __construct(
         DiscriminatorStatementsGenerator $discriminatorStatementsGenerator,
         CachedReflectionStatementsGenerator $cachedReflectionStatementsGenerator,
-        ExpressionLanguage $expressionLanguage = new ExpressionLanguage(),
+        ExpressionLanguage $expressionLanguage,
         private bool $allowReadOnlyTargetToPopulate = false,
     ) {
         $this->createObjectStatementsGenerator = new CreateTargetStatementsGenerator(

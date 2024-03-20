@@ -15,6 +15,7 @@ return static function (ContainerConfigurator $container) {
             ->args([
                 service(ClassDiscriminatorResolver::class),
                 service(Configuration::class),
+                service('automapper.expression_language'),
             ])
 
         ->set(ClassDiscriminatorResolver::class)
