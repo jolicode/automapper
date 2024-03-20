@@ -21,6 +21,7 @@ use AutoMapper\Tests\Fixtures\BuiltinClass;
 use AutoMapper\Tests\Fixtures\ClassWithMapToContextAttribute;
 use AutoMapper\Tests\Fixtures\ClassWithNullablePropertyInConstructor;
 use AutoMapper\Tests\Fixtures\ClassWithPrivateProperty;
+use AutoMapper\Tests\Fixtures\DifferentSetterGetterType;
 use AutoMapper\Tests\Fixtures\Fish;
 use AutoMapper\Tests\Fixtures\FooGenerator;
 use AutoMapper\Tests\Fixtures\HasDateTime;
@@ -38,6 +39,7 @@ use AutoMapper\Tests\Fixtures\Order;
 use AutoMapper\Tests\Fixtures\PetOwner;
 use AutoMapper\Tests\Fixtures\Transformer\MoneyTransformerFactory;
 use AutoMapper\Tests\Fixtures\Uninitialized;
+use AutoMapper\Tests\Fixtures\UserPromoted;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Attribute\Ignore;
@@ -1337,5 +1339,24 @@ class AutoMapperTest extends AutoMapperBaseTest
         $user = $this->autoMapper->map($userDto, 'array');
 
         self::assertSame([0, 1], $user['times']);
+    }
+
+    public function testDifferentSetterGetterType(): void
+    {
+        $object = new DifferentSetterGetterType(AddressType::FLAT);
+        $array = $this->autoMapper->map($object, 'array');
+
+        self::assertSame(['address' => 'flat', 'addressDocBlock' => 'flat'], $array);
+    }
+
+    public function testPromoted(): void
+    {
+        $address = new AddressDTO();
+        $address->city = 'city';
+
+        $object = new UserPromoted([$address, $address]);
+        $array = $this->autoMapper->map($object, 'array');
+
+        self::assertSame(['addresses' => [['city' => 'city'], ['city' => 'city']]], $array);
     }
 }

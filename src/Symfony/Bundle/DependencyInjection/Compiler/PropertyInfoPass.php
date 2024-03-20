@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Symfony\Bundle\DependencyInjection\Compiler;
 
+use AutoMapper\Extractor\ReadWriteTypeExtractor;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -36,6 +37,14 @@ class PropertyInfoPass implements CompilerPassInterface
         );
 
         $container->setDefinition(
+            'automapper.property_info.read_write_type_extractor',
+            new Definition(
+                ReadWriteTypeExtractor::class,
+                []
+            )
+        );
+
+        $container->setDefinition(
             'automapper.property_info',
             new Definition(
                 PropertyInfoExtractor::class,
@@ -44,6 +53,7 @@ class PropertyInfoPass implements CompilerPassInterface
                         new Reference('automapper.property_info.reflection_extractor'),
                     ]),
                     new IteratorArgument([
+                        new Reference('automapper.property_info.read_write_type_extractor'),
                         new Reference('property_info.phpstan_extractor'),
                         new Reference('automapper.property_info.reflection_extractor'),
                     ]),
