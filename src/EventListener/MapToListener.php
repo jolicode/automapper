@@ -25,8 +25,8 @@ final readonly class MapToListener extends MapListener
         $properties = $event->mapperMetadata->sourceReflectionClass->getProperties();
         $methods = $event->mapperMetadata->sourceReflectionClass->getMethods();
 
-        foreach ([...$properties, ...$methods] as $reflectionPropertyOrMethod) {
-            $mapToAttributes = $reflectionPropertyOrMethod->getAttributes(MapTo::class);
+        foreach ([$event->mapperMetadata->sourceReflectionClass, ...$properties, ...$methods] as $reflectionClassOrPropertyOrMethod) {
+            $mapToAttributes = $reflectionClassOrPropertyOrMethod->getAttributes(MapTo::class);
 
             if (0 === \count($mapToAttributes)) {
                 continue;
@@ -35,10 +35,25 @@ final readonly class MapToListener extends MapListener
             foreach ($mapToAttributes as $mapToAttribute) {
                 /** @var MapTo $mapToAttributeInstance */
                 $mapToAttributeInstance = $mapToAttribute->newInstance();
-                $name = $reflectionPropertyOrMethod instanceof \ReflectionMethod ? $this->getPropertyName($reflectionPropertyOrMethod->getName(), $properties) : $reflectionPropertyOrMethod->getName();
+
+                if ($reflectionClassOrPropertyOrMethod instanceof \ReflectionClass) {
+                    if ($mapToAttributeInstance->name === null) {
+                        throw new BadMapDefinitionException(sprintf('Required `name` property in the "%s" attribute on "%s" class.', MapTo::class, $reflectionClassOrPropertyOrMethod->getName()));
+                    }
+
+                    if ($mapToAttributeInstance->transformer === null) {
+                        throw new BadMapDefinitionException(sprintf('Required `transformer` property in the "%s" attribute on "%s" class.', MapTo::class, $reflectionClassOrPropertyOrMethod->getName()));
+                    }
+
+                    $name = $mapToAttributeInstance->name;
+                } elseif ($reflectionClassOrPropertyOrMethod instanceof \ReflectionMethod) {
+                    $name = $this->getPropertyName($reflectionClassOrPropertyOrMethod->getName(), $properties);
+                } else {
+                    $name = $reflectionClassOrPropertyOrMethod->getName();
+                }
 
                 if (null === $name) {
-                    $name = $reflectionPropertyOrMethod->getName();
+                    $name = $reflectionClassOrPropertyOrMethod->getName();
                 }
 
                 $this->addPropertyFromSource($event, $mapToAttributeInstance, $name);

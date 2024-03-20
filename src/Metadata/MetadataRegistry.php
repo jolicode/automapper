@@ -208,16 +208,12 @@ final class MetadataRegistry
                 $propertyMappedEvent->transformer = $transformer;
             }
 
-            if (null === $propertyMappedEvent->ignored) {
-                $propertyMappedEvent->ignored = false;
-            }
-
             $propertiesMapping[] = new PropertyMetadata(
                 $sourcePropertyMetadata,
                 $targetPropertyMetadata,
                 $propertyMappedEvent->types,
                 $propertyMappedEvent->transformer,
-                $propertyMappedEvent->ignored,
+                $propertyMappedEvent->ignored ?? false,
                 $propertyMappedEvent->maxDepth,
                 $propertyMappedEvent->if,
             );

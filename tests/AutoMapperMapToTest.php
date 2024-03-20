@@ -41,6 +41,7 @@ class AutoMapperMapToTest extends AutoMapperBaseTest
         $this->assertArrayNotHasKey('a', $bar);
         $this->assertSame('foo', $bar['baz']);
         $this->assertSame('foo', $bar['foo']);
+        $this->assertSame('external', $bar['externalProperty']);
         $this->assertSame('transformFromIsCallable_foo', $bar['transformFromIsCallable']);
         $this->assertSame('transformFromStringInstance_foo', $bar['transformFromStringInstance']);
         $this->assertSame('transformFromStringStatic_foo', $bar['transformFromStringStatic']);
@@ -51,7 +52,6 @@ class AutoMapperMapToTest extends AutoMapperBaseTest
         $this->assertSame('if', $bar['ifCallableOther']);
 
         $foo = new FooMapTo('bar');
-        $this->autoMapper->bindCustomTransformer(new TransformerWithDependency(new FooDependency()));
         $bar = $this->autoMapper->map($foo, 'array');
 
         $this->assertIsArray($bar);

@@ -6,6 +6,7 @@ namespace AutoMapper\Transformer\PropertyTransformer;
 
 use AutoMapper\Generator\UniqueVariableScope;
 use AutoMapper\Metadata\PropertyMetadata;
+use AutoMapper\Transformer\AllowNullValueTransformerInterface;
 use AutoMapper\Transformer\TransformerInterface;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
@@ -14,7 +15,7 @@ use PhpParser\Node\Scalar;
 /**
  * @internal
  */
-final readonly class PropertyTransformer implements TransformerInterface
+final readonly class PropertyTransformer implements TransformerInterface, AllowNullValueTransformerInterface
 {
     public function __construct(
         private string $propertyTransformerId,

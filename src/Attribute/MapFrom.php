@@ -7,7 +7,7 @@ namespace AutoMapper\Attribute;
 /**
  * Configures a property to map from.
  */
-#[\Attribute(\Attribute::TARGET_PROPERTY | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
+#[\Attribute(\Attribute::TARGET_PROPERTY | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE | \Attribute::TARGET_CLASS)]
 final readonly class MapFrom
 {
     /**
