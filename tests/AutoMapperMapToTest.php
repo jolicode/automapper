@@ -31,8 +31,9 @@ class AutoMapperMapToTest extends AutoMapperBaseTest
 
     public function testMapToArray()
     {
+        $this->buildAutoMapper(propertyTransformers: [new TransformerWithDependency(new FooDependency())]);
+
         $foo = new FooMapTo('foo');
-        $this->autoMapper->bindCustomTransformer(new TransformerWithDependency(new FooDependency()));
         $bar = $this->autoMapper->map($foo, 'array');
 
         $this->assertIsArray($bar);

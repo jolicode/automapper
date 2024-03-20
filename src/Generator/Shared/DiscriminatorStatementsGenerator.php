@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace AutoMapper\Generator\Shared;
 
 use AutoMapper\Metadata\GeneratorMetadata;
-use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformer;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformer;
 use AutoMapper\Transformer\TransformerInterface;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
+use PhpParser\Node\Name;
 use PhpParser\Node\Scalar;
 use PhpParser\Node\Stmt;
 
@@ -90,12 +91,13 @@ final readonly class DiscriminatorStatementsGenerator
 
         $variableRegistry = $metadata->variableRegistry;
         $fieldValueExpr = $propertyMetadata->source->accessor?->getExpression($variableRegistry->getSourceInput());
+
         if (null === $fieldValueExpr) {
-            if (!($propertyMetadata->transformer instanceof CustomPropertyTransformer)) {
+            if (!($propertyMetadata->transformer instanceof PropertyTransformer)) {
                 return [];
             }
 
-            $fieldValueExpr = $variableRegistry->getSourceInput();
+            $fieldValueExpr = new Expr\ConstFetch(new Name('null'));
         }
 
         // Generate the code that allows to put the type into the output variable,

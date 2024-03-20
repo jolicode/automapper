@@ -12,7 +12,7 @@ use AutoMapper\Extractor\WriteMutator;
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
  *
- * @internal
+ * @experimental
  */
 final readonly class TargetPropertyMetadata
 {

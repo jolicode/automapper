@@ -8,11 +8,9 @@ use AutoMapper\Attribute\MapFrom;
 use AutoMapper\Attribute\MapTo;
 use AutoMapper\Exception\BadMapDefinitionException;
 use AutoMapper\Transformer\CallableTransformer;
-use AutoMapper\Transformer\CustomTransformer\CustomModelTransformer;
-use AutoMapper\Transformer\CustomTransformer\CustomModelTransformerInterface;
-use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformer;
-use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformerInterface;
-use AutoMapper\Transformer\CustomTransformer\CustomTransformersRegistry;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformer;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
 use AutoMapper\Transformer\TransformerInterface;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\String\Inflector\EnglishInflector;
@@ -24,7 +22,7 @@ use Symfony\Component\String\Inflector\InflectorInterface;
 abstract readonly class MapListener
 {
     public function __construct(
-        private CustomTransformersRegistry $customTransformersRegistry,
+        private PropertyTransformerRegistry $propertyTransformerRegistry,
         private InflectorInterface $inflector = new EnglishInflector(),
     ) {
     }
@@ -44,14 +42,8 @@ abstract readonly class MapListener
                 throw new BadMapDefinitionException('Closure transformer is not supported.');
             }
 
-            if (\is_string($transformerCallable) && $customTransformer = $this->customTransformersRegistry->getCustomTransformer($transformerCallable)) {
-                if ($customTransformer instanceof CustomModelTransformerInterface) {
-                    $transformer = new CustomModelTransformer($transformerCallable);
-                }
-
-                if ($customTransformer instanceof CustomPropertyTransformerInterface) {
-                    $transformer = new CustomPropertyTransformer($transformerCallable);
-                }
+            if (\is_string($transformerCallable) && ($customTransformer = $this->propertyTransformerRegistry->getPropertyTransformer($transformerCallable)) && $customTransformer instanceof PropertyTransformerInterface) {
+                $transformer = new PropertyTransformer($transformerCallable);
             } elseif (\is_callable($transformerCallable, false, $callableName)) {
                 $transformer = new CallableTransformer($callableName);
             } elseif (\is_string($transformerCallable)) {

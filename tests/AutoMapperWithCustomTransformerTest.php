@@ -14,7 +14,7 @@ use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\FromSourceCustomMode
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\FromSourceCustomPropertyTransformer;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\FromTargetCustomModelTransformer;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\FromTargetCustomPropertyTransformer;
-use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\PrioritizedFromSourceCustomPriorityTransformer;
+use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\PrioritizedFromSourcePropertyPriorityTransformer;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\SourceTargetCustomModelTransformer;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\SourceTargetCustomPropertyTransformer;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\SourceTargetMultiFieldsCustomPropertyTransformer;
@@ -26,10 +26,10 @@ class AutoMapperWithCustomTransformerTest extends AutoMapperBaseTest
 {
     public function testFromSourceCanUseCustomTransformer(): void
     {
-        $this->buildAutoMapper(classPrefix: 'FromSourceCustomTransformer_');
-
-        $this->autoMapper->bindCustomTransformer(new FromSourceCustomModelTransformer());
-        $this->autoMapper->bindCustomTransformer(new FromSourceCustomPropertyTransformer());
+        $this->buildAutoMapper(classPrefix: 'FromSourceCustomTransformer_', propertyTransformers: [
+            new FromSourceCustomModelTransformer(),
+            new FromSourceCustomPropertyTransformer(),
+        ]);
 
         $mapped = $this->autoMapper->map(self::createUserDTO(), 'array');
         self::assertSame(
@@ -48,10 +48,10 @@ class AutoMapperWithCustomTransformerTest extends AutoMapperBaseTest
 
     public function testPrioritizedCustomTransformer(): void
     {
-        $this->buildAutoMapper(classPrefix: 'PrioritizedCustomTransformer_');
-
-        $this->autoMapper->bindCustomTransformer(new FromSourceCustomModelTransformer());
-        $this->autoMapper->bindCustomTransformer(new PrioritizedFromSourceCustomPriorityTransformer());
+        $this->buildAutoMapper(classPrefix: 'PrioritizedCustomTransformer_', propertyTransformers: [
+            new FromSourceCustomModelTransformer(),
+            new PrioritizedFromSourcePropertyPriorityTransformer(),
+        ]);
 
         self::assertSame(
             'address with city "city DTO"',
@@ -61,10 +61,10 @@ class AutoMapperWithCustomTransformerTest extends AutoMapperBaseTest
 
     public function testFromTargetCanUseCustomTransformer(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'FromTargetCustomTransformer_');
-
-        $this->autoMapper->bindCustomTransformer(new FromTargetCustomModelTransformer());
-        $this->autoMapper->bindCustomTransformer(new FromTargetCustomPropertyTransformer());
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'FromTargetCustomTransformer_', propertyTransformers: [
+            new FromTargetCustomModelTransformer(),
+            new FromTargetCustomPropertyTransformer(),
+        ]);
 
         self::assertEquals(
             self::createUserDTO('name DTO from custom property transformer', 'city DTO from custom model transformer'),
@@ -85,10 +85,10 @@ class AutoMapperWithCustomTransformerTest extends AutoMapperBaseTest
      */
     public function testFromSourceToTargetCanUseCustomTransformer(string|object $target): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'SourceTargetCustomTransformer_');
-
-        $this->autoMapper->bindCustomTransformer(new SourceTargetCustomModelTransformer());
-        $this->autoMapper->bindCustomTransformer(new SourceTargetCustomPropertyTransformer());
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'SourceTargetCustomTransformer_', propertyTransformers: [
+            new SourceTargetCustomModelTransformer(),
+            new SourceTargetCustomPropertyTransformer(),
+        ]);
 
         $mappedUser = $this->autoMapper->map(self::createUserDTO(), $target);
 
@@ -106,9 +106,9 @@ class AutoMapperWithCustomTransformerTest extends AutoMapperBaseTest
 
     public function testFromSourceToTargetMultipleFieldsTransformation(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'SourceTargetMultiFieldsCustomPropertyTransformer_');
-
-        $this->autoMapper->bindCustomTransformer(new SourceTargetMultiFieldsCustomPropertyTransformer());
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'SourceTargetMultiFieldsCustomPropertyTransformer_', propertyTransformers: [
+            new SourceTargetMultiFieldsCustomPropertyTransformer(),
+        ]);
 
         $birthDateDateTime = $this->autoMapper->map(
             new BirthDateExploded(year: 1985, month: 07, day: 01),
@@ -121,8 +121,9 @@ class AutoMapperWithCustomTransformerTest extends AutoMapperBaseTest
     public function testCustomTransformerWithDependency(): void
     {
         $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'TransformerWithDependency');
-
-        $this->autoMapper->bindCustomTransformer(new TransformerWithDependency(new FooDependency()));
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'TransformerWithDependency', propertyTransformers: [
+            new TransformerWithDependency(new FooDependency()),
+        ]);
 
         $source = new CityFoo();
         $source->name = 'foo';

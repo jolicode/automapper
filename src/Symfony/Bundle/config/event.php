@@ -10,7 +10,7 @@ use AutoMapper\EventListener\MapFromListener;
 use AutoMapper\EventListener\MapToContextListener;
 use AutoMapper\EventListener\MapToListener;
 use AutoMapper\EventListener\Symfony\AdvancedNameConverterListener;
-use AutoMapper\Transformer\CustomTransformer\CustomTransformersRegistry;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
 use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
 
 return static function (ContainerConfigurator $container) {
@@ -19,10 +19,10 @@ return static function (ContainerConfigurator $container) {
             ->args([service('automapper.property_info.reflection_extractor')])
             ->tag('kernel.event_listener', ['event' => PropertyMetadataEvent::class, 'priority' => 64])
         ->set(MapToListener::class)
-            ->args([service(CustomTransformersRegistry::class)])
+            ->args([service(PropertyTransformerRegistry::class)])
             ->tag('kernel.event_listener', ['event' => GenerateMapperEvent::class, 'priority' => 64])
         ->set(MapFromListener::class)
-            ->args([service(CustomTransformersRegistry::class)])
+            ->args([service(PropertyTransformerRegistry::class)])
             ->tag('kernel.event_listener', ['event' => GenerateMapperEvent::class, 'priority' => 32])
 
         ->set(AdvancedNameConverterListener::class)

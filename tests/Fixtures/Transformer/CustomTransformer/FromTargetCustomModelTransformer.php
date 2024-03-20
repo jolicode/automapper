@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Fixtures\Transformer\CustomTransformer;
 
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
 use AutoMapper\Metadata\TypesMatching;
 use AutoMapper\Tests\Fixtures\AddressDTO;
-use AutoMapper\Transformer\CustomTransformer\CustomModelTransformerInterface;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerSupportInterface;
 use Symfony\Component\PropertyInfo\Type;
 
-final readonly class FromTargetCustomModelTransformer implements CustomModelTransformerInterface
+final readonly class FromTargetCustomModelTransformer implements PropertyTransformerInterface, PropertyTransformerSupportInterface
 {
-    public function supports(TypesMatching $types): bool
+    public function supports(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool
     {
         $sourceUniqueType = $types->getSourceUniqueType();
 
@@ -22,13 +26,10 @@ final readonly class FromTargetCustomModelTransformer implements CustomModelTran
         return $sourceUniqueType->getBuiltinType() === 'array' && $this->targetIsAddressDTO($types[$sourceUniqueType] ?? []);
     }
 
-    /**
-     * @param array $source
-     */
-    public function transform(object|array $source): mixed
+    public function transform(mixed $value, object|array $source, array $context): mixed
     {
         $addressDTO = new AddressDTO();
-        $addressDTO->city = "{$source['city']} from custom model transformer";
+        $addressDTO->city = "{$value['city']} from custom model transformer";
 
         return $addressDTO;
     }

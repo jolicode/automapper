@@ -4,20 +4,22 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Fixtures\Transformer\CustomTransformer;
 
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
+use AutoMapper\Metadata\TypesMatching;
 use AutoMapper\Tests\Fixtures\UserDTO;
-use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformerInterface;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerSupportInterface;
 
-final readonly class FromTargetCustomPropertyTransformer implements CustomPropertyTransformerInterface
+final readonly class FromTargetCustomPropertyTransformer implements PropertyTransformerInterface, PropertyTransformerSupportInterface
 {
-    public function supports(string $source, string $target, string $sourceProperty, string $targetProperty): bool
+    public function supports(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool
     {
-        return $source === 'array' && $target === UserDTO::class && $sourceProperty === 'name';
+        return $mapperMetadata->source === 'array' && $mapperMetadata->target === UserDTO::class && $source->name === 'name';
     }
 
-    /**
-     * @param array $source
-     */
-    public function transform(object|array $source): mixed
+    public function transform(mixed $value, object|array $source, array $context): mixed
     {
         return "{$source['name']} from custom property transformer";
     }

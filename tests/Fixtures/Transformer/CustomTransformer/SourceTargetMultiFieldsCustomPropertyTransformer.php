@@ -4,21 +4,23 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Fixtures\Transformer\CustomTransformer;
 
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
+use AutoMapper\Metadata\TypesMatching;
 use AutoMapper\Tests\Fixtures\BirthDateDateTime;
 use AutoMapper\Tests\Fixtures\BirthDateExploded;
-use AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformerInterface;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerSupportInterface;
 
-final readonly class SourceTargetMultiFieldsCustomPropertyTransformer implements CustomPropertyTransformerInterface
+final readonly class SourceTargetMultiFieldsCustomPropertyTransformer implements PropertyTransformerInterface, PropertyTransformerSupportInterface
 {
-    public function supports(string $source, string $target, string $sourceProperty, string $targetProperty): bool
+    public function supports(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool
     {
-        return $source === BirthDateExploded::class && $target === BirthDateDateTime::class && $targetProperty === 'date';
+        return $mapperMetadata->source === BirthDateExploded::class && $mapperMetadata->target === BirthDateDateTime::class && $target->name === 'date';
     }
 
-    /**
-     * @param BirthDateExploded $source
-     */
-    public function transform(mixed $source): \DateTimeImmutable
+    public function transform(mixed $value, array|object $source, array $context): \DateTimeImmutable
     {
         return new \DateTimeImmutable("{$source->year}-{$source->month}-{$source->day}");
     }

@@ -13,7 +13,10 @@ automapper:
 services:
   _defaults:
     autoconfigure: true
+    autowire: true
 
   DummyApp\YearOfBirthTransformer: ~
+  dummy_app.year_of_birth_transformer:
+    class: DummyApp\YearOfBirthTransformer
   DummyApp\IdNameConverter: ~
   AutoMapper\Tests\Bundle\Resources\App\Transformer\ArrayToMoneyTransformer: ~

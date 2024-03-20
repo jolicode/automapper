@@ -10,7 +10,7 @@ use AutoMapper\EventListener\Symfony\AdvancedNameConverterListener;
 use AutoMapper\Loader\FileLoader;
 use AutoMapper\Symfony\Bundle\CacheWarmup\CacheWarmerLoaderInterface;
 use AutoMapper\Symfony\Bundle\CacheWarmup\ConfigurationCacheWarmerLoader;
-use AutoMapper\Transformer\CustomTransformer\CustomTransformerInterface;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 use AutoMapper\Transformer\SymfonyUidTransformerFactory;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\FileLocator;
@@ -59,7 +59,7 @@ class AutoMapperExtension extends Extension
         ;
 
         $container->getDefinition(FileLoader::class)->replaceArgument(3, $config['hot_reload']);
-        $container->registerForAutoconfiguration(CustomTransformerInterface::class)->addTag('automapper.custom_transformer');
+        $container->registerForAutoconfiguration(PropertyTransformerInterface::class)->addTag('automapper.property_transformer');
 
         if (class_exists(AbstractUid::class)) {
             $container
