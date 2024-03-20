@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Tests;
 
 use AutoMapper\Exception\BadMapDefinitionException;
+use AutoMapper\MapperContext;
 use AutoMapper\Tests\Fixtures\MapTo\BadMapTo;
 use AutoMapper\Tests\Fixtures\MapTo\BadMapToTransformer;
 use AutoMapper\Tests\Fixtures\MapTo\Bar;
@@ -41,7 +42,6 @@ class AutoMapperMapToTest extends AutoMapperBaseTest
         $this->assertArrayNotHasKey('a', $bar);
         $this->assertSame('foo', $bar['baz']);
         $this->assertSame('foo', $bar['foo']);
-        $this->assertSame('external', $bar['externalProperty']);
         $this->assertSame('transformFromIsCallable_foo', $bar['transformFromIsCallable']);
         $this->assertSame('transformFromStringInstance_foo', $bar['transformFromStringInstance']);
         $this->assertSame('transformFromStringStatic_foo', $bar['transformFromStringStatic']);
@@ -67,6 +67,25 @@ class AutoMapperMapToTest extends AutoMapperBaseTest
         $this->assertSame('transformFromStringInstance_bar', $bar['transformFromStringInstance']);
         $this->assertSame('transformFromStringStatic_bar', $bar['transformFromStringStatic']);
         $this->assertSame('bar', $bar['transformFromCustomTransformerService']);
+    }
+
+    public function testMapToArrayGroups()
+    {
+        $this->buildAutoMapper(propertyTransformers: [new TransformerWithDependency(new FooDependency())]);
+
+        $foo = new FooMapTo('foo');
+        $bar = $this->autoMapper->map($foo, 'array');
+
+        self::assertArrayNotHasKey('externalProperty', $bar);
+
+        $bar = $this->autoMapper->map($foo, 'array', [MapperContext::GROUPS => ['group1']]);
+
+        self::assertArrayHasKey('externalProperty', $bar);
+        self::assertSame('external', $bar['externalProperty']);
+
+        $bar = $this->autoMapper->map($foo, 'array', [MapperContext::GROUPS => ['group2']]);
+
+        self::assertArrayNotHasKey('externalProperty', $bar);
     }
 
     public function testMapFromArray()

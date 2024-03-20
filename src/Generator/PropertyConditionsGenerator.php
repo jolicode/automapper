@@ -8,15 +8,19 @@ use AutoMapper\MapperContext;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\PropertyMetadata;
 use PhpParser\Node\Arg;
-use PhpParser\Node\ArrayItem as NewArrayItem;
+use PhpParser\Node\ArrayItem;
 use PhpParser\Node\Expr;
-use PhpParser\Node\Expr\ArrayItem as OldArrayItem;
 use PhpParser\Node\Name;
 use PhpParser\Node\Scalar;
 use PhpParser\Node\Stmt;
 use PhpParser\Parser;
 use PhpParser\ParserFactory;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+
+// compatibility with nikic/php-parser 4.x
+if (!class_exists(ArrayItem::class) && class_exists(Expr\ArrayItem::class)) {
+    class_alias(Expr\ArrayItem::class, ArrayItem::class);
+}
 
 /**
  * We generate a list of conditions that will allow the field to be mapped to the target.
@@ -41,8 +45,9 @@ final readonly class PropertyConditionsGenerator
         $conditions[] = $this->propertyExistsForStdClass($metadata, $propertyMetadata);
         $conditions[] = $this->propertyExistsForArray($metadata, $propertyMetadata);
         $conditions[] = $this->isAllowedAttribute($metadata, $propertyMetadata);
-        $conditions[] = $this->sourceGroupsCheck($metadata, $propertyMetadata);
-        $conditions[] = $this->targetGroupsCheck($metadata, $propertyMetadata);
+        $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->groups); // Property groups
+        $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->source->groups); // Source groups
+        $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->target->groups); // Target groups
         $conditions[] = $this->noGroupsCheck($metadata, $propertyMetadata);
         $conditions[] = $this->maxDepthCheck($metadata, $propertyMetadata);
         $conditions[] = $this->customCondition($metadata, $propertyMetadata);
@@ -132,25 +137,18 @@ final readonly class PropertyConditionsGenerator
     }
 
     /**
-     * When there are groups associated to the source property we check if the context has the same groups.
+     * When there is groups associated we check if the context has the same groups.
      *
      * ```php
      * (null !== $context[MapperContext::GROUPS] ?? null && array_intersect($context[MapperContext::GROUPS] ?? [], ['group1', 'group2']))
      * ```
+     *
+     * @param string[]|null $groups
      */
-    private function sourceGroupsCheck(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
+    private function groupsCheck(VariableRegistry $variableRegistry, ?array $groups = []): ?Expr
     {
-        if (!$propertyMetadata->source->groups) {
+        if (!$groups) {
             return null;
-        }
-
-        $variableRegistry = $metadata->variableRegistry;
-
-        // compatibility with old versions of nikic/php-parser
-        if (class_exists(NewArrayItem::class)) {
-            $arrayItemClass = NewArrayItem::class;
-        } else {
-            $arrayItemClass = OldArrayItem::class;
         }
 
         return new Expr\BinaryOp\BooleanAnd(
@@ -168,53 +166,9 @@ final readonly class PropertyConditionsGenerator
                         new Expr\Array_()
                     )
                 ),
-                new Arg(new Expr\Array_(array_map(function (string $group) use ($arrayItemClass) {
-                    return new $arrayItemClass(new Scalar\String_($group));
-                }, $propertyMetadata->source->groups))),
-            ])
-        );
-    }
-
-    /**
-     * When there is groups associated to the target property we check if the context has the same groups.
-     *
-     * ```php
-     * (null !== $context[MapperContext::GROUPS] ?? null && array_intersect($context[MapperContext::GROUPS] ?? [], ['group1', 'group2']))
-     * ```
-     */
-    private function targetGroupsCheck(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
-    {
-        if (!$propertyMetadata->target->groups) {
-            return null;
-        }
-
-        $variableRegistry = $metadata->variableRegistry;
-
-        // compatibility with old versions of nikic/php-parser
-        if (class_exists(NewArrayItem::class)) {
-            $arrayItemClass = NewArrayItem::class;
-        } else {
-            $arrayItemClass = OldArrayItem::class;
-        }
-
-        return new Expr\BinaryOp\BooleanAnd(
-            new Expr\BinaryOp\NotIdentical(
-                new Expr\ConstFetch(new Name('null')),
-                new Expr\BinaryOp\Coalesce(
-                    new Expr\ArrayDimFetch($variableRegistry->getContext(), new Scalar\String_(MapperContext::GROUPS)),
-                    new Expr\Array_()
-                )
-            ),
-            new Expr\FuncCall(new Name('array_intersect'), [
-                new Arg(
-                    new Expr\BinaryOp\Coalesce(
-                        new Expr\ArrayDimFetch($variableRegistry->getContext(), new Scalar\String_(MapperContext::GROUPS)),
-                        new Expr\Array_()
-                    )
-                ),
-                new Arg(new Expr\Array_(array_map(function (string $group) use ($arrayItemClass) {
-                    return new $arrayItemClass(new Scalar\String_($group));
-                }, $propertyMetadata->target->groups))),
+                new Arg(new Expr\Array_(array_map(function (string $group) {
+                    return new ArrayItem(new Scalar\String_($group));
+                }, $groups))),
             ])
         );
     }
@@ -228,7 +182,7 @@ final readonly class PropertyConditionsGenerator
      */
     private function noGroupsCheck(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
     {
-        if ($propertyMetadata->target->groups || $propertyMetadata->source->groups) {
+        if ($propertyMetadata->groups || $propertyMetadata->target->groups || $propertyMetadata->source->groups) {
             return null;
         }
 

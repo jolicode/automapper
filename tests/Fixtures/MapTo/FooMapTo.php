@@ -7,7 +7,7 @@ namespace AutoMapper\Tests\Fixtures\MapTo;
 use AutoMapper\Attribute\MapTo;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\TransformerWithDependency;
 
-#[MapTo('array', name: 'externalProperty', transformer: 'transformExternalProperty')]
+#[MapTo('array', name: 'externalProperty', transformer: 'transformExternalProperty', groups: ['group1'])]
 class FooMapTo
 {
     public function __construct(

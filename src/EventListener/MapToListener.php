@@ -78,6 +78,7 @@ final readonly class MapToListener extends MapListener
             transformer: $this->getTransformerFromMapAttribute($event->mapperMetadata->source, $mapTo),
             ignored: $mapTo->ignore,
             if: $mapTo->if,
+            groups: $mapTo->groups,
         );
 
         if (\array_key_exists($property->target->name, $event->properties)) {
