@@ -90,12 +90,14 @@ class AutoMapperMapToTest extends AutoMapperBaseTest
 
     public function testMapFromArray()
     {
-        $foo = ['b' => 'foo', 'bar' => 'bar', 'baz' => 'baz', 'foo' => 'foo'];
+        $foo = ['b' => 'foo', 'bar' => 'bar', 'baz' => 'baz', 'foo' => 'foo', 'c' => 'foo', 'd' => 'foo'];
         $bar = $this->autoMapper->map($foo, Bar::class);
 
         $this->assertSame('bar', $bar->bar);
         $this->assertSame('baz', $bar->baz);
         $this->assertSame('foo', $bar->from);
+        $this->assertSame('transformC_foo', $bar->c);
+        $this->assertSame('transformDStatic_foo', $bar->d);
         $this->assertSame('', $bar->getB());
     }
 

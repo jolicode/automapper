@@ -27,7 +27,7 @@ abstract readonly class MapListener
     ) {
     }
 
-    protected function getTransformerFromMapAttribute(string $class, MapTo|MapFrom $attribute): ?TransformerInterface
+    protected function getTransformerFromMapAttribute(string $class, MapTo|MapFrom $attribute, bool $fromSource = true): ?TransformerInterface
     {
         $transformer = null;
 
@@ -61,7 +61,7 @@ abstract readonly class MapListener
                 if ($reflMethod->isStatic()) {
                     $transformer = new CallableTransformer($class . '::' . $transformerCallable);
                 } else {
-                    $transformer = new CallableTransformer($transformerCallable, true);
+                    $transformer = new CallableTransformer($transformerCallable, $fromSource, !$fromSource);
                 }
             } else {
                 throw new BadMapDefinitionException(sprintf('Callable "%s" targeted by %s transformer on class "%s" is not valid.', json_encode($transformerCallable), $attribute::class, $class));
