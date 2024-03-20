@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Generator\Shared;
 
 use AutoMapper\Metadata\GeneratorMetadata;
-use AutoMapper\Transformer\PropertyTransformer\PropertyTransformer;
+use AutoMapper\Transformer\AllowNullValueTransformerInterface;
 use AutoMapper\Transformer\TransformerInterface;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
@@ -93,7 +93,7 @@ final readonly class DiscriminatorStatementsGenerator
         $fieldValueExpr = $propertyMetadata->source->accessor?->getExpression($variableRegistry->getSourceInput());
 
         if (null === $fieldValueExpr) {
-            if (!($propertyMetadata->transformer instanceof PropertyTransformer)) {
+            if (!($propertyMetadata->transformer instanceof AllowNullValueTransformerInterface)) {
                 return [];
             }
 

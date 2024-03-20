@@ -7,8 +7,8 @@ namespace AutoMapper\Generator;
 use AutoMapper\Extractor\WriteMutator;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\PropertyMetadata;
+use AutoMapper\Transformer\AllowNullValueTransformerInterface;
 use AutoMapper\Transformer\AssignedByReferenceTransformerInterface;
-use AutoMapper\Transformer\PropertyTransformer\PropertyTransformer;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt;
@@ -32,7 +32,7 @@ final readonly class PropertyStatementsGenerator
      */
     public function generate(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): array
     {
-        if ($propertyMetadata->shouldIgnoreProperty()) {
+        if ($propertyMetadata->ignored) {
             return [];
         }
 
@@ -40,7 +40,7 @@ final readonly class PropertyStatementsGenerator
         $fieldValueExpr = $propertyMetadata->source->accessor?->getExpression($variableRegistry->getSourceInput());
 
         if (null === $fieldValueExpr) {
-            if (!($propertyMetadata->transformer instanceof PropertyTransformer)) {
+            if (!($propertyMetadata->transformer instanceof AllowNullValueTransformerInterface)) {
                 return [];
             }
 

@@ -20,14 +20,9 @@ final class PropertyMetadata
         public readonly TargetPropertyMetadata $target,
         public readonly TypesMatching $types,
         public TransformerInterface $transformer,
-        public bool $isIgnored = false,
+        public bool $ignored = false,
         public ?int $maxDepth = null,
         public ?string $if = null,
     ) {
-    }
-
-    public function shouldIgnoreProperty(): bool
-    {
-        return !$this->target->writeMutator || $this->isIgnored;
     }
 }

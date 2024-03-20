@@ -9,7 +9,7 @@ use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
 use AutoMapper\MapperContext;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\PropertyMetadata;
-use AutoMapper\Transformer\PropertyTransformer\PropertyTransformer;
+use AutoMapper\Transformer\AllowNullValueTransformerInterface;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
@@ -200,7 +200,7 @@ final readonly class CreateTargetStatementsGenerator
         $fieldValueExpr = $propertyMetadata->source->accessor?->getExpression($variableRegistry->getSourceInput());
 
         if (null === $fieldValueExpr) {
-            if (!($propertyMetadata->transformer instanceof PropertyTransformer)) {
+            if (!($propertyMetadata->transformer instanceof AllowNullValueTransformerInterface)) {
                 return null;
             }
 

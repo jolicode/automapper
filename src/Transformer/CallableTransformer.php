@@ -13,7 +13,7 @@ use PhpParser\Node\Scalar;
 /**
  * @internal
  */
-class CallableTransformer implements TransformerInterface
+class CallableTransformer implements TransformerInterface, AllowNullValueTransformerInterface
 {
     public function __construct(
         private string $callable,

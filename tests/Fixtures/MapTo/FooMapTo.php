@@ -7,6 +7,7 @@ namespace AutoMapper\Tests\Fixtures\MapTo;
 use AutoMapper\Attribute\MapTo;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\TransformerWithDependency;
 
+#[MapTo('array', name: 'externalProperty', transformer: 'transformExternalProperty')]
 class FooMapTo
 {
     public function __construct(
@@ -66,5 +67,10 @@ class FooMapTo
     public function shouldMapNotStatic(): bool
     {
         return $this->foo === 'foo';
+    }
+
+    public function transformExternalProperty($value)
+    {
+        return 'external';
     }
 }
