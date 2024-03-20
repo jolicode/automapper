@@ -6,12 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+## [8.2.2] - 2024-03-19
 ### Added
 - [GH#54](https://github.com/jolicode/automapper/pull/54) Introduce `MapperContext::DATETIME_FORCE_TIMEZONE`
 
 ### Fixed
 - [GH#55](https://github.com/jolicode/automapper/pull/55) Remove most of deprecations in tests
 - [GH#69](https://github.com/jolicode/automapper/pull/69) Allow to handle union types with several objects
+
+### Documentation
+- [GH#64](https://github.com/jolicode/automapper/pull/64) Use poetry to run and build documentation
 
 ## [8.2.1] - 2024-03-11
 ### Changed
@@ -219,7 +223,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * [AutoMapper] [GH#179](https://github.com/janephp/janephp/pull/179) Fixing incompatible changes in Symfony 5.0
 
-[Unreleased]: https://github.com/jolicode/automapper/compare/8.2.1...HEAD
+[Unreleased]: https://github.com/jolicode/automapper/compare/8.2.2...HEAD
+[8.2.2]: https://github.com/janephp/janephp/compare/8.2.1...8.2.2
 [8.2.1]: https://github.com/janephp/janephp/compare/8.2.0...8.2.1
 [8.2.0]: https://github.com/janephp/janephp/compare/8.1.0...8.2.0
 [8.1.0]: https://github.com/janephp/janephp/compare/8.0.2...8.1.0
