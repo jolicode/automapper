@@ -17,6 +17,11 @@ use Symfony\Component\PropertyInfo\Type;
 use Symfony\Component\PropertyInfo\Util\PhpStanTypeHelper;
 
 /**
+ * Add helper functions to extract types from a property.
+ *
+ * This trait is a temporary fix for the lack of a proper way to extract types from only an accessor or mutator in symfony,
+ * a proper fix would be to use the PropertyInfo component from symfony in this case.
+ *
  * @internal
  */
 trait GetTypeTrait

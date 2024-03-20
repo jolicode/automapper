@@ -7,6 +7,11 @@ namespace AutoMapper\Extractor;
 use Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface;
 
 /**
+ * Allow to extract types from accessor or mutator.
+ *
+ * This extractor is a temporary fix for the lack of a proper way to extract types from only an accessor or mutator in
+ * symfony, a proper fix would be to use the PropertyInfo component from symfony in this case.
+ *
  * @internal
  */
 final readonly class ReadWriteTypeExtractor implements PropertyTypeExtractorInterface
