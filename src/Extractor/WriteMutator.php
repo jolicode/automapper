@@ -173,6 +173,18 @@ final class WriteMutator
             try {
                 $reflectionProperty = new \ReflectionProperty($target, $this->name);
 
+                if ($reflectionProperty->isPromoted()) {
+                    if ($types = $this->extractFromDocBlock(
+                        $reflectionProperty->getDeclaringClass()->getConstructor()?->getDocComment(),
+                        $target,
+                        $reflectionProperty->getDeclaringClass()->getName(),
+                        $this->name,
+                        '@param'
+                    )) {
+                        return $types;
+                    }
+                }
+
                 if ($types = $this->extractFromDocBlock(
                     $reflectionProperty->getDocComment(),
                     $target,

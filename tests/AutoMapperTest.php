@@ -39,6 +39,7 @@ use AutoMapper\Tests\Fixtures\Order;
 use AutoMapper\Tests\Fixtures\PetOwner;
 use AutoMapper\Tests\Fixtures\Transformer\MoneyTransformerFactory;
 use AutoMapper\Tests\Fixtures\Uninitialized;
+use AutoMapper\Tests\Fixtures\UserPromoted;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Attribute\Ignore;
@@ -1346,5 +1347,16 @@ class AutoMapperTest extends AutoMapperBaseTest
         $array = $this->autoMapper->map($object, 'array');
 
         self::assertSame(['address' => 'flat', 'addressDocBlock' => 'flat'], $array);
+    }
+
+    public function testPromoted(): void
+    {
+        $address = new AddressDTO();
+        $address->city = 'city';
+
+        $object = new UserPromoted([$address, $address]);
+        $array = $this->autoMapper->map($object, 'array');
+
+        self::assertSame(['addresses' => [['city' => 'city'], ['city' => 'city']]], $array);
     }
 }

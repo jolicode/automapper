@@ -24,9 +24,9 @@ trait GetTypeTrait
     /**
      * @return Type[]
      */
-    private function extractFromDocBlock(string|false $rawDocNode, string $class, string $declaringClass, string $property, string $tagName): ?array
+    private function extractFromDocBlock(string|false|null $rawDocNode, string $class, string $declaringClass, string $property, string $tagName): ?array
     {
-        if (false === $rawDocNode) {
+        if (!$rawDocNode) {
             return null;
         }
 

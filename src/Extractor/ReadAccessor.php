@@ -318,6 +318,18 @@ final class ReadAccessor
             try {
                 $reflectionProperty = new \ReflectionProperty($class, $this->accessor);
 
+                if ($reflectionProperty->isPromoted()) {
+                    if ($types = $this->extractFromDocBlock(
+                        $reflectionProperty->getDeclaringClass()->getConstructor()?->getDocComment(),
+                        $class,
+                        $reflectionProperty->getDeclaringClass()->getName(),
+                        $this->accessor,
+                        '@param'
+                    )) {
+                        return $types;
+                    }
+                }
+
                 if ($types = $this->extractFromDocBlock(
                     $reflectionProperty->getDocComment(),
                     $class,
