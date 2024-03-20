@@ -23,6 +23,15 @@ class FooMapTo
     #[MapTo('array', if: 'source.foo == "foo"')]
     public string $if = 'if';
 
+    #[MapTo('array', if: 'shouldMapStatic')]
+    public string $ifCallableStatic = 'if';
+
+    #[MapTo('array', if: 'shouldMapNotStatic')]
+    public string $ifCallable = 'if';
+
+    #[MapTo('array', if: 'is_object')]
+    public string $ifCallableOther = 'if';
+
     #[MapTo('array', ignore: true)]
     public function getA(): string
     {
@@ -47,5 +56,15 @@ class FooMapTo
     public static function transformFromStringStatic($value)
     {
         return 'transformFromStringStatic_' . $value;
+    }
+
+    public static function shouldMapStatic($source): bool
+    {
+        return $source->foo === 'foo';
+    }
+
+    public function shouldMapNotStatic(): bool
+    {
+        return $this->foo === 'foo';
     }
 }
