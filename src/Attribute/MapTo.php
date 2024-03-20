@@ -17,6 +17,7 @@ final readonly class MapTo
      * @param string|callable(mixed $value, object $object): mixed|null $transformer A transformer id or a callable that transform the value during mapping
      * @param bool|null                                                 $ignore      if true, the property will be ignored during mapping
      * @param string|null                                               $if          The condition to map the property, using the expression language
+     * @param string[]|null                                             $groups      The groups to map the property
      */
     public function __construct(
         public ?string $target = null,
@@ -25,6 +26,7 @@ final readonly class MapTo
         public mixed $transformer = null,
         public ?bool $ignore = null,
         public ?string $if = null,
+        public ?array $groups = null,
     ) {
     }
 }

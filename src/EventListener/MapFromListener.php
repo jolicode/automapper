@@ -77,6 +77,7 @@ final readonly class MapFromListener extends MapListener
             transformer: $this->getTransformerFromMapAttribute($event->mapperMetadata->target, $mapFrom),
             ignored: $mapFrom->ignore,
             if: $mapFrom->if,
+            groups: $mapFrom->groups,
         );
 
         if (\array_key_exists($property->target->name, $event->properties)) {

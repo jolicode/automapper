@@ -76,11 +76,6 @@ parameters:
 			path: ../../src/Generator/CreateTargetStatementsGenerator.php
 
 		-
-			message: "#^Parameter \\#1 \\$items of class PhpParser\\\\Node\\\\Expr\\\\Array_ constructor expects array\\<PhpParser\\\\Node\\\\ArrayItem\\>, array\\<PhpParser\\\\Node\\\\ArrayItem\\|PhpParser\\\\Node\\\\Expr\\\\ArrayItem\\> given\\.$#"
-			count: 2
-			path: ../../src/Generator/PropertyConditionsGenerator.php
-
-		-
 			message: "#^Method AutoMapper\\\\Loader\\\\FileLoader\\:\\:addHashToRegistry\\(\\) has parameter \\$className with no type specified\\.$#"
 			count: 1
 			path: ../../src/Loader/FileLoader.php

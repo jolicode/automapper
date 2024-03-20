@@ -216,6 +216,7 @@ final class MetadataRegistry
                 $propertyMappedEvent->ignored ?? false,
                 $propertyMappedEvent->maxDepth,
                 $propertyMappedEvent->if,
+                $propertyMappedEvent->groups,
             );
         }
 

@@ -13,6 +13,9 @@ use AutoMapper\Transformer\TransformerInterface;
  */
 final class PropertyMetadataEvent
 {
+    /**
+     * @param string[]|null $groups
+     */
     public function __construct(
         public readonly MapperMetadata $mapperMetadata,
         public readonly SourcePropertyMetadata $source,
@@ -22,6 +25,7 @@ final class PropertyMetadataEvent
         public ?TransformerInterface $transformer = null,
         public ?bool $ignored = null,
         public ?string $if = null,
+        public ?array $groups = null,
     ) {
     }
 }

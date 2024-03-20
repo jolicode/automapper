@@ -15,6 +15,9 @@ use AutoMapper\Transformer\TransformerInterface;
  */
 final class PropertyMetadata
 {
+    /**
+     * @param string[]|null $groups
+     */
     public function __construct(
         public readonly SourcePropertyMetadata $source,
         public readonly TargetPropertyMetadata $target,
@@ -23,6 +26,7 @@ final class PropertyMetadata
         public bool $ignored = false,
         public ?int $maxDepth = null,
         public ?string $if = null,
+        public ?array $groups = null,
     ) {
     }
 }
