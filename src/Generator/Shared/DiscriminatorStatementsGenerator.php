@@ -23,6 +23,7 @@ final readonly class DiscriminatorStatementsGenerator
 {
     public function __construct(
         private ClassDiscriminatorResolver $classDiscriminatorResolver,
+        private bool $fromSource,
     ) {
     }
 
@@ -35,7 +36,7 @@ final readonly class DiscriminatorStatementsGenerator
             return [];
         }
 
-        $discriminatorMapperNames = $this->classDiscriminatorResolver->discriminatorMapperNames($metadata);
+        $discriminatorMapperNames = $this->classDiscriminatorResolver->discriminatorMapperNames($metadata, $this->fromSource);
 
         $injectMapperStatements = [];
 
@@ -56,8 +57,8 @@ final readonly class DiscriminatorStatementsGenerator
                         new Scalar\String_($discriminatorMapperName)
                     ),
                     new Expr\MethodCall(new Expr\Variable('autoMapperRegistry'), 'getMapper', [
-                        new Arg(new Scalar\String_($metadata->mapperMetadata->source)),
-                        new Arg(new Scalar\String_($typeTarget)),
+                        new Arg(new Scalar\String_($this->fromSource ? $typeTarget : $metadata->mapperMetadata->source)),
+                        new Arg(new Scalar\String_($this->fromSource ? $metadata->mapperMetadata->target : $typeTarget)),
                     ])
                 )
             );
@@ -83,7 +84,7 @@ final readonly class DiscriminatorStatementsGenerator
             return [];
         }
 
-        $propertyMetadata = $this->classDiscriminatorResolver->getDiscriminatorPropertyMetadata($metadata);
+        $propertyMetadata = $this->classDiscriminatorResolver->getDiscriminatorPropertyMetadata($metadata, $this->fromSource);
 
         if (!$propertyMetadata) {
             return [];
@@ -110,7 +111,7 @@ final readonly class DiscriminatorStatementsGenerator
             $variableRegistry->getSourceInput()
         );
 
-        foreach ($this->classDiscriminatorResolver->discriminatorMapperNamesIndexedByTypeValue($metadata) as $typeValue => $discriminatorMapperName) {
+        foreach ($this->classDiscriminatorResolver->discriminatorMapperNamesIndexedByTypeValue($metadata, $this->fromSource) as $typeValue => $discriminatorMapperName) {
             $createObjectStatements[] = new Stmt\If_(
                 new Expr\BinaryOp\Identical(new Scalar\String_($typeValue), $output),
                 [
@@ -138,11 +139,11 @@ final readonly class DiscriminatorStatementsGenerator
 
     private function supports(GeneratorMetadata $metadata): bool
     {
-        if (!$this->classDiscriminatorResolver->hasClassDiscriminator($metadata)) {
+        if (!$this->classDiscriminatorResolver->hasClassDiscriminator($metadata, $this->fromSource)) {
             return false;
         }
 
-        $propertyMetadata = $this->classDiscriminatorResolver->getDiscriminatorPropertyMetadata($metadata);
+        $propertyMetadata = $this->classDiscriminatorResolver->getDiscriminatorPropertyMetadata($metadata, $this->fromSource);
 
         return $propertyMetadata && $propertyMetadata->transformer instanceof TransformerInterface;
     }

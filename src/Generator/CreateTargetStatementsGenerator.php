@@ -26,7 +26,8 @@ final readonly class CreateTargetStatementsGenerator
     private Parser $parser;
 
     public function __construct(
-        private DiscriminatorStatementsGenerator $discriminatorStatementsGenerator,
+        private DiscriminatorStatementsGenerator $discriminatorStatementsGeneratorSource,
+        private DiscriminatorStatementsGenerator $discriminatorStatementsGeneratorTarget,
         private CachedReflectionStatementsGenerator $cachedReflectionStatementsGenerator,
         ?Parser $parser = null,
     ) {
@@ -49,7 +50,8 @@ final readonly class CreateTargetStatementsGenerator
         $createObjectStatements[] = $this->targetAsArray($metadata);
         $createObjectStatements[] = $this->sourceAndTargetAsStdClass($metadata);
         $createObjectStatements[] = $this->targetAsStdClass($metadata);
-        $createObjectStatements = [...$createObjectStatements, ...$this->discriminatorStatementsGenerator->createTargetStatements($metadata)];
+        $createObjectStatements = [...$createObjectStatements, ...$this->discriminatorStatementsGeneratorSource->createTargetStatements($metadata)];
+        $createObjectStatements = [...$createObjectStatements, ...$this->discriminatorStatementsGeneratorTarget->createTargetStatements($metadata)];
         $createObjectStatements = [...$createObjectStatements, ...$this->constructorArguments($metadata)];
         $createObjectStatements[] = $this->cachedReflectionStatementsGenerator->createTargetStatement($metadata);
         $createObjectStatements[] = $this->constructorWithoutArgument($metadata);

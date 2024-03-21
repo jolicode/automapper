@@ -26,13 +26,15 @@ final readonly class MapMethodStatementsGenerator
     private PropertyStatementsGenerator $propertyStatementsGenerator;
 
     public function __construct(
-        DiscriminatorStatementsGenerator $discriminatorStatementsGenerator,
+        DiscriminatorStatementsGenerator $discriminatorStatementsGeneratorSource,
+        DiscriminatorStatementsGenerator $discriminatorStatementsGeneratorTarget,
         CachedReflectionStatementsGenerator $cachedReflectionStatementsGenerator,
         ExpressionLanguage $expressionLanguage,
         private bool $allowReadOnlyTargetToPopulate = false,
     ) {
         $this->createObjectStatementsGenerator = new CreateTargetStatementsGenerator(
-            $discriminatorStatementsGenerator,
+            $discriminatorStatementsGeneratorSource,
+            $discriminatorStatementsGeneratorTarget,
             $cachedReflectionStatementsGenerator,
         );
         $this->propertyStatementsGenerator = new PropertyStatementsGenerator($expressionLanguage);

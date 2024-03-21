@@ -22,6 +22,7 @@ use AutoMapper\Tests\Fixtures\ClassWithMapToContextAttribute;
 use AutoMapper\Tests\Fixtures\ClassWithNullablePropertyInConstructor;
 use AutoMapper\Tests\Fixtures\ClassWithPrivateProperty;
 use AutoMapper\Tests\Fixtures\DifferentSetterGetterType;
+use AutoMapper\Tests\Fixtures\Dog;
 use AutoMapper\Tests\Fixtures\Fish;
 use AutoMapper\Tests\Fixtures\FooGenerator;
 use AutoMapper\Tests\Fixtures\HasDateTime;
@@ -927,7 +928,7 @@ class AutoMapperTest extends AutoMapperBaseTest
         $petOwner = [
             'pets' => [
                 ['type' => 'cat', 'name' => 'Félix'],
-                ['type' => 'dog', 'name' => 'Coco'],
+                ['type' => 'dog', 'name' => 'Coco', 'bark' => 'Wouf'],
             ],
         ];
 
@@ -939,6 +940,7 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertSame('cat', $petOwnerData->getPets()[0]->type);
         self::assertSame('Coco', $petOwnerData->getPets()[1]->name);
         self::assertSame('dog', $petOwnerData->getPets()[1]->type);
+        self::assertSame('Wouf', $petOwnerData->getPets()[1]->bark);
     }
 
     public function testAdderAndRemoverWithInstance(): void
@@ -1388,5 +1390,28 @@ class AutoMapperTest extends AutoMapperBaseTest
 
         self::assertNotEquals('Mapper_MongoDBODMProxies___PM___AutoMapper_Tests_Fixtures_Proxy_Generated_array', $mapper::class);
         self::assertEquals('Mapper_AutoMapper_Tests_Fixtures_Proxy_array', $mapper::class);
+    }
+
+    public function testDiscriminantToArray(): void
+    {
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+
+        $dog = new Dog();
+        $dog->bark = 'Wouf';
+        $dog->type = 'dog';
+        $dog->name = 'Coco';
+
+        $petOwner = new PetOwner();
+        $petOwner->addPet($dog);
+
+        $dog->owner = $petOwner;
+
+        $petOwnerData = $this->autoMapper->map($petOwner, 'array');
+
+        self::assertIsArray($petOwnerData['pets']);
+        self::assertCount(1, $petOwnerData['pets']);
+        self::assertSame('Coco', $petOwnerData['pets'][0]['name']);
+        self::assertSame('dog', $petOwnerData['pets'][0]['type']);
+        self::assertSame('Wouf', $petOwnerData['pets'][0]['bark']);
     }
 }
