@@ -50,6 +50,10 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
             return false;
         }
 
+        if (is_iterable($data)) {
+            return false;
+        }
+
         return true;
     }
 
