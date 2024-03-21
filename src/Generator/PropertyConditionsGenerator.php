@@ -32,7 +32,7 @@ final readonly class PropertyConditionsGenerator
     private Parser $parser;
 
     public function __construct(
-        private ExpressionLanguage $expressionLanguage = new ExpressionLanguage(),
+        private ExpressionLanguage $expressionLanguage,
         Parser $parser = null,
     ) {
         $this->parser = $parser ?? (new ParserFactory())->createForHostVersion();
@@ -247,7 +247,9 @@ final readonly class PropertyConditionsGenerator
                             new Arg(new Expr\Variable('value')),
                         ]
                     );
-                } elseif ($argumentsCount > 2) {
+                }
+
+                if ($argumentsCount > 2) {
                     throw new \LogicException('Callable condition must have 1 or 2 arguments required, but it has ' . $argumentsCount);
                 }
             }
@@ -259,7 +261,9 @@ final readonly class PropertyConditionsGenerator
                     new Arg(new Expr\Variable('context')),
                 ]
             );
-        } elseif ($metadata->mapperMetadata->sourceReflectionClass !== null && $metadata->mapperMetadata->sourceReflectionClass->hasMethod($propertyMetadata->if)) {
+        }
+
+        if ($metadata->mapperMetadata->sourceReflectionClass !== null && $metadata->mapperMetadata->sourceReflectionClass->hasMethod($propertyMetadata->if)) {
             $reflectionMethod = $metadata->mapperMetadata->sourceReflectionClass->getMethod($propertyMetadata->if);
 
             if ($reflectionMethod->isStatic()) {

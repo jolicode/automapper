@@ -10,6 +10,7 @@ use AutoMapper\Tests\Bundle\Fixtures\AddressDTO;
 use AutoMapper\Tests\Bundle\Fixtures\ClassWithMapToContextAttribute;
 use AutoMapper\Tests\Bundle\Fixtures\ClassWithPrivateProperty;
 use AutoMapper\Tests\Bundle\Fixtures\DTOWithEnum;
+use AutoMapper\Tests\Bundle\Fixtures\FooMapTo;
 use AutoMapper\Tests\Bundle\Fixtures\SomeEnum;
 use AutoMapper\Tests\Bundle\Fixtures\User;
 use AutoMapper\Tests\Bundle\Fixtures\UserDTO;
@@ -22,7 +23,7 @@ class ServiceInstantiationTest extends WebTestCase
     {
         static::$class = null;
         $_SERVER['KERNEL_DIR'] = __DIR__ . '/Resources/App';
-        $_SERVER['KERNEL_CLASS'] = 'DummyApp\AppKernel';
+        $_SERVER['KERNEL_CLASS'] = 'AutoMapper\Tests\Bundle\Resources\App\AppKernel';
 
         (new Filesystem())->remove(__DIR__ . '/Resources/var/cache/test');
     }
@@ -144,5 +145,30 @@ class ServiceInstantiationTest extends WebTestCase
                 [MapperContext::MAP_TO_ACCESSOR_PARAMETER => ['suffix' => 'baz', 'prefix' => 'foo']]
             )
         );
+    }
+
+    public function testMapTo()
+    {
+        static::bootKernel();
+        $container = static::$kernel->getContainer();
+        $autoMapper = $container->get(AutoMapperInterface::class);
+
+        $foo = new FooMapTo('foo');
+        $bar = $autoMapper->map($foo, 'array');
+
+        $this->assertIsArray($bar);
+        $this->assertArrayNotHasKey('bar', $bar);
+        $this->assertArrayNotHasKey('a', $bar);
+        $this->assertSame('foo', $bar['baz']);
+        $this->assertSame('foo', $bar['foo']);
+        $this->assertSame('transformFromIsCallable_foo', $bar['transformFromIsCallable']);
+        $this->assertSame('transformFromStringInstance_foo', $bar['transformFromStringInstance']);
+        $this->assertSame('transformFromStringStatic_foo', $bar['transformFromStringStatic']);
+        $this->assertSame('if', $bar['if']);
+        $this->assertSame('if', $bar['ifCallableStatic']);
+        $this->assertSame('if', $bar['ifCallable']);
+        $this->assertSame('if', $bar['ifCallableOther']);
+        $this->assertSame('transformed', $bar['transformFromExpressionLanguage']);
+        $this->assertSame('foo', $bar['transformWithExpressionFunction']);
     }
 }

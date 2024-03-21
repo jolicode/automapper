@@ -37,7 +37,7 @@ final readonly class MapperGenerator
     public function __construct(
         ClassDiscriminatorResolver $classDiscriminatorResolver,
         Configuration $configuration,
-        ExpressionLanguage $expressionLanguage = new ExpressionLanguage()
+        ExpressionLanguage $expressionLanguage,
     ) {
         $this->mapperConstructorGenerator = new MapperConstructorGenerator(
             $cachedReflectionStatementsGenerator = new CachedReflectionStatementsGenerator()

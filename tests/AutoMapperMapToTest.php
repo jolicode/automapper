@@ -6,12 +6,14 @@ namespace AutoMapper\Tests;
 
 use AutoMapper\Exception\BadMapDefinitionException;
 use AutoMapper\MapperContext;
+use AutoMapper\Symfony\ExpressionLanguageProvider;
 use AutoMapper\Tests\Fixtures\MapTo\BadMapTo;
 use AutoMapper\Tests\Fixtures\MapTo\BadMapToTransformer;
 use AutoMapper\Tests\Fixtures\MapTo\Bar;
 use AutoMapper\Tests\Fixtures\MapTo\FooMapTo;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\FooDependency;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\TransformerWithDependency;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
@@ -32,7 +34,11 @@ class AutoMapperMapToTest extends AutoMapperBaseTest
 
     public function testMapToArray()
     {
-        $this->buildAutoMapper(propertyTransformers: [new TransformerWithDependency(new FooDependency())]);
+        $expressionLanguageProvider = new ExpressionLanguageProvider(new ServiceLocator([
+            'transformerWithDependency' => fn () => fn () => new TransformerWithDependency(new FooDependency()),
+        ]));
+
+        $this->buildAutoMapper(propertyTransformers: [new TransformerWithDependency(new FooDependency())], expressionLanguageProvider: $expressionLanguageProvider);
 
         $foo = new FooMapTo('foo');
         $bar = $this->autoMapper->map($foo, 'array');
@@ -50,6 +56,8 @@ class AutoMapperMapToTest extends AutoMapperBaseTest
         $this->assertSame('if', $bar['ifCallableStatic']);
         $this->assertSame('if', $bar['ifCallable']);
         $this->assertSame('if', $bar['ifCallableOther']);
+        $this->assertSame('transformed', $bar['transformFromExpressionLanguage']);
+        $this->assertSame('bar', $bar['transformWithExpressionFunction']);
 
         $foo = new FooMapTo('bar');
         $bar = $this->autoMapper->map($foo, 'array');
@@ -67,11 +75,16 @@ class AutoMapperMapToTest extends AutoMapperBaseTest
         $this->assertSame('transformFromStringInstance_bar', $bar['transformFromStringInstance']);
         $this->assertSame('transformFromStringStatic_bar', $bar['transformFromStringStatic']);
         $this->assertSame('bar', $bar['transformFromCustomTransformerService']);
+        $this->assertSame('not transformed', $bar['transformFromExpressionLanguage']);
     }
 
     public function testMapToArrayGroups()
     {
-        $this->buildAutoMapper(propertyTransformers: [new TransformerWithDependency(new FooDependency())]);
+        $expressionLanguageProvider = new ExpressionLanguageProvider(new ServiceLocator([
+            'transformerWithDependency' => fn () => fn () => new TransformerWithDependency(new FooDependency()),
+        ]));
+
+        $this->buildAutoMapper(propertyTransformers: [new TransformerWithDependency(new FooDependency())], expressionLanguageProvider: $expressionLanguageProvider);
 
         $foo = new FooMapTo('foo');
         $bar = $this->autoMapper->map($foo, 'array');
