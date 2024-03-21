@@ -63,6 +63,17 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
         self::assertFalse($this->normalizer->supportsNormalization(['foo']));
         self::assertFalse($this->normalizer->supportsNormalization('{"foo":1}'));
 
+        $iterator = new class() implements \IteratorAggregate {
+            public function getIterator(): \Traversable
+            {
+                yield 'id' => 1;
+                yield 'name' => 'Jack';
+                yield 'age' => 37;
+            }
+        };
+
+        self::assertFalse($this->normalizer->supportsNormalization($iterator));
+
         $object = new Fixtures\User(1, 'Jack', 37);
         self::assertTrue($this->normalizer->supportsNormalization($object));
 

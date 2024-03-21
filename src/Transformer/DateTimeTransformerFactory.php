@@ -80,7 +80,7 @@ final class DateTimeTransformerFactory extends AbstractUniqueTypeTransformerFact
 
     private function getClassName(Type $type): string
     {
-        if (\DateTimeInterface::class === $type->getClassName()) {
+        if (\DateTimeInterface::class === $type->getClassName() || $type->getClassName() === null) {
             return \DateTimeImmutable::class;
         }
 
