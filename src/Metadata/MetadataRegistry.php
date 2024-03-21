@@ -73,6 +73,9 @@ final class MetadataRegistry
      */
     public function getMapperMetadata(string $source, string $target): MapperMetadata
     {
+        $source = $this->getRealClassName($source);
+        $target = $this->getRealClassName($target);
+
         if (!isset($this->mapperMetadata[$source][$target])) {
             $this->mapperMetadata[$source][$target] = new MapperMetadata($source, $target, $this->configuration->classPrefix);
         }
@@ -317,6 +320,37 @@ final class MetadataRegistry
             $fromTargetMappingExtractor,
             $transformerFactory,
             $eventDispatcher,
+        );
+    }
+
+    /**
+     * @param class-string<object>|'array' $className
+     *
+     * @return class-string<object>|'array'
+     */
+    private function getRealClassName(string $className): string
+    {
+        // __CG__: Doctrine Common Marker for Proxy (ODM < 2.0 and ORM < 3.0)
+        // __PM__: Ocramius Proxy Manager (ODM >= 2.0)
+        $positionCg = strrpos($className, '\\__CG__\\');
+        $positionPm = strrpos($className, '\\__PM__\\');
+
+        if (false === $positionCg && false === $positionPm) {
+            return $className;
+        }
+
+        if (false !== $positionCg) {
+            /** @var class-string<object> */
+            return substr($className, $positionCg + 8);
+        }
+
+        $className = ltrim($className, '\\');
+
+        /** @var class-string<object> */
+        return substr(
+            $className,
+            8 + $positionPm,
+            strrpos($className, '\\') - ($positionPm + 8)
         );
     }
 }

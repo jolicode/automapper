@@ -1359,4 +1359,34 @@ class AutoMapperTest extends AutoMapperBaseTest
 
         self::assertSame(['addresses' => [['city' => 'city'], ['city' => 'city']]], $array);
     }
+
+    public function testDateTimeFromString(): void
+    {
+        $now = new \DateTimeImmutable();
+        $data = ['dateTime' => $now->format(\DateTimeInterface::RFC3339)];
+        $object = $this->autoMapper->map($data, HasDateTime::class);
+
+        self::assertEquals($now->format(\DateTimeInterface::RFC3339), $object->dateTime->format(\DateTimeInterface::RFC3339));
+    }
+
+    public function testRealClassName(): void
+    {
+        require_once __DIR__ . '/Fixtures/proxies.php';
+
+        $proxy = new \Proxies\__CG__\AutoMapper\Tests\Fixtures\Proxy();
+        $proxy->foo = 'bar';
+
+        $mapper = $this->autoMapper->getMapper($proxy::class, 'array');
+
+        self::assertNotEquals('Mapper_Proxies___CG___AutoMapper_Tests_Fixtures_Proxy', $mapper::class);
+        self::assertEquals('Mapper_AutoMapper_Tests_Fixtures_Proxy_array', $mapper::class);
+
+        $proxy = new \MongoDBODMProxies\__PM__\AutoMapper\Tests\Fixtures\Proxy\Generated();
+        $proxy->foo = 'bar';
+
+        $mapper = $this->autoMapper->getMapper($proxy::class, 'array');
+
+        self::assertNotEquals('Mapper_MongoDBODMProxies___PM___AutoMapper_Tests_Fixtures_Proxy_Generated_array', $mapper::class);
+        self::assertEquals('Mapper_AutoMapper_Tests_Fixtures_Proxy_array', $mapper::class);
+    }
 }
