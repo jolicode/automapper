@@ -7,6 +7,8 @@ namespace AutoMapper\Symfony\Bundle\DependencyInjection;
 use AutoMapper\Configuration as AutoMapperConfiguration;
 use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\EventListener\Symfony\AdvancedNameConverterListener;
+use AutoMapper\Loader\ClassLoaderInterface;
+use AutoMapper\Loader\EvalLoader;
 use AutoMapper\Loader\FileLoader;
 use AutoMapper\Symfony\Bundle\CacheWarmup\CacheWarmerLoaderInterface;
 use AutoMapper\Symfony\Bundle\CacheWarmup\ConfigurationCacheWarmerLoader;
@@ -61,6 +63,16 @@ class AutoMapperExtension extends Extension
 
         $container->getDefinition(FileLoader::class)->replaceArgument(3, $config['hot_reload']);
         $container->registerForAutoconfiguration(PropertyTransformerInterface::class)->addTag('automapper.property_transformer');
+
+        if ($config['eval']) {
+            $container
+                ->setAlias(ClassLoaderInterface::class, EvalLoader::class)
+            ;
+        } else {
+            $container
+                ->setAlias(ClassLoaderInterface::class, FileLoader::class)
+            ;
+        }
 
         if (class_exists(AbstractUid::class)) {
             $container
