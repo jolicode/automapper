@@ -33,8 +33,8 @@ abstract class AutoMapperBaseTest extends TestCase
         string $dateTimeFormat = \DateTimeInterface::RFC3339,
         ?ExpressionLanguageProvider $expressionLanguageProvider = null,
     ): AutoMapper {
-        //        $fs = new Filesystem();
-        //        $fs->remove(__DIR__ . '/cache/');
+        $fs = new Filesystem();
+        $fs->remove(__DIR__ . '/cache/');
 
         $configuration = new Configuration(
             classPrefix: $classPrefix,

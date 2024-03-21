@@ -43,6 +43,7 @@ class AutoMapperExtension extends Extension
         $loader->load('automapper.php');
         $loader->load('custom_transformers.php');
         $loader->load('event.php');
+        $loader->load('expression_language.php');
         $loader->load('generator.php');
         $loader->load('metadata.php');
         $loader->load('symfony.php');

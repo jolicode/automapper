@@ -7,7 +7,6 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 use AutoMapper\AutoMapperRegistryInterface;
 use AutoMapper\Symfony\Bundle\CacheWarmup\CacheWarmer;
 use AutoMapper\Symfony\Bundle\CacheWarmup\ConfigurationCacheWarmerLoader;
-use Symfony\Component\DependencyInjection\ExpressionLanguage;
 
 return static function (ContainerConfigurator $container) {
     $container->services()
@@ -24,7 +23,5 @@ return static function (ContainerConfigurator $container) {
                 [], // mappers list from config
             ])
             ->tag('automapper.cache_warmer_loader')
-
-        ->set('automapper.expression_language', ExpressionLanguage::class)
     ;
 };
