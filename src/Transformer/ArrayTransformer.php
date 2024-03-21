@@ -46,7 +46,7 @@ final readonly class ArrayTransformer extends AbstractArrayTransformer implement
         $intScalar = class_exists(Scalar\Int_::class) ? new Scalar\Int_(0) : new Scalar\LNumber(0);
 
         if ($this->itemTransformer instanceof CheckTypeInterface) {
-            $itemCheck = $this->itemTransformer->getCheckExpression(new Expr\ArrayDimFetch($input, $intScalar), $target, $propertyMapping, $uniqueVariableScope, $source);
+            $itemCheck = $this->itemTransformer->getCheckExpression(new Expr\FuncCall(new Name('current'), [new Arg($input)]), $target, $propertyMapping, $uniqueVariableScope, $source);
 
             if ($itemCheck) {
                 return new Expr\BinaryOp\BooleanAnd($isArrayCheck, new Expr\BinaryOp\BooleanOr(
