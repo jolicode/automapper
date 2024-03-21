@@ -56,6 +56,15 @@ final class GeneratorMetadata
         return $this->mapperMetadata->targetReflectionClass->isUserDefined();
     }
 
+    public function isSourceUserDefined(): bool
+    {
+        if (null === $this->mapperMetadata->sourceReflectionClass) {
+            return false;
+        }
+
+        return $this->mapperMetadata->sourceReflectionClass->isUserDefined();
+    }
+
     public function hasConstructor(): bool
     {
         if (!$this->allowConstructor) {

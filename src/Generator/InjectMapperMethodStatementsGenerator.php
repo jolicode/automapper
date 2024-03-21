@@ -30,7 +30,8 @@ use PhpParser\Node\Stmt;
 final readonly class InjectMapperMethodStatementsGenerator
 {
     public function __construct(
-        private DiscriminatorStatementsGenerator $discriminatorStatementsGenerator
+        private DiscriminatorStatementsGenerator $discriminatorStatementsGeneratorSource,
+        private DiscriminatorStatementsGenerator $discriminatorStatementsGeneratorTarget,
     ) {
     }
 
@@ -65,7 +66,8 @@ final readonly class InjectMapperMethodStatementsGenerator
 
         return [
             ...$injectMapperStatements,
-            ...$this->discriminatorStatementsGenerator->injectMapperStatements($metadata),
+            ...$this->discriminatorStatementsGeneratorSource->injectMapperStatements($metadata),
+            ...$this->discriminatorStatementsGeneratorTarget->injectMapperStatements($metadata),
         ];
     }
 }
