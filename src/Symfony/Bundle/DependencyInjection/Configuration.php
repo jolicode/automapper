@@ -21,6 +21,7 @@ readonly class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->scalarNode('class_prefix')->defaultValue('Symfony_Mapper_')->end()
+                ->booleanNode('eval')->defaultFalse()->end()
                 ->booleanNode('allow_constructor')->defaultTrue()->end()
                 ->scalarNode('date_time_format')->defaultValue(\DateTimeInterface::RFC3339)->end()
                 ->booleanNode('check_attributes')->defaultTrue()->end()

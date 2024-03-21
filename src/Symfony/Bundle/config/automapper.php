@@ -41,7 +41,6 @@ return static function (ContainerConfigurator $container) {
                 '%kernel.cache_dir%/automapper',
                 true,
             ])
-            ->alias(ClassLoaderInterface::class, FileLoader::class)
 
         ->set(Configuration::class)
     ;
