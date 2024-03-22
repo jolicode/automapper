@@ -6,6 +6,7 @@ namespace AutoMapper\Tests;
 
 use AutoMapper\AutoMapper;
 use AutoMapper\Configuration;
+use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\Exception\CircularReferenceException;
 use AutoMapper\Exception\NoMappingFoundException;
 use AutoMapper\Exception\ReadOnlyTargetException;
@@ -41,6 +42,7 @@ use AutoMapper\Tests\Fixtures\PetOwner;
 use AutoMapper\Tests\Fixtures\Transformer\MoneyTransformerFactory;
 use AutoMapper\Tests\Fixtures\Uninitialized;
 use AutoMapper\Tests\Fixtures\UserPromoted;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Attribute\Ignore;
@@ -314,6 +316,38 @@ class AutoMapperTest extends AutoMapperBaseTest
 
         self::assertIsArray($fooArray);
         self::assertArrayNotHasKey('id', $fooArray);
+    }
+
+    public function testSkippedGroups(): void
+    {
+        if (!class_exists(Groups::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
+        $eventDispatcher = new EventDispatcher();
+        $eventDispatcher->addListener(PropertyMetadataEvent::class, function (PropertyMetadataEvent $event) {
+            $event->disableGroupsCheck = true;
+        });
+
+        $this->buildAutoMapper(eventDispatcher: $eventDispatcher, classPrefix: 'SkippedGroups_');
+
+        $foo = new Fixtures\Foo();
+        $foo->setId(10);
+
+        $fooArray = $this->autoMapper->map($foo, 'array', [MapperContext::GROUPS => ['group1']]);
+
+        self::assertIsArray($fooArray);
+        self::assertEquals(10, $fooArray['id']);
+
+        $fooArray = $this->autoMapper->map($foo, 'array', [MapperContext::GROUPS => []]);
+
+        self::assertIsArray($fooArray);
+        self::assertEquals(10, $fooArray['id']);
+
+        $fooArray = $this->autoMapper->map($foo, 'array');
+
+        self::assertIsArray($fooArray);
+        self::assertEquals(10, $fooArray['id']);
     }
 
     public function testDeepCloning(): void

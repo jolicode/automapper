@@ -45,10 +45,14 @@ final readonly class PropertyConditionsGenerator
         $conditions[] = $this->propertyExistsForStdClass($metadata, $propertyMetadata);
         $conditions[] = $this->propertyExistsForArray($metadata, $propertyMetadata);
         $conditions[] = $this->isAllowedAttribute($metadata, $propertyMetadata);
-        $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->groups); // Property groups
-        $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->source->groups); // Source groups
-        $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->target->groups); // Target groups
-        $conditions[] = $this->noGroupsCheck($metadata, $propertyMetadata);
+
+        if (!$propertyMetadata->disableGroupsCheck) {
+            $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->groups); // Property groups
+            $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->source->groups); // Source groups
+            $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->target->groups); // Target groups
+            $conditions[] = $this->noGroupsCheck($metadata, $propertyMetadata);
+        }
+
         $conditions[] = $this->maxDepthCheck($metadata, $propertyMetadata);
         $conditions[] = $this->customCondition($metadata, $propertyMetadata);
 

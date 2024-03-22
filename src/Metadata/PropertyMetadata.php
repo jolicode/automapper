@@ -27,6 +27,7 @@ final class PropertyMetadata
         public ?int $maxDepth = null,
         public ?string $if = null,
         public ?array $groups = null,
+        public ?bool $disableGroupsCheck = null,
     ) {
     }
 }

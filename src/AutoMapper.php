@@ -16,6 +16,8 @@ use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
@@ -125,6 +127,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         array $transformerFactories = [],
         iterable $propertyTransformers = [],
         ExpressionLanguageProvider $expressionLanguageProvider = null,
+        EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
     ): self {
         if (class_exists(AttributeLoader::class)) {
             $loaderClass = new AttributeLoader();
@@ -149,7 +152,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         }
 
         $customTransformerRegistry = new PropertyTransformerRegistry($propertyTransformers);
-        $metadataRegistry = MetadataRegistry::create($configuration, $customTransformerRegistry, $transformerFactories, $classMetadataFactory, $nameConverter, $expressionLanguage);
+        $metadataRegistry = MetadataRegistry::create($configuration, $customTransformerRegistry, $transformerFactories, $classMetadataFactory, $nameConverter, $expressionLanguage, $eventDispatcher);
 
         $mapperGenerator = new MapperGenerator(
             new ClassDiscriminatorResolver($classDiscriminatorFromClassMetadata),

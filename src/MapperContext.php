@@ -30,6 +30,7 @@ class MapperContext
     public const DATETIME_FORMAT = 'datetime_format';
     public const DATETIME_FORCE_TIMEZONE = 'datetime_force_timezone';
     public const MAP_TO_ACCESSOR_PARAMETER = 'map_to_accessor_parameter';
+    public const NORMALIZER_FORMAT = 'normalizer_format';
 
     private array $context = [
         self::DEPTH => 0,

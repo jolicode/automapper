@@ -221,6 +221,7 @@ final class MetadataRegistry
                 $propertyMappedEvent->maxDepth,
                 $propertyMappedEvent->if,
                 $propertyMappedEvent->groups,
+                $propertyMappedEvent->disableGroupsCheck,
             );
         }
 
@@ -237,6 +238,7 @@ final class MetadataRegistry
         ClassMetadataFactory $classMetadataFactory = null,
         AdvancedNameConverterInterface $nameConverter = null,
         ExpressionLanguage $expressionLanguage = new ExpressionLanguage(),
+        EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
     ): self {
         // Create property info extractors
         $flags = ReflectionExtractor::ALLOW_PUBLIC;
@@ -247,7 +249,6 @@ final class MetadataRegistry
 
         $reflectionExtractor = new ReflectionExtractor(accessFlags: $flags);
         $phpStanExtractor = new PhpStanExtractor();
-        $eventDispatcher = new EventDispatcher();
 
         if (null !== $nameConverter) {
             $eventDispatcher->addListener(PropertyMetadataEvent::class, new AdvancedNameConverterListener($nameConverter));

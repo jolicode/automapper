@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AutoMapper\Normalizer;
 
 use AutoMapper\AutoMapperInterface;
-use AutoMapper\AutoMapperRegistryInterface;
 use AutoMapper\MapperContext;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
@@ -30,13 +29,13 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
     ];
 
     public function __construct(
-        private AutoMapperInterface&AutoMapperRegistryInterface $autoMapper,
+        private AutoMapperInterface $autoMapper,
     ) {
     }
 
     public function normalize(mixed $object, string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
     {
-        return $this->autoMapper->map($object, 'array', $this->createAutoMapperContext($context));
+        return $this->autoMapper->map($object, 'array', $this->createAutoMapperContext($format, $context));
     }
 
     /**
@@ -48,7 +47,7 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
      */
     public function denormalize(mixed $data, string $type, string $format = null, array $context = []): mixed
     {
-        return $this->autoMapper->map($data, $type, $this->createAutoMapperContext($context));
+        return $this->autoMapper->map($data, $type, $this->createAutoMapperContext($format, $context));
     }
 
     public function supportsNormalization(mixed $data, string $format = null, array $context = []): bool
@@ -74,7 +73,7 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
         return ['object' => true];
     }
 
-    private function createAutoMapperContext(array $serializerContext = []): array
+    private function createAutoMapperContext(string $format = null, array $serializerContext = []): array
     {
         $context = [];
 
@@ -101,6 +100,10 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
             if (!\is_object($context[MapperContext::TARGET_TO_POPULATE]) && !\is_array($context[MapperContext::TARGET_TO_POPULATE])) {
                 unset($context[MapperContext::TARGET_TO_POPULATE]);
             }
+        }
+
+        if ($format !== null) {
+            $context[MapperContext::NORMALIZER_FORMAT] = $format;
         }
 
         return $context + $serializerContext;
