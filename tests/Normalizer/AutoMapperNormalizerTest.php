@@ -133,7 +133,7 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
             }
         );
 
-        $context = $normalizer->normalize(new Fixtures\User(1, 'Jack', 37), 'array', [
+        $context = $normalizer->normalize(new Fixtures\User(1, 'Jack', 37), 'json', [
             AbstractNormalizer::GROUPS => ['foo'],
             AbstractNormalizer::ATTRIBUTES => ['foo'],
             AbstractNormalizer::IGNORED_ATTRIBUTES => ['foo'],
@@ -154,16 +154,19 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
                 MapperContext::CIRCULAR_REFERENCE_LIMIT => 1,
                 MapperContext::CIRCULAR_REFERENCE_HANDLER => 'circular-reference-handler',
                 MapperContext::DATETIME_FORMAT => 'Y-m-d',
+                MapperContext::NORMALIZER_FORMAT => 'json',
                 'custom-context' => 'some custom context',
             ],
             $context
         );
 
-        $context = $normalizer->normalize(new Fixtures\User(1, 'Jack', 37), 'array', [
+        $context = $normalizer->normalize(new Fixtures\User(1, 'Jack', 37), 'json', [
             AbstractNormalizer::OBJECT_TO_POPULATE => 'bad-object',
         ]);
 
-        self::assertSame([], $context);
+        self::assertSame([
+            MapperContext::NORMALIZER_FORMAT => 'json',
+        ], $context);
     }
 
     public function testItUsesSerializerDateFormatBasedOnSerializerContext(): void
