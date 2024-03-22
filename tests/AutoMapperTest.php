@@ -26,6 +26,7 @@ use AutoMapper\Tests\Fixtures\DifferentSetterGetterType;
 use AutoMapper\Tests\Fixtures\Dog;
 use AutoMapper\Tests\Fixtures\Fish;
 use AutoMapper\Tests\Fixtures\FooGenerator;
+use AutoMapper\Tests\Fixtures\GroupOverride;
 use AutoMapper\Tests\Fixtures\HasDateTime;
 use AutoMapper\Tests\Fixtures\HasDateTimeImmutable;
 use AutoMapper\Tests\Fixtures\HasDateTimeImmutableWithNullValue;
@@ -1447,5 +1448,15 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertSame('Coco', $petOwnerData['pets'][0]['name']);
         self::assertSame('dog', $petOwnerData['pets'][0]['type']);
         self::assertSame('Wouf', $petOwnerData['pets'][0]['bark']);
+    }
+
+    public function testGroupOverride(): void
+    {
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+
+        $group = new GroupOverride();
+        $data = $this->autoMapper->map($group, 'array', ['groups' => ['group2']]);
+
+        self::assertSame(['id' => 'id', 'name' => 'name'], $data);
     }
 }

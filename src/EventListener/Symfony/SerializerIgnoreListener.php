@@ -16,6 +16,10 @@ final readonly class SerializerIgnoreListener
 
     public function __invoke(PropertyMetadataEvent $event): void
     {
+        if ($event->ignored !== null) {
+            return;
+        }
+
         if (($event->mapperMetadata->source !== 'array' && $event->mapperMetadata->source !== \stdClass::class) && $this->isIgnoreProperty($event->mapperMetadata->source, $event->source->name)) {
             $event->ignored = true;
 
