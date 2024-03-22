@@ -5,6 +5,7 @@ description = "Documentation for jolicode/automapper"
 authors = ["Joel Wurtz <joel.wurtz@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -12,6 +13,7 @@ mkdocs = "^1.5.3"
 mkdocs-material = "^9.5.13"
 markdown-callouts = "^0.4.0"
 mkdocs-literate-nav = "^0.6.1"
+mike = "^2.0.0"
 
 
 [build-system]

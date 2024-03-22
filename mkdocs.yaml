@@ -63,6 +63,8 @@ extra:
     - icon: fontawesome/brands/x-twitter
       link: https://twitter.com/jolicode
   generator: false
+  version:
+    provider: mike
 
 markdown_extensions:
   - admonition
