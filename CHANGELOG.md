@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#74](https://github.com/jolicode/automapper/pull/74) Check class exists when checking reflection class in object transformer factory
 - [GH#77](https://github.com/jolicode/automapper/pull/77) Try to get types from read accessor / write mutator first
 
+### Documentation
+- [GH#91](https://github.com/jolicode/automapper/pull/91) Add documentation versioning
+
 ## [8.2.2] - 2024-03-19
 ### Added
 - [GH#54](https://github.com/jolicode/automapper/pull/54) Introduce `MapperContext::DATETIME_FORCE_TIMEZONE`

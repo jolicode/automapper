@@ -63,6 +63,8 @@ extra:
     - icon: fontawesome/brands/x-twitter
       link: https://twitter.com/jolicode
   generator: false
+  version:
+    provider: mike
 
 markdown_extensions:
   - admonition
@@ -85,5 +87,7 @@ plugins:
 
 extra_javascript:
   - assets/javascripts/highlight.min.js
+  - path: assets/javascripts/version-select.js
+    defer: true
 extra_css:
   - assets/stylesheets/highlight-github.min.css

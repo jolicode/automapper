@@ -36,21 +36,25 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Install dependencies
-        run: poetry install --no-root
+        run: poetry install
 
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v4
 
-      - name: Build with mkdocs
-        run: poetry run mkdocs build
+      - name: Build documentation
+        run: ./.github/scripts/build-documentation.sh
+
+      - name: Check
+        run: ls ./.build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./site
+          path: ./.build
 
   deploy:
     name: Deploy to GitHub Pages
