@@ -5,3 +5,4 @@ vendor/
 tests/cache/
 tools/phpstan/cache/
 site/
+.build/
