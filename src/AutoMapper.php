@@ -86,15 +86,6 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         return $this->mapperRegistry[$className];
     }
 
-    /**
-     * @template Source of object
-     * @template Target of object
-     *
-     * @param Source|array<mixed>                              $source
-     * @param class-string<Target>|'array'|array<mixed>|Target $target
-     *
-     * @return ($target is class-string|Target ? Target|null : array<mixed>|null)
-     */
     public function map(array|object $source, string|array|object $target, array $context = []): array|object|null
     {
         $sourceType = $targetType = null;

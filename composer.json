@@ -31,8 +31,12 @@
         "symfony/filesystem": "^5.4 || ^6.0 || ^7.0",
         "symfony/framework-bundle": "*",
         "symfony/http-kernel": "^5.4 || ^6.0 || ^7.0",
+        "symfony/property-access": "^5.4 || ^6.0 || ^7.0",
         "symfony/serializer": "*",
+        "symfony/stopwatch": "^7.0",
+        "symfony/twig-bundle": "^5.4 || ^6.0 || ^7.0",
         "symfony/uid": "^5.4 || ^6.0 || ^7.0",
+        "symfony/web-profiler-bundle": "^5.4 || ^6.0 || ^7.0",
         "symfony/yaml": "^5.4 || ^6.0 || ^7.0"
     },
     "suggest": {

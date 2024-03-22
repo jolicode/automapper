@@ -1,0 +1,9 @@
+framework:
+  secret: automapper
+  property_info: ~
+  test: ~
+  serializer:
+    enabled: true
+  profiler:
+    enabled: "%kernel.debug%"
+    only_exceptions: false

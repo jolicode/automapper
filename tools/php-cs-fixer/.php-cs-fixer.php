@@ -1,10 +1,9 @@
 <?php
 
 $finder = (new PhpCsFixer\Finder())
-    ->exclude(__DIR__ . '/../../tests/cache')
-    ->exclude(__DIR__ . '/../../tests/Bundle/Resources/var')
     ->in(__DIR__ . '/../../src')
     ->in(__DIR__ . '/../../tests')
+    ->exclude(['cache', 'Bundle/Resources/var'])
 ;
 
 return (new PhpCsFixer\Config())

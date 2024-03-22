@@ -1,0 +1,7 @@
+automapper:
+  normalizer: false
+  name_converter: AutoMapper\Tests\Bundle\Resources\App\Service\IdNameConverter
+  map_private_properties: false
+  check_attributes: false
+  warmup:
+    - { source: 'AutoMapper\Tests\Bundle\Resources\App\Entity\NestedObject', target: 'array' }
