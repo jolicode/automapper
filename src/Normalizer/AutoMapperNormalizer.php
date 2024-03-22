@@ -39,6 +39,13 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
         return $this->autoMapper->map($object, 'array', $this->createAutoMapperContext($context));
     }
 
+    /**
+     * @template T of object
+     *
+     * @param class-string<T> $type
+     *
+     * @return T|null
+     */
     public function denormalize(mixed $data, string $type, string $format = null, array $context = []): mixed
     {
         return $this->autoMapper->map($data, $type, $this->createAutoMapperContext($context));

@@ -1,0 +1,8 @@
+services:
+  _defaults:
+    autoconfigure: true
+    autowire: true
+
+  AutoMapper\Tests\Bundle\Resources\App\:
+    resource: '../App/*'
+    exclude: '../App/{Entity,AppKernel.php}'

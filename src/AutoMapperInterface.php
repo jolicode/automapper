@@ -12,13 +12,14 @@ namespace AutoMapper;
 interface AutoMapperInterface
 {
     /**
-     * Maps data from a source to a target.
+     * @template Source of object
+     * @template Target of object
      *
-     * @param array|object                      $source  Any data object, which may be an object or an array
-     * @param 'array'|class-string|array|object $target  To which type of data, or data, the source should be mapped
-     * @param array                             $context Mapper context
+     * @param Source|array<mixed>                              $source
+     * @param class-string<Target>|'array'|array<mixed>|Target $target
+     * @param array<mixed>                                     $context
      *
-     * @return array|object|null The mapped object
+     * @return ($target is class-string|Target ? Target|null : array<mixed>|null)
      */
     public function map(array|object $source, string|array|object $target, array $context = []): array|object|null;
 }

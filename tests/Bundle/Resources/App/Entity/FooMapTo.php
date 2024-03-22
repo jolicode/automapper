@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AutoMapper\Tests\Bundle\Fixtures;
+namespace AutoMapper\Tests\Bundle\Resources\App\Entity;
 
 use AutoMapper\Attribute\MapTo;
 use AutoMapper\Tests\Fixtures\MapTo\Bar;

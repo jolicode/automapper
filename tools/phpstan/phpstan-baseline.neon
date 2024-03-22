@@ -1,34 +1,10 @@
 parameters:
 	ignoreErrors:
-		-
-			message: "#^Method AutoMapper\\\\AutoMapper\\:\\:map\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/AutoMapper.php
 
 		-
 			message: "#^Parameter \\#1 \\$loader of class Symfony\\\\Component\\\\Serializer\\\\Mapping\\\\Factory\\\\ClassMetadataFactory constructor expects Symfony\\\\Component\\\\Serializer\\\\Mapping\\\\Loader\\\\LoaderInterface, Symfony\\\\Component\\\\Serializer\\\\Mapping\\\\Loader\\\\AnnotationLoader\\|Symfony\\\\Component\\\\Serializer\\\\Mapping\\\\Loader\\\\AttributeLoader given\\.$#"
 			count: 1
 			path: ../../src/AutoMapper.php
-
-		-
-			message: "#^Method AutoMapper\\\\AutoMapperInterface\\:\\:map\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/AutoMapperInterface.php
-
-		-
-			message: "#^Method AutoMapper\\\\AutoMapperInterface\\:\\:map\\(\\) has parameter \\$source with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/AutoMapperInterface.php
-
-		-
-			message: "#^Method AutoMapper\\\\AutoMapperInterface\\:\\:map\\(\\) has parameter \\$target with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/AutoMapperInterface.php
-
-		-
-			message: "#^Method AutoMapper\\\\AutoMapperInterface\\:\\:map\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../src/AutoMapperInterface.php
 
 		-
 			message: "#^Property AutoMapper\\\\GeneratedMapper\\:\\:\\$cachedTarget has no type specified\\.$#"
@@ -251,11 +227,6 @@ parameters:
 			path: ../../src/Normalizer/AutoMapperNormalizer.php
 
 		-
-			message: "#^Method AutoMapper\\\\Normalizer\\\\AutoMapperNormalizer\\:\\:normalize\\(\\) should return array\\|ArrayObject\\|bool\\|float\\|int\\|string\\|null but returns array\\|object\\|null\\.$#"
-			count: 1
-			path: ../../src/Normalizer/AutoMapperNormalizer.php
-
-		-
 			message: "#^Method AutoMapper\\\\Normalizer\\\\AutoMapperNormalizer\\:\\:supportsDenormalization\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: ../../src/Normalizer/AutoMapperNormalizer.php
@@ -268,11 +239,6 @@ parameters:
 		-
 			message: "#^Parameter \\#1 \\$source of method AutoMapper\\\\AutoMapperInterface\\:\\:map\\(\\) expects array\\|object, mixed given\\.$#"
 			count: 2
-			path: ../../src/Normalizer/AutoMapperNormalizer.php
-
-		-
-			message: "#^Parameter \\#2 \\$target of method AutoMapper\\\\AutoMapperInterface\\:\\:map\\(\\) expects 'array'\\|array\\|class\\-string\\|object, string given\\.$#"
-			count: 1
 			path: ../../src/Normalizer/AutoMapperNormalizer.php
 
 		-

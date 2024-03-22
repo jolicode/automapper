@@ -8,8 +8,8 @@ use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
 use AutoMapper\Metadata\TypesMatching;
-use AutoMapper\Tests\Bundle\Fixtures\User;
-use AutoMapper\Tests\Bundle\Fixtures\UserDTO;
+use AutoMapper\Tests\Bundle\Resources\App\Entity\User;
+use AutoMapper\Tests\Bundle\Resources\App\Entity\UserDTO;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerSupportInterface;
 

@@ -6,14 +6,14 @@ namespace AutoMapper\Tests\Bundle;
 
 use AutoMapper\AutoMapperInterface;
 use AutoMapper\MapperContext;
-use AutoMapper\Tests\Bundle\Fixtures\AddressDTO;
-use AutoMapper\Tests\Bundle\Fixtures\ClassWithMapToContextAttribute;
-use AutoMapper\Tests\Bundle\Fixtures\ClassWithPrivateProperty;
-use AutoMapper\Tests\Bundle\Fixtures\DTOWithEnum;
-use AutoMapper\Tests\Bundle\Fixtures\FooMapTo;
-use AutoMapper\Tests\Bundle\Fixtures\SomeEnum;
-use AutoMapper\Tests\Bundle\Fixtures\User;
-use AutoMapper\Tests\Bundle\Fixtures\UserDTO;
+use AutoMapper\Tests\Bundle\Resources\App\Entity\AddressDTO;
+use AutoMapper\Tests\Bundle\Resources\App\Entity\ClassWithMapToContextAttribute;
+use AutoMapper\Tests\Bundle\Resources\App\Entity\ClassWithPrivateProperty;
+use AutoMapper\Tests\Bundle\Resources\App\Entity\DTOWithEnum;
+use AutoMapper\Tests\Bundle\Resources\App\Entity\FooMapTo;
+use AutoMapper\Tests\Bundle\Resources\App\Entity\SomeEnum;
+use AutoMapper\Tests\Bundle\Resources\App\Entity\User;
+use AutoMapper\Tests\Bundle\Resources\App\Entity\UserDTO;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -24,6 +24,7 @@ class ServiceInstantiationTest extends WebTestCase
         static::$class = null;
         $_SERVER['KERNEL_DIR'] = __DIR__ . '/Resources/App';
         $_SERVER['KERNEL_CLASS'] = 'AutoMapper\Tests\Bundle\Resources\App\AppKernel';
+        $_SERVER['APP_DEBUG'] = false;
 
         (new Filesystem())->remove(__DIR__ . '/Resources/var/cache/test');
     }
@@ -37,13 +38,13 @@ class ServiceInstantiationTest extends WebTestCase
     {
         static::bootKernel();
 
-        self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Fixtures_NestedObject_array.php');
-        self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Fixtures_User_array.php');
-        self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Fixtures_AddressDTO_array.php');
+        self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_NestedObject_array.php');
+        self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_User_array.php');
+        self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_AddressDTO_array.php');
 
-        self::assertInstanceOf(\Symfony_Mapper_AutoMapper_Tests_Bundle_Fixtures_NestedObject_array::class, new \Symfony_Mapper_AutoMapper_Tests_Bundle_Fixtures_NestedObject_array());
-        self::assertInstanceOf(\Symfony_Mapper_AutoMapper_Tests_Bundle_Fixtures_User_array::class, new \Symfony_Mapper_AutoMapper_Tests_Bundle_Fixtures_User_array());
-        self::assertInstanceOf(\Symfony_Mapper_AutoMapper_Tests_Bundle_Fixtures_AddressDTO_array::class, new \Symfony_Mapper_AutoMapper_Tests_Bundle_Fixtures_AddressDTO_array());
+        self::assertInstanceOf(\Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_NestedObject_array::class, new \Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_NestedObject_array());
+        self::assertInstanceOf(\Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_User_array::class, new \Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_User_array());
+        self::assertInstanceOf(\Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_AddressDTO_array::class, new \Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_AddressDTO_array());
     }
 
     public function testAutoMapper(): void
@@ -93,8 +94,8 @@ class ServiceInstantiationTest extends WebTestCase
             'type' => 'cat',
         ];
 
-        $pet = $autoMapper->map($data, Fixtures\Pet::class);
-        self::assertInstanceOf(Fixtures\Cat::class, $pet);
+        $pet = $autoMapper->map($data, Resources\App\Entity\Pet::class);
+        self::assertInstanceOf(Resources\App\Entity\Cat::class, $pet);
     }
 
     public function testItCanMapEnums(): void
