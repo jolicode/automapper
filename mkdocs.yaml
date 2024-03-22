@@ -65,6 +65,7 @@ extra:
   generator: false
   version:
     provider: mike
+    version_selector: false
 
 markdown_extensions:
   - admonition
@@ -87,5 +88,7 @@ plugins:
 
 extra_javascript:
   - assets/javascripts/highlight.min.js
+  - path: assets/javascripts/version-select.js
+    defer: true
 extra_css:
   - assets/stylesheets/highlight-github.min.css

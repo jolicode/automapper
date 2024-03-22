@@ -45,28 +45,16 @@ jobs:
         id: pages
         uses: actions/configure-pages@v4
 
-      - name: Build documentation for 8.x
-        run: poetry run mike deploy --push --update-aliases dev
+      - name: Build documentation
+        run: ./.github/scripts/build-documentation.sh
 
-      - name: Checkout latest 8.x tag
-        run: git checkout tags/8.2.2
-
-      - name: Build documentation for 8.x
-        run: poetry run mike deploy --push --update-aliases 8.2.2 latest
-
-      - name: Checkout latest 8.x tag
-        run: git checkout 9.0 # currently a branch, will be a tag later on
-
-      - name: Build documentation for 9.x
-        run: poetry run mike deploy --push --update-aliases 9.0-BETA
-
-      - name: Flag default version
-        run: mike set-default --push latest
+      - name: Check
+        run: ls ./.build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./site
+          path: ./.build
 
   deploy:
     name: Deploy to GitHub Pages
