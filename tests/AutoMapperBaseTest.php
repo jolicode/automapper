@@ -8,6 +8,8 @@ use AutoMapper\AutoMapper;
 use AutoMapper\Configuration;
 use AutoMapper\Symfony\ExpressionLanguageProvider;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -32,6 +34,7 @@ abstract class AutoMapperBaseTest extends TestCase
         array $propertyTransformers = [],
         string $dateTimeFormat = \DateTimeInterface::RFC3339,
         ?ExpressionLanguageProvider $expressionLanguageProvider = null,
+        EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
     ): AutoMapper {
         $fs = new Filesystem();
         $fs->remove(__DIR__ . '/cache/');
@@ -50,6 +53,7 @@ abstract class AutoMapperBaseTest extends TestCase
             transformerFactories: $transformerFactories,
             propertyTransformers: $propertyTransformers,
             expressionLanguageProvider: $expressionLanguageProvider,
+            eventDispatcher: $eventDispatcher,
         );
     }
 }
