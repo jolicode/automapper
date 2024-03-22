@@ -48,8 +48,12 @@ final readonly class PropertyConditionsGenerator
 
         if (!$propertyMetadata->disableGroupsCheck) {
             $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->groups); // Property groups
-            $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->source->groups); // Source groups
-            $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->target->groups); // Target groups
+
+            if ($propertyMetadata->groups === null) {
+                $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->source->groups); // Source groups
+                $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->target->groups); // Target groups
+            }
+
             $conditions[] = $this->noGroupsCheck($metadata, $propertyMetadata);
         }
 
