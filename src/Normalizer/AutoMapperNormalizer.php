@@ -29,7 +29,7 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
     ];
 
     public function __construct(
-        private AutoMapperInterface&AutoMapperRegistryInterface $autoMapper,
+        private AutoMapperInterface $autoMapper,
     ) {
     }
 
