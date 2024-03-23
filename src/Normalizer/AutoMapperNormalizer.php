@@ -15,6 +15,8 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
  * Bridge for symfony/serializer.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @phpstan-import-type MapperContextArray from MapperContext
  */
 readonly class AutoMapperNormalizer implements NormalizerInterface, DenormalizerInterface
 {
@@ -33,7 +35,13 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
     ) {
     }
 
-    public function normalize(mixed $object, string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
+    /**
+     * @param object               $object
+     * @param array<string, mixed> $context
+     *
+     * @return array<string, mixed>
+     */
+    public function normalize(mixed $object, string $format = null, array $context = []): ?array
     {
         return $this->autoMapper->map($object, 'array', $this->createAutoMapperContext($format, $context));
     }
@@ -41,7 +49,9 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
     /**
      * @template T of object
      *
-     * @param class-string<T> $type
+     * @param array<string, mixed> $data
+     * @param class-string<T>      $type
+     * @param array<string, mixed> $context
      *
      * @return T|null
      */
@@ -50,6 +60,9 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
         return $this->autoMapper->map($data, $type, $this->createAutoMapperContext($format, $context));
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     public function supportsNormalization(mixed $data, string $format = null, array $context = []): bool
     {
         if (!\is_object($data) || $data instanceof \stdClass) {
@@ -63,6 +76,9 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
         return true;
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     public function supportsDenormalization(mixed $data, string $type, string $format = null, array $context = []): bool
     {
         return class_exists($type);
@@ -73,8 +89,14 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
         return ['object' => true];
     }
 
+    /**
+     * @param array<string, mixed> $serializerContext
+     *
+     * @return MapperContextArray
+     */
     private function createAutoMapperContext(string $format = null, array $serializerContext = []): array
     {
+        /** @var MapperContextArray $context */
         $context = [];
 
         foreach (self::SERIALIZER_CONTEXT_MAPPING as $serializerContextName => $autoMapperContextName) {
@@ -106,6 +128,7 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
             $context[MapperContext::NORMALIZER_FORMAT] = $format;
         }
 
+        /** @var MapperContextArray */
         return $context + $serializerContext;
     }
 }

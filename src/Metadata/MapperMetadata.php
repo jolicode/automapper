@@ -11,6 +11,7 @@ use AutoMapper\AutoMapper;
  */
 class MapperMetadata
 {
+    /** @var class-string<object> */
     public string $className;
 
     /** @var \ReflectionClass<object>|null */
@@ -42,7 +43,9 @@ class MapperMetadata
             $this->targetReflectionClass = null;
         }
 
-        $this->className = sprintf('%s%s_%s', $this->classPrefix, str_replace('\\', '_', $this->source), str_replace('\\', '_', $this->target));
+        /** @var class-string<object> $className */
+        $className = sprintf('%s%s_%s', $this->classPrefix, str_replace('\\', '_', $this->source), str_replace('\\', '_', $this->target));
+        $this->className = $className;
     }
 
     public function getHash(): string

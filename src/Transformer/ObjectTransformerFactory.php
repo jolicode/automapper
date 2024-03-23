@@ -51,7 +51,7 @@ final class ObjectTransformerFactory extends AbstractUniqueTypeTransformerFactor
             return false;
         }
 
-        if (is_subclass_of($type->getClassName(), \UnitEnum::class)) {
+        if ($type->getClassName() !== null && is_subclass_of($type->getClassName(), \UnitEnum::class)) {
             return false;
         }
 

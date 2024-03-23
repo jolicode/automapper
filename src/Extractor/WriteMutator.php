@@ -43,7 +43,7 @@ final class WriteMutator
      *
      * @throws CompileException
      */
-    public function getExpression(Expr\Variable $output, Expr $value, bool $byRef = false): ?Expr
+    public function getExpression(Expr $output, Expr $value, bool $byRef = false): Expr
     {
         if (self::TYPE_METHOD === $this->type || self::TYPE_ADDER_AND_REMOVER === $this->type) {
             /*

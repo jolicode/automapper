@@ -19,22 +19,25 @@ use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
  */
 abstract class GeneratedMapper implements MapperInterface
 {
-    protected $mappers = [];
+    /** @var array<string, MapperInterface<object, object>|MapperInterface<object, array<mixed>>|MapperInterface<array<mixed>, object>> */
+    protected array $mappers = [];
 
-    protected $callbacks;
+    /** @var array<string, callable(mixed): void> */
+    protected array $hydrateCallbacks = [];
 
-    protected $hydrateCallbacks = [];
+    /** @var array<string, callable(): mixed> */
+    protected array $extractCallbacks = [];
 
-    protected $extractCallbacks = [];
-
-    /** @var callable[] */
+    /** @var array<string, callable(): bool>) */
     protected array $extractIsNullCallbacks = [];
 
-    protected $cachedTarget;
+    /** @var Target|\ReflectionClass<object> */
+    protected mixed $cachedTarget;
 
-    protected $circularReferenceHandler;
+    /** @var null|callable(mixed value): mixed */
+    protected mixed $circularReferenceHandler = null;
 
-    protected $circularReferenceLimit;
+    protected ?int $circularReferenceLimit = null;
 
     /** @var array<string, PropertyTransformerInterface> */
     protected array $transformers = [];

@@ -20,6 +20,8 @@ use PhpParser\PrettyPrinterAbstract;
 final class FileLoader implements ClassLoaderInterface
 {
     private readonly PrettyPrinterAbstract $printer;
+
+    /** @var array<class-string, string>|null */
     private ?array $registry = null;
 
     public function __construct(
@@ -75,7 +77,10 @@ final class FileLoader implements ClassLoaderInterface
         return $className;
     }
 
-    private function addHashToRegistry($className, $hash): void
+    /**
+     * @param class-string<object> $className
+     */
+    private function addHashToRegistry(string $className, string $hash): void
     {
         if (null === $this->registry) {
             $this->registry = [];
@@ -86,6 +91,7 @@ final class FileLoader implements ClassLoaderInterface
         $this->write($registryPath, "<?php\n\nreturn " . var_export($this->registry, true) . ";\n");
     }
 
+    /** @return array<class-string, string> */
     private function getRegistry(): array
     {
         if (null === $this->registry) {
@@ -108,6 +114,10 @@ final class FileLoader implements ClassLoaderInterface
         }
 
         $fp = fopen($file, 'w');
+
+        if (false === $fp) {
+            throw new \RuntimeException(sprintf('Could not open file "%s"', $file));
+        }
 
         if (flock($fp, LOCK_EX)) {
             fwrite($fp, $contents);

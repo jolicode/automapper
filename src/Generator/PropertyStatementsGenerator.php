@@ -65,9 +65,6 @@ final readonly class PropertyStatementsGenerator
                     ? $propertyMetadata->transformer->assignByRef()
                     : false
             );
-            if (null === $writeExpression) {
-                return [];
-            }
 
             $propStatements[] = new Stmt\Expression($writeExpression);
         }

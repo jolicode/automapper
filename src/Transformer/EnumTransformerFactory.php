@@ -25,6 +25,7 @@ final class EnumTransformerFactory extends AbstractUniqueTypeTransformerFactory 
 
         // target is enum, source isn't
         if (!$this->isEnumType($sourceType) && $this->isEnumType($targetType, true)) {
+            // @phpstan-ignore-next-line
             return new TargetEnumTransformer($targetType->getClassName());
         }
 
@@ -39,6 +40,10 @@ final class EnumTransformerFactory extends AbstractUniqueTypeTransformerFactory 
     private function isEnumType(Type $type, bool $backed = false): bool
     {
         if (Type::BUILTIN_TYPE_OBJECT !== $type->getBuiltinType()) {
+            return false;
+        }
+
+        if ($type->getClassName() === null) {
             return false;
         }
 
