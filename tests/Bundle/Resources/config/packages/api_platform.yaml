@@ -1,0 +1,11 @@
+api_platform:
+  title: automapper
+  description: 'Automapper API'
+  version: 1.0.0
+  mapping:
+    paths:
+        - '%kernel.project_dir%/App/Api/Entity'
+  formats:
+    jsonld: [ 'application/ld+json' ]
+    json: [ 'application/json' ]
+    html: [ 'text/html' ]

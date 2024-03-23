@@ -160,6 +160,9 @@ final class MetadataFactory
             $propertyEvents[$propertyEvent->target->name] = $propertyEvent;
         }
 
+        // Sort transformations by property name, to ensure consistent order, and easier debugging
+        ksort($propertyEvents, SORT_NATURAL);
+
         $propertiesMapping = [];
 
         foreach ($propertyEvents as $propertyMappedEvent) {

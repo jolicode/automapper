@@ -24,6 +24,7 @@
         "symfony/property-info": "^5.4.23 || ^6.2.10 || ^7.0"
     },
     "require-dev": {
+        "api-platform/core": "^3.2",
         "doctrine/annotations": "~1.0",
         "moneyphp/money": "^3.3.2",
         "phpdocumentor/type-resolver": "^1.7",

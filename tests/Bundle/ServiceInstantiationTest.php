@@ -135,9 +135,9 @@ class ServiceInstantiationTest extends WebTestCase
 
         self::assertSame(
             [
+                'propertyWithDefaultValue' => 'foo',
                 'value' => 'foo_bar_baz',
                 'virtualProperty' => 'foo_bar_baz',
-                'propertyWithDefaultValue' => 'foo',
             ],
             $autoMapper->map(
                 new ClassWithMapToContextAttribute('bar'),

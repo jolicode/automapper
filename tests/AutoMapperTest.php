@@ -1213,9 +1213,9 @@ class AutoMapperTest extends AutoMapperBaseTest
     {
         self::assertSame(
             [
+                'propertyWithDefaultValue' => 'foo',
                 'value' => 'foo_bar_baz',
                 'virtualProperty' => 'foo_bar_baz',
-                'propertyWithDefaultValue' => 'foo',
             ],
             $this->autoMapper->map(
                 new ClassWithMapToContextAttribute('bar'),
@@ -1230,7 +1230,7 @@ class AutoMapperTest extends AutoMapperBaseTest
         $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
         self::assertSame(
-            ['foo' => 'foo', 'bar' => 'bar'],
+            ['bar' => 'bar', 'foo' => 'foo'],
             $this->autoMapper->map(new ClassWithPrivateProperty('foo'), 'array')
         );
         self::assertEquals(

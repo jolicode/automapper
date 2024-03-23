@@ -106,6 +106,10 @@ class AutoMapperExtension extends Extension
             }
         }
 
+        if ($config['api_platform']) {
+            $loader->load('api_platform.php');
+        }
+
         if (null !== $config['name_converter']) {
             $container
                 ->getDefinition(AdvancedNameConverterListener::class)
