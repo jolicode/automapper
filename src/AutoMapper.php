@@ -132,6 +132,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         if (class_exists(AttributeLoader::class)) {
             $loaderClass = new AttributeLoader();
         } elseif (class_exists(AnnotationReader::class) && class_exists(AnnotationLoader::class)) {
+            /** @var AttributeLoader $loaderClass */
             $loaderClass = new AnnotationLoader(new AnnotationReader());
         } else {
             $loaderClass = null;

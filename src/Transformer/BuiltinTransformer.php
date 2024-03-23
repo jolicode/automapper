@@ -7,12 +7,16 @@ namespace AutoMapper\Transformer;
 use AutoMapper\Generator\UniqueVariableScope;
 use AutoMapper\Metadata\PropertyMetadata;
 use PhpParser\Node\Arg;
-use PhpParser\Node\ArrayItem as NewArrayItem;
+use PhpParser\Node\ArrayItem;
 use PhpParser\Node\Expr;
-use PhpParser\Node\Expr\ArrayItem as OldArrayItem;
 use PhpParser\Node\Expr\Cast;
 use PhpParser\Node\Name;
 use Symfony\Component\PropertyInfo\Type;
+
+// compatibility with nikic/php-parser 4.x
+if (!class_exists(ArrayItem::class) && class_exists(Expr\ArrayItem::class)) {
+    class_alias(Expr\ArrayItem::class, ArrayItem::class);
+}
 
 /**
  * Built in transformer to handle PHP scalar types.
@@ -136,14 +140,7 @@ final readonly class BuiltinTransformer implements TransformerInterface, CheckTy
 
     private function toArray(Expr $input): Expr
     {
-        // compatibility with old versions of nikic/php-parser
-        if (class_exists(NewArrayItem::class)) {
-            $arrayItemClass = NewArrayItem::class;
-        } else {
-            $arrayItemClass = OldArrayItem::class;
-        }
-
-        return new Expr\Array_([new $arrayItemClass($input)]);
+        return new Expr\Array_([new ArrayItem($input)]);
     }
 
     private function fromIteratorToArray(Expr $input): Expr

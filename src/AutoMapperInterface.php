@@ -8,6 +8,8 @@ namespace AutoMapper;
  * An auto mapper has the role of mapping a source to a target.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @phpstan-import-type MapperContextArray from MapperContext
  */
 interface AutoMapperInterface
 {
@@ -17,7 +19,7 @@ interface AutoMapperInterface
      *
      * @param Source|array<mixed>                              $source
      * @param class-string<Target>|'array'|array<mixed>|Target $target
-     * @param array<mixed>                                     $context
+     * @param MapperContextArray                               $context
      *
      * @return ($target is class-string|Target ? Target|null : array<mixed>|null)
      */

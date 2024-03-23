@@ -13,12 +13,14 @@ namespace AutoMapper;
  *
  * @template Source of object|array<mixed>
  * @template Target of object|array<mixed>
+ *
+ * @phpstan-import-type MapperContextArray from MapperContext
  */
 interface MapperInterface
 {
     /**
-     * @param Source               $value   Value to map
-     * @param array<string, mixed> $context Options mapper have access to
+     * @param Source             $value   Value to map
+     * @param MapperContextArray $context Mapper context
      *
      * @return Target|null The mapped value
      */

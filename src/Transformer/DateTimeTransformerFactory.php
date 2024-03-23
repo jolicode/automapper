@@ -71,6 +71,10 @@ final class DateTimeTransformerFactory extends AbstractUniqueTypeTransformerFact
             return false;
         }
 
+        if (null === $type->getClassName()) {
+            return false;
+        }
+
         if (\DateTimeInterface::class !== $type->getClassName() && !is_subclass_of($type->getClassName(), \DateTimeInterface::class)) {
             return false;
         }
@@ -89,6 +93,10 @@ final class DateTimeTransformerFactory extends AbstractUniqueTypeTransformerFact
 
     private function isDateTimeMutable(Type $type): bool
     {
+        if (null === $type->getClassName()) {
+            return false;
+        }
+
         if (\DateTime::class !== $type->getClassName() && !is_subclass_of($type->getClassName(), \DateTime::class)) {
             return false;
         }
