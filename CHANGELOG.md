@@ -12,7 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#59](https://github.com/jolicode/automapper/pull/59) Add MapTo & MapFrom attributes
 - [GH#78](https://github.com/jolicode/automapper/pull/78) Add MapTo & MapFrom listeners to bundle
 - [GH#80](https://github.com/jolicode/automapper/pull/80) Add if feature to MapTo / MapFrom attributes
-- [GH#81](https://github.com/jolicode/automapper/pull/81) Allow map to / from attribute in class when declaring a transformer and a name
+- [GH#81](https://github.com/jolicode/automapper/pull/81) Allow MapTo / MapFrom attributes in class when declaring a transformer and a name
+- [GH#82](https://github.com/jolicode/automapper/pull/82) Add groups to MapTo / MapFrom attributes
+- [GH#84](https://github.com/jolicode/automapper/pull/84) Allow expression language for transformer and add provider for custom functions
+- [GH#86](https://github.com/jolicode/automapper/pull/86) Bundle: Allow to use eval loader instead of file
+- [GH#89](https://github.com/jolicode/automapper/pull/89) Add normalizer format in context, allow skipping group checking and remove registry interface from normalizer
 
 ### Changed
 - [GH#56](https://github.com/jolicode/automapper/pull/56) Refactor metadata
@@ -20,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#71](https://github.com/jolicode/automapper/pull/71) Use interface for class metadata factory
 - [GH#75](https://github.com/jolicode/automapper/pull/75) Types: better matching between types to better handle multiple types
 - [GH#79](https://github.com/jolicode/automapper/pull/79) Refactor the way to create custom transformer
+- [GH#90](https://github.com/jolicode/automapper/pull/90) Allow to run symfony app in tests
 
 ### Fixed
 - [GH#70](https://github.com/jolicode/automapper/pull/70) Split map to / map from, fix from array
@@ -27,9 +32,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#72](https://github.com/jolicode/automapper/pull/72) Don't map property if groups specified and no groups attached
 - [GH#74](https://github.com/jolicode/automapper/pull/74) Check class exists when checking reflection class in object transformer factory
 - [GH#77](https://github.com/jolicode/automapper/pull/77) Try to get types from read accessor / write mutator first
+- [GH#83](https://github.com/jolicode/automapper/pull/83) Fix MapFrom: correctly use method from target if asked
+- [GH#85](https://github.com/jolicode/automapper/pull/85) Fix mapping with proxies
+- [GH#85](https://github.com/jolicode/automapper/pull/85) Fix \Traversable normalization
+- [GH#85](https://github.com/jolicode/automapper/pull/85) Fix array fetching on string indexed array
+- [GH#87](https://github.com/jolicode/automapper/pull/87) Correctly map from an inherited class
+- [GH#93](https://github.com/jolicode/automapper/pull/93) Fix map to overriding ignore / groups attribute from serializer
+- [GH#94](https://github.com/jolicode/automapper/pull/94) Fix most phpstan issues
 
 ### Documentation
 - [GH#91](https://github.com/jolicode/automapper/pull/91) Add documentation versioning
+- [GH#88](https://github.com/jolicode/automapper/pull/88) Reorganize documentation structure
+- [GH#92](https://github.com/jolicode/automapper/pull/92) Add doc about mapping
 
 ## [8.2.2] - 2024-03-19
 ### Added
