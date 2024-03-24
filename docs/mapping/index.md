@@ -9,4 +9,5 @@ a `source` and a `target`.
 - [Conditional mapping](conditional-mapping.md)
 - [Groups](groups.md)
 - [Transformer](transformer.md)
+- [Provider](provider.md)
 - [Mapping inheritance](inheritance.md)

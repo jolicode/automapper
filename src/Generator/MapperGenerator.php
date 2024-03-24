@@ -76,7 +76,7 @@ final readonly class MapperGenerator
             ->extend(GeneratedMapper::class)
             ->addStmt($this->constructorMethod($metadata))
             ->addStmt($this->mapMethod($metadata))
-            ->addStmt($this->injectMappersMethod($metadata))
+            ->addStmt($this->registerMappersMethod($metadata))
             ->getNode();
     }
 
@@ -95,8 +95,9 @@ final readonly class MapperGenerator
      */
     private function constructorMethod(GeneratorMetadata $metadata): Stmt\ClassMethod
     {
-        return (new Builder\Method('__construct'))
+        return (new Builder\Method('initialize'))
             ->makePublic()
+            ->setReturnType('void')
             ->addStmts($this->mapperConstructorGenerator->getStatements($metadata))
             ->getNode();
     }
@@ -130,21 +131,21 @@ final readonly class MapperGenerator
     }
 
     /**
-     * Create the injectMapper methods for this mapper.
+     * Create the registerMappers methods for this mapper.
      *
      * This is not done into the constructor in order to avoid circular dependency between mappers
      *
      * ```php
-     * public function injectMappers(AutoMapperRegistryInterface $autoMapperRegistry) {
+     * public function registerMappers(AutoMapperRegistryInterface $autoMapperRegistry) {
      *   // inject mapper statements
      *   $this->mappers['SOURCE_TO_TARGET_MAPPER'] = $autoMapperRegistry->getMapper($source, $target);
      *   ...
      * }
      * ```
      */
-    private function injectMappersMethod(GeneratorMetadata $metadata): Stmt\ClassMethod
+    private function registerMappersMethod(GeneratorMetadata $metadata): Stmt\ClassMethod
     {
-        return (new Builder\Method('injectMappers'))
+        return (new Builder\Method('registerMappers'))
             ->makePublic()
             ->setReturnType('void')
             ->addParam(new Param(

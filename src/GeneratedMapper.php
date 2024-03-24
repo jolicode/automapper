@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace AutoMapper;
 
+use AutoMapper\Provider\ProviderRegistry;
 use AutoMapper\Symfony\ExpressionLanguageProvider;
-use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
 
 /**
  * Class derived for each generated mapper.
@@ -19,6 +20,22 @@ use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
  */
 abstract class GeneratedMapper implements MapperInterface
 {
+    final public function __construct(
+        protected PropertyTransformerRegistry $transformerRegistry,
+        protected ProviderRegistry $providerRegistry,
+        protected ?ExpressionLanguageProvider $expressionLanguageProvider = null,
+    ) {
+        $this->initialize();
+    }
+
+    public function initialize(): void
+    {
+    }
+
+    public function registerMappers(AutoMapperRegistryInterface $registry): void
+    {
+    }
+
     /** @var array<string, MapperInterface<object, object>|MapperInterface<object, array<mixed>>|MapperInterface<array<mixed>, object>> */
     protected array $mappers = [];
 
@@ -33,44 +50,4 @@ abstract class GeneratedMapper implements MapperInterface
 
     /** @var Target|\ReflectionClass<object> */
     protected mixed $cachedTarget;
-
-    /** @var null|callable(mixed value): mixed */
-    protected mixed $circularReferenceHandler = null;
-
-    protected ?int $circularReferenceLimit = null;
-
-    /** @var array<string, PropertyTransformerInterface> */
-    protected array $transformers = [];
-
-    protected ?ExpressionLanguageProvider $expressionLanguageProvider = null;
-
-    /**
-     * Inject sub mappers.
-     */
-    public function injectMappers(AutoMapperRegistryInterface $autoMapperRegistry): void
-    {
-    }
-
-    public function setCircularReferenceHandler(?callable $circularReferenceHandler): void
-    {
-        $this->circularReferenceHandler = $circularReferenceHandler;
-    }
-
-    public function setCircularReferenceLimit(?int $circularReferenceLimit): void
-    {
-        $this->circularReferenceLimit = $circularReferenceLimit;
-    }
-
-    /**
-     * @param array<string, PropertyTransformerInterface> $transformers
-     */
-    public function setPropertyTransformers(array $transformers): void
-    {
-        $this->transformers = $transformers;
-    }
-
-    public function setExpressionLanguageProvider(ExpressionLanguageProvider $expressionLanguageProvider): void
-    {
-        $this->expressionLanguageProvider = $expressionLanguageProvider;
-    }
 }

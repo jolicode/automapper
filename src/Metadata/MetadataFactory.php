@@ -10,6 +10,7 @@ use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\Event\SourcePropertyMetadata as SourcePropertyMetadataEvent;
 use AutoMapper\Event\TargetPropertyMetadata as TargetPropertyMetadataEvent;
 use AutoMapper\EventListener\MapFromListener;
+use AutoMapper\EventListener\MapProviderListener;
 use AutoMapper\EventListener\MapToContextListener;
 use AutoMapper\EventListener\MapToListener;
 use AutoMapper\EventListener\Symfony\AdvancedNameConverterListener;
@@ -230,7 +231,13 @@ final class MetadataFactory
             );
         }
 
-        return new GeneratorMetadata($mapperMetadata, $propertiesMapping, $this->configuration->attributeChecking, $this->configuration->allowConstructor);
+        return new GeneratorMetadata(
+            $mapperMetadata,
+            $propertiesMapping,
+            $this->configuration->attributeChecking,
+            $this->configuration->allowConstructor,
+            $mapperEvent->provider,
+        );
     }
 
     /**
@@ -269,6 +276,7 @@ final class MetadataFactory
         $eventDispatcher->addListener(PropertyMetadataEvent::class, new MapToContextListener($reflectionExtractor));
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapToListener($customTransformerRegistry, $expressionLanguage));
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapFromListener($customTransformerRegistry, $expressionLanguage));
+        $eventDispatcher->addListener(GenerateMapperEvent::class, new MapProviderListener());
 
         $propertyInfoExtractor = new PropertyInfoExtractor(
             listExtractors: [$reflectionExtractor],

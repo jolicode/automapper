@@ -9,6 +9,7 @@ use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
 use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
 use AutoMapper\MapperContext;
 use AutoMapper\Metadata\GeneratorMetadata;
+use AutoMapper\Provider\EarlyReturn;
 use PhpParser\Comment;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
@@ -50,6 +51,7 @@ final readonly class MapMethodStatementsGenerator
         $statements = [$this->ifSourceIsNullReturnNull($metadata)];
         $statements = [...$statements, ...$this->handleCircularReference($metadata)];
         $statements = [...$statements, ...$this->initializeTargetToPopulate($metadata)];
+        $statements = [...$statements, ...$this->initializeTargetFromProvider($metadata)];
         $statements[] = $this->createObjectStatementsGenerator->generate($metadata, $variableRegistry);
 
         $addedDependenciesStatements = $this->handleDependencies($metadata);
@@ -142,8 +144,8 @@ final readonly class MapMethodStatementsGenerator
      *
      * ```php
      * $sourceHash = spl_object_hash($source) . $target;
-     * if (MapperContext::shouldHandleCircularReference($context, $sourceHash, $source)) {
-     *     return MapperContext::handleCircularReference($context, $sourceHash, $source, $this->circularReferenceLimit, $this->circularReferenceHandler);
+     * if (MapperContext::shouldHandleCircularReference($context, $sourceHash)) {
+     *     return MapperContext::handleCircularReference($context, $sourceHash, $source);
      * }
      * ```
      *
@@ -172,7 +174,6 @@ final readonly class MapMethodStatementsGenerator
                 new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'shouldHandleCircularReference', [
                     new Arg($variableRegistry->getContext()),
                     new Arg($variableRegistry->getHash()),
-                    new Arg(new Expr\PropertyFetch(new Expr\Variable('this'), 'circularReferenceLimit')),
                 ]), [
                     'stmts' => [
                         new Stmt\Return_(
@@ -183,12 +184,6 @@ final readonly class MapMethodStatementsGenerator
                                     new Arg($variableRegistry->getContext()),
                                     new Arg($variableRegistry->getHash()),
                                     new Arg($variableRegistry->getSourceInput()),
-                                    new Arg(
-                                        new Expr\PropertyFetch(new Expr\Variable('this'), 'circularReferenceLimit')
-                                    ),
-                                    new Arg(
-                                        new Expr\PropertyFetch(new Expr\Variable('this'), 'circularReferenceHandler')
-                                    ),
                                 ]
                             )
                         ),
@@ -256,6 +251,56 @@ final readonly class MapMethodStatementsGenerator
                 ]
             );
         }
+
+        return $statements;
+    }
+
+    /**
+     * @return list<Stmt>
+     */
+    private function initializeTargetFromProvider(GeneratorMetadata $metadata): array
+    {
+        if ($metadata->provider === null) {
+            return [];
+        }
+
+        $variableRegistry = $metadata->variableRegistry;
+
+        /*
+         * Get result from provider if available
+         *
+         * ```php
+         * $result ??= $this->providerRegistry->getProvider($metadata->provider)->provide($source, $context);
+         *
+         * if ($result instanceof EarlyReturn) {
+         *     return $result->value;
+         * }
+         * ```
+         */
+        $statements = [];
+        $statements[] = new Stmt\Expression(
+            new Expr\AssignOp\Coalesce(
+                $variableRegistry->getResult(),
+                new Expr\MethodCall(new Expr\MethodCall(new Expr\PropertyFetch(new Expr\Variable('this'), 'providerRegistry'), 'getProvider', [
+                    new Arg(new Scalar\String_($metadata->provider)),
+                ]), 'provide', [
+                    new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
+                    new Arg($variableRegistry->getSourceInput()),
+                    new Arg($variableRegistry->getContext()),
+                ]),
+            )
+        );
+
+        $statements[] = new Stmt\If_(
+            new Expr\Instanceof_($variableRegistry->getResult(), new Name(EarlyReturn::class)),
+            [
+                'stmts' => [
+                    new Stmt\Return_(
+                        new Expr\PropertyFetch($variableRegistry->getResult(), 'value')
+                    ),
+                ],
+            ]
+        );
 
         return $statements;
     }

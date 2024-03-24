@@ -11,6 +11,7 @@
     - [Conditional mapping](mapping/conditional-mapping.md)
     - [Groups](mapping/groups.md)
     - [Transformer](mapping/transformer.md)
+    - [Provider](mapping/provider.md)
     - [Mapping inheritance](mapping/inheritance.md)
 - [Symfony Bundle](bundle/index.md)
     - [Installation](bundle/installation.md)

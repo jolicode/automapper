@@ -30,7 +30,9 @@ final readonly class PropertyTransformer implements TransformerInterface, AllowN
          * $this->transformers['id']($input, $source, $context)
          */
         return [new Expr\MethodCall(
-            new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'transformers'), new Scalar\String_($this->propertyTransformerId)),
+            new Expr\MethodCall(new Expr\PropertyFetch(new Expr\Variable('this'), 'transformerRegistry'), 'getPropertyTransformer', [
+                new Arg(new Scalar\String_($this->propertyTransformerId)),
+            ]),
             'transform',
             [
                 new Arg($input),
