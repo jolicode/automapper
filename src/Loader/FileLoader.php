@@ -6,6 +6,7 @@ namespace AutoMapper\Loader;
 
 use AutoMapper\Generator\MapperGenerator;
 use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\MetadataFactory;
 use AutoMapper\Metadata\MetadataRegistry;
 use PhpParser\PrettyPrinter\Standard;
 use PhpParser\PrettyPrinterAbstract;
@@ -26,7 +27,7 @@ final class FileLoader implements ClassLoaderInterface
 
     public function __construct(
         private readonly MapperGenerator $generator,
-        private readonly MetadataRegistry $metadataRegistry,
+        private readonly MetadataFactory $metadataFactory,
         private readonly string $directory,
         private readonly bool $hotReload = true,
     ) {
@@ -58,6 +59,15 @@ final class FileLoader implements ClassLoaderInterface
         require $classPath;
     }
 
+    public function buildMappers(MetadataRegistry $registry): bool
+    {
+        foreach ($registry as $metadata) {
+            $this->saveMapper($metadata);
+        }
+
+        return true;
+    }
+
     /**
      * @return string The generated class name
      */
@@ -66,7 +76,7 @@ final class FileLoader implements ClassLoaderInterface
         $className = $mapperMetadata->className;
         $classPath = $this->directory . \DIRECTORY_SEPARATOR . $className . '.php';
 
-        $generatorMetadata = $this->metadataRegistry->getGeneratorMetadata($mapperMetadata->source, $mapperMetadata->target);
+        $generatorMetadata = $this->metadataFactory->getGeneratorMetadata($mapperMetadata->source, $mapperMetadata->target);
         $classCode = $this->printer->prettyPrint([$this->generator->generate($generatorMetadata)]);
 
         $this->write($classPath, "<?php\n\n" . $classCode . "\n");

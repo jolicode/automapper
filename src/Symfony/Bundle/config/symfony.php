@@ -4,24 +4,27 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use AutoMapper\AutoMapperRegistryInterface;
+use AutoMapper\Configuration;
+use AutoMapper\Loader\ClassLoaderInterface;
+use AutoMapper\Metadata\MetadataFactory;
+use AutoMapper\Metadata\MetadataRegistry;
 use AutoMapper\Symfony\Bundle\CacheWarmup\CacheWarmer;
-use AutoMapper\Symfony\Bundle\CacheWarmup\ConfigurationCacheWarmerLoader;
 
 return static function (ContainerConfigurator $container) {
     $container->services()
         ->set(CacheWarmer::class)
             ->args([
-                service(AutoMapperRegistryInterface::class),
-                tagged_iterator('automapper.cache_warmer_loader'),
+                service('automapper.config_mapping_registry'),
+                service(MetadataFactory::class),
+                service(ClassLoaderInterface::class),
                 '%automapper.cache_dir%',
             ])
             ->tag('kernel.cache_warmer')
 
-        ->set(ConfigurationCacheWarmerLoader::class)
+        ->set('automapper.config_mapping_registry')
+            ->class(MetadataRegistry::class)
             ->args([
-                [], // mappers list from config
+                service(Configuration::class),
             ])
-            ->tag('automapper.cache_warmer_loader')
     ;
 };

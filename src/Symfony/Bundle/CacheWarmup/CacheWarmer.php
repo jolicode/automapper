@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace AutoMapper\Symfony\Bundle\CacheWarmup;
 
-use AutoMapper\AutoMapperRegistryInterface;
+use AutoMapper\Loader\ClassLoaderInterface;
+use AutoMapper\Metadata\MetadataFactory;
+use AutoMapper\Metadata\MetadataRegistry;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
 
 /**
@@ -12,44 +14,38 @@ use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
  */
 final class CacheWarmer implements CacheWarmerInterface
 {
-    /** @param iterable<CacheWarmerLoaderInterface> $cacheWarmerLoaders */
     public function __construct(
-        private readonly AutoMapperRegistryInterface $autoMapperRegistry,
-        private readonly iterable $cacheWarmerLoaders,
+        private readonly MetadataRegistry $mapping,
+        private readonly MetadataFactory $metadataFactory,
+        private readonly ClassLoaderInterface $classLoader,
         private readonly string $autoMapperCacheDirectory
     ) {
     }
 
     public function isOptional(): bool
     {
-        return false;
+        return true;
     }
 
     public function warmUp(string $cacheDir, string $buildDir = null): array
     {
-        foreach ($this->cacheWarmerLoaders as $cacheWarmerLoader) {
-            foreach ($cacheWarmerLoader->loadCacheWarmupData() as $cacheWarmupData) {
-                $mapper = $this->autoMapperRegistry->getMapper($cacheWarmupData->getSource(), $cacheWarmupData->getTarget());
-            }
-        }
+        // load all mappers
+        $mapping = clone $this->mapping;
+        $this->metadataFactory->resolveAllMetadata($mapping);
 
-        // preloaded files must be in cache directory
-        if (!str_starts_with($this->autoMapperCacheDirectory, $cacheDir)) {
+        if (\count($mapping) === 0) {
             return [];
         }
 
-        $registryFile = sprintf('%s/registry.php', $this->autoMapperCacheDirectory);
-        if (!file_exists($registryFile)) {
+        if (!$this->classLoader->buildMappers($mapping)) {
             return [];
         }
-
-        $mappers = array_keys(require $registryFile);
 
         return array_map(
-            function ($mapper) {
-                return sprintf('%s/%s.php', $this->autoMapperCacheDirectory, $mapper);
+            function ($mapperMetadata) {
+                return sprintf('%s/%s.php', $this->autoMapperCacheDirectory, $mapperMetadata->className);
             },
-            $mappers
+            iterator_to_array($mapping),
         );
     }
 }

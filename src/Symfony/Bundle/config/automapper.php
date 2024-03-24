@@ -12,6 +12,7 @@ use AutoMapper\Generator\MapperGenerator;
 use AutoMapper\Loader\ClassLoaderInterface;
 use AutoMapper\Loader\EvalLoader;
 use AutoMapper\Loader\FileLoader;
+use AutoMapper\Metadata\MetadataFactory;
 use AutoMapper\Metadata\MetadataRegistry;
 use AutoMapper\Symfony\ExpressionLanguageProvider;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
@@ -31,13 +32,13 @@ return static function (ContainerConfigurator $container) {
         ->set(EvalLoader::class)
             ->args([
                 service(MapperGenerator::class),
-                service(MetadataRegistry::class),
+                service(MetadataFactory::class),
             ])
 
         ->set(FileLoader::class)
             ->args([
                 service(MapperGenerator::class),
-                service(MetadataRegistry::class),
+                service(MetadataFactory::class),
                 '%kernel.cache_dir%/automapper',
                 true,
             ])
