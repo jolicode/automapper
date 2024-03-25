@@ -11,19 +11,43 @@ use AutoMapper\Transformer\TransformerInterface;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Scalar;
+use PhpParser\Node\Stmt;
+use PhpParser\Parser;
+use PhpParser\ParserFactory;
 
 /**
  * @internal
  */
 final readonly class PropertyTransformer implements TransformerInterface, AllowNullValueTransformerInterface
 {
+    private Parser $parser;
+
+    /**
+     * @param array<mixed> $extraContext
+     */
     public function __construct(
         private string $propertyTransformerId,
+        private array $extraContext = [],
+        Parser $parser = null,
     ) {
+        $this->parser = $parser ?? (new ParserFactory())->createForHostVersion();
     }
 
     public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): array
     {
+        $context = new Expr\Variable('context');
+
+        if ($this->extraContext) {
+            $expr = $this->parser->parse('<?php ' . var_export($this->extraContext, true) . ';')[0] ?? null;
+
+            if ($expr instanceof Stmt\Expression) {
+                $context = new Expr\BinaryOp\Plus(
+                    $context,
+                    $expr->expr
+                );
+            }
+        }
+
         /*
          * When using a custom transformer, we need to call the transform method of the custom transformer which has been injected into the mapper.
          *
@@ -37,7 +61,7 @@ final readonly class PropertyTransformer implements TransformerInterface, AllowN
             [
                 new Arg($input),
                 new Arg($source),
-                new Arg(new Expr\Variable('context')),
+                new Arg($context),
             ]
         ), []];
     }

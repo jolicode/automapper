@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Transformer\ApiPlatform;
 
 use ApiPlatform\Api\IriConverterInterface;
+use ApiPlatform\Metadata\Operation;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 
 final readonly class JsonLdIdTransformer implements PropertyTransformerInterface
@@ -20,6 +21,8 @@ final readonly class JsonLdIdTransformer implements PropertyTransformerInterface
             return null;
         }
 
-        return $this->iriConverter->getIriFromResource($source);
+        $operation = $context['operation'] ?? null;
+
+        return $this->iriConverter->getIriFromResource($source, operation: $operation instanceof Operation ? $operation : null);
     }
 }

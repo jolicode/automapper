@@ -11,6 +11,8 @@ use AutoMapper\Event\GenerateMapperEvent;
 use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\Event\SourcePropertyMetadata;
 use AutoMapper\Event\TargetPropertyMetadata;
+use AutoMapper\Provider\ApiPlatform\IriProvider;
+use AutoMapper\Transformer\ApiPlatform\JsonLdContextTransformer;
 use AutoMapper\Transformer\ApiPlatform\JsonLdIdTransformer;
 use AutoMapper\Transformer\FixedValueTransformer;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformer;
@@ -54,7 +56,18 @@ final readonly class JsonLdListener
                 disableGroupsCheck: true,
             );
 
-            // @TODO @context
+            $event->properties['@context'] = new PropertyMetadataEvent(
+                mapperMetadata: $event->mapperMetadata,
+                source: new SourcePropertyMetadata('@context'),
+                target: new TargetPropertyMetadata('@context'),
+                transformer: new PropertyTransformer(JsonLdContextTransformer::class, ['forced_resource_class' => $event->mapperMetadata->source]),
+                if: "(context['normalizer_format'] ?? false) === 'jsonld' and (context['jsonld_has_context'] ?? false) === false and (context['depth'] ?? 0) <= 1",
+                disableGroupsCheck: true,
+            );
+        }
+
+        if ($event->mapperMetadata->source === 'array' && $this->resourceClassResolver->isResourceClass($event->mapperMetadata->target)) {
+            $event->provider = IriProvider::class;
         }
     }
 }
