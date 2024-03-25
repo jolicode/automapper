@@ -14,14 +14,13 @@ To avoid this problem, you can specify the mappings you want to generate in the 
 ```yaml
 automapper:
   mappings:
-    - source: App\Entity\User
-      target: App\Api\DTO\User
-
-    - source: App\Entity\User
-      target: array
-
-    - source: array
-      target: App\Entity\User
+    mappers:
+      - source: App\Entity\User
+        target: App\Api\DTO\User
+    
+      - source: App\Entity\User
+        target: array
+        reverse: true
 ```
 
 Then when running the `cache:warmup` command, this will generate the mappers for you.

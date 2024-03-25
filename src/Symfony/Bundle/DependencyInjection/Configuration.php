@@ -52,6 +52,7 @@ readonly class Configuration implements ConfigurationInterface
                                 ->children()
                                     ->scalarNode('source')->defaultValue('array')->end()
                                     ->scalarNode('target')->defaultValue('array')->end()
+                                    ->booleanNode('reverse')->defaultFalse()->end()
                                 ->end()
                             ->end()
                         ->end()

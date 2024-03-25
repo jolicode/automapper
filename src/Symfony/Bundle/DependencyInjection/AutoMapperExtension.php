@@ -97,7 +97,7 @@ class AutoMapperExtension extends Extension
 
             $normalizerDefinition = $container
                 ->getDefinition(AutoMapperNormalizer::class)
-                ->addTag('automapper.normalizer', ['priority' => $config['normalizer']['priority']])
+                ->addTag('serializer.normalizer', ['priority' => $config['normalizer']['priority']])
             ;
 
             if ($config['normalizer']['only_registered_mapping']) {
@@ -118,6 +118,10 @@ class AutoMapperExtension extends Extension
 
         foreach ($config['mapping']['mappers'] as $mapper) {
             $configMappingRegistry->addMethodCall('register', [$mapper['source'], $mapper['target']]);
+
+            if ($mapper['reverse']) {
+                $configMappingRegistry->addMethodCall('register', [$mapper['target'], $mapper['source']]);
+            }
         }
 
         if ($container->getParameter('kernel.environment') === 'test') {

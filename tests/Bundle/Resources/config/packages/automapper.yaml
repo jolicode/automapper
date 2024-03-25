@@ -1,10 +1,13 @@
 automapper:
   normalizer:
     enabled: true
-    only_registered_mapping: false
+    only_registered_mapping: true
   name_converter: AutoMapper\Tests\Bundle\Resources\App\Service\IdNameConverter
   map_private_properties: false
   check_attributes: false
   mapping:
     mappers:
       - { source: 'AutoMapper\Tests\Bundle\Resources\App\Entity\NestedObject', target: 'array' }
+      - { source: 'AutoMapper\Tests\Bundle\Resources\App\Entity\AddressDTO', target: 'array', reverse: true }
+      - { source: 'AutoMapper\Tests\Bundle\Resources\App\Entity\UserDTO', target: 'array', reverse: false }
+      - { source: 'array', target: 'AutoMapper\Tests\Bundle\Resources\App\Entity\Order', reverse: false }

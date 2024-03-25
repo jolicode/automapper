@@ -15,13 +15,18 @@ automapper:
   auto_register: true
   map_private_properties: true
   allow_readonly_target_to_populate: false
-  normalizer: false
+  normalizer:
+    enabled: false
+    only_registered_mapping: false
+    priority: 1000
   serializer: true
   name_converter: null
   cache_dir: "%kernel.cache_dir%/automapper"
   mappings:
-    - source: AutoMapper\Bundle\Tests\Fixtures\User
-      target: AutoMapper\Bundle\Tests\Fixtures\UserDTO
+    mappers:
+      - source: AutoMapper\Bundle\Tests\Fixtures\User
+        target: AutoMapper\Bundle\Tests\Fixtures\UserDTO
+        reverse: false
 ```
 
 ## Configuration Reference
@@ -37,7 +42,10 @@ automapper:
 * `map_private_properties` (default: `true`): If the mapper should map private properties;
 * `allow_readonly_target_to_populate` (default: `false`): Will throw an exception if you use a readonly class as target
   to populate if set to `false`.
-* `normalizer` (default: `false`):  A boolean which indicate if we inject the AutoMapperNormalizer;
+* `normalizer`:  Configure how the normalizer should behave;
+    * `enabled` (default: `false`): If the normalizer should be enabled;
+    * `only_registered_mapping` (default: `false`): If the normalizer should only use the registered mapping;
+    * `priority` (default: `1000`): The priority of the normalizer, the higher the value the higher the priority;
 * `serializer` (default: `true` if the symfony/serializer is available, false otherwise): A boolean which indicate
   if we use the attribute of the symfony/serializer during the mapping, this only apply to the `#[Groups]`, `#[MaxDepth]`,
   `#[Ignore]` and `#[DiscriminatorMap]` attributes;
@@ -45,5 +53,6 @@ automapper:
   this name converter will be used when mapping from an array to an object and vice versa;
 * `cache_dir` (default: `%kernel.cache_dir%/automapper`): This setting allows you to customize the output directory
   for generated mappers;
-* `mappings`: This option allows you to set a list of Mapper which will be generated during the cache warmup, you have
-  to specify `source` & `target` data types;
+* `mappings`: Allow to auto register the mappers for warmup, and selecting them to normalizer if wanted
+    * `mappers`: A list of mapping to register, each mapping should have a `source` and a `target` key, and can have
+      a `reverse` key to also register the reverse mapping. 
