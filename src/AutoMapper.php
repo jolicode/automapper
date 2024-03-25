@@ -10,6 +10,7 @@ use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
 use AutoMapper\Loader\ClassLoaderInterface;
 use AutoMapper\Loader\EvalLoader;
 use AutoMapper\Loader\FileLoader;
+use AutoMapper\Metadata\MetadataFactory;
 use AutoMapper\Metadata\MetadataRegistry;
 use AutoMapper\Symfony\ExpressionLanguageProvider;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
@@ -61,7 +62,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
      */
     public function getMapper(string $source, string $target): MapperInterface
     {
-        $metadata = $this->metadataRegistry->getMapperMetadata($source, $target);
+        $metadata = $this->metadataRegistry->get($source, $target);
         $className = $metadata->className;
 
         if (\array_key_exists($className, $this->mapperRegistry)) {
@@ -153,7 +154,17 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         }
 
         $customTransformerRegistry = new PropertyTransformerRegistry($propertyTransformers);
-        $metadataRegistry = MetadataRegistry::create($configuration, $customTransformerRegistry, $transformerFactories, $classMetadataFactory, $nameConverter, $expressionLanguage, $eventDispatcher);
+        $metadataRegistry = new MetadataRegistry($configuration);
+        $metadataFactory = MetadataFactory::create(
+            $configuration,
+            $customTransformerRegistry,
+            $metadataRegistry,
+            $transformerFactories,
+            $classMetadataFactory,
+            $nameConverter,
+            $expressionLanguage,
+            $eventDispatcher
+        );
 
         $mapperGenerator = new MapperGenerator(
             new ClassDiscriminatorResolver($classDiscriminatorFromClassMetadata),
@@ -162,9 +173,9 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         );
 
         if (null === $cacheDirectory) {
-            $loader = new EvalLoader($mapperGenerator, $metadataRegistry);
+            $loader = new EvalLoader($mapperGenerator, $metadataFactory);
         } else {
-            $loader = new FileLoader($mapperGenerator, $metadataRegistry, $cacheDirectory);
+            $loader = new FileLoader($mapperGenerator, $metadataFactory, $cacheDirectory);
         }
 
         return new self($loader, $customTransformerRegistry, $metadataRegistry, $expressionLanguageProvider);

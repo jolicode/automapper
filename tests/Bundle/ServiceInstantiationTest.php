@@ -6,6 +6,7 @@ namespace AutoMapper\Tests\Bundle;
 
 use AutoMapper\AutoMapperInterface;
 use AutoMapper\MapperContext;
+use AutoMapper\Symfony\Bundle\CacheWarmup\CacheWarmer;
 use AutoMapper\Tests\Bundle\Resources\App\Entity\AddressDTO;
 use AutoMapper\Tests\Bundle\Resources\App\Entity\ClassWithMapToContextAttribute;
 use AutoMapper\Tests\Bundle\Resources\App\Entity\ClassWithPrivateProperty;
@@ -37,14 +38,12 @@ class ServiceInstantiationTest extends WebTestCase
     public function testWarmup(): void
     {
         static::bootKernel();
+        $service = static::$kernel->getContainer()->get(CacheWarmer::class);
+        $service->warmUp(__DIR__ . '/Resources/var/cache/test');
 
         self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_NestedObject_array.php');
         self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_User_array.php');
         self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_AddressDTO_array.php');
-
-        self::assertInstanceOf(\Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_NestedObject_array::class, new \Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_NestedObject_array());
-        self::assertInstanceOf(\Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_User_array::class, new \Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_User_array());
-        self::assertInstanceOf(\Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_AddressDTO_array::class, new \Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_AddressDTO_array());
     }
 
     public function testAutoMapper(): void

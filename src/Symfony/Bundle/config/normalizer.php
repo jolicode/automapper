@@ -11,6 +11,5 @@ return static function (ContainerConfigurator $container) {
     $container->services()
         ->set(AutoMapperNormalizer::class)
             ->args([service(AutoMapperInterface::class)])
-            ->tag('serializer.normalizer', ['priority' => 1000])
     ;
 };

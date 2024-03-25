@@ -7,3 +7,4 @@ features linked to Symfony way of doing things.
 - [Configuration](configuration.md)
 - [Cache Warmup](cache-warmup.md)
 - [Expression Language](expression-language.md)
+- [Migrate existing application](migrate.md)

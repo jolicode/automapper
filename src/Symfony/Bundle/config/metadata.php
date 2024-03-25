@@ -8,6 +8,7 @@ use AutoMapper\Configuration;
 use AutoMapper\Extractor\FromSourceMappingExtractor;
 use AutoMapper\Extractor\FromTargetMappingExtractor;
 use AutoMapper\Extractor\SourceTargetMappingExtractor;
+use AutoMapper\Metadata\MetadataFactory;
 use AutoMapper\Metadata\MetadataRegistry;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -41,11 +42,17 @@ return static function (ContainerConfigurator $container) {
         ->set(MetadataRegistry::class)
             ->args([
                 service(Configuration::class),
+            ])
+
+        ->set(MetadataFactory::class)
+            ->args([
+                service(Configuration::class),
                 service(SourceTargetMappingExtractor::class),
                 service(FromSourceMappingExtractor::class),
                 service(FromTargetMappingExtractor::class),
                 service(TransformerFactoryInterface::class),
                 service(EventDispatcherInterface::class),
+                service(MetadataRegistry::class),
             ])
     ;
 };

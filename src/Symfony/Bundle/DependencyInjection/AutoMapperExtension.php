@@ -10,8 +10,8 @@ use AutoMapper\EventListener\Symfony\AdvancedNameConverterListener;
 use AutoMapper\Loader\ClassLoaderInterface;
 use AutoMapper\Loader\EvalLoader;
 use AutoMapper\Loader\FileLoader;
-use AutoMapper\Symfony\Bundle\CacheWarmup\CacheWarmerLoaderInterface;
-use AutoMapper\Symfony\Bundle\CacheWarmup\ConfigurationCacheWarmerLoader;
+use AutoMapper\Normalizer\AutoMapperNormalizer;
+use AutoMapper\Symfony\Bundle\CacheWarmup\CacheWarmer;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 use AutoMapper\Transformer\SymfonyUidTransformerFactory;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -88,12 +88,21 @@ class AutoMapperExtension extends Extension
             $loader->load('event_serializer.php');
         }
 
-        if ($config['normalizer']) {
+        if ($config['normalizer']['enabled']) {
             if (!interface_exists(NormalizerInterface::class)) {
                 throw new \LogicException('The "symfony/serializer" component is required to use the "normalizer" feature.');
             }
 
             $loader->load('normalizer.php');
+
+            $normalizerDefinition = $container
+                ->getDefinition(AutoMapperNormalizer::class)
+                ->addTag('serializer.normalizer', ['priority' => $config['normalizer']['priority']])
+            ;
+
+            if ($config['normalizer']['only_registered_mapping']) {
+                $normalizerDefinition->setArgument('$onlyMetadataRegistry', new Reference('automapper.config_mapping_registry'));
+            }
         }
 
         if (null !== $config['name_converter']) {
@@ -105,10 +114,19 @@ class AutoMapperExtension extends Extension
 
         $container->setParameter('automapper.cache_dir', $config['cache_dir']);
 
-        $container->registerForAutoconfiguration(CacheWarmerLoaderInterface::class)->addTag('automapper.cache_warmer_loader');
-        $container
-            ->getDefinition(ConfigurationCacheWarmerLoader::class)
-            ->replaceArgument(0, $config['warmup']);
+        $configMappingRegistry = $container->getDefinition('automapper.config_mapping_registry');
+
+        foreach ($config['mapping']['mappers'] as $mapper) {
+            $configMappingRegistry->addMethodCall('register', [$mapper['source'], $mapper['target']]);
+
+            if ($mapper['reverse']) {
+                $configMappingRegistry->addMethodCall('register', [$mapper['target'], $mapper['source']]);
+            }
+        }
+
+        if ($container->getParameter('kernel.environment') === 'test') {
+            $container->getDefinition(CacheWarmer::class)->setPublic(true);
+        }
     }
 
     public function getAlias(): string
