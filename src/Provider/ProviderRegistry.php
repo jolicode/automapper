@@ -9,15 +9,15 @@ namespace AutoMapper\Provider;
  */
 final readonly class ProviderRegistry
 {
-    /** @var array<string, ProviderInterface> */
+    /** @var array<class-string, ProviderInterface> */
     private array $providers;
 
     /**
-     * @param iterable<string|int, ProviderInterface> $providers
+     * @param iterable<class-string|int, ProviderInterface> $providers
      */
     public function __construct(iterable $providers)
     {
-        /** @var array<string, ProviderInterface> $indexedProviders */
+        /** @var array<class-string, ProviderInterface> $indexedProviders */
         $indexedProviders = [];
 
         foreach ($providers as $key => $provider) {
