@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#86](https://github.com/jolicode/automapper/pull/86) Bundle: Allow to use eval loader instead of file
 - [GH#89](https://github.com/jolicode/automapper/pull/89) Add normalizer format in context, allow skipping group checking and remove registry interface from normalizer
 - [GH#96](https://github.com/jolicode/automapper/pull/96) Add a way to instantiate the target object from external service using provider
+- [GH#98](https://github.com/jolicode/automapper/pull/98) Allow normalizer to only work with registered mapping
 
 ### Changed
 - [GH#56](https://github.com/jolicode/automapper/pull/56) Refactor metadata
@@ -45,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#91](https://github.com/jolicode/automapper/pull/91) Add documentation versioning
 - [GH#88](https://github.com/jolicode/automapper/pull/88) Reorganize documentation structure
 - [GH#92](https://github.com/jolicode/automapper/pull/92) Add doc about mapping
+- [GH#98](https://github.com/jolicode/automapper/pull/98) Add migration guide into documentation
 
 ## [8.2.2] - 2024-03-19
 ### Added
