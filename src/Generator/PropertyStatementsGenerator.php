@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator;
 
-use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Extractor\WriteMutator;
+use AutoMapper\Metadata\GeneratorMetadata;
+use AutoMapper\Metadata\PropertyMetadata;
+use AutoMapper\Transformer\AllowNullValueTransformerInterface;
 use AutoMapper\Transformer\AssignedByReferenceTransformerInterface;
+use PhpParser\Node\Expr;
+use PhpParser\Node\Name;
 use PhpParser\Node\Stmt;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 /**
  * @internal
@@ -17,54 +22,54 @@ final readonly class PropertyStatementsGenerator
     private PropertyConditionsGenerator $propertyConditionsGenerator;
 
     public function __construct(
+        ExpressionLanguage $expressionLanguage
     ) {
-        $this->propertyConditionsGenerator = new PropertyConditionsGenerator();
+        $this->propertyConditionsGenerator = new PropertyConditionsGenerator($expressionLanguage);
     }
 
     /**
      * @return list<Stmt>
      */
-    public function generate(PropertyMapping $propertyMapping): array
+    public function generate(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): array
     {
-        $mapperMetadata = $propertyMapping->mapperMetadata;
-
-        if ($propertyMapping->shouldIgnoreProperty($mapperMetadata->shouldMapPrivateProperties())) {
+        if ($propertyMetadata->ignored) {
             return [];
         }
 
-        $variableRegistry = $mapperMetadata->getVariableRegistry();
-        $fieldValueVariable = $variableRegistry->getFieldValueVariable($propertyMapping);
+        $variableRegistry = $metadata->variableRegistry;
+        $fieldValueExpr = $propertyMetadata->source->accessor?->getExpression($variableRegistry->getSourceInput());
 
-        if ($propertyMapping->readAccessor) {
-            $fieldValueVariable = $propertyMapping->readAccessor->getExpression($variableRegistry->getSourceInput());
+        if (null === $fieldValueExpr) {
+            if (!($propertyMetadata->transformer instanceof AllowNullValueTransformerInterface)) {
+                return [];
+            }
+
+            $fieldValueExpr = new Expr\ConstFetch(new Name('null'));
         }
 
         /* Create expression to transform the read value into the wanted written value, depending on the transform it may add new statements to get the correct value */
-        [$output, $propStatements] = $propertyMapping->transformer->transform(
-            $fieldValueVariable,
+        [$output, $propStatements] = $propertyMetadata->transformer->transform(
+            $fieldValueExpr,
             $variableRegistry->getResult(),
-            $propertyMapping,
+            $propertyMetadata,
             $variableRegistry->getUniqueVariableScope(),
             $variableRegistry->getSourceInput()
         );
 
-        if ($propertyMapping->writeMutator && $propertyMapping->writeMutator->type !== WriteMutator::TYPE_ADDER_AND_REMOVER) {
+        if ($propertyMetadata->target->writeMutator && $propertyMetadata->target->writeMutator->type !== WriteMutator::TYPE_ADDER_AND_REMOVER) {
             /** Create expression to write the transformed value to the target only if not add / remove mutator, as it's already called by the transformer in this case */
-            $writeExpression = $propertyMapping->writeMutator->getExpression(
+            $writeExpression = $propertyMetadata->target->writeMutator->getExpression(
                 $variableRegistry->getResult(),
                 $output,
-                $propertyMapping->transformer instanceof AssignedByReferenceTransformerInterface
-                    ? $propertyMapping->transformer->assignByRef()
+                $propertyMetadata->transformer instanceof AssignedByReferenceTransformerInterface
+                    ? $propertyMetadata->transformer->assignByRef()
                     : false
             );
-            if (null === $writeExpression) {
-                return [];
-            }
 
             $propStatements[] = new Stmt\Expression($writeExpression);
         }
 
-        $condition = $this->propertyConditionsGenerator->generate($propertyMapping);
+        $condition = $this->propertyConditionsGenerator->generate($metadata, $propertyMetadata);
 
         if ($condition) {
             $propStatements = [

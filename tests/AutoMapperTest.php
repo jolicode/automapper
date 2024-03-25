@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace AutoMapper\Tests;
 
 use AutoMapper\AutoMapper;
+use AutoMapper\Configuration;
+use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\Exception\CircularReferenceException;
 use AutoMapper\Exception\NoMappingFoundException;
 use AutoMapper\Exception\ReadOnlyTargetException;
 use AutoMapper\MapperContext;
+use AutoMapper\Provider\EarlyReturn;
 use AutoMapper\Tests\Fixtures\Address;
 use AutoMapper\Tests\Fixtures\AddressDTO;
 use AutoMapper\Tests\Fixtures\AddressDTOReadonlyClass;
@@ -20,8 +23,12 @@ use AutoMapper\Tests\Fixtures\BuiltinClass;
 use AutoMapper\Tests\Fixtures\ClassWithMapToContextAttribute;
 use AutoMapper\Tests\Fixtures\ClassWithNullablePropertyInConstructor;
 use AutoMapper\Tests\Fixtures\ClassWithPrivateProperty;
+use AutoMapper\Tests\Fixtures\DifferentSetterGetterType;
+use AutoMapper\Tests\Fixtures\Dog;
 use AutoMapper\Tests\Fixtures\Fish;
 use AutoMapper\Tests\Fixtures\FooGenerator;
+use AutoMapper\Tests\Fixtures\FooProvider;
+use AutoMapper\Tests\Fixtures\GroupOverride;
 use AutoMapper\Tests\Fixtures\HasDateTime;
 use AutoMapper\Tests\Fixtures\HasDateTimeImmutable;
 use AutoMapper\Tests\Fixtures\HasDateTimeImmutableWithNullValue;
@@ -35,9 +42,16 @@ use AutoMapper\Tests\Fixtures\ObjectsUnion\ObjectsUnionProperty;
 use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
 use AutoMapper\Tests\Fixtures\Order;
 use AutoMapper\Tests\Fixtures\PetOwner;
+use AutoMapper\Tests\Fixtures\Provider\CustomProvider;
 use AutoMapper\Tests\Fixtures\Transformer\MoneyTransformerFactory;
 use AutoMapper\Tests\Fixtures\Uninitialized;
+use AutoMapper\Tests\Fixtures\UserPromoted;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\Ignore;
+use Symfony\Component\Serializer\Attribute\MaxDepth;
+use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
 use Symfony\Component\Uid\Ulid;
 use Symfony\Component\Uid\Uuid;
@@ -50,11 +64,6 @@ class AutoMapperTest extends AutoMapperBaseTest
     public function testAutoMapping(): void
     {
         $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
-
-        $userMetadata = $this->autoMapper->getMetadata(Fixtures\User::class, Fixtures\UserDTO::class);
-        $userMetadata->forMember('yearOfBirth', function (Fixtures\User $user) {
-            return ((int) date('Y')) - ((int) $user->age);
-        });
 
         $address = new Address();
         $address->setCity('Toulon');
@@ -70,7 +79,6 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertSame(1, $userDto->id);
         self::assertSame('yolo', $userDto->getName());
         self::assertSame(13, $userDto->age);
-        self::assertSame(((int) date('Y')) - 13, $userDto->yearOfBirth);
         self::assertCount(1, $userDto->addresses);
         self::assertInstanceOf(AddressDTO::class, $userDto->address);
         self::assertInstanceOf(AddressDTO::class, $userDto->addresses[0]);
@@ -106,10 +114,10 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testAutoMapperFromArrayCustomDateTime(): void
     {
-        $this->buildAutoMapper(classPrefix: 'CustomDateTime_');
+        $this->buildAutoMapper(classPrefix: 'CustomDateTime_', dateTimeFormat: 'U');
 
-        $dateTime = \DateTime::createFromFormat(\DateTime::RFC3339, '1987-04-30T06:00:00Z');
         $customFormat = 'U';
+        $dateTime = \DateTime::createFromFormat(\DateTime::RFC3339, '1987-04-30T06:00:00Z');
         $user = [
             'id' => 1,
             'address' => [
@@ -117,9 +125,6 @@ class AutoMapperTest extends AutoMapperBaseTest
             ],
             'createdAt' => $dateTime->format($customFormat),
         ];
-
-        $configuration = $this->autoMapper->getMetadata('array', Fixtures\UserDTO::class);
-        $configuration->setDateTimeFormat($customFormat);
 
         /** @var Fixtures\UserDTO $userDto */
         $userDto = $this->autoMapper->map($user, Fixtures\UserDTO::class);
@@ -142,6 +147,20 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertEquals(1, $userData['id']);
         self::assertIsArray($userData['address']);
         self::assertIsString($userData['createdAt']);
+    }
+
+    public function testAutoMapperToArrayGroups(): void
+    {
+        $address = new Address();
+        $address->setCity('Toulon');
+        $user = new Fixtures\User(1, 'yolo', '13');
+        $user->address = $address;
+        $user->addresses[] = $address;
+
+        $userData = $this->autoMapper->map($user, 'array', [MapperContext::GROUPS => ['dummy']]);
+
+        self::assertIsArray($userData);
+        self::assertEmpty($userData);
     }
 
     public function testAutoMapperFromStdObject(): void
@@ -245,6 +264,10 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testGroupsSourceTarget(): void
     {
+        if (!class_exists(Groups::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
         $foo = new Fixtures\Foo();
         $foo->setId(10);
 
@@ -276,6 +299,10 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testGroupsToArray(): void
     {
+        if (!class_exists(Groups::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
         $foo = new Fixtures\Foo();
         $foo->setId(10);
 
@@ -293,6 +320,38 @@ class AutoMapperTest extends AutoMapperBaseTest
 
         self::assertIsArray($fooArray);
         self::assertArrayNotHasKey('id', $fooArray);
+    }
+
+    public function testSkippedGroups(): void
+    {
+        if (!class_exists(Groups::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
+        $eventDispatcher = new EventDispatcher();
+        $eventDispatcher->addListener(PropertyMetadataEvent::class, function (PropertyMetadataEvent $event) {
+            $event->disableGroupsCheck = true;
+        });
+
+        $this->buildAutoMapper(eventDispatcher: $eventDispatcher, classPrefix: 'SkippedGroups_');
+
+        $foo = new Fixtures\Foo();
+        $foo->setId(10);
+
+        $fooArray = $this->autoMapper->map($foo, 'array', [MapperContext::GROUPS => ['group1']]);
+
+        self::assertIsArray($fooArray);
+        self::assertEquals(10, $fooArray['id']);
+
+        $fooArray = $this->autoMapper->map($foo, 'array', [MapperContext::GROUPS => []]);
+
+        self::assertIsArray($fooArray);
+        self::assertEquals(10, $fooArray['id']);
+
+        $fooArray = $this->autoMapper->map($foo, 'array');
+
+        self::assertIsArray($fooArray);
+        self::assertEquals(10, $fooArray['id']);
     }
 
     public function testDeepCloning(): void
@@ -387,14 +446,12 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testConstructor(): void
     {
-        $autoMapper = AutoMapper::create(loader: $this->loader);
-
         $user = new Fixtures\UserDTO();
         $user->id = 10;
         $user->setName('foo');
         $user->age = 3;
         /** @var Fixtures\UserConstructorDTO $userDto */
-        $userDto = $autoMapper->map($user, Fixtures\UserConstructorDTO::class);
+        $userDto = $this->autoMapper->map($user, Fixtures\UserConstructorDTO::class);
 
         self::assertInstanceOf(Fixtures\UserConstructorDTO::class, $userDto);
         self::assertSame('10', $userDto->getId());
@@ -405,10 +462,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testConstructorNotAllowed(): void
     {
-        $this->buildAutoMapper(classPrefix: 'NotAllowedMapper_');
-
-        $configuration = $this->autoMapper->getMetadata(Fixtures\UserDTO::class, Fixtures\UserConstructorDTO::class);
-        $configuration->setConstructorAllowed(false);
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, allowConstructor: false, classPrefix: 'NotAllowedMapper_');
 
         $user = new Fixtures\UserDTO();
         $user->id = 10;
@@ -441,6 +495,8 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testConstructorDisable(): void
     {
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+
         $user = new Fixtures\UserDTONoName();
         $user->id = 10;
         /** @var Fixtures\UserConstructorDTO $userDto */
@@ -454,6 +510,10 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testMaxDepth(): void
     {
+        if (!class_exists(MaxDepth::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
         $foo = new Fixtures\FooMaxDepth(0, new Fixtures\FooMaxDepth(1, new Fixtures\FooMaxDepth(2, new Fixtures\FooMaxDepth(3, new Fixtures\FooMaxDepth(4)))));
         $fooArray = $this->autoMapper->map($foo, 'array');
 
@@ -464,6 +524,10 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testIgnoreInSource(): void
     {
+        if (!class_exists(Ignore::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
         $foo = new Fixtures\FooIgnore();
         $foo->id = 5;
         $fooArray = $this->autoMapper->map($foo, 'array');
@@ -473,6 +537,10 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testIgnoreInTarget(): void
     {
+        if (!class_exists(Ignore::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
         $foo = new Fixtures\Foo();
         $fooIgnore = $this->autoMapper->map($foo, Fixtures\FooIgnore::class);
 
@@ -481,11 +549,6 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testObjectToPopulate(): void
     {
-        $configurationUser = $this->autoMapper->getMetadata(Fixtures\User::class, Fixtures\UserDTO::class);
-        $configurationUser->forMember('yearOfBirth', function (Fixtures\User $user) {
-            return ((int) date('Y')) - ((int) $user->age);
-        });
-
         $user = new Fixtures\User(1, 'yolo', '13');
         $userDtoToPopulate = new Fixtures\UserDTO();
 
@@ -496,11 +559,6 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testObjectToPopulateWithoutContext(): void
     {
-        $configurationUser = $this->autoMapper->getMetadata(Fixtures\User::class, Fixtures\UserDTO::class);
-        $configurationUser->forMember('yearOfBirth', function (Fixtures\User $user) {
-            return ((int) date('Y')) - ((int) $user->age);
-        });
-
         $user = new Fixtures\User(1, 'yolo', '13');
         $userDtoToPopulate = new Fixtures\UserDTO();
 
@@ -511,11 +569,6 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testArrayToPopulate(): void
     {
-        $configurationUser = $this->autoMapper->getMetadata(Fixtures\User::class, Fixtures\UserDTO::class);
-        $configurationUser->forMember('yearOfBirth', function (Fixtures\User $user) {
-            return ((int) date('Y')) - ((int) $user->age);
-        });
-
         $user = new Fixtures\User(1, 'yolo', '13');
         $array = [];
         $arrayMapped = $this->autoMapper->map($user, $array);
@@ -539,19 +592,6 @@ class AutoMapperTest extends AutoMapperBaseTest
         $this->autoMapper->map($nodeA, 'array', $context->toArray());
     }
 
-    public function testCircularReferenceLimitOnMapper(): void
-    {
-        $nodeA = new Fixtures\Node();
-        $nodeA->parent = $nodeA;
-
-        $mapper = $this->autoMapper->getMapper(Fixtures\Node::class, 'array');
-        $mapper->setCircularReferenceLimit(1);
-
-        $this->expectException(CircularReferenceException::class);
-
-        $mapper->map($nodeA);
-    }
-
     public function testCircularReferenceHandlerOnContext(): void
     {
         $nodeA = new Fixtures\Node();
@@ -567,28 +607,8 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertSame('foo', $nodeArray['parent']);
     }
 
-    public function testCircularReferenceHandlerOnMapper(): void
-    {
-        $nodeA = new Fixtures\Node();
-        $nodeA->parent = $nodeA;
-
-        $mapper = $this->autoMapper->getMapper(Fixtures\Node::class, 'array');
-        $mapper->setCircularReferenceHandler(function () {
-            return 'foo';
-        });
-
-        $nodeArray = $mapper->map($nodeA);
-
-        self::assertSame('foo', $nodeArray['parent']);
-    }
-
     public function testAllowedAttributes(): void
     {
-        $configurationUser = $this->autoMapper->getMetadata(Fixtures\User::class, Fixtures\UserDTO::class);
-        $configurationUser->forMember('yearOfBirth', function (Fixtures\User $user) {
-            return ((int) date('Y')) - ((int) $user->age);
-        });
-
         $user = new Fixtures\User(1, 'yolo', '13');
         $address = new Address();
         $address->setCity('some city');
@@ -606,61 +626,18 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testIgnoredAttributes(): void
     {
-        $configurationUser = $this->autoMapper->getMetadata(Fixtures\User::class, Fixtures\UserDTO::class);
-        $configurationUser->forMember('yearOfBirth', function (Fixtures\User $user) {
-            return ((int) date('Y')) - ((int) $user->age);
-        });
-
         $user = new Fixtures\User(1, 'yolo', '13');
         $userDto = $this->autoMapper->map($user, Fixtures\UserDTO::class, [MapperContext::IGNORED_ATTRIBUTES => ['name']]);
 
         self::assertNull($userDto->getName());
     }
 
-    public function testMappingWithTargetObjectWithNoObjectToPopulate(): void
-    {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
-
-        $configurationUser = $this->autoMapper->getMetadata(Fixtures\User::class, Fixtures\UserDTOMerged::class);
-        $configurationUser->forMember('properties', function (Fixtures\User $user, Fixtures\UserDTOMerged $target) {
-            return array_merge($target->getProperties(), [
-                'name' => $user->name,
-                'age' => $user->age,
-            ]);
-        });
-
-        $user = new Fixtures\User(1, 'yolo', '13');
-
-        $userDto = $this->autoMapper->map($user, Fixtures\UserDTOMerged::class);
-
-        self::assertArrayHasKey('name', $userDto->getProperties());
-        self::assertArrayHasKey('age', $userDto->getProperties());
-        self::assertArrayNotHasKey('gender', $userDto->getProperties());
-    }
-
-    public function testMappingWithTargetObjectWithObjectToPopulate(): void
-    {
-        $configurationUser = $this->autoMapper->getMetadata(Fixtures\User::class, Fixtures\UserDTOMerged::class);
-        $configurationUser->forMember('properties', function (Fixtures\User $user, Fixtures\UserDTOMerged $target) {
-            return array_merge($target->getProperties(), [
-                'name' => $user->name,
-                'age' => $user->age,
-            ]);
-        });
-
-        $user = new Fixtures\User(1, 'yolo', '13');
-        $dto = new Fixtures\UserDTOMerged();
-        $dto->setProperties(['gender' => 1]);
-
-        $userDto = $this->autoMapper->map($user, $dto);
-
-        self::assertArrayHasKey('name', $userDto->getProperties());
-        self::assertArrayHasKey('age', $userDto->getProperties());
-        self::assertArrayHasKey('gender', $userDto->getProperties());
-    }
-
     public function testNameConverter(): void
     {
+        if (!interface_exists(AdvancedNameConverterInterface::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
         if (Kernel::MAJOR_VERSION < 6) {
             $nameConverter = new class() implements AdvancedNameConverterInterface {
                 public function normalize($propertyName, ?string $class = null, ?string $format = null, array $context = [])
@@ -703,7 +680,7 @@ class AutoMapperTest extends AutoMapperBaseTest
             };
         }
 
-        $autoMapper = AutoMapper::create(loader: $this->loader, nameConverter: $nameConverter, classPrefix: 'Mapper2_');
+        $autoMapper = AutoMapper::create(new Configuration(classPrefix: 'Mapper2_'), nameConverter: $nameConverter);
         $user = new Fixtures\User(1, 'yolo', '13');
 
         $userArray = $autoMapper->map($user, 'array');
@@ -731,6 +708,10 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testDiscriminator(): void
     {
+        if (!class_exists(ClassDiscriminatorFromClassMetadata::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
         $this->buildAutoMapper(classPrefix: 'Discriminator');
 
         $data = [
@@ -754,7 +735,7 @@ class AutoMapperTest extends AutoMapperBaseTest
     {
         self::expectException(NoMappingFoundException::class);
 
-        $automapper = AutoMapper::create(autoRegister: false);
+        $automapper = AutoMapper::create(new Configuration(autoRegister: false, classPrefix: 'NoAutoRegister_'));
         $automapper->getMapper(Fixtures\User::class, Fixtures\UserDTO::class);
     }
 
@@ -948,12 +929,16 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testAdderAndRemoverWithClass(): void
     {
+        if (!class_exists(ClassDiscriminatorFromClassMetadata::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
         $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
         $petOwner = [
             'pets' => [
                 ['type' => 'cat', 'name' => 'Félix'],
-                ['type' => 'dog', 'name' => 'Coco'],
+                ['type' => 'dog', 'name' => 'Coco', 'bark' => 'Wouf'],
             ],
         ];
 
@@ -965,10 +950,15 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertSame('cat', $petOwnerData->getPets()[0]->type);
         self::assertSame('Coco', $petOwnerData->getPets()[1]->name);
         self::assertSame('dog', $petOwnerData->getPets()[1]->type);
+        self::assertSame('Wouf', $petOwnerData->getPets()[1]->bark);
     }
 
     public function testAdderAndRemoverWithInstance(): void
     {
+        if (!class_exists(ClassDiscriminatorFromClassMetadata::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
         $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
         $fish = new Fish();
@@ -1343,5 +1333,137 @@ class AutoMapperTest extends AutoMapperBaseTest
             ['prop' => ['foo' => 'foo']],
             $this->autoMapper->map(new ObjectsUnionProperty(new Foo('foo')), 'array')
         );
+    }
+
+    public function testMultipleArray(): void
+    {
+        $now = new \DateTimeImmutable();
+        $userDto = new Fixtures\UserDTO();
+        $userDto->times = [$now, $now];
+
+        $user = $this->autoMapper->map($userDto, 'array');
+
+        self::assertSame([$now->format(\DateTimeInterface::RFC3339), $now->format(\DateTimeInterface::RFC3339)], $user['times']);
+
+        $userDto = new Fixtures\UserDTO();
+        $userDto->times = [0, 1];
+
+        $user = $this->autoMapper->map($userDto, 'array');
+
+        self::assertSame([0, 1], $user['times']);
+    }
+
+    public function testDifferentSetterGetterType(): void
+    {
+        $object = new DifferentSetterGetterType(AddressType::FLAT);
+        $array = $this->autoMapper->map($object, 'array');
+
+        self::assertSame(['address' => 'flat', 'addressDocBlock' => 'flat'], $array);
+    }
+
+    public function testPromoted(): void
+    {
+        $address = new AddressDTO();
+        $address->city = 'city';
+
+        $object = new UserPromoted([$address, $address]);
+        $array = $this->autoMapper->map($object, 'array');
+
+        self::assertSame(['addresses' => [['city' => 'city'], ['city' => 'city']]], $array);
+    }
+
+    public function testDateTimeFromString(): void
+    {
+        $now = new \DateTimeImmutable();
+        $data = ['dateTime' => $now->format(\DateTimeInterface::RFC3339)];
+        $object = $this->autoMapper->map($data, HasDateTime::class);
+
+        self::assertEquals($now->format(\DateTimeInterface::RFC3339), $object->dateTime->format(\DateTimeInterface::RFC3339));
+    }
+
+    public function testRealClassName(): void
+    {
+        require_once __DIR__ . '/Fixtures/proxies.php';
+
+        $proxy = new \Proxies\__CG__\AutoMapper\Tests\Fixtures\Proxy();
+        $proxy->foo = 'bar';
+
+        $mapper = $this->autoMapper->getMapper($proxy::class, 'array');
+
+        self::assertNotEquals('Mapper_Proxies___CG___AutoMapper_Tests_Fixtures_Proxy', $mapper::class);
+        self::assertEquals('Mapper_AutoMapper_Tests_Fixtures_Proxy_array', $mapper::class);
+
+        $proxy = new \MongoDBODMProxies\__PM__\AutoMapper\Tests\Fixtures\Proxy\Generated();
+        $proxy->foo = 'bar';
+
+        $mapper = $this->autoMapper->getMapper($proxy::class, 'array');
+
+        self::assertNotEquals('Mapper_MongoDBODMProxies___PM___AutoMapper_Tests_Fixtures_Proxy_Generated_array', $mapper::class);
+        self::assertEquals('Mapper_AutoMapper_Tests_Fixtures_Proxy_array', $mapper::class);
+    }
+
+    public function testDiscriminantToArray(): void
+    {
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+
+        $dog = new Dog();
+        $dog->bark = 'Wouf';
+        $dog->type = 'dog';
+        $dog->name = 'Coco';
+
+        $petOwner = new PetOwner();
+        $petOwner->addPet($dog);
+
+        $dog->owner = $petOwner;
+
+        $petOwnerData = $this->autoMapper->map($petOwner, 'array');
+
+        self::assertIsArray($petOwnerData['pets']);
+        self::assertCount(1, $petOwnerData['pets']);
+        self::assertSame('Coco', $petOwnerData['pets'][0]['name']);
+        self::assertSame('dog', $petOwnerData['pets'][0]['type']);
+        self::assertSame('Wouf', $petOwnerData['pets'][0]['bark']);
+    }
+
+    public function testGroupOverride(): void
+    {
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+
+        $group = new GroupOverride();
+        $data = $this->autoMapper->map($group, 'array', ['groups' => ['group2']]);
+
+        self::assertSame(['id' => 'id', 'name' => 'name'], $data);
+    }
+
+    public function testProvider(): void
+    {
+        $provided = new FooProvider();
+        $provided->foo = 'bar';
+
+        $this->buildAutoMapper(providers: [new CustomProvider($provided)]);
+
+        $data = $this->autoMapper->map(['bar' => 'foo'], FooProvider::class);
+
+        self::assertSame('bar', $data->foo);
+        self::assertSame('foo', $data->bar);
+
+        $data = $this->autoMapper->map(['bar' => 'foo', 'foo' => 'foo'], FooProvider::class);
+
+        self::assertSame('foo', $data->foo);
+        self::assertSame('foo', $data->bar);
+    }
+
+    public function testProviderEarlyReturn(): void
+    {
+        $provided = new FooProvider();
+        $provided->foo = 'bar';
+        $provided->bar = 'foo';
+
+        $this->buildAutoMapper(providers: [new CustomProvider(new EarlyReturn($provided))]);
+
+        $data = $this->autoMapper->map(['bar' => 'bar', 'foo' => 'foo'], FooProvider::class);
+
+        self::assertSame('bar', $data->foo);
+        self::assertSame('foo', $data->bar);
     }
 }

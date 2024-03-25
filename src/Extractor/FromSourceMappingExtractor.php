@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace AutoMapper\Extractor;
 
-use AutoMapper\Exception\InvalidMappingException;
-use AutoMapper\MapperGeneratorMetadataInterface;
-use AutoMapper\Transformer\TransformerFactoryInterface;
-use AutoMapper\Transformer\TransformerPropertyFactoryInterface;
+use AutoMapper\Configuration;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
+use AutoMapper\Metadata\TypesMatching;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
-use Symfony\Component\PropertyInfo\PropertyReadInfo;
 use Symfony\Component\PropertyInfo\PropertyReadInfoExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyWriteInfoExtractorInterface;
 use Symfony\Component\PropertyInfo\Type;
-use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
-use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
 
 /**
  * Mapping extracted only from source, useful when not having metadata on the target for dynamic data like array, \stdClass, ...
@@ -27,83 +24,31 @@ use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
  */
 final class FromSourceMappingExtractor extends MappingExtractor
 {
-    private const ALLOWED_TARGETS = ['array', \stdClass::class];
-
     public function __construct(
+        Configuration $configuration,
         PropertyInfoExtractorInterface $propertyInfoExtractor,
         PropertyReadInfoExtractorInterface $readInfoExtractor,
         PropertyWriteInfoExtractorInterface $writeInfoExtractor,
-        TransformerFactoryInterface|TransformerPropertyFactoryInterface $transformerFactory,
-        ClassMetadataFactoryInterface $classMetadataFactory = null,
-        private readonly ?AdvancedNameConverterInterface $nameConverter = null,
     ) {
-        parent::__construct($propertyInfoExtractor, $readInfoExtractor, $writeInfoExtractor, $transformerFactory, $classMetadataFactory);
+        parent::__construct($configuration, $propertyInfoExtractor, $readInfoExtractor, $writeInfoExtractor);
     }
 
-    public function getPropertiesMapping(MapperGeneratorMetadataInterface $mapperMetadata): array
+    public function getTypes(string $source, SourcePropertyMetadata $sourceProperty, string $target, TargetPropertyMetadata $targetProperty): TypesMatching
     {
-        $sourceProperties = $this->propertyInfoExtractor->getProperties($mapperMetadata->getSource());
+        $types = new TypesMatching();
+        $sourceTypes = $this->propertyInfoExtractor->getTypes($source, $sourceProperty->name, [
+            ReadWriteTypeExtractor::READ_ACCESSOR => $sourceProperty->accessor,
+        ]) ?? [new Type(Type::BUILTIN_TYPE_NULL)];
 
-        if (!\in_array($mapperMetadata->getTarget(), self::ALLOWED_TARGETS, true)) {
-            throw new InvalidMappingException('Only array or stdClass are accepted as a target');
+        foreach ($sourceTypes as $type) {
+            $targetType = $this->transformType($target, $type);
+
+            if ($targetType) {
+                $types[$type] = [$targetType];
+            }
         }
 
-        if (null === $sourceProperties) {
-            return [];
-        }
-
-        $sourceProperties = array_unique($sourceProperties);
-        $mapping = [];
-
-        foreach ($sourceProperties as $property) {
-            if (!$this->propertyInfoExtractor->isReadable($mapperMetadata->getSource(), $property)) {
-                continue;
-            }
-
-            $sourceTypes = $this->propertyInfoExtractor->getTypes($mapperMetadata->getSource(), $property);
-
-            if (null === $sourceTypes) {
-                $sourceTypes = [new Type(Type::BUILTIN_TYPE_NULL)]; // if no types found, we force a null type
-            }
-
-            $targetTypes = [];
-
-            foreach ($sourceTypes as $type) {
-                $targetType = $this->transformType($mapperMetadata->getTarget(), $type);
-
-                if ($targetType) {
-                    $targetTypes[] = $targetType;
-                }
-            }
-
-            if ($this->transformerFactory instanceof TransformerPropertyFactoryInterface) {
-                $transformer = $this->transformerFactory->getPropertyTransformer($sourceTypes, $targetTypes, $mapperMetadata, $property);
-            } else {
-                $transformer = $this->transformerFactory->getTransformer($sourceTypes, $targetTypes, $mapperMetadata);
-            }
-
-            if (null === $transformer) {
-                continue;
-            }
-
-            $mapping[] = new PropertyMapping(
-                $mapperMetadata,
-                $this->getReadAccessor($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property),
-                $this->getWriteMutator($mapperMetadata->getSource(), $mapperMetadata->getTarget(), $property),
-                null,
-                $transformer,
-                $property,
-                false,
-                $this->getGroups($mapperMetadata->getSource(), $property),
-                $this->getGroups($mapperMetadata->getTarget(), $property),
-                $this->getMaxDepth($mapperMetadata->getSource(), $property),
-                $this->isIgnoredProperty($mapperMetadata->getSource(), $property),
-                $this->isIgnoredProperty($mapperMetadata->getTarget(), $property),
-                PropertyReadInfo::VISIBILITY_PUBLIC === ($this->readInfoExtractor->getReadInfo($mapperMetadata->getSource(), $property)?->getVisibility() ?? PropertyReadInfo::VISIBILITY_PUBLIC),
-            );
-        }
-
-        return $mapping;
+        return $types;
     }
 
     private function transformType(string $target, Type $type = null): ?Type
@@ -129,7 +74,7 @@ final class FromSourceMappingExtractor extends MappingExtractor
         }
 
         // Use string for datetime
-        if (Type::BUILTIN_TYPE_OBJECT === $type->getBuiltinType() && (\DateTimeInterface::class === $type->getClassName() || is_subclass_of($type->getClassName(), \DateTimeInterface::class))) {
+        if (Type::BUILTIN_TYPE_OBJECT === $type->getBuiltinType() && $type->getClassName() !== null && (\DateTimeInterface::class === $type->getClassName() || is_subclass_of($type->getClassName(), \DateTimeInterface::class))) {
             $builtinType = 'string';
         }
 
@@ -148,10 +93,6 @@ final class FromSourceMappingExtractor extends MappingExtractor
 
     public function getWriteMutator(string $source, string $target, string $property, array $context = []): WriteMutator
     {
-        if (null !== $this->nameConverter) {
-            $property = $this->nameConverter->normalize($property, $source, $target);
-        }
-
         $targetMutator = new WriteMutator(WriteMutator::TYPE_ARRAY_DIMENSION, $property, false);
 
         if (\stdClass::class === $target) {

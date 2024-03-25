@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace AutoMapper\Loader;
 
 use AutoMapper\Generator\MapperGenerator;
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\MetadataFactory;
+use AutoMapper\Metadata\MetadataRegistry;
 use PhpParser\PrettyPrinter\Standard;
 use PhpParser\PrettyPrinterAbstract;
 
@@ -13,23 +15,28 @@ use PhpParser\PrettyPrinterAbstract;
  * Use file system to load mapper, and persist them using a registry.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ *  @internal
  */
 final class FileLoader implements ClassLoaderInterface
 {
     private readonly PrettyPrinterAbstract $printer;
+
+    /** @var array<class-string, string>|null */
     private ?array $registry = null;
 
     public function __construct(
         private readonly MapperGenerator $generator,
+        private readonly MetadataFactory $metadataFactory,
         private readonly string $directory,
         private readonly bool $hotReload = true,
     ) {
         $this->printer = new Standard();
     }
 
-    public function loadClass(MapperGeneratorMetadataInterface $mapperMetadata): void
+    public function loadClass(MapperMetadata $mapperMetadata): void
     {
-        $className = $mapperMetadata->getMapperClassName();
+        $className = $mapperMetadata->className;
         $classPath = $this->directory . \DIRECTORY_SEPARATOR . $className . '.php';
 
         if (!$this->hotReload && file_exists($classPath)) {
@@ -52,24 +59,38 @@ final class FileLoader implements ClassLoaderInterface
         require $classPath;
     }
 
+    public function buildMappers(MetadataRegistry $registry): bool
+    {
+        foreach ($registry as $metadata) {
+            $this->saveMapper($metadata);
+        }
+
+        return true;
+    }
+
     /**
      * @return string The generated class name
      */
-    public function saveMapper(MapperGeneratorMetadataInterface $mapperGeneratorMetadata): string
+    public function saveMapper(MapperMetadata $mapperMetadata): string
     {
-        $className = $mapperGeneratorMetadata->getMapperClassName();
+        $className = $mapperMetadata->className;
         $classPath = $this->directory . \DIRECTORY_SEPARATOR . $className . '.php';
-        $classCode = $this->printer->prettyPrint([$this->generator->generate($mapperGeneratorMetadata)]);
+
+        $generatorMetadata = $this->metadataFactory->getGeneratorMetadata($mapperMetadata->source, $mapperMetadata->target);
+        $classCode = $this->printer->prettyPrint([$this->generator->generate($generatorMetadata)]);
 
         $this->write($classPath, "<?php\n\n" . $classCode . "\n");
         if ($this->hotReload) {
-            $this->addHashToRegistry($className, $mapperGeneratorMetadata->getHash());
+            $this->addHashToRegistry($className, $mapperMetadata->getHash());
         }
 
         return $className;
     }
 
-    private function addHashToRegistry($className, $hash): void
+    /**
+     * @param class-string<object> $className
+     */
+    private function addHashToRegistry(string $className, string $hash): void
     {
         if (null === $this->registry) {
             $this->registry = [];
@@ -80,6 +101,7 @@ final class FileLoader implements ClassLoaderInterface
         $this->write($registryPath, "<?php\n\nreturn " . var_export($this->registry, true) . ";\n");
     }
 
+    /** @return array<class-string, string> */
     private function getRegistry(): array
     {
         if (null === $this->registry) {
@@ -102,6 +124,10 @@ final class FileLoader implements ClassLoaderInterface
         }
 
         $fp = fopen($file, 'w');
+
+        if (false === $fp) {
+            throw new \RuntimeException(sprintf('Could not open file "%s"', $file));
+        }
 
         if (flock($fp, LOCK_EX)) {
             fwrite($fp, $contents);

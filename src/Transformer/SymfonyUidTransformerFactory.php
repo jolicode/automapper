@@ -4,50 +4,57 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
-use AutoMapper\MapperMetadataInterface;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
 use Symfony\Component\PropertyInfo\Type;
 use Symfony\Component\Uid\AbstractUid;
 use Symfony\Component\Uid\Ulid;
 
 /**
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
+ *
+ * @internal
  */
 final class SymfonyUidTransformerFactory extends AbstractUniqueTypeTransformerFactory implements PrioritizedTransformerFactoryInterface
 {
     /** @var array<string, array{0: bool, 1: bool}> */
     private array $reflectionCache = [];
 
-    protected function createTransformer(Type $sourceType, Type $targetType, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
+    protected function createTransformer(Type $sourceType, Type $targetType, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
-        $isSourceUid = $this->isUid($sourceType);
-        $isTargetUid = $this->isUid($targetType);
+        $sourceUid = $this->getUid($sourceType);
+        $targetUid = $this->getUid($targetType);
 
-        if ($isSourceUid && $isTargetUid) {
+        if ($sourceUid[0] && $targetUid[0]) {
             return new SymfonyUidCopyTransformer();
         }
 
-        if ($isSourceUid) {
-            return new SymfonyUidToStringTransformer($this->reflectionCache[$sourceType->getClassName()][1]);
+        if ($sourceUid[0]) {
+            return new SymfonyUidToStringTransformer($sourceUid[1]);
         }
 
-        if ($isTargetUid) {
-            return new StringToSymfonyUidTransformer($targetType->getClassName());
+        if ($targetUid[0]) {
+            return new StringToSymfonyUidTransformer($targetUid[2]);
         }
 
         return null;
     }
 
-    private function isUid(Type $type): bool
+    /**
+     * @return array{false, false, null}|array{true, bool, class-string}
+     */
+    private function getUid(Type $type): array
     {
         if (Type::BUILTIN_TYPE_OBJECT !== $type->getBuiltinType()) {
-            return false;
+            return [false, false, null];
         }
 
         /** @var class-string|null $typeClassName */
         $typeClassName = $type->getClassName();
 
         if (null === $typeClassName || !class_exists($typeClassName)) {
-            return false;
+            return [false, false, null];
         }
 
         if (!\array_key_exists($typeClassName, $this->reflectionCache)) {
@@ -55,7 +62,11 @@ final class SymfonyUidTransformerFactory extends AbstractUniqueTypeTransformerFa
             $this->reflectionCache[$typeClassName] = [$reflClass->isSubclassOf(AbstractUid::class), $typeClassName === Ulid::class];
         }
 
-        return $this->reflectionCache[$typeClassName][0];
+        if (!$this->reflectionCache[$typeClassName][0]) {
+            return [false, false, null];
+        }
+
+        return [...$this->reflectionCache[$typeClassName], $typeClassName];
     }
 
     public function getPriority(): int

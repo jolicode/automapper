@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Transformer;
 
-use AutoMapper\MapperMetadata;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
+use AutoMapper\Metadata\TypesMatching;
 use AutoMapper\Transformer\ChainTransformerFactory;
 use AutoMapper\Transformer\CopyTransformer;
 use AutoMapper\Transformer\TransformerFactoryInterface;
@@ -25,7 +28,10 @@ class ChainTransformerFactoryTest extends TestCase
 
         $chainTransformerFactory = new ChainTransformerFactory([$subTransformer]);
 
-        $transformerReturned = $chainTransformerFactory->getTransformer([], [], $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata('foo');
+        $targetMapperMetadata = new TargetPropertyMetadata('foo');
+        $types = TypesMatching::fromSourceAndTargetTypes([], []);
+        $transformerReturned = $chainTransformerFactory->getTransformer($types, $sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertSame($transformer, $transformerReturned);
     }
@@ -41,7 +47,10 @@ class ChainTransformerFactoryTest extends TestCase
         $subTransformer->expects($this->any())->method('getTransformer')->willReturn(null);
         $chainTransformerFactory = new ChainTransformerFactory([$subTransformer]);
 
-        $transformerReturned = $chainTransformerFactory->getTransformer([], [], $mapperMetadata);
+        $sourceMapperMetadata = new SourcePropertyMetadata('foo');
+        $targetMapperMetadata = new TargetPropertyMetadata('foo');
+        $types = TypesMatching::fromSourceAndTargetTypes([], []);
+        $transformerReturned = $chainTransformerFactory->getTransformer($types, $sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNull($transformerReturned);
     }

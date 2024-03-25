@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\Extractor;
 
-use AutoMapper\Attribute\MapToContext;
 use AutoMapper\Exception\CompileException;
 use AutoMapper\MapperContext;
 use PhpParser\Node\Arg;
@@ -13,6 +12,7 @@ use PhpParser\Node\Name;
 use PhpParser\Node\Param;
 use PhpParser\Node\Scalar;
 use PhpParser\Node\Stmt;
+use Symfony\Component\PropertyInfo\Type;
 
 /**
  * Read accessor tell how to read from a property.
@@ -23,17 +23,24 @@ use PhpParser\Node\Stmt;
  */
 final class ReadAccessor
 {
+    use GetTypeTrait;
+
     public const TYPE_METHOD = 1;
     public const TYPE_PROPERTY = 2;
     public const TYPE_ARRAY_DIMENSION = 3;
     public const TYPE_SOURCE = 4;
 
+    /**
+     * @param array<string, string> $context
+     */
     public function __construct(
         private readonly int $type,
         private readonly string $accessor,
         private readonly ?string $sourceClass = null,
         private readonly bool $private = false,
-        private readonly ?string $name = null, // will be the name of the property if different from accessor
+        private readonly ?string $name = null,
+        // will be the name of the property if different from accessor
+        private readonly array $context = [],
     ) {
         if (self::TYPE_METHOD === $this->type && null === $this->sourceClass) {
             throw new \InvalidArgumentException('Source class must be provided when using "method" type.');
@@ -50,43 +57,35 @@ final class ReadAccessor
         if (self::TYPE_METHOD === $this->type) {
             $methodCallArguments = [];
 
-            if (\PHP_VERSION_ID >= 80000 && class_exists($this->sourceClass)) {
-                $parameters = (new \ReflectionMethod($this->sourceClass, $this->accessor))->getParameters();
-
-                foreach ($parameters as $parameter) {
-                    if ($attribute = ($parameter->getAttributes(MapToContext::class)[0] ?? null)) {
-                        /*
-                         * Create method call argument to read value from context and throw exception if not found
-                         *
-                         * $context['map_to_accessor_parameter']['some_key'] ?? throw new \InvalidArgumentException('error message');
-                         */
-                        $methodCallArguments[] = new Arg(
-                            new Expr\BinaryOp\Coalesce(
-                                new Expr\ArrayDimFetch(
-                                    new Expr\ArrayDimFetch(
-                                        new Expr\Variable('context'),
-                                        new Scalar\String_(MapperContext::MAP_TO_ACCESSOR_PARAMETER)
+            foreach ($this->context as $parameter => $context) {
+                /*
+                 * Create method call argument to read value from context and throw exception if not found
+                 *
+                 * $context['map_to_accessor_parameter']['some_key'] ?? throw new \InvalidArgumentException('error message');
+                 */
+                $methodCallArguments[] = new Arg(
+                    new Expr\BinaryOp\Coalesce(
+                        new Expr\ArrayDimFetch(
+                            new Expr\ArrayDimFetch(
+                                new Expr\Variable('context'),
+                                new Scalar\String_(MapperContext::MAP_TO_ACCESSOR_PARAMETER)
+                            ),
+                            new Scalar\String_($context)
+                        ),
+                        new Expr\Throw_(
+                            new Expr\New_(
+                                new Name\FullyQualified(\InvalidArgumentException::class),
+                                [
+                                    new Arg(
+                                        new Scalar\String_(
+                                            "Parameter \"\${$parameter}\" of method \"{$this->sourceClass}\"::\"{$this->accessor}()\" is configured to be mapped to context but no value was found in the context."
+                                        )
                                     ),
-                                    new Scalar\String_($attribute->newInstance()->contextName)
-                                ),
-                                new Expr\Throw_(
-                                    new Expr\New_(
-                                        new Name\FullyQualified(\InvalidArgumentException::class),
-                                        [
-                                            new Arg(
-                                                new Scalar\String_(
-                                                    "Parameter \"\${$parameter->getName()}\" of method \"{$this->sourceClass}\"::\"{$this->accessor}()\" is configured to be mapped to context but no value was found in the context."
-                                                )
-                                            ),
-                                        ]
-                                    )
-                                )
+                                ]
                             )
-                        );
-                    } elseif (!$parameter->isDefaultValueAvailable()) {
-                        throw new \InvalidArgumentException("Accessors method \"{$this->sourceClass}\"::\"{$this->accessor}()\" parameters must have either a default value or the #[MapToContext] attribute.");
-                    }
-                }
+                        )
+                    )
+                );
             }
 
             if ($this->private) {
@@ -282,5 +281,77 @@ final class ReadAccessor
             new Arg(new Expr\ConstFetch(new Name('null'))),
             new Arg(new Scalar\String_($className)),
         ]);
+    }
+
+    /**
+     * @return Type[]|null
+     */
+    public function getTypes(string $class): ?array
+    {
+        if (self::TYPE_METHOD === $this->type && class_exists($class)) {
+            try {
+                $reflectionMethod = new \ReflectionMethod($class, $this->accessor);
+
+                if ($types = $this->extractFromDocBlock(
+                    $reflectionMethod->getDocComment(),
+                    $class,
+                    $reflectionMethod->getDeclaringClass()->getName(),
+                    $this->accessor,
+                    '@return'
+                )) {
+                    return $types;
+                }
+
+                $reflectionReturnType = $reflectionMethod->getReturnType();
+
+                if ($reflectionReturnType === null) {
+                    return null;
+                }
+
+                return $this->extractFromReflectionType($reflectionReturnType, $reflectionMethod->getDeclaringClass());
+            } catch (\ReflectionException $e) {
+                return null;
+            }
+        }
+
+        if (self::TYPE_PROPERTY === $this->type && class_exists($class)) {
+            try {
+                $reflectionProperty = new \ReflectionProperty($class, $this->accessor);
+
+                if ($reflectionProperty->isPromoted()) {
+                    if ($types = $this->extractFromDocBlock(
+                        $reflectionProperty->getDeclaringClass()->getConstructor()?->getDocComment(),
+                        $class,
+                        $reflectionProperty->getDeclaringClass()->getName(),
+                        $this->accessor,
+                        '@param'
+                    )) {
+                        return $types;
+                    }
+                }
+
+                if ($types = $this->extractFromDocBlock(
+                    $reflectionProperty->getDocComment(),
+                    $class,
+                    $reflectionProperty->getDeclaringClass()->getName(),
+                    $this->accessor,
+                    '@var'
+                )) {
+                    return $types;
+                }
+
+                $reflectionType = $reflectionProperty->getType();
+
+                if ($reflectionType === null) {
+                    return null;
+                }
+
+                return $this->extractFromReflectionType($reflectionType, $reflectionProperty->getDeclaringClass());
+            } catch (\ReflectionException $e) {
+                return null;
+            }
+        }
+
+        return null;
     }
 }

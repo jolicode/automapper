@@ -17,28 +17,35 @@
     ],
     "require": {
         "php": "^8.2",
-        "doctrine/inflector": "^1.4 || ^2.0",
         "nikic/php-parser": "^4.18 || ^5.0",
-        "symfony/deprecation-contracts": "^2.2|^3.0",
-        "symfony/property-info": "^5.4.23 || ^6.2.10 || ^7.0",
-        "symfony/serializer": "^5.4 || ^6.0 || ^7.0"
+        "symfony/event-dispatcher": "^5.4 || ^6.0 || ^7.0",
+        "symfony/expression-language": "^5.4 || ^6.0 || ^7.0",
+        "symfony/deprecation-contracts": "^2.0|^3.0",
+        "symfony/property-info": "^5.4.23 || ^6.2.10 || ^7.0"
     },
     "require-dev": {
         "doctrine/annotations": "~1.0",
         "moneyphp/money": "^3.3.2",
         "phpdocumentor/type-resolver": "^1.7",
-        "phpstan/phpdoc-parser": "^1.24",
         "phpunit/phpunit": "^9.0",
         "symfony/filesystem": "^5.4 || ^6.0 || ^7.0",
+        "symfony/framework-bundle": "*",
         "symfony/http-kernel": "^5.4 || ^6.0 || ^7.0",
-        "symfony/uid": "^5.4 || ^6.0 || ^7.0"
+        "symfony/property-access": "^5.4 || ^6.0 || ^7.0",
+        "symfony/serializer": "*",
+        "symfony/stopwatch": "^7.0",
+        "symfony/twig-bundle": "^5.4 || ^6.0 || ^7.0",
+        "symfony/uid": "^5.4 || ^6.0 || ^7.0",
+        "symfony/web-profiler-bundle": "^5.4 || ^6.0 || ^7.0",
+        "symfony/yaml": "^5.4 || ^6.0 || ^7.0"
     },
     "suggest": {
-        "doctrine/annotations": "Docblock Annotations Parser",
-        "phpdocumentor/reflection-docblock": "Allow to extract informations from PHP Doc blocks"
+        "symfony/serializer": "Allow to use symfony serializer attributes in mapping"
     },
     "conflict": {
-        "nikic/php-parser": "<4.0.4"
+        "symfony/dependency-injection": "<5.4",
+        "symfony/framework-bundle": "<5.4",
+        "symfony/serializer": "<5.4"
     },
     "autoload": {
         "psr-4": {
@@ -48,7 +55,10 @@
     "autoload-dev": {
         "psr-4": {
             "AutoMapper\\Tests\\": "tests/"
-        }
+        },
+        "classmap": [
+            "tests/Bundle/Resources/App/AppKernel.php"
+        ]
     },
     "config": {
         "process-timeout": 1800,

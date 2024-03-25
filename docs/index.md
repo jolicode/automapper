@@ -1,146 +1,55 @@
-# Welcome 👋
+# 🚀 Very FAST 🚀 PHP AutoMapper with on the fly code generation
+
+## Presentation
 
 Welcome to the AutoMapper documentation, this library solves a simple problem: removing all the code you need to
-map one object to another. A boring code to write and often replaced by less-performant alternatives like Symfony's
-Serializer.
+map one object to another. A boring code to write and often replaced by less-performant alternatives.
 
-AutoMapper uses a convention-based matching algorithm to match up source to destination values. AutoMapper is geared 
-towards model projection scenarios to flatten complex object models to DTOs and other simple objects, whose design is 
-better suited for serialization, communication, messaging, or simply an anti-corruption layer between the domain and 
+AutoMapper uses a convention-based matching algorithm to match up source to destination values. AutoMapper is geared
+towards model projection scenarios to flatten complex object models to DTOs and other simple objects, whose design is
+better suited for serialization, communication, messaging, or simply an anti-corruption layer between the domain and
 application layer.
 
-## Quick start 🚀
+## Usage 🕹️
 
-### What is the AutoMapper ? 🤔
+Here is the quickest way to use AutoMapper:
 
-The AutoMapper is a anything to anything mapper, you can make either arrays, objects or array of objects and output the 
-same. Mapping works by transforming an input object of one type into an output object of a different or same type (in 
-case of deep copy). What makes AutoMapper interesting is that it provides some interesting conventions to take the dirty 
-work out of figuring out how to map type A to type B and it has a strong aim on performance by generating the mappers 
-whenever you require it. As long as type B follows AutoMapper’s established convention, almost zero configuration is 
-needed to map two types.
+```php
+use AutoMapper\AutoMapper;
 
-### Why should I use it ? 🙋
+$automapper = AutoMapper::create();
 
-Mapping code is boring. And in PHP, you often replace that by using Symfony's Serializer because you don't want to do
-it by hand. We were doing the same but performance made it not possible anymore. The AutoMapper replaces the Serializer 
-to do the same output by generating PHP code so it's like your wrote the mappers yourself.
+$source = new Source();
+$target = $automapper->map($source, Target::class);
+```
 
-The real question may be “why use object-object mapping?” Mapping can occur in many places in an application, but 
-mostly in the boundaries between layers, such as between the UI/Domain layers, or Service/Domain layers. Concerns of 
-one layer often conflict with concerns in another, so object-object mapping leads to segregated models, where concerns 
-for each layer can affect only types in that layer.
+That's it! `AutoMapper` will find the best way to map from `$source` object to a new `Target` object. It will also
+generate a PHP class that will do the mapping for you and serve as a cache for future mapping.
 
-### Installation 📦
+Of course there are many ways to customize the mapping, this documentation will explain all of them.
+
+## Installation 📦
 
 ```shell
 composer require jolicode/automapper
 ```
 
-### How to use it ? 🕹️
+## Serializer
 
-First, you need both a source and destination type to work with. The destination type’s design can be influenced by the 
-layer in which it lives, but the AutoMapper works best as long as the names of the members match up to the source 
-type’s members. If you have a source member called "firstName", this will automatically be mapped to a destination 
-member with the name "firstName".
+There is more than object to object mapping with AutoMapper. You can also map to or from generic data structure like
+`array` or `stdClass`. When you map to an `array`, AutoMapper will try its best to only use scalar values, so you can
+serialize the result to JSON or XML.
 
-```php
-class InputUser
-{
-  public function __construct(
-    public readonly string $firstName,
-    public readonly string $lastName,
-    public readonly int $age,
-  ) {
-  }
-}
 
-class DatabaseUser
-{
-  public function __construct(
-    #[ORM\Column]
-    public string $firstName,
-    #[ORM\Column]
-    public string $lastName,
-    #[ORM\Column]
-    public int $age,
-  ) {
-  }
-}
+## Why should I use it ? 🙋
 
-$automapper = \AutoMapper\AutoMapper::create();
-dump($automapper->map(new InputUser('John', 'Doe', 28), DatabaseUser::class));
+The real question may be “why use object-object mapping?” Mapping can occur in many places in an application, but
+mostly in the boundaries between layers, such as between the UI/Domain layers, or Service/Domain layers. Concerns of
+one layer often conflict with concerns in another, so object-object mapping leads to segregated models, where concerns
+for each layer can affect only types in that layer.
 
-// ^ DatabaseUser^ {#1383
-//   +firstName: "John"
-//   +lastName: "Doe"
-//   +age: 28
-// }
-```
+## Further reading 📚
 
-### How to customize the mapping? 🚀
-
-The mapping process could be extended in multiple ways.
-
-#### Map manually a single property
-
-You can override the mapping of a single property by leveraging `AutoMapper\Transformer\CustomTransformer\CustomPropertyTransformerInterface`.
-It can be useful if you need to map several properties from the source to a unique property in the target. 
-
-```php
-class BirthDateUserTransformer implements CustomPropertyTransformerInterface
-{
-    public function supports(string $source, string $target, string $propertyName): bool
-    {
-        return $source === InputUser::class && $target === DatabaseUser::class && $propertyName === 'birthDate';
-    }
-
-    /**
-     * @param InputUser $source
-     */
-    public function transform(object $source): \DateTimeImmutable
-    {
-        return new \DateTimeImmutable("{$source->birthYear}-{$source->birthMonth}-{$source->birthDay}");
-    }
-}
-```
-
-#### Map manually a whole object
-
-In order to customize the mapping of a whole object, you can leverage `AutoMapper\Transformer\CustomTransformer\CustomModelTransformerInterface`.
-You have then full control over the transformation between two types:
-
-```php
-use Symfony\Component\PropertyInfo\Type;
-
-class InputUserToDatabaseUserCustomTransformer implements CustomModelTransformerInterface
-{
-    public function supports(array $sourceTypes, array $targetTypes): bool
-    {
-        return $this->hasType($sourceTypes, DatabaseUser::class) && $this->hasType($targetTypes, OutputUser::class);
-    }
-
-    /**
-     * @param DatabaseUser $source
-     */
-    public function transform(object $source): OutputUser
-    {
-        return OutputUser::fromDatabaserUser($source);
-    }
-    
-    /**
-     * @param Type[] $types
-     * @param class-string $class
-     */
-    private function hasType(array $types, string $class): bool
-    {
-        foreach ($types as $type) {
-            if ($type->getClassName() === $class) {
-                return true;
-            }
-        }
-        
-        return false;
-    }      
-}
-```
+- [Getting Started](getting-started/index.md)
+- [How to customize the mapping?](mapping/index.md)
+- [Using the Symfony Bundle](bundle/index.md)

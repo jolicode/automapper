@@ -20,8 +20,8 @@ poetry run mike deploy --push --remote gh-pages --update-aliases 8.2.2 latest
 poetry run mike set-default --push latest
 
 # build documentation for 9.x
-git checkout 9.0 # currently a branch, will be a tag later on
-poetry run mike deploy --push --remote gh-pages 9.0-BETA
+# git checkout 9.0 # currently a branch, will be a tag later on
+# poetry run mike deploy --push --remote gh-pages 9.0-BETA
 
 # clean fake remote
 cd ./.build

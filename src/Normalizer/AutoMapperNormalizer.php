@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace AutoMapper\Normalizer;
 
 use AutoMapper\AutoMapperInterface;
-use AutoMapper\AutoMapperRegistryInterface;
 use AutoMapper\MapperContext;
+use AutoMapper\Metadata\MetadataRegistry;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -16,6 +16,8 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
  * Bridge for symfony/serializer.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @phpstan-import-type MapperContextArray from MapperContext
  */
 readonly class AutoMapperNormalizer implements NormalizerInterface, DenormalizerInterface
 {
@@ -30,44 +32,112 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
     ];
 
     public function __construct(
-        private AutoMapperInterface&AutoMapperRegistryInterface $autoMapper,
+        private AutoMapperInterface $autoMapper,
+        private ?MetadataRegistry $onlyMetadataRegistry = null,
     ) {
     }
 
-    public function normalize(mixed $object, string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
+    /**
+     * @param object               $object
+     * @param array<string, mixed> $context
+     *
+     * @return array<string, mixed>
+     */
+    public function normalize(mixed $object, string $format = null, array $context = []): ?array
     {
-        return $this->autoMapper->map($object, 'array', $this->createAutoMapperContext($context));
+        return $this->autoMapper->map($object, 'array', $this->createAutoMapperContext($format, $context));
     }
 
+    /**
+     * @template T of object
+     *
+     * @param array<string, mixed> $data
+     * @param class-string<T>      $type
+     * @param array<string, mixed> $context
+     *
+     * @return T|null
+     */
     public function denormalize(mixed $data, string $type, string $format = null, array $context = []): mixed
     {
-        return $this->autoMapper->map($data, $type, $this->createAutoMapperContext($context));
+        return $this->autoMapper->map($data, $type, $this->createAutoMapperContext($format, $context));
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     public function supportsNormalization(mixed $data, string $format = null, array $context = []): bool
     {
         if (!\is_object($data) || $data instanceof \stdClass) {
             return false;
         }
 
-        return $this->autoMapper->hasMapper($data::class, 'array');
+        if (is_iterable($data)) {
+            return false;
+        }
+
+        if ($this->onlyMetadataRegistry === null) {
+            return true;
+        }
+
+        return $this->onlyMetadataRegistry->has($data::class, 'array');
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     public function supportsDenormalization(mixed $data, string $type, string $format = null, array $context = []): bool
     {
-        return $this->autoMapper->hasMapper('array', $type);
+        if (!class_exists($type)) {
+            return false;
+        }
+
+        if ($this->onlyMetadataRegistry === null) {
+            return true;
+        }
+
+        return $this->onlyMetadataRegistry->has('array', $type);
     }
 
     public function getSupportedTypes(?string $format): array
     {
-        return ['object' => true];
+        if ($this->onlyMetadataRegistry === null) {
+            return ['object' => true];
+        }
+
+        $types = [];
+
+        foreach ($this->onlyMetadataRegistry as $metadata) {
+            if ($metadata->source === 'array') {
+                $hasTarget = $this->onlyMetadataRegistry->has($metadata->target, 'array');
+
+                // Only cache when both source and target exist in the registry
+                $types[$metadata->target] = $hasTarget;
+            } elseif ($metadata->target === 'array') {
+                $hasSource = $this->onlyMetadataRegistry->has($metadata->target, 'array');
+
+                // Only cache when both source and target exist in the registry
+                $types[$metadata->source] = $hasSource;
+            }
+        }
+
+        return $types;
     }
 
-    private function createAutoMapperContext(array $serializerContext = []): array
+    /**
+     * @param array<string, mixed> $serializerContext
+     *
+     * @return MapperContextArray
+     */
+    private function createAutoMapperContext(string $format = null, array $serializerContext = []): array
     {
+        /** @var MapperContextArray $context */
         $context = [];
 
         foreach (self::SERIALIZER_CONTEXT_MAPPING as $serializerContextName => $autoMapperContextName) {
+            if (!\array_key_exists($serializerContextName, $serializerContext)) {
+                continue;
+            }
+
             $context[$autoMapperContextName] = $serializerContext[$serializerContextName] ?? null;
             unset($serializerContext[$serializerContextName]);
         }
@@ -82,6 +152,17 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
             unset($serializerContext[AbstractNormalizer::DEFAULT_CONSTRUCTOR_ARGUMENTS]);
         }
 
+        if (\array_key_exists(MapperContext::TARGET_TO_POPULATE, $context)) {
+            if (!\is_object($context[MapperContext::TARGET_TO_POPULATE]) && !\is_array($context[MapperContext::TARGET_TO_POPULATE])) {
+                unset($context[MapperContext::TARGET_TO_POPULATE]);
+            }
+        }
+
+        if ($format !== null) {
+            $context[MapperContext::NORMALIZER_FORMAT] = $format;
+        }
+
+        /** @var MapperContextArray */
         return $context + $serializerContext;
     }
 }

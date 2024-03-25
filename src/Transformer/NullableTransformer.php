@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
-use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Generator\UniqueVariableScope;
+use AutoMapper\Metadata\PropertyMetadata;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt;
@@ -14,6 +14,8 @@ use PhpParser\Node\Stmt;
  * Tansformer decorator to handle null values.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 final readonly class NullableTransformer implements TransformerInterface, DependentTransformerInterface
 {
@@ -23,17 +25,8 @@ final readonly class NullableTransformer implements TransformerInterface, Depend
     ) {
     }
 
-    public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope, /* Expr\Variable $source */): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): array
     {
-        if (\func_num_args() < 5) {
-            trigger_deprecation('jolicode/automapper', '8.2', 'The "%s()" method will have a new "Expr\Variable $source" argument in version 9.0, not defining it is deprecated.', __METHOD__);
-
-            $source = new Expr\Variable('value');
-        } else {
-            /** @var Expr\Variable $source */
-            $source = func_get_arg(4);
-        }
-
         [$output, $itemStatements] = $this->itemTransformer->transform($input, $target, $propertyMapping, $uniqueVariableScope, $source);
 
         $newOutput = null;

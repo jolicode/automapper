@@ -6,6 +6,8 @@ namespace AutoMapper\Transformer;
 
 /**
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
+ *
+ * @internal
  */
 interface PrioritizedTransformerFactoryInterface
 {

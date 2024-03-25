@@ -4,38 +4,43 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Transformer;
 
-use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Extractor\ReadAccessor;
 use AutoMapper\Generator\UniqueVariableScope;
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\Metadata\PropertyMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
+use AutoMapper\Metadata\TypesMatching;
 use AutoMapper\Transformer\TransformerInterface;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Param;
 use PhpParser\Node\Stmt;
 use PhpParser\PrettyPrinter\Standard;
+use Symfony\Component\PropertyInfo\Type;
 
 trait EvalTransformerTrait
 {
-    private function createTransformerFunction(TransformerInterface $transformer, PropertyMapping $propertyMapping = null): \Closure
+    private function createTransformerFunction(TransformerInterface $transformer, PropertyMetadata $propertyMapping = null): \Closure
     {
         if (null === $propertyMapping) {
-            $propertyMapping = new PropertyMapping(
-                $this->createMock(MapperGeneratorMetadataInterface::class),
-                new ReadAccessor(ReadAccessor::TYPE_PROPERTY, 'dummy'),
-                null,
-                null,
+            $propertyMapping = new PropertyMetadata(
+                new SourcePropertyMetadata(
+                    'dummy',
+                    new ReadAccessor(ReadAccessor::TYPE_PROPERTY, 'dummy'),
+                ),
+                new TargetPropertyMetadata(
+                    'dummy',
+                ),
+                TypesMatching::fromSourceAndTargetTypes([new Type('string')], [new Type('string')]),
                 $transformer,
-                'dummy'
             );
         }
 
         $variableScope = new UniqueVariableScope();
         $inputName = $variableScope->getUniqueName('input');
         $inputExpr = new Expr\Variable($inputName);
-        $sourceExpr = new Expr\Variable('source');
 
         // we give $inputExpr as $targetExpr since we don't use it there and this is needed by TransformerInterface
-        [$outputExpr, $stmts] = $transformer->transform($inputExpr, $inputExpr, $propertyMapping, $variableScope, $sourceExpr);
+        [$outputExpr, $stmts] = $transformer->transform($inputExpr, $inputExpr, $propertyMapping, $variableScope, new Expr\Variable('source'));
 
         $stmts[] = new Stmt\Return_($outputExpr);
 
@@ -50,7 +55,7 @@ trait EvalTransformerTrait
         return eval($code);
     }
 
-    private function evalTransformer(TransformerInterface $transformer, mixed $input, PropertyMapping $propertyMapping = null): mixed
+    private function evalTransformer(TransformerInterface $transformer, mixed $input, PropertyMetadata $propertyMapping = null): mixed
     {
         $function = $this->createTransformerFunction($transformer, $propertyMapping);
 

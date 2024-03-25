@@ -4,40 +4,34 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Fixtures\Transformer\CustomTransformer;
 
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
+use AutoMapper\Metadata\TypesMatching;
 use AutoMapper\Tests\Fixtures\Address;
 use AutoMapper\Tests\Fixtures\AddressDTO;
-use AutoMapper\Transformer\CustomTransformer\CustomModelTransformerInterface;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerSupportInterface;
 use Symfony\Component\PropertyInfo\Type;
 
-final readonly class SourceTargetCustomModelTransformer implements CustomModelTransformerInterface
+final readonly class SourceTargetCustomModelTransformer implements PropertyTransformerInterface, PropertyTransformerSupportInterface
 {
-    public function supports(array $sourceTypes, array $targetTypes): bool
+    public function supports(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool
     {
-        return $this->sourceIsAddressDTO($sourceTypes) && $this->targetIsAddress($targetTypes);
-    }
+        $sourceUniqueType = $types->getSourceUniqueType();
 
-    /**
-     * @param AddressDTO $source
-     */
-    public function transform(object|array $source): mixed
-    {
-        $source->city = "{$source->city} from custom model transformer";
-
-        return Address::fromDTO($source);
-    }
-
-    /**
-     * @param Type[] $sourceTypes
-     */
-    private function sourceIsAddressDTO(array $sourceTypes): bool
-    {
-        foreach ($sourceTypes as $sourceType) {
-            if ($sourceType->getClassName() === AddressDTO::class) {
-                return true;
-            }
+        if (null === $sourceUniqueType) {
+            return false;
         }
 
-        return false;
+        return $sourceUniqueType->getClassName() === AddressDTO::class && $this->targetIsAddress($types[$sourceUniqueType] ?? []);
+    }
+
+    public function transform(mixed $value, object|array $source, array $context): mixed
+    {
+        $value->city = "{$value->city} from custom model transformer";
+
+        return Address::fromDTO($value);
     }
 
     /**

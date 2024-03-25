@@ -4,33 +4,37 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
-use AutoMapper\MapperMetadataInterface;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
+use AutoMapper\Metadata\TypesMatching;
 use Symfony\Component\PropertyInfo\Type;
 
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
 final class NullableTransformerFactory implements TransformerFactoryInterface, PrioritizedTransformerFactoryInterface, ChainTransformerFactoryAwareInterface
 {
     use ChainTransformerFactoryAwareTrait;
 
-    public function getTransformer(?array $sourceTypes, ?array $targetTypes, MapperMetadataInterface $mapperMetadata): ?TransformerInterface
+    public function getTransformer(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
-        $nbSourceTypes = $sourceTypes ? \count($sourceTypes) : 0;
+        $sourceType = $types->getSourceUniqueType();
 
-        if (null === $sourceTypes || 0 === $nbSourceTypes || $nbSourceTypes > 1) {
+        if (null === $sourceType) {
             return null;
         }
 
-        $propertyType = $sourceTypes[0];
-
-        if (!$propertyType->isNullable()) {
+        if (!$sourceType->isNullable()) {
             return null;
         }
 
         $isTargetNullable = false;
+        $targetTypes = $types[$sourceType] ?? [];
 
-        foreach ($targetTypes ?? [] as $targetType) {
+        foreach ($targetTypes as $targetType) {
             if ($targetType->isNullable()) {
                 $isTargetNullable = true;
 
@@ -38,14 +42,16 @@ final class NullableTransformerFactory implements TransformerFactoryInterface, P
             }
         }
 
-        $subTransformer = $this->chainTransformerFactory->getTransformer([new Type(
-            $propertyType->getBuiltinType(),
+        $newTypes = TypesMatching::fromSourceAndTargetTypes([new Type(
+            $sourceType->getBuiltinType(),
             false,
-            $propertyType->getClassName(),
-            $propertyType->isCollection(),
-            $propertyType->getCollectionKeyTypes(),
-            $propertyType->getCollectionValueTypes()
-        )], $targetTypes, $mapperMetadata);
+            $sourceType->getClassName(),
+            $sourceType->isCollection(),
+            $sourceType->getCollectionKeyTypes(),
+            $sourceType->getCollectionValueTypes()
+        )], $targetTypes);
+
+        $subTransformer = $this->chainTransformerFactory->getTransformer($newTypes, $source, $target, $mapperMetadata);
 
         if (null === $subTransformer) {
             return null;

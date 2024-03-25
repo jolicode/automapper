@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace AutoMapper\Loader;
 
 use AutoMapper\Generator\MapperGenerator;
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\MetadataFactory;
+use AutoMapper\Metadata\MetadataRegistry;
 use PhpParser\PrettyPrinter\Standard;
 use PhpParser\PrettyPrinterAbstract;
 
@@ -13,6 +15,8 @@ use PhpParser\PrettyPrinterAbstract;
  * Use eval to load mappers.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ *  @internal
  */
 final readonly class EvalLoader implements ClassLoaderInterface
 {
@@ -20,14 +24,20 @@ final readonly class EvalLoader implements ClassLoaderInterface
 
     public function __construct(
         private MapperGenerator $generator,
+        private MetadataFactory $metadataFactory,
     ) {
         $this->printer = new Standard();
     }
 
-    public function loadClass(MapperGeneratorMetadataInterface $mapperMetadata): void
+    public function loadClass(MapperMetadata $mapperMetadata): void
     {
-        $class = $this->generator->generate($mapperMetadata);
+        $class = $this->generator->generate($this->metadataFactory->getGeneratorMetadata($mapperMetadata->source, $mapperMetadata->target));
 
         eval($this->printer->prettyPrint([$class]));
+    }
+
+    public function buildMappers(MetadataRegistry $registry): bool
+    {
+        return false;
     }
 }

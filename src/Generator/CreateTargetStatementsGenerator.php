@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator;
 
-use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
 use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
 use AutoMapper\MapperContext;
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\Metadata\GeneratorMetadata;
+use AutoMapper\Metadata\PropertyMetadata;
+use AutoMapper\Transformer\AllowNullValueTransformerInterface;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
@@ -25,7 +26,8 @@ final readonly class CreateTargetStatementsGenerator
     private Parser $parser;
 
     public function __construct(
-        private DiscriminatorStatementsGenerator $discriminatorStatementsGenerator,
+        private DiscriminatorStatementsGenerator $discriminatorStatementsGeneratorSource,
+        private DiscriminatorStatementsGenerator $discriminatorStatementsGeneratorTarget,
         private CachedReflectionStatementsGenerator $cachedReflectionStatementsGenerator,
         ?Parser $parser = null,
     ) {
@@ -41,17 +43,18 @@ final readonly class CreateTargetStatementsGenerator
      * }
      * ```
      */
-    public function generate(MapperGeneratorMetadataInterface $mapperMetadata, VariableRegistry $variableRegistry): Stmt
+    public function generate(GeneratorMetadata $metadata, VariableRegistry $variableRegistry): Stmt
     {
         $createObjectStatements = [];
 
-        $createObjectStatements[] = $this->targetAsArray($mapperMetadata);
-        $createObjectStatements[] = $this->sourceAndTargetAsStdClass($mapperMetadata);
-        $createObjectStatements[] = $this->targetAsStdClass($mapperMetadata);
-        $createObjectStatements = [...$createObjectStatements, ...$this->discriminatorStatementsGenerator->createTargetStatements($mapperMetadata)];
-        $createObjectStatements = [...$createObjectStatements, ...$this->constructorArguments($mapperMetadata)];
-        $createObjectStatements[] = $this->cachedReflectionStatementsGenerator->createTargetStatement($mapperMetadata);
-        $createObjectStatements[] = $this->constructorWithoutArgument($mapperMetadata);
+        $createObjectStatements[] = $this->targetAsArray($metadata);
+        $createObjectStatements[] = $this->sourceAndTargetAsStdClass($metadata);
+        $createObjectStatements[] = $this->targetAsStdClass($metadata);
+        $createObjectStatements = [...$createObjectStatements, ...$this->discriminatorStatementsGeneratorSource->createTargetStatements($metadata)];
+        $createObjectStatements = [...$createObjectStatements, ...$this->discriminatorStatementsGeneratorTarget->createTargetStatements($metadata)];
+        $createObjectStatements = [...$createObjectStatements, ...$this->constructorArguments($metadata)];
+        $createObjectStatements[] = $this->cachedReflectionStatementsGenerator->createTargetStatement($metadata);
+        $createObjectStatements[] = $this->constructorWithoutArgument($metadata);
 
         $createObjectStatements = array_values(array_filter($createObjectStatements));
 
@@ -60,66 +63,60 @@ final readonly class CreateTargetStatementsGenerator
         ]);
     }
 
-    private function targetAsArray(MapperGeneratorMetadataInterface $mapperMetadata): ?Stmt
+    private function targetAsArray(GeneratorMetadata $metadata): ?Stmt
     {
-        if ($mapperMetadata->getTarget() !== 'array') {
+        if ($metadata->mapperMetadata->target !== 'array') {
             return null;
         }
 
-        $variableRegistry = $mapperMetadata->getVariableRegistry();
-
-        return new Stmt\Expression(new Expr\Assign($variableRegistry->getResult(), new Expr\Array_()));
+        return new Stmt\Expression(new Expr\Assign($metadata->variableRegistry->getResult(), new Expr\Array_()));
     }
 
-    private function sourceAndTargetAsStdClass(MapperGeneratorMetadataInterface $mapperMetadata): ?Stmt
+    private function sourceAndTargetAsStdClass(GeneratorMetadata $metadata): ?Stmt
     {
-        if (\stdClass::class !== $mapperMetadata->getSource() || \stdClass::class !== $mapperMetadata->getTarget()) {
+        if (\stdClass::class !== $metadata->mapperMetadata->source || \stdClass::class !== $metadata->mapperMetadata->target) {
             return null;
         }
-
-        $variableRegistry = $mapperMetadata->getVariableRegistry();
 
         return new Stmt\Expression(
             new Expr\Assign(
-                $variableRegistry->getResult(),
+                $metadata->variableRegistry->getResult(),
                 new Expr\FuncCall(
                     new Name('unserialize'),
-                    [new Arg(new Expr\FuncCall(new Name('serialize'), [new Arg($variableRegistry->getSourceInput())]))]
+                    [new Arg(new Expr\FuncCall(new Name('serialize'), [new Arg($metadata->variableRegistry->getSourceInput())]))]
                 )
             )
         );
     }
 
-    private function targetAsStdClass(MapperGeneratorMetadataInterface $mapperMetadata): ?Stmt
+    private function targetAsStdClass(GeneratorMetadata $metadata): ?Stmt
     {
-        if (\stdClass::class === $mapperMetadata->getSource() || \stdClass::class !== $mapperMetadata->getTarget()) {
+        if (\stdClass::class === $metadata->mapperMetadata->source || \stdClass::class !== $metadata->mapperMetadata->target) {
             return null;
         }
 
-        $variableRegistry = $mapperMetadata->getVariableRegistry();
-
-        return new Stmt\Expression(new Expr\Assign($variableRegistry->getResult(), new Expr\New_(new Name(\stdClass::class))));
+        return new Stmt\Expression(new Expr\Assign($metadata->variableRegistry->getResult(), new Expr\New_(new Name(\stdClass::class))));
     }
 
     /**
      * @return list<Stmt>
      */
-    private function constructorArguments(MapperGeneratorMetadataInterface $mapperMetadata): array
+    private function constructorArguments(GeneratorMetadata $metadata): array
     {
-        if (!$mapperMetadata->targetIsAUserDefinedClass()) {
+        if (!$metadata->isTargetUserDefined()) {
             return [];
         }
 
-        $targetConstructor = $mapperMetadata->getCachedTargetReflectionClass()?->getConstructor();
+        $targetConstructor = $metadata->mapperMetadata->targetReflectionClass?->getConstructor();
 
-        if (!$targetConstructor || !$mapperMetadata->hasConstructor()) {
+        if (!$targetConstructor || !$metadata->hasConstructor()) {
             return [];
         }
 
         $constructArguments = [];
         $createObjectStatements = [];
 
-        foreach ($mapperMetadata->getPropertiesMapping() as $propertyMapping) {
+        foreach ($metadata->propertiesMetadata as $propertyMetadata) {
             /*
              * This is the main loop to map the properties from the source to the target in the constructor, there is 2 main steps in order to generated this code :
              *
@@ -136,7 +133,7 @@ final readonly class CreateTargetStatementsGenerator
              * $constructArg1 = $this->mappers['SOURCE_TO_TARGET_MAPPER']->map($this->extractCallbacks['propertyName']($source), $context);
              * $result = new Foo($constructArg1);
              */
-            $constructorArgumentResult = $this->constructorArgument($propertyMapping);
+            $constructorArgumentResult = $this->constructorArgument($metadata, $propertyMetadata);
 
             if (!$constructorArgumentResult) {
                 continue;
@@ -154,7 +151,7 @@ final readonly class CreateTargetStatementsGenerator
                 continue;
             }
 
-            [$createObjectStatement, $constructArgument, $constructorPosition] = $this->constructorArgumentWithDefaultValue($mapperMetadata, $constructArguments, $constructorParameter) ?? [null, null, null];
+            [$createObjectStatement, $constructArgument, $constructorPosition] = $this->constructorArgumentWithDefaultValue($metadata, $constructArguments, $constructorParameter) ?? [null, null, null];
 
             if (!$createObjectStatement) {
                 continue;
@@ -173,8 +170,8 @@ final readonly class CreateTargetStatementsGenerator
          */
         $createObjectStatements[] = new Stmt\Expression(
             new Expr\Assign(
-                $mapperMetadata->getVariableRegistry()->getResult(),
-                new Expr\New_(new Name\FullyQualified($mapperMetadata->getTarget()), $constructArguments)
+                $metadata->variableRegistry->getResult(),
+                new Expr\New_(new Name\FullyQualified($metadata->mapperMetadata->target), $constructArguments)
             )
         );
 
@@ -194,39 +191,40 @@ final readonly class CreateTargetStatementsGenerator
      *
      * @return array{Stmt, Arg, int}|null
      */
-    private function constructorArgument(PropertyMapping $propertyMapping): ?array
+    private function constructorArgument(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?array
     {
-        if (null === $propertyMapping->writeMutatorConstructor || null === ($parameter = $propertyMapping->writeMutatorConstructor->parameter)) {
+        if (null === $propertyMetadata->target->writeMutatorConstructor || null === ($parameter = $propertyMetadata->target->writeMutatorConstructor->parameter)) {
             return null;
         }
 
-        $mapperMetadata = $propertyMapping->mapperMetadata;
-        $variableRegistry = $mapperMetadata->getVariableRegistry();
-
+        $variableRegistry = $metadata->variableRegistry;
         $constructVar = $variableRegistry->getVariableWithUniqueName('constructArg');
+        $fieldValueExpr = $propertyMetadata->source->accessor?->getExpression($variableRegistry->getSourceInput());
 
-        if ($propertyMapping->readAccessor) {
-            $fieldValueExpr = $propertyMapping->readAccessor->getExpression($variableRegistry->getSourceInput());
+        if (null === $fieldValueExpr) {
+            if (!($propertyMetadata->transformer instanceof AllowNullValueTransformerInterface)) {
+                return null;
+            }
 
-            /* Get extract and transform statements for this property */
-            [$output, $propStatements] = $propertyMapping->transformer->transform($fieldValueExpr, $constructVar, $propertyMapping, $variableRegistry->getUniqueVariableScope(), $variableRegistry->getSourceInput());
-        } else {
-            return null;
+            $fieldValueExpr = new Expr\ConstFetch(new Name('null'));
         }
+
+        /* Get extract and transform statements for this property */
+        [$output, $propStatements] = $propertyMetadata->transformer->transform($fieldValueExpr, $constructVar, $propertyMetadata, $variableRegistry->getUniqueVariableScope(), $variableRegistry->getSourceInput());
 
         $propStatements[] = new Stmt\Expression(new Expr\Assign($constructVar, $output));
 
         return [
             new Stmt\If_(new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'hasConstructorArgument', [
                 new Arg($variableRegistry->getContext()),
-                new Arg(new Scalar\String_($mapperMetadata->getTarget())),
-                new Arg(new Scalar\String_($propertyMapping->property)),
+                new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
+                new Arg(new Scalar\String_($propertyMetadata->target->name)),
             ]), [
                 'stmts' => [
                     new Stmt\Expression(new Expr\Assign($constructVar, new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'getConstructorArgument', [
                         new Arg($variableRegistry->getContext()),
-                        new Arg(new Scalar\String_($mapperMetadata->getTarget())),
-                        new Arg(new Scalar\String_($propertyMapping->property)),
+                        new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
+                        new Arg(new Scalar\String_($propertyMetadata->target->name)),
                     ]))),
                 ],
                 'else' => new Stmt\Else_($propStatements),
@@ -251,26 +249,25 @@ final readonly class CreateTargetStatementsGenerator
      *
      * @return array{Stmt, Arg, int}|null
      */
-    private function constructorArgumentWithDefaultValue(MapperGeneratorMetadataInterface $mapperMetadata, array $constructArguments, \ReflectionParameter $constructorParameter): ?array
+    private function constructorArgumentWithDefaultValue(GeneratorMetadata $metadata, array $constructArguments, \ReflectionParameter $constructorParameter): ?array
     {
         if (\array_key_exists($constructorParameter->getPosition(), $constructArguments) || !$constructorParameter->isDefaultValueAvailable()) {
             return null;
         }
 
-        $variableRegistry = $mapperMetadata->getVariableRegistry();
-
+        $variableRegistry = $metadata->variableRegistry;
         $constructVar = $variableRegistry->getVariableWithUniqueName('constructArg');
 
         return [
             new Stmt\If_(new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'hasConstructorArgument', [
                 new Arg($variableRegistry->getContext()),
-                new Arg(new Scalar\String_($mapperMetadata->getTarget())),
+                new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
                 new Arg(new Scalar\String_($constructorParameter->getName())),
             ]), [
                 'stmts' => [
                     new Stmt\Expression(new Expr\Assign($constructVar, new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'getConstructorArgument', [
                         new Arg($variableRegistry->getContext()),
-                        new Arg(new Scalar\String_($mapperMetadata->getTarget())),
+                        new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
                         new Arg(new Scalar\String_($constructorParameter->getName())),
                     ]))),
                 ],
@@ -290,22 +287,20 @@ final readonly class CreateTargetStatementsGenerator
      * $result = new Foo();
      * ```
      */
-    private function constructorWithoutArgument(MapperGeneratorMetadataInterface $mapperMetadata): ?Stmt
+    private function constructorWithoutArgument(GeneratorMetadata $metadata): ?Stmt
     {
-        if (!$mapperMetadata->targetIsAUserDefinedClass()
+        if (!$metadata->isTargetUserDefined()
         ) {
             return null;
         }
 
-        $targetConstructor = $mapperMetadata->getCachedTargetReflectionClass()?->getConstructor();
+        $targetConstructor = $metadata->mapperMetadata->targetReflectionClass?->getConstructor();
 
         if ($targetConstructor) {
             return null;
         }
 
-        $variableRegistry = $mapperMetadata->getVariableRegistry();
-
-        return new Stmt\Expression(new Expr\Assign($variableRegistry->getResult(), new Expr\New_(new Name\FullyQualified($mapperMetadata->getTarget()))));
+        return new Stmt\Expression(new Expr\Assign($metadata->variableRegistry->getResult(), new Expr\New_(new Name\FullyQualified($metadata->mapperMetadata->target))));
     }
 
     private function getValueAsExpr(mixed $value): Expr

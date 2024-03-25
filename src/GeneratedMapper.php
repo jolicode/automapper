@@ -4,65 +4,50 @@ declare(strict_types=1);
 
 namespace AutoMapper;
 
-use AutoMapper\Transformer\CustomTransformer\CustomTransformerInterface;
+use AutoMapper\Provider\ProviderRegistry;
+use AutoMapper\Symfony\ExpressionLanguageProvider;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
 
 /**
  * Class derived for each generated mapper.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @template Source of object|array<mixed>
+ * @template Target of object|array<mixed>
+ *
+ * @implements MapperInterface<Source, Target>
  */
 abstract class GeneratedMapper implements MapperInterface
 {
-    protected $mappers = [];
+    final public function __construct(
+        protected PropertyTransformerRegistry $transformerRegistry,
+        protected ProviderRegistry $providerRegistry,
+        protected ?ExpressionLanguageProvider $expressionLanguageProvider = null,
+    ) {
+        $this->initialize();
+    }
 
-    protected $callbacks;
+    public function initialize(): void
+    {
+    }
 
-    protected $hydrateCallbacks = [];
+    public function registerMappers(AutoMapperRegistryInterface $registry): void
+    {
+    }
 
-    protected $extractCallbacks = [];
+    /** @var array<string, MapperInterface<object, object>|MapperInterface<object, array<mixed>>|MapperInterface<array<mixed>, object>> */
+    protected array $mappers = [];
 
-    /** @var callable[] */
+    /** @var array<string, callable(mixed): void> */
+    protected array $hydrateCallbacks = [];
+
+    /** @var array<string, callable(): mixed> */
+    protected array $extractCallbacks = [];
+
+    /** @var array<string, callable(): bool>) */
     protected array $extractIsNullCallbacks = [];
 
-    protected $cachedTarget;
-
-    protected $circularReferenceHandler;
-
-    protected $circularReferenceLimit;
-
-    /** @var array<string, CustomTransformerInterface> */
-    protected array $transformers = [];
-
-    /**
-     * Add a callable for a specific property.
-     */
-    public function addCallback(string $name, callable $callback): void
-    {
-        $this->callbacks[$name] = $callback;
-    }
-
-    /**
-     * Inject sub mappers.
-     */
-    public function injectMappers(AutoMapperRegistryInterface $autoMapperRegistry): void
-    {
-    }
-
-    public function setCircularReferenceHandler(?callable $circularReferenceHandler): void
-    {
-        $this->circularReferenceHandler = $circularReferenceHandler;
-    }
-
-    public function setCircularReferenceLimit(?int $circularReferenceLimit): void
-    {
-        $this->circularReferenceLimit = $circularReferenceLimit;
-    }
-
-    /**
-     * @param array<string, CustomTransformerInterface> $transformers
-     */
-    public function setCustomTransformers(array $transformers): void
-    {
-        $this->transformers = $transformers;
-    }
+    /** @var Target|\ReflectionClass<object> */
+    protected mixed $cachedTarget;
 }

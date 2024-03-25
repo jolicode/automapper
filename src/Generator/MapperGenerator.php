@@ -5,17 +5,20 @@ declare(strict_types=1);
 namespace AutoMapper\Generator;
 
 use AutoMapper\AutoMapperRegistryInterface;
+use AutoMapper\Configuration;
 use AutoMapper\Exception\CompileException;
+use AutoMapper\Exception\NoMappingFoundException;
 use AutoMapper\GeneratedMapper;
 use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
 use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
 use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
-use AutoMapper\MapperGeneratorMetadataInterface;
+use AutoMapper\Metadata\GeneratorMetadata;
 use PhpParser\Builder;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
 use PhpParser\Node\Param;
 use PhpParser\Node\Stmt;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 /**
  * Generates code for a mapping class.
@@ -29,39 +32,51 @@ final readonly class MapperGenerator
     private MapperConstructorGenerator $mapperConstructorGenerator;
     private InjectMapperMethodStatementsGenerator $injectMapperMethodStatementsGenerator;
     private MapMethodStatementsGenerator $mapMethodStatementsGenerator;
+    private bool $disableGeneratedMapper;
 
     public function __construct(
         ClassDiscriminatorResolver $classDiscriminatorResolver,
-        bool $allowReadOnlyTargetToPopulate = false,
+        Configuration $configuration,
+        ExpressionLanguage $expressionLanguage,
     ) {
         $this->mapperConstructorGenerator = new MapperConstructorGenerator(
             $cachedReflectionStatementsGenerator = new CachedReflectionStatementsGenerator()
         );
 
         $this->mapMethodStatementsGenerator = new MapMethodStatementsGenerator(
-            $discriminatorStatementsGenerator = new DiscriminatorStatementsGenerator($classDiscriminatorResolver),
+            $discriminatorStatementsGeneratorSource = new DiscriminatorStatementsGenerator($classDiscriminatorResolver, true),
+            $discriminatorStatementsGeneratorTarget = new DiscriminatorStatementsGenerator($classDiscriminatorResolver, false),
             $cachedReflectionStatementsGenerator,
-            $allowReadOnlyTargetToPopulate,
+            $expressionLanguage,
+            $configuration->allowReadOnlyTargetToPopulate,
         );
 
         $this->injectMapperMethodStatementsGenerator = new InjectMapperMethodStatementsGenerator(
-            $discriminatorStatementsGenerator
+            $discriminatorStatementsGeneratorSource,
+            $discriminatorStatementsGeneratorTarget
         );
+
+        $this->disableGeneratedMapper = !$configuration->autoRegister;
     }
 
     /**
      * Generate Class AST given metadata for a mapper.
      *
      * @throws CompileException
+     * @throws NoMappingFoundException
      */
-    public function generate(MapperGeneratorMetadataInterface $mapperMetadata): Stmt\Class_
+    public function generate(GeneratorMetadata $metadata): Stmt\Class_
     {
-        return (new Builder\Class_($mapperMetadata->getMapperClassName()))
+        if ($this->disableGeneratedMapper) {
+            throw new NoMappingFoundException('No mapper found for source ' . $metadata->mapperMetadata->source . ' and target ' . $metadata->mapperMetadata->target);
+        }
+
+        return (new Builder\Class_($metadata->mapperMetadata->className))
             ->makeFinal()
             ->extend(GeneratedMapper::class)
-            ->addStmt($this->constructorMethod($mapperMetadata))
-            ->addStmt($this->mapMethod($mapperMetadata))
-            ->addStmt($this->injectMappersMethod($mapperMetadata))
+            ->addStmt($this->constructorMethod($metadata))
+            ->addStmt($this->mapMethod($metadata))
+            ->addStmt($this->registerMappersMethod($metadata))
             ->getNode();
     }
 
@@ -78,11 +93,12 @@ final readonly class MapperGenerator
      * }
      * ```
      */
-    private function constructorMethod(MapperGeneratorMetadataInterface $mapperMetadata): Stmt\ClassMethod
+    private function constructorMethod(GeneratorMetadata $metadata): Stmt\ClassMethod
     {
-        return (new Builder\Method('__construct'))
+        return (new Builder\Method('initialize'))
             ->makePublic()
-            ->addStmts($this->mapperConstructorGenerator->getStatements($mapperMetadata))
+            ->setReturnType('void')
+            ->addStmts($this->mapperConstructorGenerator->getStatements($metadata))
             ->getNode();
     }
 
@@ -95,21 +111,19 @@ final readonly class MapperGenerator
      * }
      * ```
      */
-    private function mapMethod(MapperGeneratorMetadataInterface $mapperMetadata): Stmt\ClassMethod
+    private function mapMethod(GeneratorMetadata $metadata): Stmt\ClassMethod
     {
-        $variableRegistry = $mapperMetadata->getVariableRegistry();
-
         return (new Builder\Method('map'))
             ->makePublic()
             ->setReturnType('mixed')
             ->makeReturnByRef()
-            ->addParam(new Param($variableRegistry->getSourceInput()))
-            ->addParam(new Param($variableRegistry->getContext(), default: new Expr\Array_(), type: new Name('array')))
-            ->addStmts($this->mapMethodStatementsGenerator->getStatements($mapperMetadata))
+            ->addParam(new Param($metadata->variableRegistry->getSourceInput()))
+            ->addParam(new Param($metadata->variableRegistry->getContext(), default: new Expr\Array_(), type: new Name('array')))
+            ->addStmts($this->mapMethodStatementsGenerator->getStatements($metadata))
             ->setDocComment(
                 sprintf(
                     '/** @param %s $%s */',
-                    $mapperMetadata->getSource() === 'array' ? $mapperMetadata->getSource() : '\\' . $mapperMetadata->getSource(),
+                    $metadata->mapperMetadata->source === 'array' ? $metadata->mapperMetadata->source : '\\' . $metadata->mapperMetadata->source,
                     'value'
                 )
             )
@@ -117,28 +131,28 @@ final readonly class MapperGenerator
     }
 
     /**
-     * Create the injectMapper methods for this mapper.
+     * Create the registerMappers methods for this mapper.
      *
      * This is not done into the constructor in order to avoid circular dependency between mappers
      *
      * ```php
-     * public function injectMappers(AutoMapperRegistryInterface $autoMapperRegistry) {
+     * public function registerMappers(AutoMapperRegistryInterface $autoMapperRegistry) {
      *   // inject mapper statements
      *   $this->mappers['SOURCE_TO_TARGET_MAPPER'] = $autoMapperRegistry->getMapper($source, $target);
      *   ...
      * }
      * ```
      */
-    private function injectMappersMethod(MapperGeneratorMetadataInterface $mapperMetadata): Stmt\ClassMethod
+    private function registerMappersMethod(GeneratorMetadata $metadata): Stmt\ClassMethod
     {
-        return (new Builder\Method('injectMappers'))
+        return (new Builder\Method('registerMappers'))
             ->makePublic()
             ->setReturnType('void')
             ->addParam(new Param(
                 var: $param = new Expr\Variable('autoMapperRegistry'),
                 type: new Name(AutoMapperRegistryInterface::class))
             )
-            ->addStmts($this->injectMapperMethodStatementsGenerator->getStatements($param, $mapperMetadata))
+            ->addStmts($this->injectMapperMethodStatementsGenerator->getStatements($param, $metadata))
             ->getNode();
     }
 }

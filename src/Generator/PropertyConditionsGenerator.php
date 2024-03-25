@@ -4,14 +4,23 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator;
 
-use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\MapperContext;
+use AutoMapper\Metadata\GeneratorMetadata;
+use AutoMapper\Metadata\PropertyMetadata;
 use PhpParser\Node\Arg;
-use PhpParser\Node\ArrayItem as NewArrayItem;
+use PhpParser\Node\ArrayItem;
 use PhpParser\Node\Expr;
-use PhpParser\Node\Expr\ArrayItem as OldArrayItem;
 use PhpParser\Node\Name;
 use PhpParser\Node\Scalar;
+use PhpParser\Node\Stmt;
+use PhpParser\Parser;
+use PhpParser\ParserFactory;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+
+// compatibility with nikic/php-parser 4.x
+if (!class_exists(ArrayItem::class) && class_exists(Expr\ArrayItem::class)) {
+    class_alias(Expr\ArrayItem::class, ArrayItem::class);
+}
 
 /**
  * We generate a list of conditions that will allow the field to be mapped to the target.
@@ -20,16 +29,36 @@ use PhpParser\Node\Scalar;
  */
 final readonly class PropertyConditionsGenerator
 {
-    public function generate(PropertyMapping $propertyMapping): ?Expr
+    private Parser $parser;
+
+    public function __construct(
+        private ExpressionLanguage $expressionLanguage,
+        Parser $parser = null,
+    ) {
+        $this->parser = $parser ?? (new ParserFactory())->createForHostVersion();
+    }
+
+    public function generate(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
     {
         $conditions = [];
 
-        $conditions[] = $this->propertyExistsForStdClass($propertyMapping);
-        $conditions[] = $this->propertyExistsForArray($propertyMapping);
-        $conditions[] = $this->isAllowedAttribute($propertyMapping);
-        $conditions[] = $this->sourceGroupsCheck($propertyMapping);
-        $conditions[] = $this->targetGroupsCheck($propertyMapping);
-        $conditions[] = $this->maxDepthCheck($propertyMapping);
+        $conditions[] = $this->propertyExistsForStdClass($metadata, $propertyMetadata);
+        $conditions[] = $this->propertyExistsForArray($metadata, $propertyMetadata);
+        $conditions[] = $this->isAllowedAttribute($metadata, $propertyMetadata);
+
+        if (!$propertyMetadata->disableGroupsCheck) {
+            $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->groups); // Property groups
+
+            if ($propertyMetadata->groups === null) {
+                $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->source->groups); // Source groups
+                $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->target->groups); // Target groups
+            }
+
+            $conditions[] = $this->noGroupsCheck($metadata, $propertyMetadata);
+        }
+
+        $conditions[] = $this->maxDepthCheck($metadata, $propertyMetadata);
+        $conditions[] = $this->customCondition($metadata, $propertyMetadata);
 
         $conditions = array_values(array_filter($conditions));
 
@@ -62,17 +91,15 @@ final readonly class PropertyConditionsGenerator
      * property_exists($source, 'propertyName')
      * ```
      */
-    private function propertyExistsForStdClass(PropertyMapping $propertyMapping): ?Expr
+    private function propertyExistsForStdClass(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
     {
-        $variableRegistry = $propertyMapping->mapperMetadata->getVariableRegistry();
-
-        if (!$propertyMapping->checkExists || \stdClass::class !== $propertyMapping->mapperMetadata->getSource()) {
+        if (!$propertyMetadata->source->checkExists || \stdClass::class !== $metadata->mapperMetadata->source) {
             return null;
         }
 
         return new Expr\FuncCall(new Name('property_exists'), [
-            new Arg($variableRegistry->getSourceInput()),
-            new Arg(new Scalar\String_($propertyMapping->property)),
+            new Arg($metadata->variableRegistry->getSourceInput()),
+            new Arg(new Scalar\String_($propertyMetadata->source->name)),
         ]);
     }
 
@@ -83,17 +110,15 @@ final readonly class PropertyConditionsGenerator
      * array_key_exists('propertyName', $source).
      * ```
      */
-    private function propertyExistsForArray(PropertyMapping $propertyMapping): ?Expr
+    private function propertyExistsForArray(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
     {
-        if (!$propertyMapping->checkExists || 'array' !== $propertyMapping->mapperMetadata->getSource()) {
+        if (!$propertyMetadata->source->checkExists || 'array' !== $metadata->mapperMetadata->source) {
             return null;
         }
 
-        $variableRegistry = $propertyMapping->mapperMetadata->getVariableRegistry();
-
         return new Expr\FuncCall(new Name('array_key_exists'), [
-            new Arg(new Scalar\String_($propertyMapping->property)),
-            new Arg($variableRegistry->getSourceInput()),
+            new Arg(new Scalar\String_($propertyMetadata->source->name)),
+            new Arg($metadata->variableRegistry->getSourceInput()),
         ]);
     }
 
@@ -104,43 +129,34 @@ final readonly class PropertyConditionsGenerator
      * MapperContext::isAllowedAttribute($context, 'propertyName', isset($source->field)).
      * ```
      */
-    private function isAllowedAttribute(PropertyMapping $propertyMapping): ?Expr
+    private function isAllowedAttribute(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
     {
-        $mapperMetadata = $propertyMapping->mapperMetadata;
-
-        if (!$propertyMapping->readAccessor || !$mapperMetadata->shouldCheckAttributes()) {
+        if (!$propertyMetadata->source->accessor || !$metadata->checkAttributes) {
             return null;
         }
 
-        $variableRegistry = $mapperMetadata->getVariableRegistry();
+        $variableRegistry = $metadata->variableRegistry;
 
         return new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'isAllowedAttribute', [
             new Arg($variableRegistry->getContext()),
-            new Arg(new Scalar\String_($propertyMapping->property)),
-            new Arg($propertyMapping->readAccessor->getIsNullExpression($variableRegistry->getSourceInput())),
+            new Arg(new Scalar\String_($propertyMetadata->source->name)),
+            new Arg($propertyMetadata->source->accessor->getIsNullExpression($variableRegistry->getSourceInput())),
         ]);
     }
 
     /**
-     * When there are groups associated to the source property we check if the context has the same groups.
+     * When there is groups associated we check if the context has the same groups.
      *
      * ```php
      * (null !== $context[MapperContext::GROUPS] ?? null && array_intersect($context[MapperContext::GROUPS] ?? [], ['group1', 'group2']))
      * ```
+     *
+     * @param string[]|null $groups
      */
-    private function sourceGroupsCheck(PropertyMapping $propertyMapping): ?Expr
+    private function groupsCheck(VariableRegistry $variableRegistry, ?array $groups = []): ?Expr
     {
-        if (!$propertyMapping->sourceGroups) {
+        if (!$groups) {
             return null;
-        }
-
-        $variableRegistry = $propertyMapping->mapperMetadata->getVariableRegistry();
-
-        // compatibility with old versions of nikic/php-parser
-        if (class_exists(NewArrayItem::class)) {
-            $arrayItemClass = NewArrayItem::class;
-        } else {
-            $arrayItemClass = OldArrayItem::class;
         }
 
         return new Expr\BinaryOp\BooleanAnd(
@@ -158,54 +174,36 @@ final readonly class PropertyConditionsGenerator
                         new Expr\Array_()
                     )
                 ),
-                new Arg(new Expr\Array_(array_map(function (string $group) use ($arrayItemClass) {
-                    return new $arrayItemClass(new Scalar\String_($group));
-                }, $propertyMapping->sourceGroups))),
+                new Arg(new Expr\Array_(array_map(function (string $group) {
+                    return new ArrayItem(new Scalar\String_($group));
+                }, $groups))),
             ])
         );
     }
 
     /**
-     * When there is groups associated to the target property we check if the context has the same groups.
+     * When there is no groups associated to the target property or source property we check if the context has the same groups.
      *
      * ```php
-     * (null !== $context[MapperContext::GROUPS] ?? null && array_intersect($context[MapperContext::GROUPS] ?? [], ['group1', 'group2']))
+     * (!array_key_exists(MapperContext::GROUPS, $context) || !$context[MapperContext::GROUPS])
      * ```
      */
-    private function targetGroupsCheck(PropertyMapping $propertyMapping): ?Expr
+    private function noGroupsCheck(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
     {
-        if (!$propertyMapping->targetGroups) {
+        if ($propertyMetadata->groups || $propertyMetadata->target->groups || $propertyMetadata->source->groups) {
             return null;
         }
 
-        $variableRegistry = $propertyMapping->mapperMetadata->getVariableRegistry();
-
-        // compatibility with old versions of nikic/php-parser
-        if (class_exists(NewArrayItem::class)) {
-            $arrayItemClass = NewArrayItem::class;
-        } else {
-            $arrayItemClass = OldArrayItem::class;
-        }
-
-        return new Expr\BinaryOp\BooleanAnd(
-            new Expr\BinaryOp\NotIdentical(
-                new Expr\ConstFetch(new Name('null')),
-                new Expr\BinaryOp\Coalesce(
-                    new Expr\ArrayDimFetch($variableRegistry->getContext(), new Scalar\String_(MapperContext::GROUPS)),
-                    new Expr\Array_()
-                )
+        return new Expr\BinaryOp\BooleanOr(
+            new Expr\BooleanNot(
+                new Expr\FuncCall(new Name('array_key_exists'), [
+                    new Arg(new Scalar\String_(MapperContext::GROUPS)),
+                    new Arg($metadata->variableRegistry->getContext()),
+                ])
             ),
-            new Expr\FuncCall(new Name('array_intersect'), [
-                new Arg(
-                    new Expr\BinaryOp\Coalesce(
-                        new Expr\ArrayDimFetch($variableRegistry->getContext(), new Scalar\String_(MapperContext::GROUPS)),
-                        new Expr\Array_()
-                    )
-                ),
-                new Arg(new Expr\Array_(array_map(function (string $group) use ($arrayItemClass) {
-                    return new $arrayItemClass(new Scalar\String_($group));
-                }, $propertyMapping->targetGroups))),
-            ])
+            new Expr\BooleanNot(
+                new Expr\ArrayDimFetch($metadata->variableRegistry->getContext(), new Scalar\String_(MapperContext::GROUPS))
+            )
         );
     }
 
@@ -216,20 +214,94 @@ final readonly class PropertyConditionsGenerator
      * ($context[MapperContext::DEPTH] ?? 0) <= $maxDepth
      * ```
      */
-    private function maxDepthCheck(PropertyMapping $propertyMapping): ?Expr
+    private function maxDepthCheck(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
     {
-        if (!$propertyMapping->maxDepth) {
+        if (!$propertyMetadata->maxDepth) {
             return null;
         }
 
-        $variableRegistry = $propertyMapping->mapperMetadata->getVariableRegistry();
+        $variableRegistry = $metadata->variableRegistry;
 
         return new Expr\BinaryOp\SmallerOrEqual(
             new Expr\BinaryOp\Coalesce(
                 new Expr\ArrayDimFetch($variableRegistry->getContext(), new Scalar\String_(MapperContext::DEPTH)),
                 new Expr\ConstFetch(new Name('0'))
             ),
-            new Scalar\LNumber($propertyMapping->maxDepth)
+            new Scalar\LNumber($propertyMetadata->maxDepth)
         );
+    }
+
+    /**
+     * When there is a if condition we check if the condition is true.
+     */
+    private function customCondition(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
+    {
+        if (null === $propertyMetadata->if) {
+            return null;
+        }
+
+        $callableName = null;
+
+        if (\is_callable($propertyMetadata->if, false, $callableName)) {
+            if (\function_exists($callableName)) {
+                // Get arguments count of the function
+                $reflectionFunction = new \ReflectionFunction($callableName);
+                $argumentsCount = $reflectionFunction->getNumberOfRequiredParameters();
+
+                if ($argumentsCount === 1) {
+                    return new Expr\FuncCall(
+                        new Name($callableName),
+                        [
+                            new Arg(new Expr\Variable('value')),
+                        ]
+                    );
+                }
+
+                if ($argumentsCount > 2) {
+                    throw new \LogicException('Callable condition must have 1 or 2 arguments required, but it has ' . $argumentsCount);
+                }
+            }
+
+            return new Expr\FuncCall(
+                new Name($callableName),
+                [
+                    new Arg(new Expr\Variable('value')),
+                    new Arg(new Expr\Variable('context')),
+                ]
+            );
+        }
+
+        if ($metadata->mapperMetadata->sourceReflectionClass !== null && $metadata->mapperMetadata->sourceReflectionClass->hasMethod($propertyMetadata->if)) {
+            $reflectionMethod = $metadata->mapperMetadata->sourceReflectionClass->getMethod($propertyMetadata->if);
+
+            if ($reflectionMethod->isStatic()) {
+                return new Expr\StaticCall(
+                    new Name\FullyQualified($metadata->mapperMetadata->source),
+                    $propertyMetadata->if,
+                    [
+                        new Arg(new Expr\Variable('value')),
+                        new Arg(new Expr\Variable('context')),
+                    ]
+                );
+            }
+
+            return new Expr\MethodCall(
+                new Expr\Variable('value'),
+                $propertyMetadata->if,
+                [
+                    new Arg(new Expr\Variable('value')),
+                    new Arg(new Expr\Variable('context')),
+                ]
+            );
+        }
+
+        $expression = $this->expressionLanguage->compile($propertyMetadata->if, ['value' => 'source', 'context']);
+        $expr = $this->parser->parse('<?php ' . $expression . ';')[0] ?? null;
+
+        if ($expr instanceof Stmt\Expression) {
+            return $expr->expr;
+        }
+
+        throw new \LogicException('Cannot use callback or create expression language condition from expression "' . $propertyMetadata->if . "'");
     }
 }

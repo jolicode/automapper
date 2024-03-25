@@ -14,6 +14,7 @@ use AutoMapper\Tests\Fixtures;
 use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 /**
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
@@ -24,6 +25,10 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
 
     protected function setUp(): void
     {
+        if (!interface_exists(NormalizerInterface::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
         parent::setUp();
         $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
         $this->normalizer = new AutoMapperNormalizer($this->autoMapper);
@@ -58,6 +63,17 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
         self::assertFalse($this->normalizer->supportsNormalization(['foo']));
         self::assertFalse($this->normalizer->supportsNormalization('{"foo":1}'));
 
+        $iterator = new class() implements \IteratorAggregate {
+            public function getIterator(): \Traversable
+            {
+                yield 'id' => 1;
+                yield 'name' => 'Jack';
+                yield 'age' => 37;
+            }
+        };
+
+        self::assertFalse($this->normalizer->supportsNormalization($iterator));
+
         $object = new Fixtures\User(1, 'Jack', 37);
         self::assertTrue($this->normalizer->supportsNormalization($object));
 
@@ -70,8 +86,8 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
 
     public function testSupportsDenormalization(): void
     {
-        self::assertTrue($this->normalizer->supportsDenormalization(['foo' => 1], 'array'));
-        self::assertTrue($this->normalizer->supportsDenormalization(['foo' => 1], 'json'));
+        self::assertFalse($this->normalizer->supportsDenormalization(['foo' => 1], 'array'));
+        self::assertFalse($this->normalizer->supportsDenormalization(['foo' => 1], 'json'));
 
         $user = ['id' => 1, 'name' => 'Jack', 'age' => 37];
         self::assertTrue($this->normalizer->supportsDenormalization($user, Fixtures\User::class));
@@ -117,11 +133,11 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
             }
         );
 
-        $context = $normalizer->normalize(new Fixtures\User(1, 'Jack', 37), 'array', [
+        $context = $normalizer->normalize(new Fixtures\User(1, 'Jack', 37), 'json', [
             AbstractNormalizer::GROUPS => ['foo'],
             AbstractNormalizer::ATTRIBUTES => ['foo'],
             AbstractNormalizer::IGNORED_ATTRIBUTES => ['foo'],
-            AbstractNormalizer::OBJECT_TO_POPULATE => 'some-object',
+            AbstractNormalizer::OBJECT_TO_POPULATE => [],
             AbstractNormalizer::CIRCULAR_REFERENCE_LIMIT => 1,
             AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => 'circular-reference-handler',
             DateTimeNormalizer::FORMAT_KEY => 'Y-m-d',
@@ -134,14 +150,23 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
                 MapperContext::GROUPS => ['foo'],
                 MapperContext::ALLOWED_ATTRIBUTES => ['foo'],
                 MapperContext::IGNORED_ATTRIBUTES => ['foo'],
-                MapperContext::TARGET_TO_POPULATE => 'some-object',
+                MapperContext::TARGET_TO_POPULATE => [],
                 MapperContext::CIRCULAR_REFERENCE_LIMIT => 1,
                 MapperContext::CIRCULAR_REFERENCE_HANDLER => 'circular-reference-handler',
                 MapperContext::DATETIME_FORMAT => 'Y-m-d',
+                MapperContext::NORMALIZER_FORMAT => 'json',
                 'custom-context' => 'some custom context',
             ],
             $context
         );
+
+        $context = $normalizer->normalize(new Fixtures\User(1, 'Jack', 37), 'json', [
+            AbstractNormalizer::OBJECT_TO_POPULATE => 'bad-object',
+        ]);
+
+        self::assertSame([
+            MapperContext::NORMALIZER_FORMAT => 'json',
+        ], $context);
     }
 
     public function testItUsesSerializerDateFormatBasedOnSerializerContext(): void

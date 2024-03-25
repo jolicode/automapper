@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Transformer;
 
-use AutoMapper\MapperMetadata;
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
+use AutoMapper\Metadata\TypesMatching;
 use AutoMapper\Transformer\SymfonyUidCopyTransformer;
 use AutoMapper\Transformer\SymfonyUidTransformerFactory;
 use PHPUnit\Framework\TestCase;
@@ -17,8 +20,11 @@ class SymfonyUidTransformerFactoryTest extends TestCase
     {
         $factory = new SymfonyUidTransformerFactory();
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $sourceMapperMetadata = new SourcePropertyMetadata('foo');
+        $targetMapperMetadata = new TargetPropertyMetadata('foo');
+        $types = TypesMatching::fromSourceAndTargetTypes([new Type('object', false, null)], [new Type('object', false, null)], );
 
-        $transformer = $factory->getTransformer([new Type('object', false, null)], [new Type('object', false, null)], $mapperMetadata);
+        $transformer = $factory->getTransformer($types, $sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNull($transformer);
     }
@@ -27,12 +33,11 @@ class SymfonyUidTransformerFactoryTest extends TestCase
     {
         $factory = new SymfonyUidTransformerFactory();
         $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $sourceMapperMetadata = new SourcePropertyMetadata('foo');
+        $targetMapperMetadata = new TargetPropertyMetadata('foo');
+        $types = TypesMatching::fromSourceAndTargetTypes([new Type('object', false, Ulid::class)], [new Type('object', false, Ulid::class)], );
 
-        $transformer = $factory->getTransformer(
-            [new Type('object', false, Ulid::class)],
-            [new Type('object', false, Ulid::class)],
-            $mapperMetadata
-        );
+        $transformer = $factory->getTransformer($types, $sourceMapperMetadata, $targetMapperMetadata, $mapperMetadata);
 
         self::assertNotNull($transformer);
         self::assertInstanceOf(SymfonyUidCopyTransformer::class, $transformer);

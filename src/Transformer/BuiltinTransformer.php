@@ -4,22 +4,28 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
-use AutoMapper\Extractor\PropertyMapping;
 use AutoMapper\Generator\UniqueVariableScope;
+use AutoMapper\Metadata\PropertyMetadata;
 use PhpParser\Node\Arg;
-use PhpParser\Node\ArrayItem as NewArrayItem;
+use PhpParser\Node\ArrayItem;
 use PhpParser\Node\Expr;
-use PhpParser\Node\Expr\ArrayItem as OldArrayItem;
 use PhpParser\Node\Expr\Cast;
 use PhpParser\Node\Name;
 use Symfony\Component\PropertyInfo\Type;
+
+// compatibility with nikic/php-parser 4.x
+if (!class_exists(ArrayItem::class) && class_exists(Expr\ArrayItem::class)) {
+    class_alias(Expr\ArrayItem::class, ArrayItem::class);
+}
 
 /**
  * Built in transformer to handle PHP scalar types.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
+ *
+ * @internal
  */
-final readonly class BuiltinTransformer implements TransformerInterface
+final readonly class BuiltinTransformer implements TransformerInterface, CheckTypeInterface
 {
     private const CAST_MAPPING = [
         Type::BUILTIN_TYPE_BOOL => [
@@ -58,6 +64,19 @@ final readonly class BuiltinTransformer implements TransformerInterface
         Type::BUILTIN_TYPE_RESOURCE => [],
     ];
 
+    private const CONDITION_MAPPING = [
+        Type::BUILTIN_TYPE_BOOL => 'is_bool',
+        Type::BUILTIN_TYPE_INT => 'is_int',
+        Type::BUILTIN_TYPE_FLOAT => 'is_float',
+        Type::BUILTIN_TYPE_STRING => 'is_string',
+        Type::BUILTIN_TYPE_NULL => 'is_null',
+        Type::BUILTIN_TYPE_ARRAY => 'is_array',
+        Type::BUILTIN_TYPE_OBJECT => 'is_object',
+        Type::BUILTIN_TYPE_RESOURCE => 'is_resource',
+        Type::BUILTIN_TYPE_CALLABLE => 'is_callable',
+        Type::BUILTIN_TYPE_ITERABLE => 'is_iterable',
+    ];
+
     public function __construct(
         private Type $sourceType,
         /** @var Type[] $targetTypes */
@@ -65,12 +84,8 @@ final readonly class BuiltinTransformer implements TransformerInterface
     ) {
     }
 
-    public function transform(Expr $input, Expr $target, PropertyMapping $propertyMapping, UniqueVariableScope $uniqueVariableScope, /* Expr\Variable $source */): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): array
     {
-        if (\func_num_args() < 5) {
-            trigger_deprecation('jolicode/automapper', '8.2', 'The "%s()" method will have a new "Expr\Variable $source" argument in version 9.0, not defining it is deprecated.', __METHOD__);
-        }
-
         $targetTypes = array_map(function (Type $type) {
             return $type->getBuiltinType();
         }, $this->targetTypes);
@@ -104,16 +119,28 @@ final readonly class BuiltinTransformer implements TransformerInterface
         return [$input, []];
     }
 
-    private function toArray(Expr $input): Expr
+    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): ?Expr
     {
-        // compatibility with old versions of nikic/php-parser
-        if (class_exists(NewArrayItem::class)) {
-            $arrayItemClass = NewArrayItem::class;
-        } else {
-            $arrayItemClass = OldArrayItem::class;
+        $condition = new Expr\FuncCall(
+            new Name(self::CONDITION_MAPPING[$this->sourceType->getBuiltinType()]),
+            [
+                new Arg($input),
+            ]
+        );
+
+        if ($this->sourceType->getBuiltinType() === Type::BUILTIN_TYPE_OBJECT) {
+            $condition = new Expr\BinaryOp\BooleanAnd(
+                $condition,
+                new Expr\Instanceof_($input, new Name\FullyQualified($type->getClassName())) // @phpstan-ignore-line $type->getClassName() cannot be null here
+            );
         }
 
-        return new Expr\Array_([new $arrayItemClass($input)]);
+        return $condition;
+    }
+
+    private function toArray(Expr $input): Expr
+    {
+        return new Expr\Array_([new ArrayItem($input)]);
     }
 
     private function fromIteratorToArray(Expr $input): Expr
