@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Bundle;
 
-use ApiPlatform\Elasticsearch\Tests\Fixtures\Book;
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -37,7 +36,11 @@ class ApiPlatformTest extends ApiTestCase
         ]);
 
         $this->assertCount(1, $response->toArray()['hydra:member']);
-        $this->assertMatchesResourceCollectionJsonSchema(Book::class);
+        $this->assertArraySubset([
+            '@type' => 'Book',
+            '@id' => '/books/1',
+            'reviews' => [],
+        ], $response->toArray()['hydra:member'][0]);
     }
 
     public function testGetBook(): void
