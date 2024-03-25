@@ -23,6 +23,7 @@ final class GeneratorMetadata
         public readonly array $propertiesMetadata,
         public readonly bool $checkAttributes = true,
         public readonly bool $allowConstructor = true,
+        public readonly ?string $provider = null,
     ) {
         $this->variableRegistry = new VariableRegistry();
     }

@@ -92,6 +92,13 @@ use AutoMapper\AutoMapper;
 $autoMapper = AutoMapper::create(propertyTransformers: [new UrlTransformer($urlGenerator)]);
 ```
 
+> [!NOTE]
+> When using the Symfony Bundle version of the AutoMapper, you can use the `automapper.property_transformer` tag to 
+> register the transformer.
+> 
+> If you have autoconfiguration enabled, you do not need to register the transformer manually as the tag will be 
+> automatically added.
+
 Then you can use it in the `transformer` argument.
 
 ```php
@@ -103,6 +110,10 @@ class Source
     public int $id;
 }
 ```
+
+> [!NOTE]
+> When using the Symfony Bundle version of the AutoMapper, the transformer will be the service id, which may be different
+> from the class name.
 
 ### Automatically apply custom transformers
 

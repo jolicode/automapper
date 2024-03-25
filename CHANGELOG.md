@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#84](https://github.com/jolicode/automapper/pull/84) Allow expression language for transformer and add provider for custom functions
 - [GH#86](https://github.com/jolicode/automapper/pull/86) Bundle: Allow to use eval loader instead of file
 - [GH#89](https://github.com/jolicode/automapper/pull/89) Add normalizer format in context, allow skipping group checking and remove registry interface from normalizer
+- [GH#96](https://github.com/jolicode/automapper/pull/96) Add a way to instantiate the target object from external service using provider
 
 ### Changed
 - [GH#56](https://github.com/jolicode/automapper/pull/56) Refactor metadata

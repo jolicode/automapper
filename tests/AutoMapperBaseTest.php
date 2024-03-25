@@ -32,6 +32,7 @@ abstract class AutoMapperBaseTest extends TestCase
         string $classPrefix = 'Mapper_',
         array $transformerFactories = [],
         array $propertyTransformers = [],
+        array $providers = [],
         string $dateTimeFormat = \DateTimeInterface::RFC3339,
         ?ExpressionLanguageProvider $expressionLanguageProvider = null,
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
@@ -54,6 +55,7 @@ abstract class AutoMapperBaseTest extends TestCase
             propertyTransformers: $propertyTransformers,
             expressionLanguageProvider: $expressionLanguageProvider,
             eventDispatcher: $eventDispatcher,
+            providers: $providers,
         );
     }
 }

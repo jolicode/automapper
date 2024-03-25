@@ -14,6 +14,7 @@ use AutoMapper\Loader\EvalLoader;
 use AutoMapper\Loader\FileLoader;
 use AutoMapper\Metadata\MetadataFactory;
 use AutoMapper\Metadata\MetadataRegistry;
+use AutoMapper\Provider\ProviderRegistry;
 use AutoMapper\Symfony\ExpressionLanguageProvider;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
 
@@ -24,6 +25,7 @@ return static function (ContainerConfigurator $container) {
                 service(ClassLoaderInterface::class),
                 service(PropertyTransformerRegistry::class),
                 service(MetadataRegistry::class),
+                service(ProviderRegistry::class),
                 service(ExpressionLanguageProvider::class),
             ])
             ->alias(AutoMapperInterface::class, AutoMapper::class)->public()

@@ -16,7 +16,8 @@ final class GenerateMapperEvent
      */
     public function __construct(
         public readonly MapperMetadata $mapperMetadata,
-        public $properties = [],
+        public array $properties = [],
+        public ?string $provider = null,
     ) {
     }
 }

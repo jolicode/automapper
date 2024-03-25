@@ -11,6 +11,7 @@ use AutoMapper\Exception\CircularReferenceException;
 use AutoMapper\Exception\NoMappingFoundException;
 use AutoMapper\Exception\ReadOnlyTargetException;
 use AutoMapper\MapperContext;
+use AutoMapper\Provider\EarlyReturn;
 use AutoMapper\Tests\Fixtures\Address;
 use AutoMapper\Tests\Fixtures\AddressDTO;
 use AutoMapper\Tests\Fixtures\AddressDTOReadonlyClass;
@@ -26,6 +27,7 @@ use AutoMapper\Tests\Fixtures\DifferentSetterGetterType;
 use AutoMapper\Tests\Fixtures\Dog;
 use AutoMapper\Tests\Fixtures\Fish;
 use AutoMapper\Tests\Fixtures\FooGenerator;
+use AutoMapper\Tests\Fixtures\FooProvider;
 use AutoMapper\Tests\Fixtures\GroupOverride;
 use AutoMapper\Tests\Fixtures\HasDateTime;
 use AutoMapper\Tests\Fixtures\HasDateTimeImmutable;
@@ -40,6 +42,7 @@ use AutoMapper\Tests\Fixtures\ObjectsUnion\ObjectsUnionProperty;
 use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
 use AutoMapper\Tests\Fixtures\Order;
 use AutoMapper\Tests\Fixtures\PetOwner;
+use AutoMapper\Tests\Fixtures\Provider\CustomProvider;
 use AutoMapper\Tests\Fixtures\Transformer\MoneyTransformerFactory;
 use AutoMapper\Tests\Fixtures\Uninitialized;
 use AutoMapper\Tests\Fixtures\UserPromoted;
@@ -589,19 +592,6 @@ class AutoMapperTest extends AutoMapperBaseTest
         $this->autoMapper->map($nodeA, 'array', $context->toArray());
     }
 
-    public function testCircularReferenceLimitOnMapper(): void
-    {
-        $nodeA = new Fixtures\Node();
-        $nodeA->parent = $nodeA;
-
-        $mapper = $this->autoMapper->getMapper(Fixtures\Node::class, 'array');
-        $mapper->setCircularReferenceLimit(1);
-
-        $this->expectException(CircularReferenceException::class);
-
-        $mapper->map($nodeA);
-    }
-
     public function testCircularReferenceHandlerOnContext(): void
     {
         $nodeA = new Fixtures\Node();
@@ -613,21 +603,6 @@ class AutoMapperTest extends AutoMapperBaseTest
         });
 
         $nodeArray = $this->autoMapper->map($nodeA, 'array', $context->toArray());
-
-        self::assertSame('foo', $nodeArray['parent']);
-    }
-
-    public function testCircularReferenceHandlerOnMapper(): void
-    {
-        $nodeA = new Fixtures\Node();
-        $nodeA->parent = $nodeA;
-
-        $mapper = $this->autoMapper->getMapper(Fixtures\Node::class, 'array');
-        $mapper->setCircularReferenceHandler(function () {
-            return 'foo';
-        });
-
-        $nodeArray = $mapper->map($nodeA);
 
         self::assertSame('foo', $nodeArray['parent']);
     }
@@ -1458,5 +1433,37 @@ class AutoMapperTest extends AutoMapperBaseTest
         $data = $this->autoMapper->map($group, 'array', ['groups' => ['group2']]);
 
         self::assertSame(['id' => 'id', 'name' => 'name'], $data);
+    }
+
+    public function testProvider(): void
+    {
+        $provided = new FooProvider();
+        $provided->foo = 'bar';
+
+        $this->buildAutoMapper(providers: [new CustomProvider($provided)]);
+
+        $data = $this->autoMapper->map(['bar' => 'foo'], FooProvider::class);
+
+        self::assertSame('bar', $data->foo);
+        self::assertSame('foo', $data->bar);
+
+        $data = $this->autoMapper->map(['bar' => 'foo', 'foo' => 'foo'], FooProvider::class);
+
+        self::assertSame('foo', $data->foo);
+        self::assertSame('foo', $data->bar);
+    }
+
+    public function testProviderEarlyReturn(): void
+    {
+        $provided = new FooProvider();
+        $provided->foo = 'bar';
+        $provided->bar = 'foo';
+
+        $this->buildAutoMapper(providers: [new CustomProvider(new EarlyReturn($provided))]);
+
+        $data = $this->autoMapper->map(['bar' => 'bar', 'foo' => 'foo'], FooProvider::class);
+
+        self::assertSame('bar', $data->foo);
+        self::assertSame('foo', $data->bar);
     }
 }

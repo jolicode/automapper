@@ -12,6 +12,8 @@ use AutoMapper\Loader\EvalLoader;
 use AutoMapper\Loader\FileLoader;
 use AutoMapper\Metadata\MetadataFactory;
 use AutoMapper\Metadata\MetadataRegistry;
+use AutoMapper\Provider\ProviderInterface;
+use AutoMapper\Provider\ProviderRegistry;
 use AutoMapper\Symfony\ExpressionLanguageProvider;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
@@ -47,6 +49,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         private readonly ClassLoaderInterface $classLoader,
         private readonly PropertyTransformerRegistry $propertyTransformerRegistry,
         private readonly MetadataRegistry $metadataRegistry,
+        private readonly ProviderRegistry $providerRegistry,
         private readonly ?ExpressionLanguageProvider $expressionLanguageProvider = null,
     ) {
     }
@@ -75,15 +78,15 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         }
 
         /** @var GeneratedMapper<Source, Target>|GeneratedMapper<array<mixed>, Target>|GeneratedMapper<Source, array<mixed>> $mapper */
-        $mapper = new $className();
+        $mapper = new $className(
+            $this->propertyTransformerRegistry,
+            $this->providerRegistry,
+            $this->expressionLanguageProvider,
+        );
+
         $this->mapperRegistry[$className] = $mapper;
 
-        $mapper->injectMappers($this);
-        $mapper->setPropertyTransformers($this->propertyTransformerRegistry->getPropertyTransformers());
-
-        if (null !== $this->expressionLanguageProvider) {
-            $mapper->setExpressionLanguageProvider($this->expressionLanguageProvider);
-        }
+        $mapper->registerMappers($this);
 
         /** @var GeneratedMapper<Source, Target>|GeneratedMapper<array<mixed>, Target>|GeneratedMapper<Source, array<mixed>> */
         return $this->mapperRegistry[$className];
@@ -119,6 +122,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
 
     /**
      * @param TransformerFactoryInterface[]                  $transformerFactories
+     * @param ProviderInterface[]                            $providers
      * @param iterable<string, PropertyTransformerInterface> $propertyTransformers
      */
     public static function create(
@@ -129,6 +133,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         iterable $propertyTransformers = [],
         ExpressionLanguageProvider $expressionLanguageProvider = null,
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
+        iterable $providers = [],
     ): self {
         if (class_exists(AttributeLoader::class)) {
             $loaderClass = new AttributeLoader();
@@ -155,6 +160,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
 
         $customTransformerRegistry = new PropertyTransformerRegistry($propertyTransformers);
         $metadataRegistry = new MetadataRegistry($configuration);
+        $providerRegistry = new ProviderRegistry($providers);
         $metadataFactory = MetadataFactory::create(
             $configuration,
             $customTransformerRegistry,
@@ -178,6 +184,6 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
             $loader = new FileLoader($mapperGenerator, $metadataFactory, $cacheDirectory);
         }
 
-        return new self($loader, $customTransformerRegistry, $metadataRegistry, $expressionLanguageProvider);
+        return new self($loader, $customTransformerRegistry, $metadataRegistry, $providerRegistry, $expressionLanguageProvider);
     }
 }
