@@ -12,8 +12,21 @@ use AutoMapper\Normalizer\AutoMapperNormalizer;
 use AutoMapper\Tests\AutoMapperBaseTest;
 use AutoMapper\Tests\Fixtures;
 use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
+use AutoMapper\Tests\Normalizer\Features\AttributesTestTrait;
+use AutoMapper\Tests\Normalizer\Features\CallbacksTestTrait;
+use AutoMapper\Tests\Normalizer\Features\CircularReferenceDummy;
+use AutoMapper\Tests\Normalizer\Features\CircularReferenceTestTrait;
+use AutoMapper\Tests\Normalizer\Features\ConstructorArgumentsTestTrait;
+use AutoMapper\Tests\Normalizer\Features\GroupsTestTrait;
+use AutoMapper\Tests\Normalizer\Features\IgnoredAttributesTestTrait;
+use AutoMapper\Tests\Normalizer\Features\MaxDepthTestTrait;
+use AutoMapper\Tests\Normalizer\Features\ObjectToPopulateTestTrait;
+use AutoMapper\Tests\Normalizer\Features\SkipNullValuesTestTrait;
+use AutoMapper\Tests\Normalizer\Features\SkipUninitializedValuesTestTrait;
+use AutoMapper\Tests\Normalizer\Features\TypeEnforcementTestTrait;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 /**
@@ -21,6 +34,18 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
  */
 class AutoMapperNormalizerTest extends AutoMapperBaseTest
 {
+    use AttributesTestTrait;
+    use CallbacksTestTrait;
+    use CircularReferenceTestTrait;
+    use ConstructorArgumentsTestTrait;
+    use GroupsTestTrait;
+    use IgnoredAttributesTestTrait;
+    use MaxDepthTestTrait;
+    use ObjectToPopulateTestTrait;
+    use SkipNullValuesTestTrait;
+    use SkipUninitializedValuesTestTrait;
+    use TypeEnforcementTestTrait;
+
     protected AutoMapperNormalizer $normalizer;
 
     protected function setUp(): void
@@ -145,20 +170,15 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
             MapperContext::ALLOWED_ATTRIBUTES => 'some ignored context',
         ]);
 
-        self::assertSame(
-            [
-                MapperContext::GROUPS => ['foo'],
-                MapperContext::ALLOWED_ATTRIBUTES => ['foo'],
-                MapperContext::IGNORED_ATTRIBUTES => ['foo'],
-                MapperContext::TARGET_TO_POPULATE => [],
-                MapperContext::CIRCULAR_REFERENCE_LIMIT => 1,
-                MapperContext::CIRCULAR_REFERENCE_HANDLER => 'circular-reference-handler',
-                MapperContext::DATETIME_FORMAT => 'Y-m-d',
-                MapperContext::NORMALIZER_FORMAT => 'json',
-                'custom-context' => 'some custom context',
-            ],
-            $context
-        );
+        self::assertSame(['foo'], $context[MapperContext::GROUPS]);
+        self::assertSame(['foo'], $context[MapperContext::ALLOWED_ATTRIBUTES]);
+        self::assertSame(['foo'], $context[MapperContext::IGNORED_ATTRIBUTES]);
+        self::assertSame([], $context[MapperContext::TARGET_TO_POPULATE]);
+        self::assertSame(1, $context[MapperContext::CIRCULAR_REFERENCE_LIMIT]);
+        self::assertIsCallable($context[MapperContext::CIRCULAR_REFERENCE_HANDLER]);
+        self::assertSame('Y-m-d', $context[MapperContext::DATETIME_FORMAT]);
+        self::assertSame('json', $context[MapperContext::NORMALIZER_FORMAT]);
+        self::assertSame('some custom context', $context['custom-context']);
 
         $context = $normalizer->normalize(new Fixtures\User(1, 'Jack', 37), 'json', [
             AbstractNormalizer::OBJECT_TO_POPULATE => 'bad-object',
@@ -166,6 +186,7 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
 
         self::assertSame([
             MapperContext::NORMALIZER_FORMAT => 'json',
+            MapperContext::CIRCULAR_REFERENCE_LIMIT => 1,
         ], $context);
     }
 
@@ -189,5 +210,90 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
                 [MapperContext::DATETIME_FORMAT => '!d-m-Y']
             )
         );
+    }
+
+    protected function getNormalizerForAttributes(): NormalizerInterface
+    {
+        return $this->normalizer;
+    }
+
+    protected function getDenormalizerForAttributes(): DenormalizerInterface
+    {
+        return $this->normalizer;
+    }
+
+    protected function getNormalizerForCacheableObjectAttributesTest(): NormalizerInterface
+    {
+        return $this->normalizer;
+    }
+
+    protected function getNormalizerForCallbacks(): NormalizerInterface
+    {
+        return $this->normalizer;
+    }
+
+    protected function getNormalizerForCallbacksWithPropertyTypeExtractor(): NormalizerInterface
+    {
+        return $this->normalizer;
+    }
+
+    protected function getNormalizerForCircularReference(): NormalizerInterface
+    {
+        return $this->normalizer;
+    }
+
+    protected function getSelfReferencingModel()
+    {
+        return new CircularReferenceDummy();
+    }
+
+    protected function getDenormalizerForConstructArguments(): DenormalizerInterface
+    {
+        return $this->normalizer;
+    }
+
+    protected function getNormalizerForGroups(): NormalizerInterface
+    {
+        return $this->normalizer;
+    }
+
+    protected function getDenormalizerForGroups(): DenormalizerInterface
+    {
+        return $this->normalizer;
+    }
+
+    protected function getNormalizerForIgnoredAttributes(): NormalizerInterface
+    {
+        return $this->normalizer;
+    }
+
+    protected function getDenormalizerForIgnoredAttributes(): DenormalizerInterface
+    {
+        return $this->normalizer;
+    }
+
+    protected function getNormalizerForMaxDepth(): NormalizerInterface
+    {
+        return $this->normalizer;
+    }
+
+    protected function getDenormalizerForObjectToPopulate(): DenormalizerInterface
+    {
+        return $this->normalizer;
+    }
+
+    protected function getNormalizerForSkipNullValues(): NormalizerInterface
+    {
+        return $this->normalizer;
+    }
+
+    protected function getNormalizerForSkipUninitializedValues(): NormalizerInterface
+    {
+        return $this->normalizer;
+    }
+
+    protected function getDenormalizerForTypeEnforcement(): DenormalizerInterface
+    {
+        return $this->normalizer;
     }
 }

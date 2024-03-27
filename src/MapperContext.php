@@ -24,6 +24,7 @@ use AutoMapper\Exception\CircularReferenceException;
  *   "circular_count_reference_registry"?: array<string, int>,
  *   "depth"?: int,
  *   "target_to_populate"?: mixed,
+ *   "deep_target_to_populate"?: bool,
  *   "constructor_arguments"?: array<string, array<string, mixed>>,
  *   "skip_null_values"?: bool,
  *   "allow_readonly_target_to_populate"?: bool,
@@ -44,6 +45,7 @@ class MapperContext
     public const CIRCULAR_COUNT_REFERENCE_REGISTRY = 'circular_count_reference_registry';
     public const DEPTH = 'depth';
     public const TARGET_TO_POPULATE = 'target_to_populate';
+    public const DEEP_TARGET_TO_POPULATE = 'deep_target_to_populate';
     public const CONSTRUCTOR_ARGUMENTS = 'constructor_arguments';
     public const SKIP_NULL_VALUES = 'skip_null_values';
     public const ALLOW_READONLY_TARGET_TO_POPULATE = 'allow_readonly_target_to_populate';
@@ -187,7 +189,7 @@ class MapperContext
 
         if (null !== $circularReferenceLimit) {
             if ($circularReferenceLimit <= ($context[self::CIRCULAR_COUNT_REFERENCE_REGISTRY][$reference] ?? 0)) {
-                throw new CircularReferenceException(sprintf('A circular reference has been detected when mapping the object of type "%s" (configured limit: %d)', \is_object($object) ? $object::class : 'array', $circularReferenceLimit));
+                throw new CircularReferenceException(sprintf('A circular reference has been detected when mapping the object of type "%s" (configured limit: %d).', \is_object($object) ? $object::class : 'array', $circularReferenceLimit));
             }
 
             $context[self::CIRCULAR_COUNT_REFERENCE_REGISTRY][$reference] ??= 0;
@@ -228,9 +230,9 @@ class MapperContext
      *
      * @internal
      */
-    public static function isAllowedAttribute(array $context, string $attribute, bool $valueIsNotNullOrNotUndefined): bool
+    public static function isAllowedAttribute(array $context, string $attribute, bool $valueIsNullOrUndefined): bool
     {
-        if (($context[self::SKIP_NULL_VALUES] ?? false) && !$valueIsNotNullOrNotUndefined) {
+        if (($context[self::SKIP_NULL_VALUES] ?? false) && $valueIsNullOrUndefined) {
             return false;
         }
 
@@ -289,9 +291,9 @@ class MapperContext
      *
      * @return MapperContextArray
      */
-    public static function withNewContext(array $context, string $attribute): array
+    public static function withNewContext(array $context, string $attribute, mixed $deepObjectToPopulate = null): array
     {
-        $context[self::TARGET_TO_POPULATE] = null;
+        $context[self::TARGET_TO_POPULATE] = $deepObjectToPopulate;
 
         if (!($context[self::ALLOWED_ATTRIBUTES] ?? false) && !($context[self::IGNORED_ATTRIBUTES] ?? false)) {
             return $context;

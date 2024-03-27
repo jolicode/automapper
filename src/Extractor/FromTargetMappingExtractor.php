@@ -51,17 +51,6 @@ final class FromTargetMappingExtractor extends MappingExtractor
         return $types;
     }
 
-    public function getReadAccessor(string $source, string $target, string $property): ?ReadAccessor
-    {
-        $sourceAccessor = new ReadAccessor(ReadAccessor::TYPE_ARRAY_DIMENSION, $property);
-
-        if (\stdClass::class === $source) {
-            $sourceAccessor = new ReadAccessor(ReadAccessor::TYPE_PROPERTY, $property);
-        }
-
-        return $sourceAccessor;
-    }
-
     private function transformType(string $source, ?Type $type = null): ?Type
     {
         if (null === $type) {

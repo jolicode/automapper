@@ -24,6 +24,7 @@ use AutoMapper\Extractor\SourceTargetMappingExtractor;
 use AutoMapper\Transformer\ArrayTransformerFactory;
 use AutoMapper\Transformer\BuiltinTransformerFactory;
 use AutoMapper\Transformer\ChainTransformerFactory;
+use AutoMapper\Transformer\CopyTransformerFactory;
 use AutoMapper\Transformer\DateTimeTransformerFactory;
 use AutoMapper\Transformer\DependentTransformerInterface;
 use AutoMapper\Transformer\EnumTransformerFactory;
@@ -168,7 +169,7 @@ final class MetadataFactory
         foreach ($propertyEvents as $propertyMappedEvent) {
             // Create the source property metadata
             if ($propertyMappedEvent->source->accessor === null) {
-                $propertyMappedEvent->source->accessor = $extractor->getReadAccessor($mapperMetadata->source, $mapperMetadata->target, $propertyMappedEvent->source->name);
+                $propertyMappedEvent->source->accessor = $extractor->getReadAccessor($mapperMetadata->source, $propertyMappedEvent->source->name);
             }
 
             if ($propertyMappedEvent->source->checkExists === null) {
@@ -184,6 +185,10 @@ final class MetadataFactory
             }
 
             // Create the target property metadata
+            if ($propertyMappedEvent->target->readAccessor === null) {
+                $propertyMappedEvent->target->readAccessor = $extractor->getReadAccessor($mapperMetadata->target, $propertyMappedEvent->target->name);
+            }
+
             if ($propertyMappedEvent->target->writeMutator === null) {
                 $propertyMappedEvent->target->writeMutator = $extractor->getWriteMutator($mapperMetadata->source, $mapperMetadata->target, $propertyMappedEvent->target->name, [
                     'enable_constructor_extraction' => false,
@@ -298,6 +303,7 @@ final class MetadataFactory
             new ObjectTransformerFactory(),
             new EnumTransformerFactory(),
             new PropertyTransformerFactory($customTransformerRegistry),
+            new CopyTransformerFactory(),
         ];
 
         if (class_exists(AbstractUid::class)) {

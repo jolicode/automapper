@@ -38,7 +38,7 @@ interface MappingExtractorInterface
     /**
      * Extracts read accessor for a given source, target and property.
      */
-    public function getReadAccessor(string $source, string $target, string $property): ?ReadAccessor;
+    public function getReadAccessor(string $class, string $property): ?ReadAccessor;
 
     /**
      * Extracts write mutator for a given source, target and property.

@@ -5,9 +5,14 @@ declare(strict_types=1);
 namespace AutoMapper\Normalizer;
 
 use AutoMapper\AutoMapperInterface;
+use AutoMapper\Exception\CircularReferenceException;
+use AutoMapper\Exception\MissingConstructorArgumentsException;
 use AutoMapper\MapperContext;
 use AutoMapper\Metadata\MetadataRegistry;
+use Symfony\Component\Serializer\Exception\CircularReferenceException as SymfonyCircularReferenceException;
+use Symfony\Component\Serializer\Exception\MissingConstructorArgumentsException as SymfonyMissingConstructorArgumentsException;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -26,8 +31,8 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
         AbstractNormalizer::ATTRIBUTES => MapperContext::ALLOWED_ATTRIBUTES,
         AbstractNormalizer::IGNORED_ATTRIBUTES => MapperContext::IGNORED_ATTRIBUTES,
         AbstractNormalizer::OBJECT_TO_POPULATE => MapperContext::TARGET_TO_POPULATE,
-        AbstractNormalizer::CIRCULAR_REFERENCE_LIMIT => MapperContext::CIRCULAR_REFERENCE_LIMIT,
-        AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => MapperContext::CIRCULAR_REFERENCE_HANDLER,
+        AbstractObjectNormalizer::DEEP_OBJECT_TO_POPULATE => MapperContext::DEEP_TARGET_TO_POPULATE,
+        AbstractObjectNormalizer::SKIP_NULL_VALUES => MapperContext::SKIP_NULL_VALUES,
         DateTimeNormalizer::FORMAT_KEY => MapperContext::DATETIME_FORMAT,
     ];
 
@@ -45,7 +50,13 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
      */
     public function normalize(mixed $object, string $format = null, array $context = []): ?array
     {
-        return $this->autoMapper->map($object, 'array', $this->createAutoMapperContext($format, $context));
+        try {
+            return $this->autoMapper->map($object, 'array', $this->createAutoMapperContext($format, $context));
+        } catch (CircularReferenceException $e) {
+            throw new SymfonyCircularReferenceException($e->getMessage(), $e->getCode(), $e);
+        } catch (MissingConstructorArgumentsException $e) {
+            throw new SymfonyMissingConstructorArgumentsException($e->getMessage(), $e->getCode(), $e, $e->missingArguments, $e->class);
+        }
     }
 
     /**
@@ -59,7 +70,13 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
      */
     public function denormalize(mixed $data, string $type, string $format = null, array $context = []): mixed
     {
-        return $this->autoMapper->map($data, $type, $this->createAutoMapperContext($format, $context));
+        try {
+            return $this->autoMapper->map($data, $type, $this->createAutoMapperContext($format, $context));
+        } catch (CircularReferenceException $e) {
+            throw new SymfonyCircularReferenceException($e->getMessage(), $e->getCode(), $e);
+        } catch (MissingConstructorArgumentsException $e) {
+            throw new SymfonyMissingConstructorArgumentsException($e->getMessage(), $e->getCode(), $e, $e->missingArguments, $e->class);
+        }
     }
 
     /**
@@ -161,6 +178,19 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
         if ($format !== null) {
             $context[MapperContext::NORMALIZER_FORMAT] = $format;
         }
+
+        if (\array_key_exists(AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER, $serializerContext)) {
+            /** @var callable(object, string, array<mixed>) $callback */
+            $callback = $serializerContext[AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER];
+            $context[MapperContext::CIRCULAR_REFERENCE_HANDLER] = function ($object, array $context) use ($format, $callback) {
+                return $callback($object, $format, $context);
+            };
+
+            unset($serializerContext[AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER]);
+        }
+
+        $context[MapperContext::CIRCULAR_REFERENCE_LIMIT] = $serializerContext[AbstractNormalizer::CIRCULAR_REFERENCE_LIMIT] ?? 1;
+        unset($serializerContext[AbstractNormalizer::CIRCULAR_REFERENCE_LIMIT]);
 
         /** @var MapperContextArray */
         return $context + $serializerContext;

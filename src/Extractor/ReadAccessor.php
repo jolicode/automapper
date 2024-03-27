@@ -189,7 +189,7 @@ final class ReadAccessor
              *
              * isset($input->property_name)
              */
-            return new Expr\Isset_([new Expr\PropertyFetch($input, $this->accessor)]);
+            return new Expr\BooleanNot(new Expr\Isset_([new Expr\PropertyFetch($input, $this->accessor)]));
         }
 
         if (self::TYPE_ARRAY_DIMENSION === $this->type) {
@@ -198,7 +198,7 @@ final class ReadAccessor
              *
              * isset($input['property_name'])
              */
-            return new Expr\Isset_([new Expr\ArrayDimFetch($input, new Scalar\String_($this->accessor))]);
+            return new Expr\BooleanNot(new Expr\Isset_([new Expr\ArrayDimFetch($input, new Scalar\String_($this->accessor))]));
         }
 
         if (self::TYPE_SOURCE === $this->type) {
@@ -264,7 +264,7 @@ final class ReadAccessor
          * Create extract is null callback for this accessor
          *
          *  \Closure::bind(function ($object) {
-         *      return isset($object->property_name);
+         *      return !isset($object->property_name);
          *  }, null, $className)
          */
         return new Expr\StaticCall(new Name\FullyQualified(\Closure::class), 'bind', [
@@ -274,7 +274,7 @@ final class ReadAccessor
                         new Param(new Expr\Variable('object')),
                     ],
                     'stmts' => [
-                        new Stmt\Return_(new Expr\Isset_([new Expr\PropertyFetch(new Expr\Variable('object'), $this->accessor)])),
+                        new Stmt\Return_(new Expr\BooleanNot(new Expr\Isset_([new Expr\PropertyFetch(new Expr\Variable('object'), $this->accessor)]))),
                     ],
                 ])
             ),
