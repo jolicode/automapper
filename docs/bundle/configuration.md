@@ -20,6 +20,7 @@ automapper:
     only_registered_mapping: false
     priority: 1000
   serializer: true
+  api_platform: false
   name_converter: null
   cache_dir: "%kernel.cache_dir%/automapper"
   mappings:
@@ -49,6 +50,8 @@ automapper:
 * `serializer` (default: `true` if the symfony/serializer is available, false otherwise): A boolean which indicate
   if we use the attribute of the symfony/serializer during the mapping, this only apply to the `#[Groups]`, `#[MaxDepth]`,
   `#[Ignore]` and `#[DiscriminatorMap]` attributes;
+* `api_platform` (default: `false`): A boolean which indicate if we use services from the api-platform/core package and
+inject extra data (json ld) in the mappers when we map a Resource class to or from an array.
 * `name_converter` (default: `null`): A service id which implement the `AdvancedNameConverterInterface` from the symfony/serializer,
   this name converter will be used when mapping from an array to an object and vice versa;
 * `cache_dir` (default: `%kernel.cache_dir%/automapper`): This setting allows you to customize the output directory
