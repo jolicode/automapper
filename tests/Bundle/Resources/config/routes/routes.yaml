@@ -3,3 +3,7 @@ controllers:
     path: ../../App/Controller/
     namespace: AutoMapper\Tests\Bundle\Resources\App\Controller
   type: attribute
+
+_api_platform:
+  resource: '.'
+  type: 'api_platform'

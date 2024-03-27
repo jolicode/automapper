@@ -29,7 +29,7 @@ class HomeController extends AbstractController
         $output = [];
         $data = new FooMapTo('value');
 
-        for ($i = 0; $i < 10000; ++$i) {
+        for ($i = 0; $i < 1; ++$i) {
             if ($request->query->has('serializer')) {
                 $output[] = $this->serializer->normalize($data, 'json');
             } else {

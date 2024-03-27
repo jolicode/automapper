@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Bundle\Resources\App\Service;
 
+use AutoMapper\Tests\Bundle\Resources\App\Entity\User;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
 
@@ -12,7 +13,7 @@ if (Kernel::MAJOR_VERSION < 6) {
     {
         public function normalize($propertyName, ?string $class = null, ?string $format = null, array $context = []): string
         {
-            if ('id' === $propertyName) {
+            if ($class === User::class && 'id' === $propertyName) {
                 return '@id';
             }
 
@@ -21,7 +22,7 @@ if (Kernel::MAJOR_VERSION < 6) {
 
         public function denormalize($propertyName, ?string $class = null, ?string $format = null, array $context = []): string
         {
-            if ('@id' === $propertyName) {
+            if ($class === User::class && '@id' === $propertyName) {
                 return 'id';
             }
 
@@ -33,7 +34,7 @@ if (Kernel::MAJOR_VERSION < 6) {
     {
         public function normalize(string $propertyName, ?string $class = null, ?string $format = null, array $context = []): string
         {
-            if ('id' === $propertyName) {
+            if ($class === User::class && 'id' === $propertyName) {
                 return '@id';
             }
 
@@ -42,7 +43,7 @@ if (Kernel::MAJOR_VERSION < 6) {
 
         public function denormalize(string $propertyName, ?string $class = null, ?string $format = null, array $context = []): string
         {
-            if ('@id' === $propertyName) {
+            if ($class === User::class && '@id' === $propertyName) {
                 return 'id';
             }
 

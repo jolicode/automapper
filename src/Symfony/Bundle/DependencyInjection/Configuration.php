@@ -37,6 +37,7 @@ readonly class Configuration implements ConfigurationInterface
                     ->addDefaultsIfNotSet()
                 ->end()
                 ->booleanNode('serializer')->defaultValue(interface_exists(SerializerInterface::class))->end()
+                ->booleanNode('api_platform')->defaultFalse()->end()
                 ->scalarNode('name_converter')->defaultNull()->end()
                 ->scalarNode('cache_dir')->defaultValue('%kernel.cache_dir%/automapper')->end()
                 ->scalarNode('date_time_format')->defaultValue(\DateTimeInterface::RFC3339)->end()

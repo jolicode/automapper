@@ -311,7 +311,16 @@ final readonly class MapMethodStatementsGenerator
     private function handleDependencies(GeneratorMetadata $metadata): array
     {
         if (!$metadata->getDependencies()) {
-            return [];
+            return [
+                new Stmt\Expression(
+                    new Expr\Assign(
+                        $metadata->variableRegistry->getContext(),
+                        new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'withIncrementedDepth', [
+                            new Arg($metadata->variableRegistry->getContext()),
+                        ])
+                    )
+                ),
+            ];
         }
 
         $variableRegistry = $metadata->variableRegistry;
