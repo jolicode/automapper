@@ -2,6 +2,9 @@ automapper:
   normalizer:
     enabled: true
     only_registered_mapping: true
+  loader:
+    eval: false
+    reload_strategy: 'always'
   api_platform: true
   name_converter: AutoMapper\Tests\Bundle\Resources\App\Service\IdNameConverter
   map_private_properties: false

@@ -20,6 +20,10 @@ use PhpParser\PrettyPrinterAbstract;
  */
 final class FileLoader implements ClassLoaderInterface
 {
+    public const RELOAD_ALWAYS = 'always';
+    public const RELOAD_NEVER = 'never';
+    public const RELOAD_ON_CHANGE = 'on_change';
+
     private readonly PrettyPrinterAbstract $printer;
 
     /** @var array<class-string, string>|null */
@@ -29,7 +33,7 @@ final class FileLoader implements ClassLoaderInterface
         private readonly MapperGenerator $generator,
         private readonly MetadataFactory $metadataFactory,
         private readonly string $directory,
-        private readonly bool $hotReload = true,
+        private readonly string $reloadStrategy = self::RELOAD_ON_CHANGE,
     ) {
         $this->printer = new Standard();
     }
@@ -39,21 +43,22 @@ final class FileLoader implements ClassLoaderInterface
         $className = $mapperMetadata->className;
         $classPath = $this->directory . \DIRECTORY_SEPARATOR . $className . '.php';
 
-        if (!$this->hotReload && file_exists($classPath)) {
+        if ($this->reloadStrategy === self::RELOAD_NEVER && file_exists($classPath)) {
             require $classPath;
 
             return;
         }
 
-        $shouldSaveMapper = true;
-        if ($this->hotReload) {
+        $shouldBuildMapper = true;
+
+        if ($this->reloadStrategy === self::RELOAD_ON_CHANGE) {
             $registry = $this->getRegistry();
             $hash = $mapperMetadata->getHash();
-            $shouldSaveMapper = !isset($registry[$className]) || $registry[$className] !== $hash || !file_exists($classPath);
+            $shouldBuildMapper = !isset($registry[$className]) || $registry[$className] !== $hash || !file_exists($classPath);
         }
 
-        if ($shouldSaveMapper) {
-            $this->saveMapper($mapperMetadata);
+        if ($shouldBuildMapper) {
+            $this->createGeneratedMapper($mapperMetadata);
         }
 
         require $classPath;
@@ -62,7 +67,7 @@ final class FileLoader implements ClassLoaderInterface
     public function buildMappers(MetadataRegistry $registry): bool
     {
         foreach ($registry as $metadata) {
-            $this->saveMapper($metadata);
+            $this->createGeneratedMapper($metadata);
         }
 
         return true;
@@ -71,7 +76,7 @@ final class FileLoader implements ClassLoaderInterface
     /**
      * @return string The generated class name
      */
-    public function saveMapper(MapperMetadata $mapperMetadata): string
+    public function createGeneratedMapper(MapperMetadata $mapperMetadata): string
     {
         $className = $mapperMetadata->className;
         $classPath = $this->directory . \DIRECTORY_SEPARATOR . $className . '.php';
@@ -80,7 +85,8 @@ final class FileLoader implements ClassLoaderInterface
         $classCode = $this->printer->prettyPrint([$this->generator->generate($generatorMetadata)]);
 
         $this->write($classPath, "<?php\n\n" . $classCode . "\n");
-        if ($this->hotReload) {
+
+        if ($this->reloadStrategy === self::RELOAD_ON_CHANGE) {
             $this->addHashToRegistry($className, $mapperMetadata->getHash());
         }
 

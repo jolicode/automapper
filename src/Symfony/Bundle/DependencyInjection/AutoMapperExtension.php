@@ -63,17 +63,25 @@ class AutoMapperExtension extends Extension
             ->setArgument('$allowReadOnlyTargetToPopulate', $config['allow_readonly_target_to_populate'])
         ;
 
-        $container->getDefinition(FileLoader::class)->replaceArgument(3, $config['hot_reload']);
         $container->registerForAutoconfiguration(PropertyTransformerInterface::class)->addTag('automapper.property_transformer');
 
-        if ($config['eval']) {
+        if ($config['loader']['eval']) {
             $container
                 ->setAlias(ClassLoaderInterface::class, EvalLoader::class)
             ;
         } else {
+            $isDebug = $container->getParameter('kernel.debug');
+            $generateStrategy = $config['loader']['reload_strategy'] ?? $isDebug ? FileLoader::RELOAD_ALWAYS : FileLoader::RELOAD_NEVER;
+
+            $container
+                ->getDefinition(FileLoader::class)
+                ->replaceArgument(3, $generateStrategy);
+
             $container
                 ->setAlias(ClassLoaderInterface::class, FileLoader::class)
             ;
+
+            $container->setParameter('automapper.cache_dir', $config['loader']['cache_dir']);
         }
 
         if (class_exists(AbstractUid::class)) {
@@ -117,8 +125,6 @@ class AutoMapperExtension extends Extension
                 ->replaceArgument(0, new Reference($config['name_converter']))
                 ->addTag('kernel.event_listener', ['event' => PropertyMetadataEvent::class, 'priority' => -64]);
         }
-
-        $container->setParameter('automapper.cache_dir', $config['cache_dir']);
 
         $configMappingRegistry = $container->getDefinition('automapper.config_mapping_registry');
 
