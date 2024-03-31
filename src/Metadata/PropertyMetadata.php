@@ -24,6 +24,7 @@ final class PropertyMetadata
         public readonly TypesMatching $types,
         public TransformerInterface $transformer,
         public bool $ignored = false,
+        public string $ignoreReason = '',
         public ?int $maxDepth = null,
         public ?string $if = null,
         public ?array $groups = null,

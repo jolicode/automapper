@@ -42,7 +42,7 @@ class AutoMapperExtension extends Extension
         $configuration = $this->getConfiguration($configs, $container);
         $config = $this->processConfiguration($configuration, $configs);
 
-        $loader = new PhpFileLoader($container, new FileLocator(__DIR__ . '/../config'));
+        $loader = new PhpFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
 
         $loader->load('automapper.php');
         $loader->load('custom_transformers.php');

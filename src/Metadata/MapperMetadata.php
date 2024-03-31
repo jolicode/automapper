@@ -27,6 +27,7 @@ class MapperMetadata
     public function __construct(
         public string $source,
         public string $target,
+        public bool $registered,
         private string $classPrefix = 'Mapper_',
     ) {
         if (class_exists($this->source) && !\in_array($this->source, ['array', \stdClass::class], true)) {

@@ -22,6 +22,7 @@ use AutoMapper\Extractor\FromTargetMappingExtractor;
 use AutoMapper\Extractor\ReadWriteTypeExtractor;
 use AutoMapper\Extractor\SourceTargetMappingExtractor;
 use AutoMapper\Extractor\WriteMutator;
+use AutoMapper\Transformer\AllowNullValueTransformerInterface;
 use AutoMapper\Transformer\ArrayTransformerFactory;
 use AutoMapper\Transformer\BuiltinTransformerFactory;
 use AutoMapper\Transformer\ChainTransformerFactory;
@@ -37,6 +38,7 @@ use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
 use AutoMapper\Transformer\SymfonyUidTransformerFactory;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use AutoMapper\Transformer\UniqueTypeTransformerFactory;
+use AutoMapper\Transformer\VoidTransformer;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
@@ -114,6 +116,18 @@ final class MetadataFactory
                         $remainingMetadata[] = $metadataRegistry->get($mapperDependency->source, $mapperDependency->target);
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * @return iterable<GeneratorMetadata>
+     */
+    public function listMetadata(): iterable
+    {
+        foreach ($this->generatorMetadata as $targets) {
+            foreach ($targets as $metadata) {
+                yield $metadata;
             }
         }
     }
@@ -225,18 +239,30 @@ final class MetadataFactory
                 $transformer = $this->transformerFactory->getTransformer($propertyMappedEvent->types, $sourcePropertyMetadata, $targetPropertyMetadata, $mapperMetadata);
 
                 if (null === $transformer) {
-                    continue;
+                    $propertyMappedEvent->ignored = true;
+                    $propertyMappedEvent->ignoreReason = 'We didn\'t find a way to correctly transform this property.';
                 }
 
                 $propertyMappedEvent->transformer = $transformer;
+            }
+
+            if ($sourcePropertyMetadata->accessor === null && !($propertyMappedEvent->transformer instanceof AllowNullValueTransformerInterface)) {
+                $propertyMappedEvent->ignored = true;
+                $propertyMappedEvent->ignoreReason = 'Property cannot be read from source, and the attached transformer require a value.';
+            }
+
+            if ($targetPropertyMetadata->writeMutator === null && $targetPropertyMetadata->parameterInConstructor === null) {
+                $propertyMappedEvent->ignored = true;
+                $propertyMappedEvent->ignoreReason = 'Property cannot be write on target.';
             }
 
             $propertiesMapping[] = new PropertyMetadata(
                 $sourcePropertyMetadata,
                 $targetPropertyMetadata,
                 $propertyMappedEvent->types,
-                $propertyMappedEvent->transformer,
+                $propertyMappedEvent->transformer ?? new VoidTransformer(),
                 $propertyMappedEvent->ignored ?? false,
+                $propertyMappedEvent->ignoreReason ?? '',
                 $propertyMappedEvent->maxDepth,
                 $propertyMappedEvent->if,
                 $propertyMappedEvent->groups,

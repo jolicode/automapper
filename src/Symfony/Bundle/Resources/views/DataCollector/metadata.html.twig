@@ -1,0 +1,188 @@
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar %}
+    {% set text %}
+        {% if collector.metadatas|length == 0 %}
+            <div class="sf-toolbar-info-piece">
+                <b>AutoMapper</b>
+                <span>No Mapper</span>
+            </div>
+        {% endif %}
+        {% for metadata in collector.metadatas %}
+            <div class="sf-toolbar-info-piece">
+                <b>AutoMapper</b>
+                <span>{{ metadata.mapperMetadata.source }} to {{ metadata.mapperMetadata.target }}</span>
+            </div>
+        {% endfor %}
+    {% endset %}
+
+    {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { 'link': true }) }}
+{% endblock %}
+
+{% block menu %}
+    <span class="label{{ collector.metadatas|length > 0 ? '' : ' disabled' }}">
+        <strong>AutoMapper</strong>
+        {% if collector.metadatas|length > 0 %}
+            <span class="count">
+               <span>{{ collector.metadatas|length }}</span>
+            </span>
+        {% endif %}
+    </span>
+{% endblock %}
+
+{% block panel %}
+    <h2>AutoMapper</h2>
+
+    {% if collector.metadatas|length == 0 %}
+        <div class="empty">
+            <p>No Mapper</p>
+        </div>
+    {% else %}
+        <h2>Mappers</h2>
+
+        <div class="sf-tabs">
+            {% for metadata in collector.metadatas %}
+                <div class="tab">
+                    <h3 class="tab-title">{{ metadata.source }} -> {{ metadata.target }} <span class="badge">{{ metadata.usedProperties|length }}</span></h3>
+
+                    <div class="tab-content">
+                        <h2>Mapper Configuration</h2>
+
+                        <div class="metrics">
+                            <div class="metric-group">
+                                <div class="metric">
+                                    <span class="value value-is-icon {{ not metadata.registered ? 'value-shows-no-color' }}">{{ source('@WebProfiler/Icon/' ~ (metadata.registered ? 'yes' : 'no') ~ '.svg') }}</span>
+                                    <span class="label">Registered</span>
+                                </div>
+                            </div>
+
+                            <div class="metric-divider"></div>
+
+                            <div class="metric-group">
+                                <div class="metric">
+                                    <span class="value">
+                                        {{ metadata.source }}
+                                    </span>
+                                    <span class="label">Source</span>
+                                </div>
+
+                                <div class="metric">
+                                    <span class="value">
+                                        {{ metadata.target }}
+                                    </span>
+                                    <span class="label">Target</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="metrics">
+                            <div class="metric-group">
+                                <div class="metric">
+                                    <span class="value value-is-icon {{ not metadata.checkAttributes ? 'value-shows-no-color' }}">{{ source('@WebProfiler/Icon/' ~ (metadata.checkAttributes ? 'yes' : 'no') ~ '.svg') }}</span>
+                                    <span class="label">Attributes Checked</span>
+                                </div>
+
+                                <div class="metric">
+                                    <span class="value value-is-icon {{ not metadata.useConstructor ? 'value-shows-no-color' }}">{{ source('@WebProfiler/Icon/' ~ (metadata.useConstructor ? 'yes' : 'no') ~ '.svg') }}</span>
+                                    <span class="label">Constructor Used</span>
+                                </div>
+                            </div>
+                            {% if metadata.provider %}
+                                <div class="metric-divider"></div>
+                                <div class="metric-group">
+                                    <div class="metric">
+                                    <span class="value">
+                                        {{ metadata.provider }}
+                                    </span>
+                                        <span class="label">Provider</span>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <h2>Properties</h2>
+
+                        {% if metadata.usedProperties | length > 0 %}
+                            <h3>{{ metadata.usedProperties | length }} properties mapped</h3>
+
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Source -> Target</th>
+                                        <th>If</th>
+                                        <th>Transformer</th>
+                                        <th>Groups</th>
+                                        <th>MaxDepth</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for property in metadata.usedProperties %}
+                                        {% set code_id = 'code-' ~ metadata.className ~ '-' ~ loop.index %}
+                                        <tr>
+                                            <td rowspan="2" style="vertical-align: middle">
+                                                {% if property.source.accessor %}
+                                                    <span class="badge">{{ property.source.name }}</span> ->
+                                                    <span class="badge">{{ property.target.name }}</span>
+                                                {% else %}
+                                                    <span class="badge">{{ property.target.name }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ property.if | default('') }}</td>
+                                            <td>{{ property.transformer }}</td>
+                                            <td>{{ property.disableGroupsCheck ? 'Disabled' : property.groups|join(', ') }}</td>
+                                            <td>{{ property.maxDepth }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="4">
+                                                <span><button type="button" class="btn btn-link text-small sf-toggle" data-toggle-selector="#{{ code_id }}" data-toggle-alt-content="Hide code">Show Code</button></span>
+
+                                                <div id="{{ code_id }}" class="dump-inline context sf-toggle-content sf-toggle-hidden" style="background-color: #1E1F22; padding: 4px 15px">
+                                                    {{ property.code|raw }}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% endif %}
+                        {% if metadata.notUsedProperties | length > 0 %}
+                            <h3>{{ metadata.notUsedProperties | length }} properties not mapped</h3>
+
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th>Source -> Target</th>
+                                    <th>Reason</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for property in metadata.notUsedProperties %}
+                                    <tr>
+                                        <td>
+                                            {% if property.source.accessor %}
+                                                <span class="badge">{{ property.source.name }}</span> ->
+                                                <span class="badge">{{ property.target.name }}</span>
+                                            {% else %}
+                                                <span class="badge">{{ property.target.name }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ property.reason }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% endif %}
+
+                        {% if metadata.fileCode %}
+                        <h2>Generated code</h2>
+
+                        <div class="context" style="background-color: #1E1F22; padding: 4px 15px">
+                            {{ metadata.fileCode|raw }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}

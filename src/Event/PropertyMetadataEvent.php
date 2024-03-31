@@ -24,6 +24,7 @@ final class PropertyMetadataEvent
         public ?int $maxDepth = null,
         public ?TransformerInterface $transformer = null,
         public ?bool $ignored = null,
+        public ?string $ignoreReason = null,
         public ?string $if = null,
         public ?array $groups = null,
         public ?bool $disableGroupsCheck = null,

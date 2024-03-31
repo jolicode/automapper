@@ -76,6 +76,7 @@ final readonly class MapFromListener extends MapListener
             maxDepth: $mapFrom->maxDepth,
             transformer: $this->getTransformerFromMapAttribute($event->mapperMetadata->target, $mapFrom, false),
             ignored: $mapFrom->ignore,
+            ignoreReason: $mapFrom->ignore === true ? 'Property is ignored by MapFrom Attribute on Target' : null,
             if: $mapFrom->if,
             groups: $mapFrom->groups,
         );
