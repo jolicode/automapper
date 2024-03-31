@@ -8,6 +8,7 @@ use AutoMapper\AutoMapper;
 use AutoMapper\Configuration;
 use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\Exception\CircularReferenceException;
+use AutoMapper\Exception\MissingConstructorArgumentsException;
 use AutoMapper\Exception\NoMappingFoundException;
 use AutoMapper\Exception\ReadOnlyTargetException;
 use AutoMapper\MapperContext;
@@ -23,6 +24,7 @@ use AutoMapper\Tests\Fixtures\BuiltinClass;
 use AutoMapper\Tests\Fixtures\ClassWithMapToContextAttribute;
 use AutoMapper\Tests\Fixtures\ClassWithNullablePropertyInConstructor;
 use AutoMapper\Tests\Fixtures\ClassWithPrivateProperty;
+use AutoMapper\Tests\Fixtures\ConstructorWithDefaultValues;
 use AutoMapper\Tests\Fixtures\DifferentSetterGetterType;
 use AutoMapper\Tests\Fixtures\Dog;
 use AutoMapper\Tests\Fixtures\Fish;
@@ -43,6 +45,7 @@ use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
 use AutoMapper\Tests\Fixtures\Order;
 use AutoMapper\Tests\Fixtures\PetOwner;
 use AutoMapper\Tests\Fixtures\Provider\CustomProvider;
+use AutoMapper\Tests\Fixtures\SourceForConstructorWithDefaultValues;
 use AutoMapper\Tests\Fixtures\Transformer\MoneyTransformerFactory;
 use AutoMapper\Tests\Fixtures\Uninitialized;
 use AutoMapper\Tests\Fixtures\UserPromoted;
@@ -462,7 +465,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testConstructorNotAllowed(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, allowConstructor: false, classPrefix: 'NotAllowedMapper_');
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, constructorStrategy: Configuration::CONSTRUCTOR_STRATEGY_NEVER, classPrefix: 'NotAllowedMapper_');
 
         $user = new Fixtures\UserDTO();
         $user->id = 10;
@@ -477,6 +480,43 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertSame('foo', $userDto->getName());
         self::assertSame(3, $userDto->getAge());
         self::assertFalse($userDto->getConstructor());
+    }
+
+    public function testConstructorForced(): void
+    {
+        $this->buildAutoMapper(constructorStrategy: Configuration::CONSTRUCTOR_STRATEGY_ALWAYS, classPrefix: 'AlwaysConstructorMapper_');
+
+        $data = ['baz' => 'baz'];
+        /** @var ConstructorWithDefaultValues $object */
+        $object = $this->autoMapper->map($data, ConstructorWithDefaultValues::class);
+
+        self::assertInstanceOf(ConstructorWithDefaultValues::class, $object);
+        self::assertSame(1, $object->foo);
+        self::assertSame(0, $object->bar);
+        self::assertSame('baz', $object->baz);
+
+        $data = new SourceForConstructorWithDefaultValues();
+        $data->foo = 10;
+        /** @var ConstructorWithDefaultValues $object */
+        $object = $this->autoMapper->map($data, ConstructorWithDefaultValues::class, [MapperContext::CONSTRUCTOR_ARGUMENTS => [
+            ConstructorWithDefaultValues::class => ['baz' => 'test'],
+        ]]);
+
+        self::assertInstanceOf(ConstructorWithDefaultValues::class, $object);
+        self::assertSame(10, $object->foo);
+        self::assertSame(0, $object->bar);
+        self::assertSame('test', $object->baz);
+    }
+
+    public function testConstructorForcedException(): void
+    {
+        $this->buildAutoMapper(constructorStrategy: Configuration::CONSTRUCTOR_STRATEGY_ALWAYS, classPrefix: 'AlwaysConstructorMapper_');
+        $data = new SourceForConstructorWithDefaultValues();
+        $data->foo = 10;
+
+        $this->expectException(MissingConstructorArgumentsException::class);
+
+        $this->autoMapper->map($data, ConstructorWithDefaultValues::class);
     }
 
     public function testConstructorWithDefault(): void

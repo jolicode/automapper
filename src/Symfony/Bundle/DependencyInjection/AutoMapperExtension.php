@@ -54,7 +54,7 @@ class AutoMapperExtension extends Extension
 
         $container->getDefinition(AutoMapperConfiguration::class)
             ->setArgument('$classPrefix', $config['class_prefix'])
-            ->setArgument('$allowConstructor', $config['allow_constructor'])
+            ->setArgument('$constructorStrategy', $config['constructor_strategy'])
             ->setArgument('$dateTimeFormat', $config['date_time_format'])
             ->setArgument('$attributeChecking', $config['check_attributes'])
             ->setArgument('$autoRegister', $config['auto_register'])

@@ -9,7 +9,7 @@ Then configure the bundle to your needs, for example:
 ```yaml
 automapper:
   class_prefix: "Symfony_Mapper_"
-  allow_constructor: true
+  constructor_strategy: 'auto'
   date_time_format: !php/const:DateTimeInterface::RFC3339
   check_attributes: true
   auto_register: true
@@ -33,7 +33,13 @@ automapper:
 ## Configuration Reference
 
 * `class_prefix` (default: `Symfony_Mapper_`): The prefix to use for the generated mappers class names;
-* `allow_constructor` (default: `true`): If the generated mapper should use the constructor to instantiate the target.
+* `constructor_strategy` (default: `auto`): If the generated mapper should use the constructor to instantiate the target. 
+    * When set to `auto`, AutoMapper will use the constructor if all mandatory properties are present in the source object, 
+      otherwise it will not use it.
+    * When set to `never`, AutoMapper will never use the constructor.
+    * When set to `always`, AutoMapper will always use the constructor, even if some mandatory properties are missing. 
+      In this case you may need to [provide a default value for the missing properties using the context](../getting-started/context.md).
+
 * `date_time_format` (default: `\DateTimeInterface::RFC3339`): The format to use to transform a date from/to a string;
 * `check_attributes` (default: `true`): Check if the field should be mapped at runtime, this allow you to have dynamic
   partial mapping, if you don't use this feature set it to false as it will improve the performance;

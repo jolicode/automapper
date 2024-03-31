@@ -28,7 +28,7 @@ abstract class AutoMapperBaseTest extends TestCase
     protected function buildAutoMapper(
         bool $allowReadOnlyTargetToPopulate = false,
         bool $mapPrivatePropertiesAndMethod = false,
-        bool $allowConstructor = true,
+        string $constructorStrategy = Configuration::CONSTRUCTOR_STRATEGY_AUTO,
         string $classPrefix = 'Mapper_',
         array $transformerFactories = [],
         array $propertyTransformers = [],
@@ -42,7 +42,7 @@ abstract class AutoMapperBaseTest extends TestCase
 
         $configuration = new Configuration(
             classPrefix: $classPrefix,
-            allowConstructor: $allowConstructor,
+            constructorStrategy: $constructorStrategy,
             dateTimeFormat: $dateTimeFormat,
             mapPrivateProperties: $mapPrivatePropertiesAndMethod,
             allowReadOnlyTargetToPopulate: $allowReadOnlyTargetToPopulate,

@@ -10,7 +10,7 @@ use AutoMapper\AutoMapper;
 
 $configuration = new Configuration(
     classPrefix: 'Mapper_'
-    allowConstructor: true,
+    constructorStrategy: 'auto',
     dateTimeFormat: \DateTimeInterface::RFC3339,
     attributesChecking: true,
     autoRegister: true,
@@ -27,10 +27,13 @@ The `Configuration` object allows you to define the following options:
 The prefix to use for the generated mappers class names. It can be useful to change it you have a different AutoMapper 
 instance in your application and they should not conflict when mapping the same classes.
 
-* `allowConstructor` (default: `true`)
+* `constructorStrategy` (default: `always`)
 
-If the generated mapper should use the constructor to instantiate the target. If set to false, will build the object 
-without calling the constructor.
+If the generated mapper should use the constructor to instantiate the target. When set to auto, AutoMapper will use the
+constructor if all mandatory properties are present in the source object, otherwise it will not use it.
+Set it to `never` to never use the constructor.
+Set it to `always` to always use the constructor, even if some mandatory properties are missing. In this cas you may need
+to [provide a default value for the missing properties using the context](context.md).
 
 * `dateTimeFormat` (default: `\DateTimeInterface::RFC3339`)
 

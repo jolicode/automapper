@@ -24,7 +24,7 @@ final readonly class TargetPropertyMetadata
         public string $name,
         public ?ReadAccessor $readAccessor = null,
         public ?WriteMutator $writeMutator = null,
-        public ?WriteMutator $writeMutatorConstructor = null,
+        public ?string $parameterInConstructor = null,
         public ?array $groups = null,
         public string $dateTimeFormat = \DateTimeInterface::RFC3339,
     ) {
@@ -36,7 +36,7 @@ final readonly class TargetPropertyMetadata
             $metadata->name,
             $metadata->readAccessor,
             $metadata->writeMutator,
-            $metadata->writeMutatorConstructor,
+            $metadata->parameterInConstructor,
             $metadata->groups,
             $metadata->dateTimeFormat ?? \DateTimeInterface::RFC3339,
         );

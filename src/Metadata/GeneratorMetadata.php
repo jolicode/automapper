@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Metadata;
 
+use AutoMapper\Configuration;
 use AutoMapper\Generator\VariableRegistry;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 
@@ -22,7 +23,7 @@ final class GeneratorMetadata
         /** @var PropertyMetadata[] */
         public readonly array $propertiesMetadata,
         public readonly bool $checkAttributes = true,
-        public readonly bool $allowConstructor = true,
+        public readonly string $constructorStrategy = Configuration::CONSTRUCTOR_STRATEGY_AUTO,
         public readonly ?string $provider = null,
     ) {
         $this->variableRegistry = new VariableRegistry();
@@ -68,8 +69,12 @@ final class GeneratorMetadata
 
     public function hasConstructor(): bool
     {
-        if (!$this->allowConstructor) {
+        if ($this->constructorStrategy === Configuration::CONSTRUCTOR_STRATEGY_NEVER) {
             return false;
+        }
+
+        if ($this->constructorStrategy === Configuration::CONSTRUCTOR_STRATEGY_ALWAYS) {
+            return true;
         }
 
         if (\in_array($this->mapperMetadata->target, ['array', \stdClass::class], true)) {
@@ -156,7 +161,7 @@ final class GeneratorMetadata
         $properties = [];
 
         foreach ($this->propertiesMetadata as $propertyMetadata) {
-            if (null === $propertyMetadata->target->writeMutatorConstructor || null === $propertyMetadata->target->writeMutatorConstructor->parameter) {
+            if (null === $propertyMetadata->target->parameterInConstructor) {
                 continue;
             }
 
@@ -170,6 +175,17 @@ final class GeneratorMetadata
     {
         foreach ($this->propertiesMetadata as $propertyMetadata) {
             if ($propertyMetadata->target->name === $name) {
+                return $propertyMetadata;
+            }
+        }
+
+        return null;
+    }
+
+    public function getTargetPropertyWithConstructor(string $parameterName): ?PropertyMetadata
+    {
+        foreach ($this->propertiesMetadata as $propertyMetadata) {
+            if ($propertyMetadata->target->parameterInConstructor === $parameterName) {
                 return $propertyMetadata;
             }
         }

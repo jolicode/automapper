@@ -124,45 +124,20 @@ final readonly class CreateTargetStatementsGenerator
         $constructArguments = [];
         $createObjectStatements = [];
 
-        foreach ($metadata->propertiesMetadata as $propertyMetadata) {
-            /*
-             * This is the main loop to map the properties from the source to the target in the constructor, there is 2 main steps in order to generated this code :
-             *
-             *  * Generate code on how to read the value from the source, which returns statements and an output expression
-             *  * Generate code on how to transform the value, which use the output expression, add some statements and return a new output expression
-             *
-             * As an example this could generate the following code :
-             *
-             *  * Extract value from a private property : $this->extractCallbacks['propertyName']($source)
-             *  * Transform the value, which is an object in this example, with another mapper : $this->mappers['SOURCE_TO_TARGET_MAPPER']->map(..., $context);
-             *
-             * The output expression of the transform will then be used as argument for the object constructor
-             *
-             * $constructArg1 = $this->mappers['SOURCE_TO_TARGET_MAPPER']->map($this->extractCallbacks['propertyName']($source), $context);
-             * $result = new Foo(foo: $constructArg1);
-             */
-            $constructorArgumentResult = $this->constructorArgument($metadata, $propertyMetadata);
-
-            if (!$constructorArgumentResult) {
-                continue;
-            }
-
-            [$createObjectStatement, $constructArgument, $constructorName] = $constructorArgumentResult;
-
-            $createObjectStatements[] = $createObjectStatement;
-            $constructArguments[$constructorName] = $constructArgument;
-        }
-
-        /* We loop to get constructor arguments that were not present in the source */
         foreach ($targetConstructor->getParameters() as $constructorParameter) {
-            if (\array_key_exists($constructorParameter->getName(), $constructArguments) && ($constructorParameter->isDefaultValueAvailable() || $constructorParameter->isOptional())) {
-                continue;
+            // Find property for parameter
+            $propertyMetadata = $metadata->getTargetPropertyWithConstructor($constructorParameter->getName());
+
+            $createObjectStatement = null;
+            $constructArgument = null;
+            $constructorName = null;
+
+            if (null !== $propertyMetadata) {
+                [$createObjectStatement, $constructArgument, $constructorName] = $this->constructorArgument($metadata, $propertyMetadata, $constructorParameter);
             }
 
-            [$createObjectStatement, $constructArgument, $constructorName] = $this->constructorArgumentWithDefaultValue($metadata, $constructArguments, $constructorParameter) ?? [null, null, null];
-
-            if (!$createObjectStatement) {
-                continue;
+            if (null === $createObjectStatement || null === $constructArgument || null === $constructorName) {
+                [$createObjectStatement, $constructArgument, $constructorName] = $this->constructorArgumentWithoutSource($metadata, $constructorParameter);
             }
 
             $createObjectStatements[] = $createObjectStatement;
@@ -195,21 +170,17 @@ final readonly class CreateTargetStatementsGenerator
      *  }
      * ```
      *
-     * @return array{Stmt, Arg, string}|null
+     * @return array{Stmt, Arg, string}|array{null, null, null}
      */
-    private function constructorArgument(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?array
+    private function constructorArgument(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata, \ReflectionParameter $parameter): array
     {
-        if (null === $propertyMetadata->target->writeMutatorConstructor || null === ($parameter = $propertyMetadata->target->writeMutatorConstructor->parameter)) {
-            return null;
-        }
-
         $variableRegistry = $metadata->variableRegistry;
         $constructVar = $variableRegistry->getVariableWithUniqueName('constructArg');
         $fieldValueExpr = $propertyMetadata->source->accessor?->getExpression($variableRegistry->getSourceInput());
 
         if (null === $fieldValueExpr) {
             if (!($propertyMetadata->transformer instanceof AllowNullValueTransformerInterface)) {
-                return null;
+                return [null, null, null];
             }
 
             $fieldValueExpr = new Expr\ConstFetch(new Name('null'));
@@ -217,6 +188,24 @@ final readonly class CreateTargetStatementsGenerator
 
         /* Get extract and transform statements for this property */
         [$output, $propStatements] = $propertyMetadata->transformer->transform($fieldValueExpr, $constructVar, $propertyMetadata, $variableRegistry->getUniqueVariableScope(), $variableRegistry->getSourceInput());
+
+        $defaultValueExpr = new Expr\Throw_(
+            new Expr\New_(new Name\FullyQualified(MissingConstructorArgumentsException::class), [
+                new Arg(new Scalar\String_(sprintf('Cannot create an instance of "%s" from mapping data because its constructor requires the following parameters to be present : "$%s".', $metadata->mapperMetadata->target, $propertyMetadata->target->name))),
+                new Arg(new Scalar\LNumber(0)),
+                new Arg(new Expr\ConstFetch(new Name('null'))),
+                new Arg(new Expr\Array_([
+                    new ArrayItem(new Scalar\String_($propertyMetadata->target->name)),
+                ])),
+                new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
+            ])
+        );
+
+        if ($parameter->isDefaultValueAvailable()) {
+            $defaultValueExpr = $this->getValueAsExpr($parameter->getDefaultValue());
+        } elseif ($parameter->allowsNull()) {
+            $defaultValueExpr = new Expr\ConstFetch(new Name('null'));
+        }
 
         return [
             new Stmt\If_(new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'hasConstructorArgument', [
@@ -234,17 +223,7 @@ final readonly class CreateTargetStatementsGenerator
                 ],
                 'else' => new Stmt\Else_([
                     ...$propStatements,
-                    new Stmt\Expression(new Expr\Assign($constructVar, new Expr\BinaryOp\Coalesce($output, $parameter->allowsNull() ? new Expr\ConstFetch(new Name('null')) : new Expr\Throw_(
-                        new Expr\New_(new Name\FullyQualified(MissingConstructorArgumentsException::class), [
-                            new Arg(new Scalar\String_(sprintf('Cannot create an instance of "%s" from mapping data because its constructor requires the following parameters to be present : "$%s".', $metadata->mapperMetadata->target, $propertyMetadata->target->name))),
-                            new Arg(new Scalar\LNumber(0)),
-                            new Arg(new Expr\ConstFetch(new Name('null'))),
-                            new Arg(new Expr\Array_([
-                                new ArrayItem(new Scalar\String_($propertyMetadata->target->name)),
-                            ])),
-                            new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
-                        ])
-                    )))),
+                    new Stmt\Expression(new Expr\Assign($constructVar, new Expr\BinaryOp\Coalesce($output, $defaultValueExpr))),
                 ]),
             ]),
             new Arg($constructVar, name: new Identifier($parameter->getName())),
@@ -260,21 +239,35 @@ final readonly class CreateTargetStatementsGenerator
      *     $constructArg2 = MapperContext::getConstructorArgument($context, $target, 'propertyName');
      * } else {
      *     $constructArg2 = 'default value';
+     *     // or set to null if the parameter is nullable
+     *     $constructArg2 = null;
+     *     // throw an exception otherwise
+     *     throw new MissingConstructorArgumentsException('Cannot create an instance of "Foo" from mapping data because its constructor requires the following parameters to be present : "$propertyName".', 0, null, ['propertyName'], 'Foo');
      * }
      * ```
      *
-     * @param array<string, Arg> $constructArguments
-     *
-     * @return array{Stmt, Arg, string}|null
+     * @return array{Stmt, Arg, string}
      */
-    private function constructorArgumentWithDefaultValue(GeneratorMetadata $metadata, array $constructArguments, \ReflectionParameter $constructorParameter): ?array
+    private function constructorArgumentWithoutSource(GeneratorMetadata $metadata, \ReflectionParameter $constructorParameter): array
     {
-        if (\array_key_exists($constructorParameter->getPosition(), $constructArguments) || !$constructorParameter->isDefaultValueAvailable()) {
-            return null;
-        }
-
         $variableRegistry = $metadata->variableRegistry;
         $constructVar = $variableRegistry->getVariableWithUniqueName('constructArg');
+
+        $defaultValueExpr = new Expr\Throw_(new Expr\New_(new Name\FullyQualified(MissingConstructorArgumentsException::class), [
+            new Arg(new Scalar\String_(sprintf('Cannot create an instance of "%s" from mapping data because its constructor requires the following parameters to be present : "$%s".', $metadata->mapperMetadata->target, $constructorParameter->getName()))),
+            new Arg(new Scalar\LNumber(0)),
+            new Arg(new Expr\ConstFetch(new Name('null'))),
+            new Arg(new Expr\Array_([
+                new ArrayItem(new Scalar\String_($constructorParameter->getName())),
+            ])),
+            new Arg(new Scalar\String_($constructorParameter->getName())),
+        ]));
+
+        if ($constructorParameter->isDefaultValueAvailable()) {
+            $defaultValueExpr = new Expr\Assign($constructVar, $this->getValueAsExpr($constructorParameter->getDefaultValue()));
+        } elseif ($constructorParameter->allowsNull()) {
+            $defaultValueExpr = new Expr\Assign($constructVar, new Expr\ConstFetch(new Name('null')));
+        }
 
         return [
             new Stmt\If_(new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'hasConstructorArgument', [
@@ -290,7 +283,7 @@ final readonly class CreateTargetStatementsGenerator
                     ]))),
                 ],
                 'else' => new Stmt\Else_([
-                    new Stmt\Expression(new Expr\Assign($constructVar, $this->getValueAsExpr($constructorParameter->getDefaultValue()))),
+                    new Stmt\Expression($defaultValueExpr),
                 ]),
             ]),
             new Arg($constructVar, name: new Identifier($constructorParameter->getName())),
