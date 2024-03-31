@@ -51,7 +51,7 @@ class MapperContextTest extends TestCase
         }
 
         self::expectException(CircularReferenceException::class);
-        self::expectExceptionMessage('A circular reference has been detected when mapping the object of type "stdClass" (configured limit: 3)');
+        self::expectExceptionMessage('A circular reference has been detected when mapping the object of type "stdClass" (configured limit: 3).');
         MapperContext::handleCircularReference($context, 'reference', $object);
     }
 
@@ -136,7 +136,7 @@ class MapperContextTest extends TestCase
     public function testSkipNullValues(): void
     {
         $context = [MapperContext::SKIP_NULL_VALUES => true];
-        self::assertFalse(MapperContext::isAllowedAttribute($context, 'id', false));
+        self::assertFalse(MapperContext::isAllowedAttribute($context, 'id', true));
     }
 
     /**

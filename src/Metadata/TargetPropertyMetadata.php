@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Metadata;
 
 use AutoMapper\Event\TargetPropertyMetadata as EventTargetPropertyMetadata;
+use AutoMapper\Extractor\ReadAccessor;
 use AutoMapper\Extractor\WriteMutator;
 
 /**
@@ -21,6 +22,7 @@ final readonly class TargetPropertyMetadata
      */
     public function __construct(
         public string $name,
+        public ?ReadAccessor $readAccessor = null,
         public ?WriteMutator $writeMutator = null,
         public ?WriteMutator $writeMutatorConstructor = null,
         public ?array $groups = null,
@@ -32,6 +34,7 @@ final readonly class TargetPropertyMetadata
     {
         return new self(
             $metadata->name,
+            $metadata->readAccessor,
             $metadata->writeMutator,
             $metadata->writeMutatorConstructor,
             $metadata->groups,

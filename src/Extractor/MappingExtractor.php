@@ -38,9 +38,17 @@ abstract class MappingExtractor implements MappingExtractorInterface
         return $this->propertyInfoExtractor->getProperties($class) ?? [];
     }
 
-    public function getReadAccessor(string $source, string $target, string $property): ?ReadAccessor
+    public function getReadAccessor(string $class, string $property): ?ReadAccessor
     {
-        $readInfo = $this->readInfoExtractor->getReadInfo($source, $property);
+        if ('array' === $class) {
+            return new ReadAccessor(ReadAccessor::TYPE_ARRAY_DIMENSION, $property);
+        }
+
+        if (\stdClass::class === $class) {
+            return new ReadAccessor(ReadAccessor::TYPE_PROPERTY, $property);
+        }
+
+        $readInfo = $this->readInfoExtractor->getReadInfo($class, $property);
 
         if (null === $readInfo) {
             return null;
@@ -55,7 +63,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
         return new ReadAccessor(
             $type,
             $readInfo->getName(),
-            $source,
+            $class,
             PropertyReadInfo::VISIBILITY_PUBLIC !== $readInfo->getVisibility(),
             $property
         );

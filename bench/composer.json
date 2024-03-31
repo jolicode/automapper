@@ -1,0 +1,17 @@
+{
+    "name": "automapper/bench",
+    "require": {
+        "phpbench/phpbench": "^1.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Automapper\\Bench\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Joel Wurtz",
+            "email": "jwurtz@jolicode.com"
+        }
+    ]
+}

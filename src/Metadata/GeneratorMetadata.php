@@ -86,7 +86,7 @@ final class GeneratorMetadata
         $mandatoryParameters = [];
 
         foreach ($parameters as $parameter) {
-            if (!$parameter->isOptional() && !$parameter->allowsNull()) {
+            if (!$parameter->isOptional()) {
                 $mandatoryParameters[] = $parameter;
             }
         }
@@ -164,6 +164,17 @@ final class GeneratorMetadata
         }
 
         return $properties;
+    }
+
+    public function getTargetProperty(string $name): ?PropertyMetadata
+    {
+        foreach ($this->propertiesMetadata as $propertyMetadata) {
+            if ($propertyMetadata->target->name === $name) {
+                return $propertyMetadata;
+            }
+        }
+
+        return null;
     }
 
     /**

@@ -1,11 +1,11 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Parameter \\#2 \\$args of class PhpParser\\\\Node\\\\Expr\\\\New_ constructor expects array\\<PhpParser\\\\Node\\\\Arg\\|PhpParser\\\\Node\\\\VariadicPlaceholder\\>, array\\<int\\|string, PhpParser\\\\Node\\\\Arg\\|null\\> given\\.$#"
+			message: "#^Parameter \\#2 \\$args of class PhpParser\\\\Node\\\\Expr\\\\New_ constructor expects array\\<PhpParser\\\\Node\\\\Arg\\|PhpParser\\\\Node\\\\VariadicPlaceholder\\>, array\\<string, PhpParser\\\\Node\\\\Arg\\|null\\> given\\.$#"
 			count: 1
 			path: ../../src/Generator/CreateTargetStatementsGenerator.php
 
 		-
-			message: "#^Parameter \\#2 \\$constructArguments of method AutoMapper\\\\Generator\\\\CreateTargetStatementsGenerator\\:\\:constructorArgumentWithDefaultValue\\(\\) expects array\\<PhpParser\\\\Node\\\\Arg\\>, array\\<int\\|string, PhpParser\\\\Node\\\\Arg\\|null\\> given\\.$#"
+			message: "#^Parameter \\#2 \\$constructArguments of method AutoMapper\\\\Generator\\\\CreateTargetStatementsGenerator\\:\\:constructorArgumentWithDefaultValue\\(\\) expects array\\<string, PhpParser\\\\Node\\\\Arg\\>, array\\<string, PhpParser\\\\Node\\\\Arg\\|null\\> given\\.$#"
 			count: 1
 			path: ../../src/Generator/CreateTargetStatementsGenerator.php

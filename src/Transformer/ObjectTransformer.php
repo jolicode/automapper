@@ -32,6 +32,25 @@ final readonly class ObjectTransformer implements TransformerInterface, Dependen
     {
         $mapperName = $this->getDependencyName();
 
+        $newContextArgs = [
+            new Arg(new Expr\Variable('context')),
+            new Arg(new Scalar\String_($propertyMapping->source->name)),
+        ];
+
+        // ($context['deep_target_to_populate'] ?? false) ? $source->property : null
+        if ($propertyMapping->target->readAccessor !== null) {
+            $newContextArgs[] = new Arg(
+                new Expr\Ternary(
+                    new Expr\BinaryOp\Coalesce(
+                        new Expr\ArrayDimFetch(new Expr\Variable('context'), new Scalar\String_(MapperContext::DEEP_TARGET_TO_POPULATE)),
+                        new Expr\ConstFetch(new Name('false'))
+                    ),
+                    $propertyMapping->target->readAccessor->getExpression(new Expr\Variable('result')),
+                    new Expr\ConstFetch(new Name('null'))
+                )
+            );
+        }
+
         /*
          * Use a sub mapper to map the property
          *
@@ -42,10 +61,7 @@ final readonly class ObjectTransformer implements TransformerInterface, Dependen
             new Scalar\String_($mapperName)
         ), 'map', [
             new Arg($input),
-            new Arg(new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'withNewContext', [
-                new Arg(new Expr\Variable('context')),
-                new Arg(new Scalar\String_($propertyMapping->source->name)),
-            ])),
+            new Arg(new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'withNewContext', $newContextArgs)),
         ]), []];
     }
 
