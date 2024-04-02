@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.0.0-beta.2] - 2024-04-02
+### Added
+- [GH#95](https://github.com/jolicode/automapper/pull/95) Add Api Platform integration
+- [GH#103](https://github.com/jolicode/automapper/pull/103) Add debug command and profiler for the symfony bundle
+
+### Changed
+- [GH#104](https://github.com/jolicode/automapper/pull/104) Replace allow_constructor with constructor_strategy to have more control on how to use the constructor
+- [GH#102](https://github.com/jolicode/automapper/pull/102) Change default reload behavior for the symfony bundle
+
+### Fixed
+- [GH#101](https://github.com/jolicode/automapper/pull/101) Fix some inconsistencies with symfony/serializer behavior
+
 ## [9.0.0-beta.1] - 2024-03-25
 ### Added
 - [GH#61](https://github.com/jolicode/automapper/pull/61) Add event system during code generation, make serializer optional thanks to it
