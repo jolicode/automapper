@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Symfony\Bundle\DependencyInjection;
 
 use AutoMapper\ConstructorStrategy;
+use AutoMapper\Loader\FileReloadStrategy;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -22,7 +23,6 @@ readonly class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->scalarNode('class_prefix')->defaultValue('Symfony_Mapper_')->end()
-                ->booleanNode('eval')->defaultFalse()->end()
                 ->enumNode('constructor_strategy')
                     ->values(array_map(fn (ConstructorStrategy $strategy) => $strategy->value, ConstructorStrategy::cases()))
                     ->defaultValue(ConstructorStrategy::AUTO->value)
@@ -43,15 +43,18 @@ readonly class Configuration implements ConfigurationInterface
                 ->booleanNode('serializer')->defaultValue(interface_exists(SerializerInterface::class))->end()
                 ->booleanNode('api_platform')->defaultFalse()->end()
                 ->scalarNode('name_converter')->defaultNull()->end()
-                ->scalarNode('cache_dir')->defaultValue('%kernel.cache_dir%/automapper')->end()
+                ->arrayNode('loader')
+                    ->children()
+                        ->booleanNode('eval')->defaultFalse()->end()
+                        ->scalarNode('cache_dir')->defaultValue('%kernel.cache_dir%/automapper')->end()
+                        ->enumNode('reload_strategy')->values(array_map(fn (FileReloadStrategy $value) => $value->value, FileReloadStrategy::cases()))->defaultNull()->end()
+                    ->end()
+                    ->addDefaultsIfNotSet()
+                ->end()
                 ->scalarNode('date_time_format')->defaultValue(\DateTimeInterface::RFC3339)->end()
-                ->booleanNode('hot_reload')->defaultValue('%kernel.debug%')->end()
                 ->booleanNode('map_private_properties')->defaultFalse()->end()
                 ->arrayNode('mapping')
                     ->children()
-                        ->arrayNode('paths')
-                            ->scalarPrototype()->end()
-                        ->end()
                         ->arrayNode('mappers')
                             ->arrayPrototype()
                                 ->children()

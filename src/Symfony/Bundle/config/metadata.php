@@ -9,7 +9,6 @@ use AutoMapper\Extractor\FromSourceMappingExtractor;
 use AutoMapper\Extractor\FromTargetMappingExtractor;
 use AutoMapper\Extractor\SourceTargetMappingExtractor;
 use AutoMapper\Metadata\MetadataFactory;
-use AutoMapper\Metadata\MetadataRegistry;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -39,11 +38,6 @@ return static function (ContainerConfigurator $container) {
                 service('automapper.property_info.reflection_extractor'),
             ])
 
-        ->set(MetadataRegistry::class)
-            ->args([
-                service(Configuration::class),
-            ])
-
         ->set(MetadataFactory::class)
             ->args([
                 service(Configuration::class),
@@ -52,7 +46,7 @@ return static function (ContainerConfigurator $container) {
                 service(FromTargetMappingExtractor::class),
                 service(TransformerFactoryInterface::class),
                 service(EventDispatcherInterface::class),
-                service(MetadataRegistry::class),
+                service('automapper.config_mapping_registry'),
             ])
     ;
 };

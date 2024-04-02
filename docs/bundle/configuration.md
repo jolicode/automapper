@@ -19,10 +19,13 @@ automapper:
     enabled: false
     only_registered_mapping: false
     priority: 1000
+  loader:
+    eval: false
+    cache_dir: "%kernel.cache_dir%/automapper"
+    reload_strategy: "always"
   serializer: true
   api_platform: false
   name_converter: null
-  cache_dir: "%kernel.cache_dir%/automapper"
   mappings:
     mappers:
       - source: AutoMapper\Bundle\Tests\Fixtures\User
@@ -45,7 +48,7 @@ automapper:
   partial mapping, if you don't use this feature set it to false as it will improve the performance;
 * `auto_register` (default: `true`): If the bundle should auto register the mappers in the container when it does not
   exist, when set to `false` you have to register the mappers manually using the `mapping` option, this option is useful
-  when you cannot write to the disk and you want to use the cache warmup;
+  when you cannot write to the disk, and you want to use the cache warmup;
 * `map_private_properties` (default: `true`): If the mapper should map private properties;
 * `allow_readonly_target_to_populate` (default: `false`): Will throw an exception if you use a readonly class as target
   to populate if set to `false`.
@@ -53,6 +56,15 @@ automapper:
     * `enabled` (default: `false`): If the normalizer should be enabled;
     * `only_registered_mapping` (default: `false`): If the normalizer should only use the registered mapping;
     * `priority` (default: `1000`): The priority of the normalizer, the higher the value the higher the priority;
+* `loader`:
+    * `eval` (default: `false`): If the loader should use the eval function to load the mappers, this is useful when
+      you cannot write to the disk;
+    * `cache_dir` (default: `%kernel.cache_dir%/automapper`): The directory where the loader should write the mappers;
+    * `reload_strategy` (default: `always` when `%kernel.debug%` is true, `never` otherwise): The strategy to use to 
+  generate the mappers between each request, can be `always`, `never` or `on_change`:
+        * `always` will generate the mappers at each request;
+        * `never` will generate them only if they don't exist;
+        * `on_change` will generate the mappers only if the source or target class has changed since the last generation;
 * `serializer` (default: `true` if the symfony/serializer is available, false otherwise): A boolean which indicate
   if we use the attribute of the symfony/serializer during the mapping, this only apply to the `#[Groups]`, `#[MaxDepth]`,
   `#[Ignore]` and `#[DiscriminatorMap]` attributes;
@@ -60,8 +72,6 @@ automapper:
 inject extra data (json ld) in the mappers when we map a Resource class to or from an array.
 * `name_converter` (default: `null`): A service id which implement the `AdvancedNameConverterInterface` from the symfony/serializer,
   this name converter will be used when mapping from an array to an object and vice versa;
-* `cache_dir` (default: `%kernel.cache_dir%/automapper`): This setting allows you to customize the output directory
-  for generated mappers;
 * `mappings`: Allow to auto register the mappers for warmup, and selecting them to normalizer if wanted
     * `mappers`: A list of mapping to register, each mapping should have a `source` and a `target` key, and can have
       a `reverse` key to also register the reverse mapping. 
