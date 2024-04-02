@@ -7,4 +7,6 @@ features linked to Symfony way of doing things.
 - [Configuration](configuration.md)
 - [Cache Warmup](cache-warmup.md)
 - [Expression Language](expression-language.md)
+- [Api Platform](api-platform.md)
 - [Migrate existing application](migrate.md)
+- [Debugging](debugging.md)
