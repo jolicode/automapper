@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Symfony\Bundle\DependencyInjection;
 
 use AutoMapper\Configuration as AutoMapperConfiguration;
+use AutoMapper\ConstructorStrategy;
 use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\EventListener\Symfony\AdvancedNameConverterListener;
 use AutoMapper\Loader\ClassLoaderInterface;
@@ -54,7 +55,7 @@ class AutoMapperExtension extends Extension
 
         $container->getDefinition(AutoMapperConfiguration::class)
             ->setArgument('$classPrefix', $config['class_prefix'])
-            ->setArgument('$constructorStrategy', $config['constructor_strategy'])
+            ->setArgument('$constructorStrategy', ConstructorStrategy::tryFrom($config['constructor_strategy']) ?? ConstructorStrategy::AUTO)
             ->setArgument('$dateTimeFormat', $config['date_time_format'])
             ->setArgument('$attributeChecking', $config['check_attributes'])
             ->setArgument('$autoRegister', $config['auto_register'])
