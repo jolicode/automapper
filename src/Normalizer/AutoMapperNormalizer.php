@@ -96,7 +96,7 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
             return true;
         }
 
-        return $this->onlyMetadataRegistry->has($data::class, 'array');
+        return $this->onlyMetadataRegistry->has($data::class, 'array', true);
     }
 
     /**
@@ -112,7 +112,7 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
             return true;
         }
 
-        return $this->onlyMetadataRegistry->has('array', $type);
+        return $this->onlyMetadataRegistry->has('array', $type, true);
     }
 
     public function getSupportedTypes(?string $format): array
@@ -125,12 +125,12 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
 
         foreach ($this->onlyMetadataRegistry as $metadata) {
             if ($metadata->source === 'array') {
-                $hasTarget = $this->onlyMetadataRegistry->has($metadata->target, 'array');
+                $hasTarget = $this->onlyMetadataRegistry->has($metadata->target, 'array', true);
 
                 // Only cache when both source and target exist in the registry
                 $types[$metadata->target] = $hasTarget;
             } elseif ($metadata->target === 'array') {
-                $hasSource = $this->onlyMetadataRegistry->has($metadata->target, 'array');
+                $hasSource = $this->onlyMetadataRegistry->has($metadata->target, 'array', true);
 
                 // Only cache when both source and target exist in the registry
                 $types[$metadata->source] = $hasSource;

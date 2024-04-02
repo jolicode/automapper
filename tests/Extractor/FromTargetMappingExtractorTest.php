@@ -55,7 +55,7 @@ class FromTargetMappingExtractorTest extends AutoMapperBaseTest
     public function testWithSourceAsArray(): void
     {
         $userReflection = new \ReflectionClass(Fixtures\User::class);
-        $mapperMetadata = new MapperMetadata('array', target: Fixtures\User::class);
+        $mapperMetadata = new MapperMetadata('array', target: Fixtures\User::class, registered: true);
         $targetPropertiesMapping = $this->fromTargetMappingExtractor->getProperties($mapperMetadata->target);
 
         self::assertCount(\count($userReflection->getProperties()), $targetPropertiesMapping);
@@ -67,7 +67,7 @@ class FromTargetMappingExtractorTest extends AutoMapperBaseTest
     public function testWithSourceAsStdClass(): void
     {
         $userReflection = new \ReflectionClass(Fixtures\User::class);
-        $mapperMetadata = new MapperMetadata('stdClass', target: Fixtures\User::class);
+        $mapperMetadata = new MapperMetadata('stdClass', target: Fixtures\User::class, registered: true);
         $targetPropertiesMapping = $this->fromTargetMappingExtractor->getProperties($mapperMetadata->target);
 
         self::assertCount(\count($userReflection->getProperties()), $targetPropertiesMapping);
@@ -78,7 +78,7 @@ class FromTargetMappingExtractorTest extends AutoMapperBaseTest
 
     public function testWithTargetAsEmpty(): void
     {
-        $mapperMetadata = new MapperMetadata('array', target: Fixtures\Empty_::class);
+        $mapperMetadata = new MapperMetadata('array', target: Fixtures\Empty_::class, registered: true);
         $targetPropertiesMapping = $this->fromTargetMappingExtractor->getProperties($mapperMetadata->target);
 
         self::assertCount(0, $targetPropertiesMapping);
@@ -87,13 +87,13 @@ class FromTargetMappingExtractorTest extends AutoMapperBaseTest
     public function testWithTargetAsPrivate(): void
     {
         $privateReflection = new \ReflectionClass(Fixtures\Private_::class);
-        $mapperMetadata = new MapperMetadata(source: 'array', target: Fixtures\Private_::class);
+        $mapperMetadata = new MapperMetadata(source: 'array', target: Fixtures\Private_::class, registered: true);
 
         $targetPropertiesMapping = $this->fromTargetMappingExtractor->getProperties($mapperMetadata->target);
         self::assertCount(\count($privateReflection->getProperties()), $targetPropertiesMapping);
 
         $this->fromTargetMappingExtractorBootstrap(false);
-        $mapperMetadata = new MapperMetadata(source: 'array', target: Fixtures\Private_::class);
+        $mapperMetadata = new MapperMetadata(source: 'array', target: Fixtures\Private_::class, registered: true);
 
         $targetPropertiesMapping = $this->fromTargetMappingExtractor->getProperties($mapperMetadata->target);
         self::assertCount(0, $targetPropertiesMapping);
@@ -101,14 +101,14 @@ class FromTargetMappingExtractorTest extends AutoMapperBaseTest
 
     public function testWithTargetAsArray(): void
     {
-        $mapperMetadata = new MapperMetadata(source: Fixtures\User::class, target: 'array');
+        $mapperMetadata = new MapperMetadata(source: Fixtures\User::class, target: 'array', registered: true);
         $targetPropertiesMapping = $this->fromTargetMappingExtractor->getProperties($mapperMetadata->target);
         self::assertCount(0, $targetPropertiesMapping);
     }
 
     public function testWithTargetAsStdClass(): void
     {
-        $mapperMetadata = new MapperMetadata(source: Fixtures\User::class, target: 'stdClass');
+        $mapperMetadata = new MapperMetadata(source: Fixtures\User::class, target: 'stdClass', registered: true);
         $targetPropertiesMapping = $this->fromTargetMappingExtractor->getProperties($mapperMetadata->target);
         self::assertCount(0, $targetPropertiesMapping);
     }

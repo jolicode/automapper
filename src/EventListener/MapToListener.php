@@ -77,6 +77,7 @@ final readonly class MapToListener extends MapListener
             maxDepth: $mapTo->maxDepth,
             transformer: $this->getTransformerFromMapAttribute($event->mapperMetadata->source, $mapTo),
             ignored: $mapTo->ignore,
+            ignoreReason: $mapTo->ignore === true ? 'Property is ignored by MapTo Attribute on Source' : null,
             if: $mapTo->if,
             groups: $mapTo->groups,
         );

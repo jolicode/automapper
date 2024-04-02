@@ -111,8 +111,9 @@ class MetadataFactoryTest extends AutoMapperBaseTest
 
         $this->factory->resolveAllMetadata($registry);
 
-        self::assertTrue($registry->has(Fixtures\User::class, 'array'));
-        self::assertTrue($registry->has(Fixtures\Address::class, 'array'));
+        self::assertTrue($registry->has(Fixtures\User::class, 'array', true));
+        self::assertFalse($registry->has(Fixtures\Address::class, 'array', true));
+        self::assertTrue($registry->has(Fixtures\Address::class, 'array', false));
     }
 
     public function testCreateArrayToObject(): void
@@ -139,7 +140,8 @@ class MetadataFactoryTest extends AutoMapperBaseTest
         self::assertEquals(Fixtures\User::class, $metadata->mapperMetadata->target);
         self::assertInstanceOf(PropertyMetadata::class, $this->getPropertyMetadata($metadata, 'id'));
         self::assertInstanceOf(PropertyMetadata::class, $this->getPropertyMetadata($metadata, 'name'));
-        self::assertNull($this->getPropertyMetadata($metadata, 'email'));
+        self::assertInstanceOf(PropertyMetadata::class, $this->getPropertyMetadata($metadata, 'email'));
+        self::assertTrue($this->getPropertyMetadata($metadata, 'email')->ignored);
         self::assertFalse($metadata->isTargetReadOnlyClass());
     }
 

@@ -9,6 +9,8 @@ use AutoMapper\Loader\ClassLoaderInterface;
 use AutoMapper\Metadata\MetadataFactory;
 use AutoMapper\Metadata\MetadataRegistry;
 use AutoMapper\Symfony\Bundle\CacheWarmup\CacheWarmer;
+use AutoMapper\Symfony\Bundle\Command\DebugMapperCommand;
+use AutoMapper\Symfony\Bundle\DataCollector\MetadataCollector;
 
 return static function (ContainerConfigurator $container) {
     $container->services()
@@ -26,5 +28,20 @@ return static function (ContainerConfigurator $container) {
             ->args([
                 service(Configuration::class),
             ])
+
+        ->set('automapper.data_collector.metadata')
+            ->class(MetadataCollector::class)
+            ->args([
+                service(MetadataFactory::class),
+                service('automapper.config_mapping_registry'),
+            ])
+            ->tag('data_collector')
+
+        ->set('automapper.command.debug_mapper')
+            ->class(DebugMapperCommand::class)
+            ->args([
+                service(MetadataFactory::class),
+            ])
+            ->autoconfigure()
     ;
 };

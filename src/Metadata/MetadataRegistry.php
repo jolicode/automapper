@@ -29,12 +29,12 @@ class MetadataRegistry implements \IteratorAggregate, \Countable
      * @param class-string<object>|'array' $source
      * @param class-string<object>|'array' $target
      */
-    public function get(string $source, string $target): MapperMetadata
+    public function get(string $source, string $target, bool $registered = false): MapperMetadata
     {
         $source = $this->getRealClassName($source);
         $target = $this->getRealClassName($target);
 
-        return $this->registry[$source][$target] ??= new MapperMetadata($source, $target, $this->configuration->classPrefix);
+        return $this->registry[$source][$target] ??= new MapperMetadata($source, $target, $registered, $this->configuration->classPrefix);
     }
 
     /**
@@ -43,19 +43,27 @@ class MetadataRegistry implements \IteratorAggregate, \Countable
      */
     public function register(string $source, string $target): void
     {
-        $this->get($source, $target);
+        $this->get($source, $target, true);
     }
 
     /**
      * @param class-string<object>|'array' $source
      * @param class-string<object>|'array' $target
      */
-    public function has(string $source, string $target): bool
+    public function has(string $source, string $target, bool $onlyRegistered): bool
     {
         $source = $this->getRealClassName($source);
         $target = $this->getRealClassName($target);
 
-        return isset($this->registry[$source][$target]);
+        if (!isset($this->registry[$source][$target])) {
+            return false;
+        }
+
+        if ($onlyRegistered) {
+            return $this->registry[$source][$target]->registered;
+        }
+
+        return true;
     }
 
     public function getIterator(): \Traversable

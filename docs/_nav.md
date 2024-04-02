@@ -18,6 +18,8 @@
     - [Configuration](bundle/configuration.md)
     - [Cache Warmup](bundle/cache-warmup.md)
     - [Expression Language](bundle/expression-language.md)
+    - [Api Platform](bundle/api-platform.md)
     - [Migrate existing application](bundle/migrate.md)
+    - [Debugging](bundle/debugging.md)
 - [Upgrading to 9.0](upgrading-9.0.md)
 - [Contributing](contributing.md)
