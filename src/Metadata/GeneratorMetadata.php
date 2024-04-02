@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Metadata;
 
-use AutoMapper\Configuration;
+use AutoMapper\ConstructorStrategy;
 use AutoMapper\Generator\VariableRegistry;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 
@@ -23,7 +23,7 @@ final class GeneratorMetadata
         /** @var PropertyMetadata[] */
         public readonly array $propertiesMetadata,
         public readonly bool $checkAttributes = true,
-        public readonly string $constructorStrategy = Configuration::CONSTRUCTOR_STRATEGY_AUTO,
+        public readonly ConstructorStrategy $constructorStrategy = ConstructorStrategy::AUTO,
         public readonly ?string $provider = null,
     ) {
         $this->variableRegistry = new VariableRegistry();
@@ -69,11 +69,11 @@ final class GeneratorMetadata
 
     public function hasConstructor(): bool
     {
-        if ($this->constructorStrategy === Configuration::CONSTRUCTOR_STRATEGY_NEVER) {
+        if ($this->constructorStrategy === ConstructorStrategy::NEVER) {
             return false;
         }
 
-        if ($this->constructorStrategy === Configuration::CONSTRUCTOR_STRATEGY_ALWAYS) {
+        if ($this->constructorStrategy === ConstructorStrategy::ALWAYS) {
             return true;
         }
 

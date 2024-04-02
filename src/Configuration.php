@@ -6,10 +6,6 @@ namespace AutoMapper;
 
 final readonly class Configuration
 {
-    public const CONSTRUCTOR_STRATEGY_AUTO = 'auto';
-    public const CONSTRUCTOR_STRATEGY_ALWAYS = 'always';
-    public const CONSTRUCTOR_STRATEGY_NEVER = 'never';
-
     public function __construct(
         /**
          * Class prefix used to prefix the class name of the generated mappers.
@@ -18,7 +14,7 @@ final readonly class Configuration
         /**
          * If the constructor should be used to map the properties.
          */
-        public string $constructorStrategy = self::CONSTRUCTOR_STRATEGY_AUTO,
+        public ConstructorStrategy $constructorStrategy = ConstructorStrategy::AUTO,
         /**
          * The date time format used to map \DateTimeInterface properties.
          */

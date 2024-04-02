@@ -6,6 +6,7 @@ namespace AutoMapper\Tests;
 
 use AutoMapper\AutoMapper;
 use AutoMapper\Configuration;
+use AutoMapper\ConstructorStrategy;
 use AutoMapper\Symfony\ExpressionLanguageProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -28,7 +29,7 @@ abstract class AutoMapperBaseTest extends TestCase
     protected function buildAutoMapper(
         bool $allowReadOnlyTargetToPopulate = false,
         bool $mapPrivatePropertiesAndMethod = false,
-        string $constructorStrategy = Configuration::CONSTRUCTOR_STRATEGY_AUTO,
+        ConstructorStrategy $constructorStrategy = ConstructorStrategy::AUTO,
         string $classPrefix = 'Mapper_',
         array $transformerFactories = [],
         array $propertyTransformers = [],

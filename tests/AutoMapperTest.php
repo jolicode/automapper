@@ -6,6 +6,7 @@ namespace AutoMapper\Tests;
 
 use AutoMapper\AutoMapper;
 use AutoMapper\Configuration;
+use AutoMapper\ConstructorStrategy;
 use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\Exception\CircularReferenceException;
 use AutoMapper\Exception\MissingConstructorArgumentsException;
@@ -465,7 +466,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testConstructorNotAllowed(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, constructorStrategy: Configuration::CONSTRUCTOR_STRATEGY_NEVER, classPrefix: 'NotAllowedMapper_');
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, constructorStrategy: ConstructorStrategy::NEVER, classPrefix: 'NotAllowedMapper_');
 
         $user = new Fixtures\UserDTO();
         $user->id = 10;
@@ -484,7 +485,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testConstructorForced(): void
     {
-        $this->buildAutoMapper(constructorStrategy: Configuration::CONSTRUCTOR_STRATEGY_ALWAYS, classPrefix: 'AlwaysConstructorMapper_');
+        $this->buildAutoMapper(constructorStrategy: ConstructorStrategy::ALWAYS, classPrefix: 'AlwaysConstructorMapper_');
 
         $data = ['baz' => 'baz'];
         /** @var ConstructorWithDefaultValues $object */
@@ -510,7 +511,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testConstructorForcedException(): void
     {
-        $this->buildAutoMapper(constructorStrategy: Configuration::CONSTRUCTOR_STRATEGY_ALWAYS, classPrefix: 'AlwaysConstructorMapper_');
+        $this->buildAutoMapper(constructorStrategy: ConstructorStrategy::ALWAYS, classPrefix: 'AlwaysConstructorMapper_');
         $data = new SourceForConstructorWithDefaultValues();
         $data->foo = 10;
 

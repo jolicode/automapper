@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Symfony\Bundle\DependencyInjection;
 
-use AutoMapper\Configuration as AutoMapperConfiguration;
+use AutoMapper\ConstructorStrategy;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -24,12 +24,8 @@ readonly class Configuration implements ConfigurationInterface
                 ->scalarNode('class_prefix')->defaultValue('Symfony_Mapper_')->end()
                 ->booleanNode('eval')->defaultFalse()->end()
                 ->enumNode('constructor_strategy')
-                    ->values([
-                        AutoMapperConfiguration::CONSTRUCTOR_STRATEGY_AUTO,
-                        AutoMapperConfiguration::CONSTRUCTOR_STRATEGY_ALWAYS,
-                        AutoMapperConfiguration::CONSTRUCTOR_STRATEGY_ALWAYS,
-                    ])
-                    ->defaultValue(AutoMapperConfiguration::CONSTRUCTOR_STRATEGY_AUTO)
+                    ->values(ConstructorStrategy::cases())
+                    ->defaultValue(ConstructorStrategy::AUTO)
                 ->end()
                 ->scalarNode('date_time_format')->defaultValue(\DateTimeInterface::RFC3339)->end()
                 ->booleanNode('check_attributes')->defaultTrue()->end()
