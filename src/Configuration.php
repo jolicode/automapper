@@ -14,7 +14,7 @@ final readonly class Configuration
         /**
          * If the constructor should be used to map the properties.
          */
-        public bool $allowConstructor = true,
+        public ConstructorStrategy $constructorStrategy = ConstructorStrategy::AUTO,
         /**
          * The date time format used to map \DateTimeInterface properties.
          */

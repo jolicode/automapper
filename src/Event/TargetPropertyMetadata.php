@@ -26,7 +26,7 @@ final class TargetPropertyMetadata
         public ?array $types = null,
         public ?ReadAccessor $readAccessor = null,
         public ?WriteMutator $writeMutator = null,
-        public ?WriteMutator $writeMutatorConstructor = null,
+        public ?string $parameterInConstructor = null,
         public bool $extractGroupsIfNull = true,
         public ?array $groups = null,
         public ?string $dateTimeFormat = null,

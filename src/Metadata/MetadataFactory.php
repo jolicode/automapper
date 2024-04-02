@@ -21,6 +21,7 @@ use AutoMapper\Extractor\FromSourceMappingExtractor;
 use AutoMapper\Extractor\FromTargetMappingExtractor;
 use AutoMapper\Extractor\ReadWriteTypeExtractor;
 use AutoMapper\Extractor\SourceTargetMappingExtractor;
+use AutoMapper\Extractor\WriteMutator;
 use AutoMapper\Transformer\ArrayTransformerFactory;
 use AutoMapper\Transformer\BuiltinTransformerFactory;
 use AutoMapper\Transformer\ChainTransformerFactory;
@@ -195,10 +196,14 @@ final class MetadataFactory
                 ]);
             }
 
-            if ($propertyMappedEvent->target->writeMutatorConstructor === null) {
-                $propertyMappedEvent->target->writeMutatorConstructor = $extractor->getWriteMutator($mapperMetadata->source, $mapperMetadata->target, $propertyMappedEvent->target->name, [
+            if ($propertyMappedEvent->target->parameterInConstructor === null) {
+                $mutator = $extractor->getWriteMutator($mapperMetadata->source, $mapperMetadata->target, $propertyMappedEvent->target->name, [
                     'enable_constructor_extraction' => true,
                 ]);
+
+                if ($mutator !== null && $mutator->type === WriteMutator::TYPE_CONSTRUCTOR && $mutator->parameter !== null) {
+                    $propertyMappedEvent->target->parameterInConstructor = $mutator->parameter->getName();
+                }
             }
 
             if ($propertyMappedEvent->target->extractGroupsIfNull && $propertyMappedEvent->target->groups === null) {
@@ -243,7 +248,7 @@ final class MetadataFactory
             $mapperMetadata,
             $propertiesMapping,
             $this->configuration->attributeChecking,
-            $this->configuration->allowConstructor,
+            $this->configuration->constructorStrategy,
             $mapperEvent->provider,
         );
     }
