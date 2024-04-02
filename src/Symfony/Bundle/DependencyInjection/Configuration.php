@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Symfony\Bundle\DependencyInjection;
 
 use AutoMapper\ConstructorStrategy;
-use AutoMapper\Loader\FileLoader;
+use AutoMapper\Loader\FileReloadStrategy;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -47,7 +47,7 @@ readonly class Configuration implements ConfigurationInterface
                     ->children()
                         ->booleanNode('eval')->defaultFalse()->end()
                         ->scalarNode('cache_dir')->defaultValue('%kernel.cache_dir%/automapper')->end()
-                        ->enumNode('reload_strategy')->values([FileLoader::RELOAD_ALWAYS, FileLoader::RELOAD_ON_CHANGE, FileLoader::RELOAD_NEVER])->end()
+                        ->enumNode('reload_strategy')->values(array_map(fn (FileReloadStrategy $value) => $value->value, FileReloadStrategy::cases()))->defaultNull()->end()
                     ->end()
                     ->addDefaultsIfNotSet()
                 ->end()

@@ -11,6 +11,7 @@ use AutoMapper\EventListener\Symfony\AdvancedNameConverterListener;
 use AutoMapper\Loader\ClassLoaderInterface;
 use AutoMapper\Loader\EvalLoader;
 use AutoMapper\Loader\FileLoader;
+use AutoMapper\Loader\FileReloadStrategy;
 use AutoMapper\Normalizer\AutoMapperNormalizer;
 use AutoMapper\Symfony\Bundle\CacheWarmup\CacheWarmer;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
@@ -71,7 +72,8 @@ class AutoMapperExtension extends Extension
             ;
         } else {
             $isDebug = $container->getParameter('kernel.debug');
-            $generateStrategy = $config['loader']['reload_strategy'] ?? $isDebug ? FileLoader::RELOAD_ALWAYS : FileLoader::RELOAD_NEVER;
+            $generateStrategy = $config['loader']['reload_strategy'] ?? $isDebug ? FileReloadStrategy::ALWAYS->value : FileReloadStrategy::NEVER->value;
+            $generateStrategy = FileReloadStrategy::tryFrom($generateStrategy);
 
             $container
                 ->getDefinition(FileLoader::class)

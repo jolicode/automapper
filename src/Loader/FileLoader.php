@@ -20,10 +20,6 @@ use PhpParser\PrettyPrinterAbstract;
  */
 final class FileLoader implements ClassLoaderInterface
 {
-    public const RELOAD_ALWAYS = 'always';
-    public const RELOAD_NEVER = 'never';
-    public const RELOAD_ON_CHANGE = 'on_change';
-
     private readonly PrettyPrinterAbstract $printer;
 
     /** @var array<class-string, string>|null */
@@ -33,7 +29,7 @@ final class FileLoader implements ClassLoaderInterface
         private readonly MapperGenerator $generator,
         private readonly MetadataFactory $metadataFactory,
         private readonly string $directory,
-        private readonly string $reloadStrategy = self::RELOAD_ON_CHANGE,
+        private readonly FileReloadStrategy $reloadStrategy = FileReloadStrategy::ON_CHANGE,
     ) {
         $this->printer = new Standard();
     }
@@ -43,7 +39,7 @@ final class FileLoader implements ClassLoaderInterface
         $className = $mapperMetadata->className;
         $classPath = $this->directory . \DIRECTORY_SEPARATOR . $className . '.php';
 
-        if ($this->reloadStrategy === self::RELOAD_NEVER && file_exists($classPath)) {
+        if ($this->reloadStrategy === FileReloadStrategy::NEVER && file_exists($classPath)) {
             require $classPath;
 
             return;
@@ -51,7 +47,7 @@ final class FileLoader implements ClassLoaderInterface
 
         $shouldBuildMapper = true;
 
-        if ($this->reloadStrategy === self::RELOAD_ON_CHANGE) {
+        if ($this->reloadStrategy === FileReloadStrategy::ON_CHANGE) {
             $registry = $this->getRegistry();
             $hash = $mapperMetadata->getHash();
             $shouldBuildMapper = !isset($registry[$className]) || $registry[$className] !== $hash || !file_exists($classPath);
@@ -86,7 +82,7 @@ final class FileLoader implements ClassLoaderInterface
 
         $this->write($classPath, "<?php\n\n" . $classCode . "\n");
 
-        if ($this->reloadStrategy === self::RELOAD_ON_CHANGE) {
+        if ($this->reloadStrategy === FileReloadStrategy::ON_CHANGE) {
             $this->addHashToRegistry($className, $mapperMetadata->getHash());
         }
 
