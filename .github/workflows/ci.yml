@@ -88,23 +88,3 @@ jobs:
         run: composer update --prefer-stable --prefer-lowest
       - name: tests
         run: vendor/bin/phpunit
-  check-version:
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@master
-      - name: cache-composer
-        uses: actions/cache@v2
-        with:
-          path: ~/.composer/cache/
-          key: composer-${{ github.sha }}
-      - name: setup
-        uses: shivammathur/setup-php@2.29.0
-        with:
-          php-version: 8.3
-          coverage: none
-          extensions: mbstring, fileinfo, json, intl, dom
-      - name: composer install
-        run: composer update --prefer-stable
-      - name: check version
-        run: ./.github/scripts/check-version.sh

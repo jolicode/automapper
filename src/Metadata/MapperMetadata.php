@@ -69,7 +69,7 @@ class MapperMetadata
             }
         }
 
-        $hash .= AutoMapper::VERSION_ID;
+        $hash .= AutoMapper::VERSION;
 
         return $hash;
     }
