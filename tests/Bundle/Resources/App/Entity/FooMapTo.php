@@ -7,16 +7,16 @@ namespace AutoMapper\Tests\Bundle\Resources\App\Entity;
 use AutoMapper\Attribute\MapTo;
 use AutoMapper\Tests\Fixtures\MapTo\Bar;
 
-#[MapTo('array', name: 'transformWithExpressionFunction', transformer: "service('foo').foo()")]
+#[MapTo('array', property: 'transformWithExpressionFunction', transformer: "service('foo').foo()")]
 class FooMapTo
 {
     public function __construct(
-        #[MapTo(Bar::class, name: 'bar')]
-        #[MapTo(name: 'baz')]
-        #[MapTo('array', name: 'transformFromIsCallable', transformer: self::class . '::transformFromIsCallable')]
-        #[MapTo('array', name: 'transformFromStringInstance', transformer: 'transformFromStringInstance')]
-        #[MapTo('array', name: 'transformFromStringStatic', transformer: 'transformFromStringStatic')]
-        #[MapTo('array', name: 'transformFromExpressionLanguage', transformer: "source.foo === 'foo' ? 'transformed' : 'not transformed'")]
+        #[MapTo(Bar::class, property: 'bar')]
+        #[MapTo(property: 'baz')]
+        #[MapTo('array', property: 'transformFromIsCallable', transformer: self::class . '::transformFromIsCallable')]
+        #[MapTo('array', property: 'transformFromStringInstance', transformer: 'transformFromStringInstance')]
+        #[MapTo('array', property: 'transformFromStringStatic', transformer: 'transformFromStringStatic')]
+        #[MapTo('array', property: 'transformFromExpressionLanguage', transformer: "source.foo === 'foo' ? 'transformed' : 'not transformed'")]
         public string $foo
     ) {
     }

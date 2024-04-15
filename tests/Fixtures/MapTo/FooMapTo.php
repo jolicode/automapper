@@ -7,18 +7,18 @@ namespace AutoMapper\Tests\Fixtures\MapTo;
 use AutoMapper\Attribute\MapTo;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\TransformerWithDependency;
 
-#[MapTo('array', name: 'externalProperty', transformer: 'transformExternalProperty', groups: ['group1'])]
-#[MapTo('array', name: 'transformWithExpressionFunction', transformer: "transformerWithDependency().transform('foo', source, context)")]
+#[MapTo('array', property: 'externalProperty', transformer: 'transformExternalProperty', groups: ['group1'])]
+#[MapTo('array', property: 'transformWithExpressionFunction', transformer: "transformerWithDependency().transform('foo', source, context)")]
 class FooMapTo
 {
     public function __construct(
-        #[MapTo(Bar::class, name: 'bar')]
-        #[MapTo(name: 'baz')]
-        #[MapTo('array', name: 'transformFromIsCallable', transformer: self::class . '::transformFromIsCallable')]
-        #[MapTo('array', name: 'transformFromStringInstance', transformer: 'transformFromStringInstance')]
-        #[MapTo('array', name: 'transformFromStringStatic', transformer: 'transformFromStringStatic')]
-        #[MapTo('array', name: 'transformFromCustomTransformerService', transformer: TransformerWithDependency::class)]
-        #[MapTo('array', name: 'transformFromExpressionLanguage', transformer: "source.foo === 'foo' ? 'transformed' : 'not transformed'")]
+        #[MapTo(Bar::class, property: 'bar')]
+        #[MapTo(property: 'baz')]
+        #[MapTo('array', property: 'transformFromIsCallable', transformer: self::class . '::transformFromIsCallable')]
+        #[MapTo('array', property: 'transformFromStringInstance', transformer: 'transformFromStringInstance')]
+        #[MapTo('array', property: 'transformFromStringStatic', transformer: 'transformFromStringStatic')]
+        #[MapTo('array', property: 'transformFromCustomTransformerService', transformer: TransformerWithDependency::class)]
+        #[MapTo('array', property: 'transformFromExpressionLanguage', transformer: "source.foo === 'foo' ? 'transformed' : 'not transformed'")]
         public string $foo
     ) {
     }

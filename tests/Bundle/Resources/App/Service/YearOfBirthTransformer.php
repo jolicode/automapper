@@ -24,6 +24,6 @@ class YearOfBirthTransformer implements PropertyTransformerInterface, PropertyTr
 
     public function supports(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool
     {
-        return User::class === $mapperMetadata->source && UserDTO::class === $mapperMetadata->target && 'yearOfBirth' === $source->name;
+        return User::class === $mapperMetadata->source && UserDTO::class === $mapperMetadata->target && 'yearOfBirth' === $source->property;
     }
 }

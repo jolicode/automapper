@@ -106,7 +106,7 @@ use App\Transformer\UrlTransformer;
 
 class Source
 {
-    #[MapTo(name: 'url', transformer: UrlTransformer::class)]
+    #[MapTo(property: 'url', transformer: UrlTransformer::class)]
     public int $id;
 }
 ```

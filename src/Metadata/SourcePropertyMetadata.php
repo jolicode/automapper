@@ -20,7 +20,7 @@ final readonly class SourcePropertyMetadata
      * @param string[]|null $groups
      */
     public function __construct(
-        public string $name,
+        public string $property,
         public ?ReadAccessor $accessor = null,
         public bool $checkExists = false,
         public ?array $groups = null,
@@ -31,7 +31,7 @@ final readonly class SourcePropertyMetadata
     public static function fromEvent(SourcePropertyMetadataEvent $metadata): self
     {
         return new self(
-            $metadata->name,
+            $metadata->property,
             $metadata->accessor,
             $metadata->checkExists ?? false,
             $metadata->groups,

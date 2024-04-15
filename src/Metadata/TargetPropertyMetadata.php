@@ -21,7 +21,7 @@ final readonly class TargetPropertyMetadata
      * @param string[]|null $groups
      */
     public function __construct(
-        public string $name,
+        public string $property,
         public ?ReadAccessor $readAccessor = null,
         public ?WriteMutator $writeMutator = null,
         public ?string $parameterInConstructor = null,
@@ -33,7 +33,7 @@ final readonly class TargetPropertyMetadata
     public static function fromEvent(EventTargetPropertyMetadata $metadata): self
     {
         return new self(
-            $metadata->name,
+            $metadata->property,
             $metadata->readAccessor,
             $metadata->writeMutator,
             $metadata->parameterInConstructor,

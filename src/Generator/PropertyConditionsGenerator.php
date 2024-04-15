@@ -100,7 +100,7 @@ final readonly class PropertyConditionsGenerator
 
         return new Expr\FuncCall(new Name('property_exists'), [
             new Arg($metadata->variableRegistry->getSourceInput()),
-            new Arg(new Scalar\String_($propertyMetadata->source->name)),
+            new Arg(new Scalar\String_($propertyMetadata->source->property)),
         ]);
     }
 
@@ -118,7 +118,7 @@ final readonly class PropertyConditionsGenerator
         }
 
         return new Expr\FuncCall(new Name('array_key_exists'), [
-            new Arg(new Scalar\String_($propertyMetadata->source->name)),
+            new Arg(new Scalar\String_($propertyMetadata->source->property)),
             new Arg($metadata->variableRegistry->getSourceInput()),
         ]);
     }
@@ -140,7 +140,7 @@ final readonly class PropertyConditionsGenerator
 
         return new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'isAllowedAttribute', [
             new Arg($variableRegistry->getContext()),
-            new Arg(new Scalar\String_($propertyMetadata->source->name)),
+            new Arg(new Scalar\String_($propertyMetadata->source->property)),
             new Arg($propertyMetadata->source->accessor->getIsNullExpression($variableRegistry->getSourceInput())),
         ]);
     }

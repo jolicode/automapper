@@ -85,7 +85,7 @@ final readonly class MapMethodStatementsGenerator
              * - Statements that need to be executed before the constructor, if the property needs to be written in the constructor
              * - Statements that need to be executed after the constructor.
              */
-            if (\in_array($propertyMetadata->target->name, $metadata->getPropertiesInConstructor(), true)) {
+            if (\in_array($propertyMetadata->target->property, $metadata->getPropertiesInConstructor(), true)) {
                 $duplicatedStatements = [...$duplicatedStatements, ...$propStatements];
             } else {
                 $setterStatements = [...$setterStatements, ...$propStatements];

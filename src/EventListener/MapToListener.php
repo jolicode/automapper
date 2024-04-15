@@ -37,7 +37,7 @@ final readonly class MapToListener extends MapListener
                 $mapToAttributeInstance = $mapToAttribute->newInstance();
 
                 if ($reflectionClassOrPropertyOrMethod instanceof \ReflectionClass) {
-                    if ($mapToAttributeInstance->name === null) {
+                    if ($mapToAttributeInstance->property === null) {
                         throw new BadMapDefinitionException(sprintf('Required `name` property in the "%s" attribute on "%s" class.', MapTo::class, $reflectionClassOrPropertyOrMethod->getName()));
                     }
 
@@ -45,30 +45,30 @@ final readonly class MapToListener extends MapListener
                         throw new BadMapDefinitionException(sprintf('Required `transformer` property in the "%s" attribute on "%s" class.', MapTo::class, $reflectionClassOrPropertyOrMethod->getName()));
                     }
 
-                    $name = $mapToAttributeInstance->name;
+                    $property = $mapToAttributeInstance->property;
                 } elseif ($reflectionClassOrPropertyOrMethod instanceof \ReflectionMethod) {
-                    $name = $this->getPropertyName($reflectionClassOrPropertyOrMethod->getName(), $properties);
+                    $property = $this->getPropertyName($reflectionClassOrPropertyOrMethod->getName(), $properties);
                 } else {
-                    $name = $reflectionClassOrPropertyOrMethod->getName();
+                    $property = $reflectionClassOrPropertyOrMethod->getName();
                 }
 
-                if (null === $name) {
-                    $name = $reflectionClassOrPropertyOrMethod->getName();
+                if (null === $property) {
+                    $property = $reflectionClassOrPropertyOrMethod->getName();
                 }
 
-                $this->addPropertyFromSource($event, $mapToAttributeInstance, $name);
+                $this->addPropertyFromSource($event, $mapToAttributeInstance, $property);
             }
         }
     }
 
-    private function addPropertyFromSource(GenerateMapperEvent $event, MapTo $mapTo, string $name): void
+    private function addPropertyFromSource(GenerateMapperEvent $event, MapTo $mapTo, string $property): void
     {
         if ($mapTo->target !== null && $event->mapperMetadata->target !== $mapTo->target) {
             return;
         }
 
-        $sourceProperty = new SourcePropertyMetadata($name);
-        $targetProperty = new TargetPropertyMetadata($mapTo->name ?? $name);
+        $sourceProperty = new SourcePropertyMetadata($property);
+        $targetProperty = new TargetPropertyMetadata($mapTo->property ?? $property);
 
         $property = new PropertyMetadataEvent(
             mapperMetadata: $event->mapperMetadata,
@@ -82,10 +82,10 @@ final readonly class MapToListener extends MapListener
             groups: $mapTo->groups,
         );
 
-        if (\array_key_exists($property->target->name, $event->properties)) {
-            throw new BadMapDefinitionException(sprintf('There is already a MapTo attribute with target "%s" in class "%s".', $property->target->name, $event->mapperMetadata->source));
+        if (\array_key_exists($property->target->property, $event->properties)) {
+            throw new BadMapDefinitionException(sprintf('There is already a MapTo attribute with target "%s" in class "%s".', $property->target->property, $event->mapperMetadata->source));
         }
 
-        $event->properties[$property->target->name] = $property;
+        $event->properties[$property->target->property] = $property;
     }
 }

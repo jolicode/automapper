@@ -166,7 +166,7 @@ class MetadataFactoryTest extends AutoMapperBaseTest
     private function getPropertyMetadata(GeneratorMetadata $metadata, string $propertyName): ?PropertyMetadata
     {
         foreach ($metadata->propertiesMetadata as $propertyMetadata) {
-            if ($propertyMetadata->source->name === $propertyName) {
+            if ($propertyMetadata->source->property === $propertyName) {
                 return $propertyMetadata;
             }
         }

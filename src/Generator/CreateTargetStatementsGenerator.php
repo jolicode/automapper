@@ -192,11 +192,11 @@ final readonly class CreateTargetStatementsGenerator
 
         $defaultValueExpr = new Expr\Throw_(
             new Expr\New_(new Name\FullyQualified(MissingConstructorArgumentsException::class), [
-                new Arg(new Scalar\String_(sprintf('Cannot create an instance of "%s" from mapping data because its constructor requires the following parameters to be present : "$%s".', $metadata->mapperMetadata->target, $propertyMetadata->target->name))),
+                new Arg(new Scalar\String_(sprintf('Cannot create an instance of "%s" from mapping data because its constructor requires the following parameters to be present : "$%s".', $metadata->mapperMetadata->target, $propertyMetadata->target->property))),
                 new Arg(new Scalar\LNumber(0)),
                 new Arg(new Expr\ConstFetch(new Name('null'))),
                 new Arg(new Expr\Array_([
-                    new ArrayItem(new Scalar\String_($propertyMetadata->target->name)),
+                    new ArrayItem(new Scalar\String_($propertyMetadata->target->property)),
                 ])),
                 new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
             ])
@@ -212,14 +212,14 @@ final readonly class CreateTargetStatementsGenerator
             new Stmt\If_(new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'hasConstructorArgument', [
                 new Arg($variableRegistry->getContext()),
                 new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
-                new Arg(new Scalar\String_($propertyMetadata->target->name)),
+                new Arg(new Scalar\String_($propertyMetadata->target->property)),
             ]), [
                 'stmts' => [
                     ...$propStatements,
                     new Stmt\Expression(new Expr\Assign($constructVar, new Expr\BinaryOp\Coalesce($output, new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'getConstructorArgument', [
                         new Arg($variableRegistry->getContext()),
                         new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
-                        new Arg(new Scalar\String_($propertyMetadata->target->name)),
+                        new Arg(new Scalar\String_($propertyMetadata->target->property)),
                     ])))),
                 ],
                 'else' => new Stmt\Else_([

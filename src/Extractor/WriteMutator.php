@@ -32,7 +32,7 @@ final class WriteMutator
 
     public function __construct(
         public readonly int $type,
-        private readonly string $name,
+        private readonly string $property,
         private readonly bool $private = false,
         public readonly ?\ReflectionParameter $parameter = null,
     ) {
@@ -51,7 +51,7 @@ final class WriteMutator
              *
              * $output->method($value);
              */
-            return new Expr\MethodCall($output, $this->name, [
+            return new Expr\MethodCall($output, $this->property, [
                 new Arg($value),
             ]);
         }
@@ -64,7 +64,7 @@ final class WriteMutator
                  * $this->hydrateCallbacks['propertyName']($output, $value);
                  */
                 return new Expr\FuncCall(
-                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'hydrateCallbacks'), new Scalar\String_($this->name)),
+                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'hydrateCallbacks'), new Scalar\String_($this->property)),
                     [
                         new Arg($output),
                         new Arg($value),
@@ -78,10 +78,10 @@ final class WriteMutator
              * $output->propertyName &= $value;
              */
             if ($byRef) {
-                return new Expr\AssignRef(new Expr\PropertyFetch($output, $this->name), $value);
+                return new Expr\AssignRef(new Expr\PropertyFetch($output, $this->property), $value);
             }
 
-            return new Expr\Assign(new Expr\PropertyFetch($output, $this->name), $value);
+            return new Expr\Assign(new Expr\PropertyFetch($output, $this->property), $value);
         }
 
         if (self::TYPE_ARRAY_DIMENSION === $this->type) {
@@ -91,10 +91,10 @@ final class WriteMutator
              * $output['propertyName'] &= $value;
              */
             if ($byRef) {
-                return new Expr\AssignRef(new Expr\ArrayDimFetch($output, new Scalar\String_($this->name)), $value);
+                return new Expr\AssignRef(new Expr\ArrayDimFetch($output, new Scalar\String_($this->property)), $value);
             }
 
-            return new Expr\Assign(new Expr\ArrayDimFetch($output, new Scalar\String_($this->name)), $value);
+            return new Expr\Assign(new Expr\ArrayDimFetch($output, new Scalar\String_($this->property)), $value);
         }
 
         throw new CompileException('Invalid accessor for write expression');
@@ -123,7 +123,7 @@ final class WriteMutator
                     new Param(new Expr\Variable('value')),
                 ],
                 'stmts' => [
-                    new Stmt\Expression(new Expr\Assign(new Expr\PropertyFetch(new Expr\Variable('object'), $this->name), new Expr\Variable('value'))),
+                    new Stmt\Expression(new Expr\Assign(new Expr\PropertyFetch(new Expr\Variable('object'), $this->property), new Expr\Variable('value'))),
                 ],
             ])),
             new Arg(new Expr\ConstFetch(new Name('null'))),
@@ -138,13 +138,13 @@ final class WriteMutator
     {
         if (self::TYPE_METHOD === $this->type && class_exists($target)) {
             try {
-                $reflectionMethod = new \ReflectionMethod($target, $this->name);
+                $reflectionMethod = new \ReflectionMethod($target, $this->property);
 
                 if ($types = $this->extractFromDocBlock(
                     $reflectionMethod->getDocComment(),
                     $target,
                     $reflectionMethod->getDeclaringClass()->getName(),
-                    $this->name,
+                    $this->property,
                     '@param'
                 )) {
                     return $types;
@@ -171,14 +171,14 @@ final class WriteMutator
 
         if (self::TYPE_PROPERTY === $this->type && class_exists($target)) {
             try {
-                $reflectionProperty = new \ReflectionProperty($target, $this->name);
+                $reflectionProperty = new \ReflectionProperty($target, $this->property);
 
                 if ($reflectionProperty->isPromoted()) {
                     if ($types = $this->extractFromDocBlock(
                         $reflectionProperty->getDeclaringClass()->getConstructor()?->getDocComment(),
                         $target,
                         $reflectionProperty->getDeclaringClass()->getName(),
-                        $this->name,
+                        $this->property,
                         '@param'
                     )) {
                         return $types;
@@ -189,7 +189,7 @@ final class WriteMutator
                     $reflectionProperty->getDocComment(),
                     $target,
                     $reflectionProperty->getDeclaringClass()->getName(),
-                    $this->name,
+                    $this->property,
                     '@var'
                 )) {
                     return $types;

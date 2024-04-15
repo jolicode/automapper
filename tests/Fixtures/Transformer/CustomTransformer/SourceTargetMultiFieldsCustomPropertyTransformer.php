@@ -17,7 +17,7 @@ final readonly class SourceTargetMultiFieldsCustomPropertyTransformer implements
 {
     public function supports(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool
     {
-        return $mapperMetadata->source === BirthDateExploded::class && $mapperMetadata->target === BirthDateDateTime::class && $target->name === 'date';
+        return $mapperMetadata->source === BirthDateExploded::class && $mapperMetadata->target === BirthDateDateTime::class && $target->property === 'date';
     }
 
     public function transform(mixed $value, array|object $source, array $context): \DateTimeImmutable

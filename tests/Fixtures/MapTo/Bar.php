@@ -20,12 +20,12 @@ class Bar
     public function __construct(
         public string $bar,
         public string $baz,
-        #[MapFrom(name: 'foo')]
+        #[MapFrom(property: 'foo')]
         public string $from,
     ) {
     }
 
-    #[MapFrom(source: FooMapTo::class, name: 'd')]
+    #[MapFrom(source: FooMapTo::class, property: 'd')]
     public function setB(string $b)
     {
         $this->b = $b;

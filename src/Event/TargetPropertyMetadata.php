@@ -22,7 +22,7 @@ final class TargetPropertyMetadata
      * @param string[]|null $groups
      */
     public function __construct(
-        public string $name,
+        public string $property,
         public ?array $types = null,
         public ?ReadAccessor $readAccessor = null,
         public ?WriteMutator $writeMutator = null,

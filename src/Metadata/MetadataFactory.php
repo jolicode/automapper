@@ -155,7 +155,7 @@ final class MetadataFactory
 
             $this->eventDispatcher->dispatch($propertyEvent);
 
-            $propertyEvents[$propertyEvent->target->name] = $propertyEvent;
+            $propertyEvents[$propertyEvent->target->property] = $propertyEvent;
         }
 
         foreach ($extractor->getProperties($mapperMetadata->target) as $property) {
@@ -167,13 +167,13 @@ final class MetadataFactory
 
             $this->eventDispatcher->dispatch($propertyEvent);
 
-            $propertyEvents[$propertyEvent->target->name] = $propertyEvent;
+            $propertyEvents[$propertyEvent->target->property] = $propertyEvent;
         }
 
         foreach ($mapperEvent->properties as $propertyEvent) {
             $this->eventDispatcher->dispatch($propertyEvent);
 
-            $propertyEvents[$propertyEvent->target->name] = $propertyEvent;
+            $propertyEvents[$propertyEvent->target->property] = $propertyEvent;
         }
 
         // Sort transformations by property name, to ensure consistent order, and easier debugging
@@ -184,34 +184,34 @@ final class MetadataFactory
         foreach ($propertyEvents as $propertyMappedEvent) {
             // Create the source property metadata
             if ($propertyMappedEvent->source->accessor === null) {
-                $propertyMappedEvent->source->accessor = $extractor->getReadAccessor($mapperMetadata->source, $propertyMappedEvent->source->name);
+                $propertyMappedEvent->source->accessor = $extractor->getReadAccessor($mapperMetadata->source, $propertyMappedEvent->source->property);
             }
 
             if ($propertyMappedEvent->source->checkExists === null) {
-                $propertyMappedEvent->source->checkExists = $extractor->getCheckExists($mapperMetadata->source, $propertyMappedEvent->source->name);
+                $propertyMappedEvent->source->checkExists = $extractor->getCheckExists($mapperMetadata->source, $propertyMappedEvent->source->property);
             }
 
             if ($propertyMappedEvent->source->extractGroupsIfNull && $propertyMappedEvent->source->groups === null) {
-                $propertyMappedEvent->source->groups = $extractor->getGroups($mapperMetadata->source, $propertyMappedEvent->source->name);
+                $propertyMappedEvent->source->groups = $extractor->getGroups($mapperMetadata->source, $propertyMappedEvent->source->property);
             }
 
             if ($propertyMappedEvent->source->dateTimeFormat === null) {
-                $propertyMappedEvent->source->dateTimeFormat = $extractor->getDateTimeFormat($mapperMetadata->source, $propertyMappedEvent->source->name);
+                $propertyMappedEvent->source->dateTimeFormat = $extractor->getDateTimeFormat($mapperMetadata->source, $propertyMappedEvent->source->property);
             }
 
             // Create the target property metadata
             if ($propertyMappedEvent->target->readAccessor === null) {
-                $propertyMappedEvent->target->readAccessor = $extractor->getReadAccessor($mapperMetadata->target, $propertyMappedEvent->target->name);
+                $propertyMappedEvent->target->readAccessor = $extractor->getReadAccessor($mapperMetadata->target, $propertyMappedEvent->target->property);
             }
 
             if ($propertyMappedEvent->target->writeMutator === null) {
-                $propertyMappedEvent->target->writeMutator = $extractor->getWriteMutator($mapperMetadata->source, $mapperMetadata->target, $propertyMappedEvent->target->name, [
+                $propertyMappedEvent->target->writeMutator = $extractor->getWriteMutator($mapperMetadata->source, $mapperMetadata->target, $propertyMappedEvent->target->property, [
                     'enable_constructor_extraction' => false,
                 ]);
             }
 
             if ($propertyMappedEvent->target->parameterInConstructor === null) {
-                $mutator = $extractor->getWriteMutator($mapperMetadata->source, $mapperMetadata->target, $propertyMappedEvent->target->name, [
+                $mutator = $extractor->getWriteMutator($mapperMetadata->source, $mapperMetadata->target, $propertyMappedEvent->target->property, [
                     'enable_constructor_extraction' => true,
                 ]);
 
@@ -221,11 +221,11 @@ final class MetadataFactory
             }
 
             if ($propertyMappedEvent->target->extractGroupsIfNull && $propertyMappedEvent->target->groups === null) {
-                $propertyMappedEvent->target->groups = $extractor->getGroups($mapperMetadata->target, $propertyMappedEvent->target->name);
+                $propertyMappedEvent->target->groups = $extractor->getGroups($mapperMetadata->target, $propertyMappedEvent->target->property);
             }
 
             if ($propertyMappedEvent->target->dateTimeFormat === null) {
-                $propertyMappedEvent->target->dateTimeFormat = $extractor->getDateTimeFormat($mapperMetadata->target, $propertyMappedEvent->target->name);
+                $propertyMappedEvent->target->dateTimeFormat = $extractor->getDateTimeFormat($mapperMetadata->target, $propertyMappedEvent->target->property);
             }
 
             $sourcePropertyMetadata = SourcePropertyMetadata::fromEvent($propertyMappedEvent->source);

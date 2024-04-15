@@ -17,7 +17,7 @@ They can be used on :
 ```php
 class Entity
 {
-    #[MapTo(name: 'name')]
+    #[MapTo(property: 'name')]
     public string $title;
 }
 ```
@@ -29,7 +29,7 @@ class EntityDto
 {
     private string $name;
 
-    #[MapFrom(name: 'title')]
+    #[MapFrom(property: 'title')]
     public function setName($name): void
     {
         $this->name = $name;
@@ -40,7 +40,7 @@ class EntityDto
  * a class (to add virtual properties)
 
 ```
-#[MapTo(name: 'virtualProperty')]
+#[MapTo(property: 'virtualProperty')]
 class Entity {}
 ```
 
@@ -52,8 +52,8 @@ You can use this attribute multiple times on the same property to handle behavio
 ```php
 class Entity
 {
-    #[MapTo(target: EntityDto::class, name: 'name')]
-    #[MapTo(target: 'array', name: 'title')]
+    #[MapTo(target: EntityDto::class, property: 'name')]
+    #[MapTo(target: 'array', property: 'title')]
     public string $title;
 }
 ```
@@ -63,8 +63,8 @@ class Entity
 ```php
 class EntityDto
 {
-    #[MapFrom(source: Entity::class, name: 'title')]
-    #[MapFrom(source: 'array', name: 'name')]
+    #[MapFrom(source: Entity::class, property: 'title')]
+    #[MapFrom(source: 'array', property: 'name')]
     public string $name;
 }
 ```
