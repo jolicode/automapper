@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- [GH#109](https://github.com/jolicode/automapper/pull/109) Use AutoMapper exceptions
+
 ## [9.0.0-beta.2] - 2024-04-02
 ### Added
 - [GH#95](https://github.com/jolicode/automapper/pull/95) Add Api Platform integration

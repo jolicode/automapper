@@ -8,6 +8,7 @@ use AutoMapper\Configuration as AutoMapperConfiguration;
 use AutoMapper\ConstructorStrategy;
 use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\EventListener\Symfony\AdvancedNameConverterListener;
+use AutoMapper\Exception\LogicException;
 use AutoMapper\Loader\ClassLoaderInterface;
 use AutoMapper\Loader\EvalLoader;
 use AutoMapper\Loader\FileLoader;
@@ -94,7 +95,7 @@ class AutoMapperExtension extends Extension
 
         if ($config['serializer']) {
             if (!interface_exists(SerializerInterface::class)) {
-                throw new \LogicException('The "symfony/serializer" component is required to use the "serializer" feature.');
+                throw new LogicException('The "symfony/serializer" component is required to use the "serializer" feature.');
             }
 
             $loader->load('event_serializer.php');
@@ -102,7 +103,7 @@ class AutoMapperExtension extends Extension
 
         if ($config['normalizer']['enabled']) {
             if (!interface_exists(NormalizerInterface::class)) {
-                throw new \LogicException('The "symfony/serializer" component is required to use the "normalizer" feature.');
+                throw new LogicException('The "symfony/serializer" component is required to use the "normalizer" feature.');
             }
 
             $loader->load('normalizer.php');

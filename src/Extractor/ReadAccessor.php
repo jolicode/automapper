@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Extractor;
 
 use AutoMapper\Exception\CompileException;
+use AutoMapper\Exception\InvalidArgumentException;
 use AutoMapper\MapperContext;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
@@ -43,7 +44,7 @@ final class ReadAccessor
         private readonly array $context = [],
     ) {
         if (self::TYPE_METHOD === $this->type && null === $this->sourceClass) {
-            throw new \InvalidArgumentException('Source class must be provided when using "method" type.');
+            throw new InvalidArgumentException('Source class must be provided when using "method" type.');
         }
     }
 
