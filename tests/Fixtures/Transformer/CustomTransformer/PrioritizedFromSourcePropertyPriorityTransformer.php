@@ -17,7 +17,7 @@ final readonly class PrioritizedFromSourcePropertyPriorityTransformer implements
 {
     public function supports(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool
     {
-        return $mapperMetadata->source === UserDTO::class && $mapperMetadata->target === 'array' && $source->name === 'address';
+        return $mapperMetadata->source === UserDTO::class && $mapperMetadata->target === 'array' && $source->property === 'address';
     }
 
     public function transform(mixed $value, object|array $source, array $context): mixed

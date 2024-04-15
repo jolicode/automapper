@@ -34,7 +34,7 @@ final readonly class ObjectTransformer implements TransformerInterface, Dependen
 
         $newContextArgs = [
             new Arg(new Expr\Variable('context')),
-            new Arg(new Scalar\String_($propertyMapping->source->name)),
+            new Arg(new Scalar\String_($propertyMapping->source->property)),
         ];
 
         // ($context['deep_target_to_populate'] ?? false) ? $source->property : null

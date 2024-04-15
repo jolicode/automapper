@@ -16,8 +16,8 @@ final readonly class SerializerGroupListener
 
     public function __invoke(PropertyMetadataEvent $event): void
     {
-        $event->target->groups = $this->getGroups($event->mapperMetadata->target, $event->target->name);
-        $event->source->groups = $this->getGroups($event->mapperMetadata->source, $event->source->name);
+        $event->target->groups = $this->getGroups($event->mapperMetadata->target, $event->target->property);
+        $event->source->groups = $this->getGroups($event->mapperMetadata->source, $event->source->property);
     }
 
     /**

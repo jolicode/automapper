@@ -21,7 +21,7 @@ final class SourcePropertyMetadata
      * @param string[]|null $groups
      */
     public function __construct(
-        public string $name,
+        public string $property,
         public ?array $types = null,
         public ?ReadAccessor $accessor = null,
         public ?bool $checkExists = null,

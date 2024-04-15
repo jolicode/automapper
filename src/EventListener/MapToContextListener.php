@@ -23,14 +23,14 @@ final readonly class MapToContextListener
             return;
         }
 
-        $readInfo = $this->extractor->getReadInfo($event->mapperMetadata->source, $event->source->name);
+        $readInfo = $this->extractor->getReadInfo($event->mapperMetadata->source, $event->source->property);
 
         if ($readInfo !== null && ($readInfo->getType() === PropertyReadInfo::TYPE_PROPERTY && $readInfo->getVisibility() === PropertyReadInfo::VISIBILITY_PUBLIC)) {
             return;
         }
 
         $reflectionClass = $event->mapperMetadata->sourceReflectionClass;
-        $camelProp = $this->camelize($event->source->name);
+        $camelProp = $this->camelize($event->source->property);
         $readInfo = null;
         $contextParameters = null;
 
@@ -68,7 +68,7 @@ final readonly class MapToContextListener
             $readInfo->getName(),
             $event->mapperMetadata->source,
             PropertyReadInfo::VISIBILITY_PUBLIC !== $readInfo->getVisibility(),
-            $event->source->name,
+            $event->source->property,
             $contextParameters
         );
     }

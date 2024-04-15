@@ -12,7 +12,7 @@ final readonly class MapFrom
 {
     /**
      * @param class-string|'array'|null                                 $source      The specific source class name or array. If null this attribute will be used for all source classes.
-     * @param string|null                                               $name        The source property name. If null, the target property name will be used.
+     * @param string|null                                               $property    The source property name. If null, the target property name will be used.
      * @param int|null                                                  $maxDepth    The maximum depth of the mapping. If null, the default max depth will be used.
      * @param string|callable(mixed $value, object $object): mixed|null $transformer A transformer id or a callable that transform the value during mapping
      * @param bool|null                                                 $ignore      if true, the property will be ignored during mapping
@@ -21,7 +21,7 @@ final readonly class MapFrom
      */
     public function __construct(
         public ?string $source = null,
-        public ?string $name = null,
+        public ?string $property = null,
         public ?int $maxDepth = null,
         public mixed $transformer = null,
         public ?bool $ignore = null,

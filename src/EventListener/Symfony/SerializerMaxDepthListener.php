@@ -16,8 +16,8 @@ final readonly class SerializerMaxDepthListener
 
     public function __invoke(PropertyMetadataEvent $event): void
     {
-        $targetMaxDepth = $this->getMaxDepth($event->mapperMetadata->target, $event->target->name);
-        $sourceMaxDepth = $this->getMaxDepth($event->mapperMetadata->source, $event->source->name);
+        $targetMaxDepth = $this->getMaxDepth($event->mapperMetadata->target, $event->target->property);
+        $sourceMaxDepth = $this->getMaxDepth($event->mapperMetadata->source, $event->source->property);
 
         // Extract the property metadata
         if ($targetMaxDepth !== null || $sourceMaxDepth !== null) {

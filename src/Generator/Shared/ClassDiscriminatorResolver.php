@@ -41,7 +41,7 @@ final readonly class ClassDiscriminatorResolver
         }
 
         foreach ($metadata->propertiesMetadata as $propertyMetadata) {
-            if (($fromSource ? $propertyMetadata->source->name : $propertyMetadata->target->name) === $classDiscriminatorMapping->getTypeProperty()) {
+            if (($fromSource ? $propertyMetadata->source->property : $propertyMetadata->target->property) === $classDiscriminatorMapping->getTypeProperty()) {
                 return $propertyMetadata;
             }
         }

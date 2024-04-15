@@ -20,14 +20,14 @@ final readonly class SerializerIgnoreListener
             return;
         }
 
-        if (($event->mapperMetadata->source !== 'array' && $event->mapperMetadata->source !== \stdClass::class) && $this->isIgnoreProperty($event->mapperMetadata->source, $event->source->name)) {
+        if (($event->mapperMetadata->source !== 'array' && $event->mapperMetadata->source !== \stdClass::class) && $this->isIgnoreProperty($event->mapperMetadata->source, $event->source->property)) {
             $event->ignored = true;
             $event->ignoreReason = 'Property is ignored by Symfony Serializer Attribute on Source';
 
             return;
         }
 
-        if (($event->mapperMetadata->target !== 'array' && $event->mapperMetadata->target !== \stdClass::class) && $this->isIgnoreProperty($event->mapperMetadata->target, $event->target->name)) {
+        if (($event->mapperMetadata->target !== 'array' && $event->mapperMetadata->target !== \stdClass::class) && $this->isIgnoreProperty($event->mapperMetadata->target, $event->target->property)) {
             $event->ignored = true;
             $event->ignoreReason = 'Property is ignored by Symfony Serializer Attribute on Target';
         }

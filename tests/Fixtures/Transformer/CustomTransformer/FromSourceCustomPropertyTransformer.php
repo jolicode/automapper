@@ -16,7 +16,7 @@ final readonly class FromSourceCustomPropertyTransformer implements PropertyTran
 {
     public function supports(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool
     {
-        return $mapperMetadata->source === UserDTO::class && $mapperMetadata->target === 'array' && $source->name === 'name';
+        return $mapperMetadata->source === UserDTO::class && $mapperMetadata->target === 'array' && $source->property === 'name';
     }
 
     public function transform(mixed $value, object|array $source, array $context): mixed

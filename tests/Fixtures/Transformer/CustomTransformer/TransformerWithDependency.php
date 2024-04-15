@@ -21,7 +21,7 @@ final readonly class TransformerWithDependency implements PropertyTransformerInt
 
     public function supports(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool
     {
-        return $mapperMetadata->source === CityFoo::class && $mapperMetadata->target === 'array' && $source->name === 'name';
+        return $mapperMetadata->source === CityFoo::class && $mapperMetadata->target === 'array' && $source->property === 'name';
     }
 
     public function transform(mixed $value, object|array $source, array $context): string

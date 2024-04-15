@@ -105,7 +105,7 @@ final class GeneratorMetadata
             $propertyMapping = null;
 
             foreach ($this->propertiesMetadata as $mapping) {
-                if ($mapping->target->name === $mandatoryParameter->getName()) {
+                if ($mapping->target->property === $mandatoryParameter->getName()) {
                     $propertyMapping = $mapping;
                     break;
                 }
@@ -165,16 +165,16 @@ final class GeneratorMetadata
                 continue;
             }
 
-            $properties[] = $propertyMetadata->target->name;
+            $properties[] = $propertyMetadata->target->property;
         }
 
         return $properties;
     }
 
-    public function getTargetProperty(string $name): ?PropertyMetadata
+    public function getTargetProperty(string $property): ?PropertyMetadata
     {
         foreach ($this->propertiesMetadata as $propertyMetadata) {
-            if ($propertyMetadata->target->name === $name) {
+            if ($propertyMetadata->target->property === $property) {
                 return $propertyMetadata;
             }
         }

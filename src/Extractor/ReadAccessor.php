@@ -39,7 +39,7 @@ final class ReadAccessor
         private readonly string $accessor,
         private readonly ?string $sourceClass = null,
         private readonly bool $private = false,
-        private readonly ?string $name = null,
+        private readonly ?string $property = null,
         // will be the name of the property if different from accessor
         private readonly array $context = [],
     ) {
@@ -98,7 +98,7 @@ final class ReadAccessor
                  * $this->extractCallbacks['method_name']($input)
                  */
                 return new Expr\FuncCall(
-                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractCallbacks'), new Scalar\String_($this->name ?? $this->accessor)),
+                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractCallbacks'), new Scalar\String_($this->property ?? $this->accessor)),
                     [
                         new Arg($input),
                     ]

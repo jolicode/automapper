@@ -19,8 +19,8 @@ class SourceTargetMappingExtractor extends MappingExtractor
 {
     public function getTypes(string $source, SourcePropertyMetadata $sourceProperty, string $target, TargetPropertyMetadata $targetProperty): TypesMatching
     {
-        $sourceTypes = $this->propertyInfoExtractor->getTypes($source, $sourceProperty->name, [ReadWriteTypeExtractor::READ_ACCESSOR => $sourceProperty->accessor]) ?? [];
-        $targetTypes = $this->propertyInfoExtractor->getTypes($target, $targetProperty->name, [ReadWriteTypeExtractor::WRITE_MUTATOR => $targetProperty->writeMutator]) ?? [];
+        $sourceTypes = $this->propertyInfoExtractor->getTypes($source, $sourceProperty->property, [ReadWriteTypeExtractor::READ_ACCESSOR => $sourceProperty->accessor]) ?? [];
+        $targetTypes = $this->propertyInfoExtractor->getTypes($target, $targetProperty->property, [ReadWriteTypeExtractor::WRITE_MUTATOR => $targetProperty->writeMutator]) ?? [];
 
         return TypesMatching::fromSourceAndTargetTypes($sourceTypes, $targetTypes);
     }

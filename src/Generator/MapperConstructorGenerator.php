@@ -56,7 +56,7 @@ final readonly class MapperConstructorGenerator
 
         return new Stmt\Expression(
             new Expr\Assign(
-                new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractCallbacks'), new Scalar\String_($propertyMetadata->source->name)),
+                new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractCallbacks'), new Scalar\String_($propertyMetadata->source->property)),
                 $extractCallback
             ));
     }
@@ -78,7 +78,7 @@ final readonly class MapperConstructorGenerator
 
         return new Stmt\Expression(
             new Expr\Assign(
-                new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractIsNullCallbacks'), new Scalar\String_($propertyMetadata->source->name)),
+                new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractIsNullCallbacks'), new Scalar\String_($propertyMetadata->source->property)),
                 $extractNullCallback
             ));
     }
@@ -99,7 +99,7 @@ final readonly class MapperConstructorGenerator
         }
 
         return new Stmt\Expression(new Expr\Assign(
-            new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'hydrateCallbacks'), new Scalar\String_($propertyMetadata->target->name)),
+            new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'hydrateCallbacks'), new Scalar\String_($propertyMetadata->target->property)),
             $hydrateCallback
         ));
     }
