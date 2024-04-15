@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
+use AutoMapper\Exception\LogicException;
 use AutoMapper\Generator\UniqueVariableScope;
 use AutoMapper\Metadata\PropertyMetadata;
 use PhpParser\Node\Expr;
@@ -33,6 +34,6 @@ final readonly class FixedValueTransformer implements TransformerInterface, Allo
             return [$expr->expr, []];
         }
 
-        throw new \LogicException('Cannot create php code from value ' . json_encode($this->value));
+        throw new LogicException('Cannot create php code from value ' . json_encode($this->value));
     }
 }
