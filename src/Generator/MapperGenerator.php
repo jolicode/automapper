@@ -48,7 +48,6 @@ final readonly class MapperGenerator
             new DiscriminatorStatementsGenerator($classDiscriminatorResolver, false),
             $cachedReflectionStatementsGenerator,
             $expressionLanguage,
-            $configuration->allowReadOnlyTargetToPopulate,
         );
 
         $this->injectMapperMethodStatementsGenerator = new InjectMapperMethodStatementsGenerator();

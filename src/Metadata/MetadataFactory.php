@@ -10,6 +10,7 @@ use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\Event\SourcePropertyMetadata as SourcePropertyMetadataEvent;
 use AutoMapper\Event\TargetPropertyMetadata as TargetPropertyMetadataEvent;
 use AutoMapper\EventListener\MapFromListener;
+use AutoMapper\EventListener\MapperListener;
 use AutoMapper\EventListener\MapProviderListener;
 use AutoMapper\EventListener\MapToContextListener;
 use AutoMapper\EventListener\MapToListener;
@@ -308,8 +309,9 @@ final class MetadataFactory
         return new GeneratorMetadata(
             $mapperMetadata,
             $propertiesMapping,
-            $this->configuration->attributeChecking,
-            $this->configuration->constructorStrategy,
+            $mapperEvent->checkAttributes ?? $this->configuration->attributeChecking,
+            $mapperEvent->constructorStrategy ?? $this->configuration->constructorStrategy,
+            $mapperEvent->allowReadOnlyTargetToPopulate ?? $this->configuration->allowReadOnlyTargetToPopulate,
             $mapperEvent->provider,
         );
     }
@@ -351,6 +353,7 @@ final class MetadataFactory
         $eventDispatcher->addListener(PropertyMetadataEvent::class, new MapToContextListener($reflectionExtractor));
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapToListener($customTransformerRegistry, $expressionLanguage));
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapFromListener($customTransformerRegistry, $expressionLanguage));
+        $eventDispatcher->addListener(GenerateMapperEvent::class, new MapperListener());
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapProviderListener());
 
         $propertyInfoExtractor = new PropertyInfoExtractor(

@@ -8,7 +8,10 @@ use AutoMapper\Attribute\MapProvider;
 use AutoMapper\Event\GenerateMapperEvent;
 use AutoMapper\Exception\BadMapDefinitionException;
 
-class MapProviderListener
+/**
+ * @internal
+ */
+final readonly class MapProviderListener
 {
     public function __construct()
     {
