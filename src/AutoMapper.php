@@ -156,10 +156,13 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         $customTransformerRegistry = new PropertyTransformerRegistry($propertyTransformers);
         $metadataRegistry = new MetadataRegistry($configuration);
         $providerRegistry = new ProviderRegistry($providers);
+        $classDiscriminatorResolver = new ClassDiscriminatorResolver($classDiscriminatorFromClassMetadata);
+
         $metadataFactory = MetadataFactory::create(
             $configuration,
             $customTransformerRegistry,
             $metadataRegistry,
+            $classDiscriminatorResolver,
             $transformerFactories,
             $classMetadataFactory,
             $nameConverter,
@@ -168,7 +171,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         );
 
         $mapperGenerator = new MapperGenerator(
-            new ClassDiscriminatorResolver($classDiscriminatorFromClassMetadata),
+            $classDiscriminatorResolver,
             $configuration,
             $expressionLanguage,
         );

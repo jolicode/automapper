@@ -44,6 +44,9 @@ class ServiceInstantiationTest extends WebTestCase
         self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_NestedObject_array.php');
         self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_User_array.php');
         self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_AddressDTO_array.php');
+        self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_Pet_array.php');
+        self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_Dog_array.php');
+        self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_Cat_array.php');
     }
 
     public function testAutoMapper(): void
