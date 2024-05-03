@@ -26,11 +26,17 @@ final readonly class MapperListener
                 /** @var Mapper $mapper */
                 $mapper = $attribute->newInstance();
 
-                if ($mapper->target !== null && $mapper->target !== $event->mapperMetadata->target) {
-                    continue;
+                if ($mapper->target === null) {
+                    $mappers[] = $mapper;
                 }
 
-                $mappers[] = $mapper;
+                if (\is_string($mapper->target) && $mapper->target === $event->mapperMetadata->target) {
+                    $mappers[] = $mapper;
+                }
+
+                if (\is_array($mapper->target) && \in_array($event->mapperMetadata->target, $mapper->target, true)) {
+                    $mappers[] = $mapper;
+                }
             }
         }
 
@@ -39,11 +45,17 @@ final readonly class MapperListener
                 /** @var Mapper $mapper */
                 $mapper = $attribute->newInstance();
 
-                if ($mapper->source !== null && $mapper->source !== $event->mapperMetadata->source) {
-                    continue;
+                if ($mapper->source === null) {
+                    $mappers[] = $mapper;
                 }
 
-                $mappers[] = $mapper;
+                if (\is_string($mapper->source) && $mapper->source === $event->mapperMetadata->source) {
+                    $mappers[] = $mapper;
+                }
+
+                if (\is_array($mapper->source) && \in_array($event->mapperMetadata->source, $mapper->source, true)) {
+                    $mappers[] = $mapper;
+                }
             }
         }
 

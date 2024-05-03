@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Symfony\Bundle\DependencyInjection;
 
+use AutoMapper\Attribute\Mapper;
 use AutoMapper\Configuration as AutoMapperConfiguration;
 use AutoMapper\ConstructorStrategy;
 use AutoMapper\Event\PropertyMetadataEvent;
@@ -15,6 +16,7 @@ use AutoMapper\Loader\FileLoader;
 use AutoMapper\Loader\FileReloadStrategy;
 use AutoMapper\Normalizer\AutoMapperNormalizer;
 use AutoMapper\Symfony\Bundle\CacheWarmup\CacheWarmer;
+use AutoMapper\Symfony\Bundle\ReflectionClassRecursiveIterator;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 use AutoMapper\Transformer\SymfonyUidTransformerFactory;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -136,6 +138,30 @@ class AutoMapperExtension extends Extension
 
             if ($mapper['reverse']) {
                 $configMappingRegistry->addMethodCall('register', [$mapper['target'], $mapper['source']]);
+            }
+        }
+
+        foreach (ReflectionClassRecursiveIterator::getReflectionClassesFromDirectories($config['mapping']['paths']) as $className => $reflectionClass) {
+            $mapperAttributes = $reflectionClass->getAttributes(Mapper::class);
+
+            foreach ($mapperAttributes as $mapperAttribute) {
+                $mapper = $mapperAttribute->newInstance();
+
+                if (null !== $mapper->source) {
+                    $sources = \is_array($mapper->source) ? $mapper->source : [$mapper->source];
+
+                    foreach ($sources as $source) {
+                        $configMappingRegistry->addMethodCall('register', [$source, $className]);
+                    }
+                }
+
+                if (null !== $mapper->target) {
+                    $targets = \is_array($mapper->target) ? $mapper->target : [$mapper->target];
+
+                    foreach ($targets as $target) {
+                        $configMappingRegistry->addMethodCall('register', [$className, $target]);
+                    }
+                }
             }
         }
 

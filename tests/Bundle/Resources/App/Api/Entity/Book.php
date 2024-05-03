@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace AutoMapper\Tests\Bundle\Resources\App\Api\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use AutoMapper\Attribute\Mapper;
 use AutoMapper\Attribute\MapTo;
 use AutoMapper\Tests\Bundle\Resources\App\Api\Processor\BookProcessor;
 use AutoMapper\Tests\Bundle\Resources\App\Api\Provider\BookProvider;
 
 /** A book. */
 #[ApiResource(provider: BookProvider::class, processor: BookProcessor::class)]
+#[Mapper(source: 'array', target: 'array')]
 class Book
 {
     /** The ID of this book. */
