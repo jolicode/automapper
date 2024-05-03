@@ -8,6 +8,7 @@ use AutoMapper\Configuration;
 use AutoMapper\Extractor\FromSourceMappingExtractor;
 use AutoMapper\Extractor\FromTargetMappingExtractor;
 use AutoMapper\Extractor\SourceTargetMappingExtractor;
+use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
 use AutoMapper\Metadata\MetadataFactory;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -47,6 +48,7 @@ return static function (ContainerConfigurator $container) {
                 service(TransformerFactoryInterface::class),
                 service(EventDispatcherInterface::class),
                 service('automapper.config_mapping_registry'),
+                service(ClassDiscriminatorResolver::class),
             ])
     ;
 };

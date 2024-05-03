@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator;
 
-use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
 use AutoMapper\Metadata\Dependency;
 use AutoMapper\Metadata\GeneratorMetadata;
 use PhpParser\Node\Arg;
@@ -29,10 +28,8 @@ use PhpParser\Node\Stmt;
  */
 final readonly class InjectMapperMethodStatementsGenerator
 {
-    public function __construct(
-        private DiscriminatorStatementsGenerator $discriminatorStatementsGeneratorSource,
-        private DiscriminatorStatementsGenerator $discriminatorStatementsGeneratorTarget,
-    ) {
+    public function __construct()
+    {
     }
 
     /**
@@ -66,8 +63,6 @@ final readonly class InjectMapperMethodStatementsGenerator
 
         return [
             ...$injectMapperStatements,
-            ...$this->discriminatorStatementsGeneratorSource->injectMapperStatements($metadata),
-            ...$this->discriminatorStatementsGeneratorTarget->injectMapperStatements($metadata),
         ];
     }
 }

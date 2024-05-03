@@ -22,6 +22,7 @@ use AutoMapper\Extractor\FromTargetMappingExtractor;
 use AutoMapper\Extractor\ReadWriteTypeExtractor;
 use AutoMapper\Extractor\SourceTargetMappingExtractor;
 use AutoMapper\Extractor\WriteMutator;
+use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
 use AutoMapper\Transformer\AllowNullValueTransformerInterface;
 use AutoMapper\Transformer\ArrayTransformerFactory;
 use AutoMapper\Transformer\BuiltinTransformerFactory;
@@ -30,6 +31,7 @@ use AutoMapper\Transformer\CopyTransformerFactory;
 use AutoMapper\Transformer\DateTimeTransformerFactory;
 use AutoMapper\Transformer\DependentTransformerInterface;
 use AutoMapper\Transformer\EnumTransformerFactory;
+use AutoMapper\Transformer\MapperDependency;
 use AutoMapper\Transformer\MultipleTransformerFactory;
 use AutoMapper\Transformer\NullableTransformerFactory;
 use AutoMapper\Transformer\ObjectTransformerFactory;
@@ -65,6 +67,7 @@ final class MetadataFactory
         private readonly TransformerFactoryInterface $transformerFactory,
         private readonly EventDispatcherInterface $eventDispatcher,
         public readonly MetadataRegistry $metadataRegistry,
+        private readonly ClassDiscriminatorResolver $classDiscriminatorResolver,
     ) {
     }
 
@@ -80,7 +83,7 @@ final class MetadataFactory
             $metadata = $this->createGeneratorMetadata($this->metadataRegistry->get($source, $target));
             $this->generatorMetadata[$source][$target] = $metadata;
 
-            // Add dependencies to the mapper
+            // Add dependencies from transformer to the mapper
             foreach ($metadata->propertiesMetadata as $propertyMapping) {
                 if ($propertyMapping->transformer instanceof DependentTransformerInterface) {
                     foreach ($propertyMapping->transformer->getDependencies() as $mapperDependency) {
@@ -88,6 +91,25 @@ final class MetadataFactory
 
                         $metadata->addDependency(new Dependency($mapperDependency, $dependencyMetadata));
                     }
+                }
+            }
+
+            // Add dependencies from discriminator to the mapper
+            if ($this->classDiscriminatorResolver->hasClassDiscriminator($metadata, true)) {
+                foreach ($this->classDiscriminatorResolver->discriminatorMapperNames($metadata, true) as $newSourceType => $mapperDependencyName) {
+                    $dependencyMetadata = $this->getGeneratorMetadata($newSourceType, $metadata->mapperMetadata->target);
+                    $mapperDependency = new MapperDependency($mapperDependencyName, $newSourceType, $metadata->mapperMetadata->target);
+
+                    $metadata->addDependency(new Dependency($mapperDependency, $dependencyMetadata));
+                }
+            }
+
+            if ($this->classDiscriminatorResolver->hasClassDiscriminator($metadata, false)) {
+                foreach ($this->classDiscriminatorResolver->discriminatorMapperNames($metadata, false) as $newTargetType => $mapperDependencyName) {
+                    $dependencyMetadata = $this->getGeneratorMetadata($metadata->mapperMetadata->source, $newTargetType);
+                    $mapperDependency = new MapperDependency($mapperDependencyName, $metadata->mapperMetadata->source, $newTargetType);
+
+                    $metadata->addDependency(new Dependency($mapperDependency, $dependencyMetadata));
                 }
             }
         }
@@ -115,6 +137,19 @@ final class MetadataFactory
                     foreach ($propertyMetadata->transformer->getDependencies() as $mapperDependency) {
                         $remainingMetadata[] = $metadataRegistry->get($mapperDependency->source, $mapperDependency->target);
                     }
+                }
+            }
+
+            // Add dependencies from discriminator to the mapper
+            if ($this->classDiscriminatorResolver->hasClassDiscriminator($generatorMetadata, true)) {
+                foreach ($this->classDiscriminatorResolver->discriminatorMapperNames($generatorMetadata, true) as $newSourceType => $mapperDependencyName) {
+                    $remainingMetadata[] = $metadataRegistry->get($newSourceType, $generatorMetadata->mapperMetadata->target);
+                }
+            }
+
+            if ($this->classDiscriminatorResolver->hasClassDiscriminator($generatorMetadata, false)) {
+                foreach ($this->classDiscriminatorResolver->discriminatorMapperNames($generatorMetadata, false) as $newTargetType => $mapperDependencyName) {
+                    $remainingMetadata[] = $metadataRegistry->get($generatorMetadata->mapperMetadata->source, $newTargetType);
                 }
             }
         }
@@ -286,6 +321,7 @@ final class MetadataFactory
         Configuration $configuration,
         PropertyTransformerRegistry $customTransformerRegistry,
         MetadataRegistry $metadataRegistry,
+        ClassDiscriminatorResolver $classDiscriminatorResolver,
         array $transformerFactories = [],
         ClassMetadataFactory $classMetadataFactory = null,
         AdvancedNameConverterInterface $nameConverter = null,
@@ -376,6 +412,7 @@ final class MetadataFactory
             $transformerFactory,
             $eventDispatcher,
             $metadataRegistry,
+            $classDiscriminatorResolver,
         );
     }
 }

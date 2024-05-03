@@ -50,7 +50,7 @@ final readonly class ClassDiscriminatorResolver
     }
 
     /**
-     * @return array<string, string>
+     * @return array<class-string<object>, string>
      */
     public function discriminatorMapperNames(GeneratorMetadata $metadata, bool $fromSource): array
     {

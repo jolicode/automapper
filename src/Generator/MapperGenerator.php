@@ -44,17 +44,14 @@ final readonly class MapperGenerator
         );
 
         $this->mapMethodStatementsGenerator = new MapMethodStatementsGenerator(
-            $discriminatorStatementsGeneratorSource = new DiscriminatorStatementsGenerator($classDiscriminatorResolver, true),
-            $discriminatorStatementsGeneratorTarget = new DiscriminatorStatementsGenerator($classDiscriminatorResolver, false),
+            new DiscriminatorStatementsGenerator($classDiscriminatorResolver, true),
+            new DiscriminatorStatementsGenerator($classDiscriminatorResolver, false),
             $cachedReflectionStatementsGenerator,
             $expressionLanguage,
             $configuration->allowReadOnlyTargetToPopulate,
         );
 
-        $this->injectMapperMethodStatementsGenerator = new InjectMapperMethodStatementsGenerator(
-            $discriminatorStatementsGeneratorSource,
-            $discriminatorStatementsGeneratorTarget
-        );
+        $this->injectMapperMethodStatementsGenerator = new InjectMapperMethodStatementsGenerator();
 
         $this->disableGeneratedMapper = !$configuration->autoRegister;
     }

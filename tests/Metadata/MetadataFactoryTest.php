@@ -8,6 +8,7 @@ use AutoMapper\Configuration;
 use AutoMapper\Extractor\FromSourceMappingExtractor;
 use AutoMapper\Extractor\FromTargetMappingExtractor;
 use AutoMapper\Extractor\SourceTargetMappingExtractor;
+use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\MetadataFactory;
 use AutoMapper\Metadata\MetadataRegistry;
@@ -88,7 +89,8 @@ class MetadataFactoryTest extends AutoMapperBaseTest
             $fromTargetMappingExtractor,
             $transformerFactory,
             new EventDispatcher(),
-            new MetadataRegistry($configuration)
+            new MetadataRegistry($configuration),
+            new ClassDiscriminatorResolver()
         );
     }
 

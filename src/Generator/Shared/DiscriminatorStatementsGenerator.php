@@ -29,46 +29,6 @@ final readonly class DiscriminatorStatementsGenerator
 
     /**
      * @return list<Stmt>
-     */
-    public function injectMapperStatements(GeneratorMetadata $metadata): array
-    {
-        if (!$this->supports($metadata)) {
-            return [];
-        }
-
-        $discriminatorMapperNames = $this->classDiscriminatorResolver->discriminatorMapperNames($metadata, $this->fromSource);
-
-        $injectMapperStatements = [];
-
-        foreach ($discriminatorMapperNames as $typeTarget => $discriminatorMapperName) {
-            /*
-             * We inject dependencies for all the discriminator variant
-             *
-             * ```php
-             *  $this->mappers['Discriminator_Mapper_VariantA'] = $autoMapperRegistry->getMapper($source, VariantA::class);
-             *  $this->mappers['Discriminator_Mapper_VariantB'] = $autoMapperRegistry->getMapper($source, VariantB::class);
-             *  ...
-             * ```
-             */
-            $injectMapperStatements[] = new Stmt\Expression(
-                new Expr\Assign(
-                    new Expr\ArrayDimFetch(
-                        new Expr\PropertyFetch(new Expr\Variable('this'), 'mappers'),
-                        new Scalar\String_($discriminatorMapperName)
-                    ),
-                    new Expr\MethodCall(new Expr\Variable('autoMapperRegistry'), 'getMapper', [
-                        new Arg(new Scalar\String_($this->fromSource ? $typeTarget : $metadata->mapperMetadata->source)),
-                        new Arg(new Scalar\String_($this->fromSource ? $metadata->mapperMetadata->target : $typeTarget)),
-                    ])
-                )
-            );
-        }
-
-        return $injectMapperStatements;
-    }
-
-    /**
-     * @return list<Stmt>
      *
      * We return the object created with the correct mapper depending on the variant, this will skip the next mapping phase in this situation
      *

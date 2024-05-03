@@ -13,6 +13,7 @@ automapper:
     mappers:
       - { source: 'AutoMapper\Tests\Bundle\Resources\App\Entity\NestedObject', target: 'array' }
       - { source: 'AutoMapper\Tests\Bundle\Resources\App\Entity\AddressDTO', target: 'array', reverse: true }
+      - { source: 'AutoMapper\Tests\Bundle\Resources\App\Entity\Pet', target: 'array', reverse: true }
       - { source: 'AutoMapper\Tests\Bundle\Resources\App\Entity\UserDTO', target: 'array', reverse: false }
       - { source: 'array', target: 'AutoMapper\Tests\Bundle\Resources\App\Entity\Order', reverse: false }
       - { source: 'AutoMapper\Tests\Bundle\Resources\App\Api\Entity\Book', target: 'array', reverse: true }

@@ -95,7 +95,7 @@ final readonly class ObjectTransformer implements TransformerInterface, Dependen
     }
 
     /**
-     * @return class-string<mixed>|'array'
+     * @return class-string<object>|'array'
      */
     private function getSource(): string
     {
@@ -105,7 +105,7 @@ final readonly class ObjectTransformer implements TransformerInterface, Dependen
             /**
              * Cannot be null since we check the source type is an Object.
              *
-             * @var class-string<mixed> $sourceTypeName
+             * @var class-string<object> $sourceTypeName
              */
             $sourceTypeName = $this->sourceType->getClassName();
         }
@@ -114,7 +114,7 @@ final readonly class ObjectTransformer implements TransformerInterface, Dependen
     }
 
     /**
-     * @return class-string<mixed>|'array'
+     * @return class-string<object>|'array'
      */
     private function getTarget(): string
     {
@@ -124,7 +124,7 @@ final readonly class ObjectTransformer implements TransformerInterface, Dependen
             /**
              * Cannot be null since we check the target type is an Object.
              *
-             * @var class-string<mixed> $targetTypeName
+             * @var class-string<object> $targetTypeName
              */
             $targetTypeName = $this->targetType->getClassName();
         }
