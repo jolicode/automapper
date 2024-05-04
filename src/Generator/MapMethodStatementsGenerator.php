@@ -31,7 +31,6 @@ final readonly class MapMethodStatementsGenerator
         DiscriminatorStatementsGenerator $discriminatorStatementsGeneratorTarget,
         CachedReflectionStatementsGenerator $cachedReflectionStatementsGenerator,
         ExpressionLanguage $expressionLanguage,
-        private bool $allowReadOnlyTargetToPopulate = false,
     ) {
         $this->createObjectStatementsGenerator = new CreateTargetStatementsGenerator(
             $discriminatorStatementsGeneratorSource,
@@ -218,7 +217,7 @@ final readonly class MapMethodStatementsGenerator
             ['comments' => [new Comment(sprintf('/** @var %s $result */', $metadata->mapperMetadata->target === 'array' ? $metadata->mapperMetadata->target : '\\' . $metadata->mapperMetadata->target))]]
         );
 
-        if (!$this->allowReadOnlyTargetToPopulate && $metadata->isTargetReadOnlyClass()) {
+        if (!$metadata->allowReadOnlyTargetToPopulate && $metadata->isTargetReadOnlyClass()) {
             /*
              * If the target is a read-only class, we throw an exception if the target is not null
              *

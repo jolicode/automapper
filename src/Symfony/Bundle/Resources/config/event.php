@@ -7,6 +7,8 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 use AutoMapper\Event\GenerateMapperEvent;
 use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\EventListener\MapFromListener;
+use AutoMapper\EventListener\MapperListener;
+use AutoMapper\EventListener\MapProviderListener;
 use AutoMapper\EventListener\MapToContextListener;
 use AutoMapper\EventListener\MapToListener;
 use AutoMapper\EventListener\Symfony\AdvancedNameConverterListener;
@@ -24,6 +26,10 @@ return static function (ContainerConfigurator $container) {
         ->set(MapFromListener::class)
             ->args([service(PropertyTransformerRegistry::class), service('automapper.expression_language')])
             ->tag('kernel.event_listener', ['event' => GenerateMapperEvent::class, 'priority' => 32])
+        ->set(MapProviderListener::class)
+            ->tag('kernel.event_listener', ['event' => GenerateMapperEvent::class, 'priority' => 128])
+        ->set(MapperListener::class)
+            ->tag('kernel.event_listener', ['event' => GenerateMapperEvent::class, 'priority' => 256])
 
         ->set(AdvancedNameConverterListener::class)
             ->args([service(AdvancedNameConverterInterface::class)])

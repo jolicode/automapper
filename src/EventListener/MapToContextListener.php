@@ -10,6 +10,9 @@ use AutoMapper\Extractor\ReadAccessor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyReadInfo;
 
+/**
+ * @internal
+ */
 final readonly class MapToContextListener
 {
     public function __construct(

@@ -27,6 +27,8 @@ automapper:
   api_platform: false
   name_converter: null
   mappings:
+    paths:
+      - "%kernel.project_dir%/src/Entity"
     mappers:
       - source: AutoMapper\Bundle\Tests\Fixtures\User
         target: AutoMapper\Bundle\Tests\Fixtures\UserDTO
@@ -73,5 +75,7 @@ inject extra data (json ld) in the mappers when we map a Resource class to or fr
 * `name_converter` (default: `null`): A service id which implement the `AdvancedNameConverterInterface` from the symfony/serializer,
   this name converter will be used when mapping from an array to an object and vice versa;
 * `mappings`: Allow to auto register the mappers for warmup, and selecting them to normalizer if wanted
+    * `paths`: A list of paths where to look for mappers to register; This will automatically register all classes
+      with the `#[Mapper]` attribute in the given paths.
     * `mappers`: A list of mapping to register, each mapping should have a `source` and a `target` key, and can have
       a `reverse` key to also register the reverse mapping. 

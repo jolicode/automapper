@@ -24,6 +24,7 @@ final class GeneratorMetadata
         public readonly array $propertiesMetadata,
         public readonly bool $checkAttributes = true,
         public readonly ConstructorStrategy $constructorStrategy = ConstructorStrategy::AUTO,
+        public bool $allowReadOnlyTargetToPopulate = false,
         public readonly ?string $provider = null,
     ) {
         $this->variableRegistry = new VariableRegistry();

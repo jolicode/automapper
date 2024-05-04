@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Event;
 
+use AutoMapper\ConstructorStrategy;
 use AutoMapper\Metadata\MapperMetadata;
 
 /**
@@ -18,6 +19,9 @@ final class GenerateMapperEvent
         public readonly MapperMetadata $mapperMetadata,
         public array $properties = [],
         public ?string $provider = null,
+        public ?bool $checkAttributes = null,
+        public ?ConstructorStrategy $constructorStrategy = null,
+        public ?bool $allowReadOnlyTargetToPopulate = null,
     ) {
     }
 }
