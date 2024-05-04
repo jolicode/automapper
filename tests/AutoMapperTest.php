@@ -39,6 +39,9 @@ use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithImmutableInstance;
 use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithMutableInstance;
 use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithNullValue;
 use AutoMapper\Tests\Fixtures\HasDateTimeWithNullValue;
+use AutoMapper\Tests\Fixtures\Issue111\Colour;
+use AutoMapper\Tests\Fixtures\Issue111\ColourTransformer;
+use AutoMapper\Tests\Fixtures\Issue111\FooDto;
 use AutoMapper\Tests\Fixtures\ObjectsUnion\Bar;
 use AutoMapper\Tests\Fixtures\ObjectsUnion\Foo;
 use AutoMapper\Tests\Fixtures\ObjectsUnion\ObjectsUnionProperty;
@@ -1506,5 +1509,18 @@ class AutoMapperTest extends AutoMapperBaseTest
 
         self::assertSame('bar', $data->foo);
         self::assertSame('foo', $data->bar);
+    }
+
+    public function testIssue111(): void
+    {
+        $fooDto = new FooDto();
+        $fooDto->colours = ['red', 'green', 'blue'];
+
+        $this->buildAutoMapper(propertyTransformers: [new ColourTransformer()]);
+
+        $foo = $this->autoMapper->map($fooDto, Fixtures\Issue111\Foo::class);
+
+        self::assertInstanceOf(Fixtures\Issue111\Foo::class, $foo);
+        self::assertEquals([new Colour('red'), new Colour('green'), new Colour('blue')], $foo->getColours());
     }
 }
