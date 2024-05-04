@@ -29,3 +29,38 @@ Then when running the `cache:warmup` command, this will generate the mappers for
 > When a mapping have dependencies, it will generate the dependencies as well even if not specified in the mappings configuration.
 
 This way, you can generate all the mappers you need before deploying your application.
+
+## Automatically register mappers
+
+You can also define a list of paths where the mappers are located, and the bundle will automatically register them for you.
+
+```yaml
+automapper:
+  mappings:
+    paths:
+      - "%kernel.project_dir%/src/Entity"
+```
+
+All classes in the specified paths with the `#[Mapper]` attribute will be registered in the container.
+
+This attribute need a `source` and/or `target` argument to specify which mapping to register.
+
+```php
+#[Mapper(source: 'array', target: 'array')]
+class Entity
+{
+    public string $foo;
+}
+```
+
+This will generate a mapper from `array` to `Entity` and vice versa during the cache warmup.
+
+You can also specify an array of sources and / or targets to generate multiple mappers at once.
+
+```php
+#[Mapper(source: 'array', target: ['array', EntityDto::class])]
+class Entity
+{
+    public string $foo;
+}
+```
