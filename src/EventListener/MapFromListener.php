@@ -62,7 +62,9 @@ final readonly class MapFromListener extends MapListener
 
     private function addPropertyFromTarget(GenerateMapperEvent $event, MapFrom $mapFrom, string $property): void
     {
-        if ($mapFrom->source !== null && $event->mapperMetadata->source !== $mapFrom->source) {
+        $sources = null === $mapFrom->source ? null : (\is_array($mapFrom->source) ? $mapFrom->source : [$mapFrom->source]);
+
+        if ($sources !== null && !\in_array($event->mapperMetadata->source, $sources, true)) {
             return;
         }
 
@@ -79,10 +81,11 @@ final readonly class MapFromListener extends MapListener
             ignoreReason: $mapFrom->ignore === true ? 'Property is ignored by MapFrom Attribute on Target' : null,
             if: $mapFrom->if,
             groups: $mapFrom->groups,
+            priority: $mapFrom->priority,
         );
 
-        if (\array_key_exists($property->target->property, $event->properties)) {
-            throw new BadMapDefinitionException(sprintf('There is already a MapTo or MapFrom attribute with target "%s" in class "%s" or class "%s".', $property->target->property, $event->mapperMetadata->source, $event->mapperMetadata->target));
+        if (\array_key_exists($property->target->property, $event->properties) && $event->properties[$property->target->property]->priority >= $property->priority) {
+            return;
         }
 
         $event->properties[$property->target->property] = $property;

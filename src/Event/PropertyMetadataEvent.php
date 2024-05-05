@@ -28,6 +28,7 @@ final class PropertyMetadataEvent
         public ?string $if = null,
         public ?array $groups = null,
         public ?bool $disableGroupsCheck = null,
+        public int $priority = 0,
     ) {
     }
 }
