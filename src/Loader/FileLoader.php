@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Loader;
 
-use AutoMapper\Exception\RuntimeException;
+use AutoMapper\Exception\CompileException;
 use AutoMapper\Generator\MapperGenerator;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\MetadataFactory;
@@ -129,7 +129,7 @@ final class FileLoader implements ClassLoaderInterface
         $fp = fopen($file, 'w');
 
         if (false === $fp) {
-            throw new RuntimeException(sprintf('Could not open file "%s"', $file));
+            throw new CompileException(sprintf('Could not open file "%s"', $file));
         }
 
         if (flock($fp, LOCK_EX)) {

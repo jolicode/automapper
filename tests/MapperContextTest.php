@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Tests;
 
 use AutoMapper\Exception\CircularReferenceException;
+use AutoMapper\Exception\InvalidArgumentException;
 use AutoMapper\MapperContext;
 use PHPUnit\Framework\TestCase;
 
@@ -159,7 +160,7 @@ class MapperContextTest extends TestCase
 
     public function testItThrowsExceptionWithInvalidTimeZone(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid timezone "foo" passed to automapper context.');
 
         MapperContext::getForcedTimezone([MapperContext::DATETIME_FORCE_TIMEZONE => 'foo']);

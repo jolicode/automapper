@@ -7,6 +7,6 @@ namespace AutoMapper\Exception;
 /**
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
  */
-final class InvalidArgumentException extends \InvalidArgumentException
+final class InvalidArgumentException extends \InvalidArgumentException implements AutoMapperException
 {
 }

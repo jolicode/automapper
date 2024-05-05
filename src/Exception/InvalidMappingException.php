@@ -7,6 +7,6 @@ namespace AutoMapper\Exception;
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-final class InvalidMappingException extends RuntimeException
+final class InvalidMappingException extends MetadataException
 {
 }

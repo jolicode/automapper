@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper;
 
 use AutoMapper\Exception\CircularReferenceException;
-use AutoMapper\Exception\RuntimeException;
+use AutoMapper\Exception\InvalidArgumentException;
 
 /**
  * Context for mapping.
@@ -327,7 +327,7 @@ class MapperContext
         try {
             return new \DateTimeZone($timezone);
         } catch (\Exception $e) {
-            throw new RuntimeException("Invalid timezone \"$timezone\" passed to automapper context.", previous: $e);
+            throw new InvalidArgumentException("Invalid timezone \"$timezone\" passed to automapper context.", previous: $e);
         }
     }
 }

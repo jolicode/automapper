@@ -7,6 +7,6 @@ namespace AutoMapper\Exception;
 /**
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
  */
-final class LogicException extends \LogicException
+final class LogicException extends \LogicException implements AutoMapperException
 {
 }
