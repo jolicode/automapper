@@ -7,10 +7,10 @@ namespace AutoMapper\Tests;
 use AutoMapper\Exception\BadMapDefinitionException;
 use AutoMapper\MapperContext;
 use AutoMapper\Symfony\ExpressionLanguageProvider;
-use AutoMapper\Tests\Fixtures\MapTo\BadMapTo;
 use AutoMapper\Tests\Fixtures\MapTo\BadMapToTransformer;
 use AutoMapper\Tests\Fixtures\MapTo\Bar;
 use AutoMapper\Tests\Fixtures\MapTo\FooMapTo;
+use AutoMapper\Tests\Fixtures\MapTo\PriorityMapTo;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\FooDependency;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\TransformerWithDependency;
 use Symfony\Component\DependencyInjection\ServiceLocator;
@@ -114,12 +114,14 @@ class AutoMapperMapToTest extends AutoMapperBaseTest
         $this->assertSame('', $bar->getB());
     }
 
-    public function testBadDefinitionOnSameTargetProperty()
+    public function testPriority()
     {
-        $foo = new BadMapTo('foo');
+        $foo = new PriorityMapTo('foo');
 
-        $this->expectException(BadMapDefinitionException::class);
-        $this->autoMapper->map($foo, 'array');
+        $result = $this->autoMapper->map($foo, 'array');
+
+        self::assertArrayHasKey('foo', $result);
+        self::assertSame('foo', $result['foo']);
     }
 
     public function testBadDefinitionOnTransformer()

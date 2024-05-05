@@ -6,11 +6,11 @@ namespace AutoMapper\Tests\Fixtures\MapTo;
 
 use AutoMapper\Attribute\MapTo;
 
-class BadMapTo
+class PriorityMapTo
 {
     public function __construct(
-        #[MapTo('array', ignore: true)]
-        #[MapTo('array', ignore: false)]
+        #[MapTo('array', ignore: true, priority: 0)]
+        #[MapTo('array', ignore: false, priority: 10)]
         public string $foo
     ) {
     }

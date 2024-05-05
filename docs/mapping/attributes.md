@@ -69,5 +69,32 @@ class EntityDto
 }
 ```
 
-> [!WARNING]
-> If multiple `#[MapTo]` and/or `#[MapFrom]` attributes target the same property an exception will be thrown.
+You can also pass an array to the `target` or `source` argument to specify configuration for multiple targets or sources.
+```php
+class EntityDto
+{
+    #[MapFrom(source: Entity::class, property: 'title')]
+    #[MapFrom(source: 'array', property: 'name')]
+    public string $name;
+    
+    #[MapFrom(source: [Entity::class, 'array'], property: 'bar')]
+    public string $foo;
+}
+```
+
+In case there is multiple attributes that match the same target (not source), you can use the `priority` argument 
+to specify which one should be used first. The default priority is `0`.
+
+```php
+class Entity
+{
+    #[MapTo(ignore: true)]
+    public string $title;
+}
+
+class EntityDto
+{
+    #[MapFrom(source: Entity::class, ignore: false, priority: 10)]
+    public string $title;
+}
+```
