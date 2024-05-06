@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.0.0] - 2024-05-06
 ### Added
 - [GH#114](https://github.com/jolicode/automapper/pull/114) Introducing Mapper Attribute
 - [GH#117](https://github.com/jolicode/automapper/pull/117) Allow multiple source/target, allow overriding attribute with priority system
@@ -291,7 +292,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * [AutoMapper] [GH#179](https://github.com/janephp/janephp/pull/179) Fixing incompatible changes in Symfony 5.0
 
-[Unreleased]: https://github.com/jolicode/automapper/compare/9.0.0-beta.2...HEAD
+[Unreleased]: https://github.com/jolicode/automapper/compare/9.0.0...HEAD
+[9.0.0]: https://github.com/janephp/janephp/compare/9.0.0-beta.2...9.0.0
 [9.0.0-beta.2]: https://github.com/janephp/janephp/compare/9.0.0-beta.1...9.0.0-beta.2
 [9.0.0-beta.1]: https://github.com/janephp/janephp/compare/8.2.2...9.0.0-beta.1
 [8.2.2]: https://github.com/janephp/janephp/compare/8.2.1...8.2.2
