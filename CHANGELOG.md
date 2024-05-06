@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#114](https://github.com/jolicode/automapper/pull/114) Introducing Mapper Attribute
 - [GH#117](https://github.com/jolicode/automapper/pull/117) Allow multiple source/target, allow overriding attribute with priority system
 
+### Changed
+- [GH#119](https://github.com/jolicode/automapper/pull/119) Change serializer configuration naming in Symfony Bundle
+
 ### Fixed
 - [GH#109](https://github.com/jolicode/automapper/pull/109) Use AutoMapper exceptions
 - [GH#115](https://github.com/jolicode/automapper/pull/115) Fix generating discriminator dependencies

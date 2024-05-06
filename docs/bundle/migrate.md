@@ -57,7 +57,7 @@ automapper:
 
 ### Serializer attributes
 
-If you have serializer attributes on your entity, you can also enabled the `serializer` option to use them.
+If you have serializer attributes on your entity, you can also enabled the `serializer_attributes` option to use them.
 
 ```yaml
 # config/packages/automapper.yaml

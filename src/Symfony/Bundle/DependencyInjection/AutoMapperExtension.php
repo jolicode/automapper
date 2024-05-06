@@ -95,7 +95,7 @@ class AutoMapperExtension extends Extension
                 ->addTag('automapper.transformer_factory', ['priority' => '-1004']);
         }
 
-        if ($config['serializer']) {
+        if ($config['serializer_attributes']) {
             if (!interface_exists(SerializerInterface::class)) {
                 throw new LogicException('The "symfony/serializer" component is required to use the "serializer" feature.');
             }
