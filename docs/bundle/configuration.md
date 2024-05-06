@@ -23,7 +23,7 @@ automapper:
     eval: false
     cache_dir: "%kernel.cache_dir%/automapper"
     reload_strategy: "always"
-  serializer: true
+  serializer_attributes: true
   api_platform: false
   name_converter: null
   mappings:
