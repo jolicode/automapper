@@ -7,6 +7,6 @@ namespace AutoMapper\Exception;
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-final class BadMapDefinitionException extends RuntimeException
+final class BadMapDefinitionException extends MetadataException
 {
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator;
 
-use AutoMapper\Exception\LogicException;
+use AutoMapper\Exception\CompileException;
 use AutoMapper\Exception\MissingConstructorArgumentsException;
 use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
 use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
@@ -323,6 +323,6 @@ final readonly class CreateTargetStatementsGenerator
             return $expr->expr;
         }
 
-        throw new LogicException('Cannot extract expr from ' . var_export($value, true));
+        throw new CompileException('Cannot extract expr from ' . var_export($value, true));
     }
 }

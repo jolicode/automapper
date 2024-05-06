@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
-use AutoMapper\Exception\LogicException;
+use AutoMapper\Exception\CompileException;
 use AutoMapper\Generator\UniqueVariableScope;
 use AutoMapper\Metadata\PropertyMetadata;
 use PhpParser\Node\Expr;
@@ -34,6 +34,6 @@ final readonly class ExpressionLanguageTransformer implements TransformerInterfa
             return [$expr->expr, []];
         }
 
-        throw new LogicException('Cannot use callback or create expression language condition from expression "' . $this->expression . "'");
+        throw new CompileException('Cannot use callback or create expression language condition from expression "' . $this->expression . "'");
     }
 }

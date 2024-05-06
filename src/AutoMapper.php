@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper;
 
-use AutoMapper\Exception\NoMappingFoundException;
+use AutoMapper\Exception\InvalidMappingException;
 use AutoMapper\Generator\MapperGenerator;
 use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
 use AutoMapper\Loader\ClassLoaderInterface;
@@ -109,7 +109,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         }
 
         if ('array' === $sourceType && 'array' === $targetType) {
-            throw new NoMappingFoundException('Cannot map this value, both source and target are array.');
+            throw new InvalidMappingException('Cannot map this value, both source and target are array.');
         }
 
         return $this->getMapper($sourceType, $targetType)->map($source, $context);

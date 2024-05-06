@@ -62,7 +62,7 @@ final class ReadAccessor
                 /*
                  * Create method call argument to read value from context and throw exception if not found
                  *
-                 * $context['map_to_accessor_parameter']['some_key'] ?? throw new \InvalidArgumentException('error message');
+                 * $context['map_to_accessor_parameter']['some_key'] ?? throw new InvalidArgumentException('error message');
                  */
                 $methodCallArguments[] = new Arg(
                     new Expr\BinaryOp\Coalesce(
@@ -75,7 +75,7 @@ final class ReadAccessor
                         ),
                         new Expr\Throw_(
                             new Expr\New_(
-                                new Name\FullyQualified(\InvalidArgumentException::class),
+                                new Name\FullyQualified(InvalidArgumentException::class),
                                 [
                                     new Arg(
                                         new Scalar\String_(

@@ -7,6 +7,6 @@ namespace AutoMapper\Exception;
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-final class CompileException extends RuntimeException
+final class CompileException extends \LogicException implements AutoMapperException
 {
 }

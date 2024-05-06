@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator;
 
-use AutoMapper\Exception\LogicException;
+use AutoMapper\Exception\CompileException;
 use AutoMapper\MapperContext;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\PropertyMetadata;
@@ -259,7 +259,7 @@ final readonly class PropertyConditionsGenerator
                 }
 
                 if ($argumentsCount > 2) {
-                    throw new LogicException('Callable condition must have 1 or 2 arguments required, but it has ' . $argumentsCount);
+                    throw new CompileException('Callable condition must have 1 or 2 arguments required, but it has ' . $argumentsCount);
                 }
             }
 
@@ -303,6 +303,6 @@ final readonly class PropertyConditionsGenerator
             return $expr->expr;
         }
 
-        throw new LogicException('Cannot use callback or create expression language condition from expression "' . $propertyMetadata->if . "'");
+        throw new CompileException('Cannot use callback or create expression language condition from expression "' . $propertyMetadata->if . "'");
     }
 }

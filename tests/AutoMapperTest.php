@@ -9,8 +9,8 @@ use AutoMapper\Configuration;
 use AutoMapper\ConstructorStrategy;
 use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\Exception\CircularReferenceException;
+use AutoMapper\Exception\InvalidMappingException;
 use AutoMapper\Exception\MissingConstructorArgumentsException;
-use AutoMapper\Exception\NoMappingFoundException;
 use AutoMapper\Exception\ReadOnlyTargetException;
 use AutoMapper\MapperContext;
 use AutoMapper\Provider\EarlyReturn;
@@ -769,7 +769,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testInvalidMappingBothArray(): void
     {
-        self::expectException(NoMappingFoundException::class);
+        $this->expectException(InvalidMappingException::class);
 
         $data = ['test' => 'foo'];
         $array = $this->autoMapper->map($data, 'array');
@@ -777,7 +777,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testNoAutoRegister(): void
     {
-        self::expectException(NoMappingFoundException::class);
+        $this->expectException(InvalidMappingException::class);
 
         $automapper = AutoMapper::create(new Configuration(autoRegister: false, classPrefix: 'NoAutoRegister_'));
         $automapper->getMapper(Fixtures\User::class, Fixtures\UserDTO::class);

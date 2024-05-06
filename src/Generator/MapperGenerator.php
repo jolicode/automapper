@@ -7,7 +7,7 @@ namespace AutoMapper\Generator;
 use AutoMapper\AutoMapperRegistryInterface;
 use AutoMapper\Configuration;
 use AutoMapper\Exception\CompileException;
-use AutoMapper\Exception\NoMappingFoundException;
+use AutoMapper\Exception\InvalidMappingException;
 use AutoMapper\GeneratedMapper;
 use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
 use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
@@ -59,12 +59,12 @@ final readonly class MapperGenerator
      * Generate Class AST given metadata for a mapper.
      *
      * @throws CompileException
-     * @throws NoMappingFoundException
+     * @throws InvalidMappingException
      */
     public function generate(GeneratorMetadata $metadata): Stmt\Class_
     {
         if ($this->disableGeneratedMapper) {
-            throw new NoMappingFoundException('No mapper found for source ' . $metadata->mapperMetadata->source . ' and target ' . $metadata->mapperMetadata->target);
+            throw new InvalidMappingException('No mapper found for source ' . $metadata->mapperMetadata->source . ' and target ' . $metadata->mapperMetadata->target);
         }
 
         return (new Builder\Class_($metadata->mapperMetadata->className))

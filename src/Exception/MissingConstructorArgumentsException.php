@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Exception;
 
-final class MissingConstructorArgumentsException extends \RuntimeException
+final class MissingConstructorArgumentsException extends RuntimeException
 {
     /**
      * @param string[]          $missingArguments

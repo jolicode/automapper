@@ -7,6 +7,6 @@ namespace AutoMapper\Exception;
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-final class NoMappingFoundException extends RuntimeException
+interface AutoMapperException
 {
 }
