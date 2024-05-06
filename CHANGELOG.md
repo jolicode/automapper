@@ -7,8 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- [GH#114](https://github.com/jolicode/automapper/pull/114) Introducing Mapper Attribute
+- [GH#117](https://github.com/jolicode/automapper/pull/117) Allow multiple source/target, allow overriding attribute with priority system
+
 ### Fixed
 - [GH#109](https://github.com/jolicode/automapper/pull/109) Use AutoMapper exceptions
+- [GH#115](https://github.com/jolicode/automapper/pull/115) Fix generating discriminator dependencies
+- [GH#116](https://github.com/jolicode/automapper/pull/116) Fix property transformer with adder and remover methods
 
 ## [9.0.0-beta.2] - 2024-04-02
 ### Added
