@@ -40,7 +40,7 @@ readonly class Configuration implements ConfigurationInterface
                     ->end()
                     ->addDefaultsIfNotSet()
                 ->end()
-                ->booleanNode('serializer')->defaultValue(interface_exists(SerializerInterface::class))->end()
+                ->booleanNode('serializer_attributes')->defaultValue(interface_exists(SerializerInterface::class))->end()
                 ->booleanNode('api_platform')->defaultFalse()->end()
                 ->scalarNode('name_converter')->defaultNull()->end()
                 ->arrayNode('loader')

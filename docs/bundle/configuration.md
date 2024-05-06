@@ -67,9 +67,9 @@ automapper:
         * `always` will generate the mappers at each request;
         * `never` will generate them only if they don't exist;
         * `on_change` will generate the mappers only if the source or target class has changed since the last generation;
-* `serializer` (default: `true` if the symfony/serializer is available, false otherwise): A boolean which indicate
-  if we use the attribute of the symfony/serializer during the mapping, this only apply to the `#[Groups]`, `#[MaxDepth]`,
-  `#[Ignore]` and `#[DiscriminatorMap]` attributes;
+* `serializer_attributes` (default: `true` if the symfony/serializer is available, false otherwise): A boolean which 
+indicate if we use the attribute of the symfony/serializer during the mapping, this only apply to the `#[Groups]`, 
+`#[MaxDepth]`, `#[Ignore]` and `#[DiscriminatorMap]` attributes;
 * `api_platform` (default: `false`): A boolean which indicate if we use services from the api-platform/core package and
 inject extra data (json ld) in the mappers when we map a Resource class to or from an array.
 * `name_converter` (default: `null`): A service id which implement the `AdvancedNameConverterInterface` from the symfony/serializer,
