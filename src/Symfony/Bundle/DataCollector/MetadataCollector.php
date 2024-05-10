@@ -133,10 +133,10 @@ class MetadataCollector extends AbstractDataCollector
     private function highlight(string $code): string
     {
         $highlightComment = \ini_get('highlight.comment');
-        $highlightDefault = \ini_get('highlight.comment');
-        $highlightHtml = \ini_get('highlight.comment');
-        $highlightKeyword = \ini_get('highlight.comment');
-        $highlightString = \ini_get('highlight.comment');
+        $highlightDefault = \ini_get('highlight.default');
+        $highlightHtml = \ini_get('highlight.html');
+        $highlightKeyword = \ini_get('highlight.keyword');
+        $highlightString = \ini_get('highlight.string');
 
         ini_set('highlight.comment', '#5F826B');
         ini_set('highlight.default', '#9876AA');
