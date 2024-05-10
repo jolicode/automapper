@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixes
 - [GH#124](https://github.com/jolicode/automapper/pull/124) Fix Symfony's WebProfiler issues
+- [GH#125](https://github.com/jolicode/automapper/pull/125) Fix MetadataCollector default highlight colors
 
 ## [9.0.0] - 2024-05-06
 ### Added
