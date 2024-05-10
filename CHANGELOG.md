@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.0.1] - 2024-05-10
 ### Fixes
 - [GH#124](https://github.com/jolicode/automapper/pull/124) Fix Symfony's WebProfiler issues
 - [GH#125](https://github.com/jolicode/automapper/pull/125) Fix MetadataCollector default highlight colors
@@ -296,7 +297,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * [AutoMapper] [GH#179](https://github.com/janephp/janephp/pull/179) Fixing incompatible changes in Symfony 5.0
 
-[Unreleased]: https://github.com/jolicode/automapper/compare/9.0.0...HEAD
+[Unreleased]: https://github.com/jolicode/automapper/compare/9.0.1...HEAD
+[9.0.1]: https://github.com/janephp/janephp/compare/9.0.0...9.0.1
 [9.0.0]: https://github.com/janephp/janephp/compare/9.0.0-beta.2...9.0.0
 [9.0.0-beta.2]: https://github.com/janephp/janephp/compare/9.0.0-beta.1...9.0.0-beta.2
 [9.0.0-beta.1]: https://github.com/janephp/janephp/compare/8.2.2...9.0.0-beta.1
