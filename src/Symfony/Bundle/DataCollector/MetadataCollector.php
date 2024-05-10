@@ -41,7 +41,7 @@ class MetadataCollector extends AbstractDataCollector
             if (class_exists($metadata->mapperMetadata->className)) {
                 $reflectionClass = new \ReflectionClass($metadata->mapperMetadata->className);
 
-                if (($fileName = $reflectionClass->getFileName()) !== false && ($content = file_get_contents($fileName)) !== false) {
+                if (($fileName = $reflectionClass->getFileName()) !== false && ($content = @file_get_contents($fileName)) !== false) {
                     $fileCode = $this->highlight($content);
                 }
             }

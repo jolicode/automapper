@@ -6,7 +6,11 @@ namespace AutoMapper\Tests\Bundle;
 
 use AutoMapper\AutoMapperInterface;
 use AutoMapper\MapperContext;
+use AutoMapper\Metadata\MetadataFactory;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
 use AutoMapper\Symfony\Bundle\CacheWarmup\CacheWarmer;
+use AutoMapper\Symfony\Bundle\DataCollector\MetadataCollector;
 use AutoMapper\Tests\Bundle\Resources\App\Entity\AddressDTO;
 use AutoMapper\Tests\Bundle\Resources\App\Entity\ClassWithMapToContextAttribute;
 use AutoMapper\Tests\Bundle\Resources\App\Entity\ClassWithPrivateProperty;
@@ -17,6 +21,8 @@ use AutoMapper\Tests\Bundle\Resources\App\Entity\User;
 use AutoMapper\Tests\Bundle\Resources\App\Entity\UserDTO;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class ServiceInstantiationTest extends WebTestCase
 {
@@ -151,7 +157,7 @@ class ServiceInstantiationTest extends WebTestCase
         );
     }
 
-    public function testMapTo()
+    public function testMapTo(): void
     {
         static::bootKernel();
         $container = static::$kernel->getContainer();
@@ -174,5 +180,77 @@ class ServiceInstantiationTest extends WebTestCase
         $this->assertSame('if', $bar['ifCallableOther']);
         $this->assertSame('transformed', $bar['transformFromExpressionLanguage']);
         $this->assertSame('foo', $bar['transformWithExpressionFunction']);
+    }
+
+    /**
+     * All the tests in this test are made to validate that
+     * src/Symfony/Bundle/Resources/views/DataCollector/metadata.html.twig will work.
+     */
+    public function testCollector(): void
+    {
+        static::bootKernel();
+        /** @var MetadataFactory $factory */
+        $factory = static::getContainer()->get(MetadataFactory::class);
+        /** @var AutoMapperInterface $factory */
+        $autoMapper = static::getContainer()->get(AutoMapperInterface::class);
+
+        // update collector so we can recover data from it
+        $collector = new class($factory) extends MetadataCollector {
+            public function getData(): array
+            {
+                return $this->data;
+            }
+        };
+
+        // generate metadata for at least a mapper
+        $factory->getGeneratorMetadata(FooMapTo::class, 'array');
+
+        // compute profiler data
+        $collector->collect(new Request(), new Response());
+
+        // check output matches what is required within metadata.html.twig
+        $this->assertCount(1, $data = $collector->getData());
+        foreach ($data as $metadata) {
+            $this->assertArrayHasKey('source', $metadata);
+            $this->assertIsString($metadata['source']);
+            $this->assertArrayHasKey('target', $metadata);
+            $this->assertIsString($metadata['target']);
+            $this->assertArrayHasKey('usedProperties', $metadata);
+            $this->assertIsArray($metadata['usedProperties']);
+            $this->assertArrayHasKey('notUsedProperties', $metadata);
+            $this->assertIsArray($metadata['notUsedProperties']);
+            $this->assertArrayHasKey('registered', $metadata);
+            $this->assertIsBool($metadata['registered']);
+            $this->assertArrayHasKey('checkAttributes', $metadata);
+            $this->assertIsBool($metadata['checkAttributes']);
+            $this->assertArrayHasKey('useConstructor', $metadata);
+            $this->assertIsBool($metadata['useConstructor']);
+            $this->assertArrayHasKey('provider', $metadata);
+            $this->assertArrayHasKey('fileCode', $metadata);
+            $this->assertArrayHasKey('className', $metadata);
+
+            foreach ($metadata['usedProperties'] as $property) {
+                $this->assertArrayHasKey('source', $property);
+                $this->assertInstanceOf(SourcePropertyMetadata::class, $property['source']);
+                $this->assertArrayHasKey('target', $property);
+                $this->assertInstanceOf(TargetPropertyMetadata::class, $property['target']);
+
+                $this->assertArrayHasKey('if', $property);
+                $this->assertArrayHasKey('transformer', $property);
+                $this->assertArrayHasKey('disableGroupsCheck', $property);
+                $this->assertArrayHasKey('groups', $property);
+                $this->assertArrayHasKey('maxDepth', $property);
+                $this->assertArrayHasKey('code', $property);
+                $this->assertIsString($property['code']);
+            }
+
+            foreach ($metadata['notUsedProperties'] as $property) {
+                $this->assertArrayHasKey('source', $property);
+                $this->assertInstanceOf(SourcePropertyMetadata::class, $property['source']);
+                $this->assertArrayHasKey('target', $property);
+                $this->assertInstanceOf(TargetPropertyMetadata::class, $property['target']);
+                $this->assertArrayHasKey('reason', $property);
+            }
+        }
     }
 }
