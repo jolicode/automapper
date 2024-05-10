@@ -11,7 +11,7 @@
         {% for metadata in collector.metadatas %}
             <div class="sf-toolbar-info-piece">
                 <b>AutoMapper</b>
-                <span>{{ metadata.mapperMetadata.source }} to {{ metadata.mapperMetadata.target }}</span>
+                <span>{{ metadata.source }} to {{ metadata.target }}</span>
             </div>
         {% endfor %}
     {% endset %}
@@ -121,10 +121,10 @@
                                         <tr>
                                             <td rowspan="2" style="vertical-align: middle">
                                                 {% if property.source.accessor %}
-                                                    <span class="badge">{{ property.source.name }}</span> ->
-                                                    <span class="badge">{{ property.target.name }}</span>
+                                                    <span class="badge">{{ property.source.property }}</span> ->
+                                                    <span class="badge">{{ property.target.property }}</span>
                                                 {% else %}
-                                                    <span class="badge">{{ property.target.name }}</span>
+                                                    <span class="badge">{{ property.target.property }}</span>
                                                 {% endif %}
                                             </td>
                                             <td>{{ property.if | default('') }}</td>
@@ -160,10 +160,10 @@
                                     <tr>
                                         <td>
                                             {% if property.source.accessor %}
-                                                <span class="badge">{{ property.source.name }}</span> ->
-                                                <span class="badge">{{ property.target.name }}</span>
+                                                <span class="badge">{{ property.source.property }}</span> ->
+                                                <span class="badge">{{ property.target.property }}</span>
                                             {% else %}
-                                                <span class="badge">{{ property.target.name }}</span>
+                                                <span class="badge">{{ property.target.property }}</span>
                                             {% endif %}
                                         </td>
                                         <td>{{ property.reason }}</td>
