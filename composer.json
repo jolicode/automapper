@@ -21,7 +21,8 @@
         "symfony/event-dispatcher": "^6.4 || ^7.0",
         "symfony/expression-language": "^6.4 || ^7.0",
         "symfony/deprecation-contracts": "^3.0",
-        "symfony/property-info": "^6.4 || ^7.0"
+        "symfony/property-info": "^6.4 || ^7.0",
+        "symfony/var-exporter": "^6.4 || ^7.0"
     },
     "require-dev": {
         "api-platform/core": "^3.0.4",

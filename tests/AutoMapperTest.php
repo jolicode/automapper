@@ -62,6 +62,7 @@ use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
 use Symfony\Component\Uid\Ulid;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\VarExporter\LazyObjectInterface;
 
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
@@ -94,6 +95,46 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertIsArray($userDto->money);
         self::assertCount(1, $userDto->money);
         self::assertSame(20.10, $userDto->money[0]);
+    }
+
+    public function testAutoMappingLazy(): void
+    {
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+
+        $address = new Address();
+        $address->setCity('Toulon');
+        $user = new Fixtures\User(1, 'yolo', '13');
+        $user->address = $address;
+        $user->addresses[] = $address;
+        $user->money = 20.10;
+
+        /** @var Fixtures\UserDTO&LazyObjectInterface $userDto */
+        $userDto = $this->autoMapper->map($user, Fixtures\UserDTO::class, [MapperContext::LAZY_MAPPING => true]);
+
+        self::assertNotSame(Fixtures\UserDTO::class, $userDto::class);
+        self::assertInstanceOf(LazyObjectInterface::class, $userDto);
+        self::assertFalse($userDto->isLazyObjectInitialized());
+
+        self::assertInstanceOf(Fixtures\UserDTO::class, $userDto);
+
+        self::assertSame(1, $userDto->id);
+        self::assertSame('yolo', $userDto->getName());
+        self::assertSame(13, $userDto->age);
+        self::assertCount(1, $userDto->addresses);
+
+        // Sub object are also lazy loaded
+        self::assertNotSame(AddressDTO::class, $userDto->address::class);
+        self::assertInstanceOf(LazyObjectInterface::class, $userDto->address);
+        self::assertFalse($userDto->address->isLazyObjectInitialized());
+
+        self::assertInstanceOf(AddressDTO::class, $userDto->address);
+        self::assertInstanceOf(AddressDTO::class, $userDto->addresses[0]);
+        self::assertSame('Toulon', $userDto->address->city);
+        self::assertSame('Toulon', $userDto->addresses[0]->city);
+        self::assertIsArray($userDto->money);
+        self::assertCount(1, $userDto->money);
+        self::assertSame(20.10, $userDto->money[0]);
+        self::assertTrue($userDto->isLazyObjectInitialized());
     }
 
     public function testAutoMapperFromArray(): void
@@ -153,6 +194,22 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertIsArray($userData);
         self::assertEquals(1, $userData['id']);
         self::assertIsArray($userData['address']);
+        self::assertIsString($userData['createdAt']);
+    }
+
+    public function testAutoMapperToArrayLazy(): void
+    {
+        $address = new Address();
+        $address->setCity('Toulon');
+        $user = new Fixtures\User(1, 'yolo', '13');
+        $user->address = $address;
+        $user->addresses[] = $address;
+
+        $userData = $this->autoMapper->map($user, 'array', [MapperContext::LAZY_MAPPING => true]);
+
+        self::assertInstanceOf(\ArrayAccess::class, $userData);
+        self::assertEquals(1, $userData['id']);
+        self::assertInstanceOf(\ArrayAccess::class, $userData['address']);
         self::assertIsString($userData['createdAt']);
     }
 

@@ -13,6 +13,7 @@ class MapperMetadata
 {
     /** @var class-string<object> */
     public string $className;
+    public ?string $lazyGhostClassName;
 
     /** @var \ReflectionClass<object>|null */
     public readonly ?\ReflectionClass $sourceReflectionClass;
@@ -47,6 +48,12 @@ class MapperMetadata
         /** @var class-string<object> $className */
         $className = sprintf('%s%s_%s', $this->classPrefix, str_replace('\\', '_', $this->source), str_replace('\\', '_', $this->target));
         $this->className = $className;
+
+        if (null !== $this->targetReflectionClass && !$this->targetReflectionClass->isFinal() && !$this->targetReflectionClass->isAbstract() && !$this->targetReflectionClass->isReadOnly()) {
+            $this->lazyGhostClassName = sprintf('%s%s_%s_LazyGhost', $this->classPrefix, str_replace('\\', '_', $this->source), str_replace('\\', '_', $this->target));
+        } else {
+            $this->lazyGhostClassName = null;
+        }
     }
 
     public function getHash(): string
