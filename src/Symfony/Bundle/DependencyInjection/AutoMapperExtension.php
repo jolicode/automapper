@@ -91,6 +91,7 @@ class AutoMapperExtension extends Extension
         }
 
         $container->setParameter('automapper.cache_dir', $config['cache_dir']);
+        $container->setParameter('automapper.map_private_properties', $config['map_private_properties']);
 
         $container->registerForAutoconfiguration(CacheWarmerLoaderInterface::class)->addTag('automapper.cache_warmer_loader');
         $container

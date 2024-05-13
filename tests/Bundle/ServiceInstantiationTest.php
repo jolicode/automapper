@@ -15,6 +15,7 @@ use AutoMapper\Tests\Bundle\Fixtures\User;
 use AutoMapper\Tests\Bundle\Fixtures\UserDTO;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 class ServiceInstantiationTest extends WebTestCase
 {
@@ -122,6 +123,35 @@ class ServiceInstantiationTest extends WebTestCase
         );
     }
 
+    public static function mapToClassWithPrivatePropertyProvider(): iterable
+    {
+        yield 'disallow private properties' => [['additionalConfigFile' => __DIR__ . '/Resources/App/no-private-properties.yml'], []];
+        yield 'allow private properties' => [[], ['foo' => 'foo', 'bar' => 'bar']];
+    }
+
+    /**
+     * This test validates that PropertyInfoPass is correctly applied.
+     *
+     * @dataProvider mapFromClassWithPrivatePropertyProvider
+     */
+    public function testMapFromClassWithPrivateProperty(array $kernelOptions, array $expected): void
+    {
+        static::bootKernel($kernelOptions);
+        $container = static::getContainer();
+        $autoMapper = $container->get(AutoMapperInterface::class);
+
+        self::assertEquals(
+            $expected,
+            $autoMapper->map(new ClassWithPrivateProperty('foo'), 'array')
+        );
+    }
+
+    public static function mapFromClassWithPrivatePropertyProvider(): iterable
+    {
+        yield 'disallow private properties' => [['additionalConfigFile' => __DIR__ . '/Resources/App/no-private-properties.yml'], []];
+        yield 'allow private properties' => [[], ['foo' => 'foo', 'bar' => 'bar']];
+    }
+
     /**
      * We need to test that the mapToContext attribute is correctly used,
      * because this behavior is dependent of the dependency injection.
@@ -144,5 +174,13 @@ class ServiceInstantiationTest extends WebTestCase
                 [MapperContext::MAP_TO_ACCESSOR_PARAMETER => ['suffix' => 'baz', 'prefix' => 'foo']]
             )
         );
+    }
+
+    protected static function createKernel(array $options = []): KernelInterface
+    {
+        $env = $options['environment'] ?? $_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? 'test';
+        $debug = $options['debug'] ?? $_ENV['APP_DEBUG'] ?? $_SERVER['APP_DEBUG'] ?? true;
+
+        return new \DummyApp\AppKernel($env, $debug, $options['additionalConfigFile'] ?? null);
     }
 }

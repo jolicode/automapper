@@ -21,6 +21,12 @@ class PropertyInfoPass implements CompilerPassInterface
             return;
         }
 
+        $flags = ReflectionExtractor::ALLOW_PUBLIC;
+
+        if ($container->getParameter('automapper.map_private_properties')) {
+            $flags |= ReflectionExtractor::ALLOW_PRIVATE | ReflectionExtractor::ALLOW_PROTECTED;
+        }
+
         $container->setDefinition(
             'automapper.property_info.reflection_extractor',
             new Definition(
@@ -30,7 +36,7 @@ class PropertyInfoPass implements CompilerPassInterface
                     '$accessorPrefixes' => null,
                     '$arrayMutatorPrefixes' => null,
                     '$enableConstructorExtraction' => true,
-                    '$accessFlags' => ReflectionExtractor::ALLOW_PUBLIC | ReflectionExtractor::ALLOW_PROTECTED | ReflectionExtractor::ALLOW_PRIVATE,
+                    '$accessFlags' => $flags,
                 ]
             )
         );

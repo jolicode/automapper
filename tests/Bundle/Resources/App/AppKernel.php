@@ -19,6 +19,14 @@ class AppKernel extends Kernel
 {
     use MicroKernelTrait;
 
+    public function __construct(
+        string $environment,
+        bool $debug,
+        private ?string $additionalConfigFile = null
+    ) {
+        parent::__construct($environment, $debug);
+    }
+
     public function registerBundles(): array
     {
         $bundles = [
@@ -32,11 +40,20 @@ class AppKernel extends Kernel
     protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader): void
     {
         $loader->load(__DIR__ . '/config.yml');
+
+        if ($this->additionalConfigFile) {
+            $loader->load($this->additionalConfigFile);
+        }
     }
 
     public function getProjectDir(): string
     {
         return __DIR__ . '/..';
+    }
+
+    public function getCacheDir(): string
+    {
+        return parent::getCacheDir() . '/' . spl_object_hash($this);
     }
 }
 

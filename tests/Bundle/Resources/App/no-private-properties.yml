@@ -1,0 +1,2 @@
+automapper:
+    map_private_properties: false
