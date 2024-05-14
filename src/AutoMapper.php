@@ -119,6 +119,8 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
      * @param TransformerFactoryInterface[]                  $transformerFactories
      * @param ProviderInterface[]                            $providers
      * @param iterable<string, PropertyTransformerInterface> $propertyTransformers
+     *
+     * @return self
      */
     public static function create(
         Configuration $configuration = new Configuration(),
@@ -129,7 +131,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         ExpressionLanguageProvider $expressionLanguageProvider = null,
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
         iterable $providers = [],
-    ): self {
+    ): AutoMapperInterface {
         if (class_exists(AttributeLoader::class)) {
             $loaderClass = new AttributeLoader();
         } elseif (class_exists(AnnotationReader::class) && class_exists(AnnotationLoader::class)) {
