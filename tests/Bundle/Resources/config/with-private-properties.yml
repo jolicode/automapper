@@ -1,0 +1,3 @@
+automapper:
+    class_prefix: "Symfony_Mapper_With_Private_Property"
+    map_private_properties: true

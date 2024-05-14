@@ -11,6 +11,7 @@ use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
 use AutoMapper\Symfony\Bundle\CacheWarmup\CacheWarmer;
 use AutoMapper\Symfony\Bundle\DataCollector\MetadataCollector;
+use AutoMapper\Tests\Bundle\Resources\App\AppKernel;
 use AutoMapper\Tests\Bundle\Resources\App\Entity\AddressDTO;
 use AutoMapper\Tests\Bundle\Resources\App\Entity\ClassWithMapToContextAttribute;
 use AutoMapper\Tests\Bundle\Resources\App\Entity\ClassWithPrivateProperty;
@@ -23,15 +24,14 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 class ServiceInstantiationTest extends WebTestCase
 {
-    protected function setUp(): void
+    public static function setUpBeforeClass(): void
     {
         static::$class = null;
         $_SERVER['KERNEL_DIR'] = __DIR__ . '/Resources/App';
-        $_SERVER['KERNEL_CLASS'] = 'AutoMapper\Tests\Bundle\Resources\App\AppKernel';
-        $_SERVER['APP_DEBUG'] = false;
 
         (new Filesystem())->remove(__DIR__ . '/Resources/var/cache/test');
     }
@@ -47,13 +47,14 @@ class ServiceInstantiationTest extends WebTestCase
         $service = static::$kernel->getContainer()->get(CacheWarmer::class);
         $service->warmUp(__DIR__ . '/Resources/var/cache/test');
 
-        self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_NestedObject_array.php');
-        self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_User_array.php');
-        self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_AddressDTO_array.php');
-        self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_Pet_array.php');
-        self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_Dog_array.php');
-        self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_Cat_array.php');
-        self::assertFileExists(__DIR__ . '/Resources/var/cache/test/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Api_Entity_Book_array.php');
+        $cacheDir = static::$kernel->getCacheDir();
+        self::assertFileExists("{$cacheDir}/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_NestedObject_array.php");
+        self::assertFileExists("{$cacheDir}/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_User_array.php");
+        self::assertFileExists("{$cacheDir}/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_AddressDTO_array.php");
+        self::assertFileExists("{$cacheDir}/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_Pet_array.php");
+        self::assertFileExists("{$cacheDir}/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_Dog_array.php");
+        self::assertFileExists("{$cacheDir}/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Entity_Cat_array.php");
+        self::assertFileExists("{$cacheDir}/automapper/Symfony_Mapper_AutoMapper_Tests_Bundle_Resources_App_Api_Entity_Book_array.php");
     }
 
     public function testAutoMapper(): void
@@ -121,9 +122,10 @@ class ServiceInstantiationTest extends WebTestCase
     /**
      * This test validates that PropertyInfoPass is correctly applied.
      */
-    public function testMapClassWithPrivateProperty(): void
+    public function testMapToClassWithPrivateProperty(): void
     {
         static::bootKernel();
+
         $container = static::$kernel->getContainer();
         $autoMapper = $container->get(AutoMapperInterface::class);
 
@@ -131,6 +133,28 @@ class ServiceInstantiationTest extends WebTestCase
             new ClassWithPrivateProperty('bar'),
             $autoMapper->map(['foo' => 'bar'], ClassWithPrivateProperty::class)
         );
+    }
+
+    /**
+     * This test validates that PropertyInfoPass is correctly applied.
+     *
+     * @dataProvider mapFromClassWithPrivatePropertyProvider
+     */
+    public function testMapFromClassWithPrivateProperty(array $kernelOptions, array $expected): void
+    {
+        static::bootKernel($kernelOptions);
+        $autoMapper = self::getContainer()->get(AutoMapperInterface::class);
+
+        self::assertEquals(
+            $expected,
+            $autoMapper->map(new ClassWithPrivateProperty('foo'), 'array')
+        );
+    }
+
+    public static function mapFromClassWithPrivatePropertyProvider(): iterable
+    {
+        yield 'disallow private properties' => [[], []];
+        yield 'allow private properties' => [['additionalConfigFile' => __DIR__ . '/Resources/config/with-private-properties.yml'], ['foo' => 'foo', 'bar' => 'bar']];
     }
 
     /**
@@ -252,5 +276,10 @@ class ServiceInstantiationTest extends WebTestCase
                 $this->assertArrayHasKey('reason', $property);
             }
         }
+    }
+
+    protected static function createKernel(array $options = []): KernelInterface
+    {
+        return new AppKernel('test', false, $options['additionalConfigFile'] ?? null);
     }
 }
