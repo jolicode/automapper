@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#131](https://github.com/jolicode/automapper/pull/131) Require mandatory packages
 - [GH#132](https://github.com/jolicode/automapper/pull/132) Use DI Extension class instead of deprecated HttpKernel Extension
 - [GH#130](https://github.com/jolicode/automapper/pull/130) Make ClassDiscriminatorResolver optional
+- [GH#135](https://github.com/jolicode/automapper/pull/135) Fix return type of AutoMapper::create()
 
 ## [9.0.1] - 2024-05-10
 ### Fixes
