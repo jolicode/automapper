@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixes
+- [GH#131](https://github.com/jolicode/automapper/pull/131) Require mandatory packages
+
 ## [9.0.1] - 2024-05-10
 ### Fixes
 - [GH#124](https://github.com/jolicode/automapper/pull/124) Fix Symfony's WebProfiler issues
