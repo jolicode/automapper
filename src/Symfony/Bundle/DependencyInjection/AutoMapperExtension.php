@@ -19,6 +19,7 @@ use AutoMapper\Symfony\Bundle\CacheWarmup\CacheWarmer;
 use AutoMapper\Symfony\Bundle\ReflectionClassRecursiveIterator;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 use AutoMapper\Transformer\SymfonyUidTransformerFactory;
+use AutoMapper\Transformer\TransformerFactoryInterface;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -88,6 +89,8 @@ class AutoMapperExtension extends Extension
 
             $container->setParameter('automapper.cache_dir', $config['loader']['cache_dir']);
         }
+
+        $container->registerForAutoconfiguration(TransformerFactoryInterface::class)->addTag('automapper.transformer_factory');
 
         if (class_exists(AbstractUid::class)) {
             $container

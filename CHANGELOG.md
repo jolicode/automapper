@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#135](https://github.com/jolicode/automapper/pull/135) Fix return type of AutoMapper::create()
 - [GH#139](https://github.com/jolicode/automapper/pull/139) Fix unreachable variable in BuitinTransformer
 - [GH#138](https://github.com/jolicode/automapper/pull/138) Declare CopyTransformerFactory as a service
+- [GH#136](https://github.com/jolicode/automapper/pull/136) Recover ability to register AST transformer factories in Symfony Bundle
 
 ## [9.0.1] - 2024-05-10
 ### Fixes
