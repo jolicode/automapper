@@ -7,6 +7,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 use AutoMapper\Transformer\ArrayTransformerFactory;
 use AutoMapper\Transformer\BuiltinTransformerFactory;
 use AutoMapper\Transformer\ChainTransformerFactory;
+use AutoMapper\Transformer\CopyTransformerFactory;
 use AutoMapper\Transformer\DateTimeTransformerFactory;
 use AutoMapper\Transformer\EnumTransformerFactory;
 use AutoMapper\Transformer\MultipleTransformerFactory;
@@ -33,9 +34,6 @@ return static function (ContainerConfigurator $container) {
         ->set(UniqueTypeTransformerFactory::class)
             ->tag('automapper.transformer_factory', ['priority' => 1000])
 
-        ->set(EnumTransformerFactory::class)
-            ->tag('automapper.transformer_factory', ['priority' => -999])
-
         ->set(DateTimeTransformerFactory::class)
             ->tag('automapper.transformer_factory', ['priority' => -1000])
 
@@ -47,6 +45,12 @@ return static function (ContainerConfigurator $container) {
 
         ->set(ObjectTransformerFactory::class)
             ->tag('automapper.transformer_factory', ['priority' => -1003])
+
+        ->set(EnumTransformerFactory::class)
+            ->tag('automapper.transformer_factory', ['priority' => -1004])
+
+        ->set(CopyTransformerFactory::class)
+            ->tag('automapper.transformer_factory', ['priority' => -1005])
 
         ->set(SymfonyUidTransformerFactory::class)
     ;
