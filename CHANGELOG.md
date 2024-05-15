@@ -6,11 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-
 ### Deprecated
 - [GH#136](https://github.com/jolicode/automapper/pull/136) Deprecate the ability to inject AST transformer factories withing stand-alone AutoMapper
 
-### Fixes
+### Fixed
 - [GH#131](https://github.com/jolicode/automapper/pull/131) Require mandatory packages
 - [GH#132](https://github.com/jolicode/automapper/pull/132) Use DI Extension class instead of deprecated HttpKernel Extension
 - [GH#130](https://github.com/jolicode/automapper/pull/130) Make ClassDiscriminatorResolver optional
@@ -19,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#138](https://github.com/jolicode/automapper/pull/138) Declare CopyTransformerFactory as a service
 
 ## [9.0.1] - 2024-05-10
-### Fixes
+### Fixed
 - [GH#124](https://github.com/jolicode/automapper/pull/124) Fix Symfony's WebProfiler issues
 - [GH#125](https://github.com/jolicode/automapper/pull/125) Fix MetadataCollector default highlight colors
 
