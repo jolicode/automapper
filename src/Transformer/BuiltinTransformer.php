@@ -128,10 +128,10 @@ final readonly class BuiltinTransformer implements TransformerInterface, CheckTy
             ]
         );
 
-        if ($this->sourceType->getBuiltinType() === Type::BUILTIN_TYPE_OBJECT) {
+        if ($this->sourceType->getBuiltinType() === Type::BUILTIN_TYPE_OBJECT && \is_string($this->sourceType->getClassName())) {
             $condition = new Expr\BinaryOp\BooleanAnd(
                 $condition,
-                new Expr\Instanceof_($input, new Name\FullyQualified($type->getClassName())) // @phpstan-ignore-line $type->getClassName() cannot be null here
+                new Expr\Instanceof_($input, new Name\FullyQualified($this->sourceType->getClassName()))
             );
         }
 
