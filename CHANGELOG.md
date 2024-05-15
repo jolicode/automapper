@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Deprecated
+- [GH#136](https://github.com/jolicode/automapper/pull/136) Deprecate the ability to inject AST transformer factories withing stand-alone AutoMapper
+
 ### Fixes
 - [GH#131](https://github.com/jolicode/automapper/pull/131) Require mandatory packages
 - [GH#132](https://github.com/jolicode/automapper/pull/132) Use DI Extension class instead of deprecated HttpKernel Extension
@@ -14,7 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#135](https://github.com/jolicode/automapper/pull/135) Fix return type of AutoMapper::create()
 - [GH#139](https://github.com/jolicode/automapper/pull/139) Fix unreachable variable in BuitinTransformer
 - [GH#138](https://github.com/jolicode/automapper/pull/138) Declare CopyTransformerFactory as a service
-- [GH#136](https://github.com/jolicode/automapper/pull/136) Deprecate the ability to inject AST transformer factories withing stand-alone AutoMapper
 
 ## [9.0.1] - 2024-05-10
 ### Fixes
