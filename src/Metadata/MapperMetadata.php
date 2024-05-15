@@ -30,7 +30,7 @@ class MapperMetadata
         public bool $registered,
         private string $classPrefix = 'Mapper_',
     ) {
-        if (class_exists($this->source) && !\in_array($this->source, ['array', \stdClass::class], true)) {
+        if (class_exists($this->source) && $this->source !== \stdClass::class) {
             $reflectionSource = new \ReflectionClass($this->source);
             $this->sourceReflectionClass = $reflectionSource;
         } else {
