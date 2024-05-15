@@ -47,11 +47,11 @@ Then, use the `service()` function to refer that service inside your expression.
 ```php
 class Entity
 {
-    #[MapTo(transformer: "service('my_service').transform(source)'")]
+    #[MapTo(transformer: "service('my_service').transform(source)")]
     public string $name;
     
     // Or without an alias
-    #[MapTo(transformer: "service('App\\\Service\\\MyService').transform(source)'")]
+    #[MapTo(transformer: "service('App\\\Service\\\MyService').transform(source)")]
     public string $name;
     
     #[MapTo(if: "service('my_service').check()")]
