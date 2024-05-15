@@ -6,9 +6,6 @@ namespace AutoMapper\Metadata;
 
 use AutoMapper\AutoMapper;
 
-/**
- * @internal
- */
 class MapperMetadata
 {
     /** @var class-string<object> */
