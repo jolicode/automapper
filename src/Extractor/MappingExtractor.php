@@ -30,13 +30,44 @@ abstract class MappingExtractor implements MappingExtractorInterface
     /**
      * @return list<string>
      */
-    public function getProperties(string $class): iterable
+    public function getProperties(string $class, bool $withConstructorParameters = false): iterable
     {
         if ($class === 'array' || $class === \stdClass::class) {
             return [];
         }
 
-        return $this->propertyInfoExtractor->getProperties($class) ?? [];
+        $properties = $this->propertyInfoExtractor->getProperties($class) ?? [];
+
+        if ($withConstructorParameters) {
+            $properties = array_values(
+                array_unique(
+                    [...$properties, ...$this->getConstructorParameters($class)]
+                )
+            );
+        }
+
+        return $properties;
+    }
+
+    /**
+     * @param class-string|'array' $class
+     *
+     * @return list<string>
+     */
+    private function getConstructorParameters(string $class): iterable
+    {
+        if ($class === 'array' || $class === \stdClass::class) {
+            return [];
+        }
+
+        try {
+            return array_map(
+                static fn (\ReflectionParameter $parameter) => $parameter->getName(),
+                (new \ReflectionClass($class))->getMethod('__construct')->getParameters()
+            );
+        } catch (\ReflectionException) {
+            return [];
+        }
     }
 
     public function getReadAccessor(string $class, string $property): ?ReadAccessor

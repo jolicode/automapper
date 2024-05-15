@@ -21,6 +21,8 @@ interface MappingExtractorInterface
     /**
      * Extracts properties mapped for a given source and target.
      *
+     * @param class-string|'array' $class
+     *
      * @return list<string>
      */
     public function getProperties(string $class): iterable;
