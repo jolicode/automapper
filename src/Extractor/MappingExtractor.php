@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace AutoMapper\Extractor;
 
 use AutoMapper\Configuration;
+use MongoDB\BSON\Document;
+use MongoDB\Model\BSONDocument;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyReadInfo;
 use Symfony\Component\PropertyInfo\PropertyReadInfoExtractorInterface;
@@ -31,7 +33,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
      */
     public function getProperties(string $class): iterable
     {
-        if ($class === 'array' || $class === \stdClass::class) {
+        if ($class === 'array' || in_array($class, [\stdClass::class, Document::class, BSONDocument::class], true)) {
             return [];
         }
 
@@ -40,7 +42,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
 
     public function getReadAccessor(string $class, string $property): ?ReadAccessor
     {
-        if ('array' === $class) {
+        if (in_array($class, ['array', Document::class, BSONDocument::class], true)) {
             return new ReadAccessor(ReadAccessor::TYPE_ARRAY_DIMENSION, $property);
         }
 
@@ -107,7 +109,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
 
     public function getCheckExists(string $class, string $property): bool
     {
-        if ('array' === $class || \stdClass::class === $class) {
+        if (in_array($class, ['array', \stdClass::class, Document::class, BSONDocument::class], true)) {
             return true;
         }
 

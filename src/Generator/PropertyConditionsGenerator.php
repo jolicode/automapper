@@ -8,6 +8,8 @@ use AutoMapper\Exception\CompileException;
 use AutoMapper\MapperContext;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\PropertyMetadata;
+use MongoDB\BSON\Document;
+use MongoDB\Model\BSONDocument;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
@@ -42,6 +44,7 @@ final readonly class PropertyConditionsGenerator
 
         $conditions[] = $this->propertyExistsForStdClass($metadata, $propertyMetadata);
         $conditions[] = $this->propertyExistsForArray($metadata, $propertyMetadata);
+        $conditions[] = $this->propertyExistsForBSONDocument($metadata, $propertyMetadata);
         $conditions[] = $this->isAllowedAttribute($metadata, $propertyMetadata);
 
         if (!$propertyMetadata->disableGroupsCheck) {
@@ -118,6 +121,26 @@ final readonly class PropertyConditionsGenerator
             new Arg(new Scalar\String_($propertyMetadata->source->property)),
             new Arg($metadata->variableRegistry->getSourceInput()),
         ]);
+    }
+
+    /**
+     * In case of source is an array we ensure that the key exists.
+     *
+     * ```php
+     * $source->offsetExists('propertyName').
+     * ```
+     */
+    private function propertyExistsForBSONDocument(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
+    {
+        if (!$propertyMetadata->source->checkExists || !in_array($metadata->mapperMetadata->source, [Document::class, BSONDocument::class], true)) {
+            return null;
+        }
+
+        return new Expr\MethodCall(
+            $metadata->variableRegistry->getSourceInput(),
+            'offsetExists',
+            [new Arg(new Scalar\String_($propertyMetadata->source->property))],
+        );
     }
 
     /**

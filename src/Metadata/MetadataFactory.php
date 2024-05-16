@@ -42,6 +42,8 @@ use AutoMapper\Transformer\SymfonyUidTransformerFactory;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use AutoMapper\Transformer\UniqueTypeTransformerFactory;
 use AutoMapper\Transformer\VoidTransformer;
+use MongoDB\BSON\Document;
+use MongoDB\Model\BSONDocument;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
@@ -172,11 +174,11 @@ final class MetadataFactory
     {
         $extractor = $this->sourceTargetPropertiesMappingExtractor;
 
-        if ('array' === $mapperMetadata->source || 'stdClass' === $mapperMetadata->source) {
+        if (in_array($mapperMetadata->source, ['array', \stdClass::class, Document::class, BSONDocument::class], true)) {
             $extractor = $this->fromTargetPropertiesMappingExtractor;
         }
 
-        if ('array' === $mapperMetadata->target || 'stdClass' === $mapperMetadata->target) {
+        if (in_array($mapperMetadata->target, ['array', \stdClass::class, Document::class, BSONDocument::class], true)) {
             $extractor = $this->fromSourcePropertiesMappingExtractor;
         }
 
