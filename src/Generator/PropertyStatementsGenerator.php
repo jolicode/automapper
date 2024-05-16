@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator;
 
+use AutoMapper\Configuration;
 use AutoMapper\Extractor\WriteMutator;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\PropertyMetadata;
@@ -22,9 +23,10 @@ final readonly class PropertyStatementsGenerator
     private PropertyConditionsGenerator $propertyConditionsGenerator;
 
     public function __construct(
+        Configuration $configuration,
         ExpressionLanguage $expressionLanguage
     ) {
-        $this->propertyConditionsGenerator = new PropertyConditionsGenerator($expressionLanguage);
+        $this->propertyConditionsGenerator = new PropertyConditionsGenerator($configuration, $expressionLanguage);
     }
 
     /**

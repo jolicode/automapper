@@ -44,6 +44,7 @@ final readonly class MapperGenerator
         );
 
         $this->mapMethodStatementsGenerator = new MapMethodStatementsGenerator(
+            $configuration,
             new DiscriminatorStatementsGenerator($classDiscriminatorResolver, true),
             new DiscriminatorStatementsGenerator($classDiscriminatorResolver, false),
             $cachedReflectionStatementsGenerator,

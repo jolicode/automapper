@@ -4,7 +4,9 @@ parameters:
 		- ../../src/
 
 	tmpDir: cache
+	scanFiles:
+		- stubs/mongodb.php
 
 	ignoreErrors:
-	    - "#Instantiated class fromIteratorToArray not found#"
-	    - "#Instantiated class toArray not found#"
+		- "#Instantiated class fromIteratorToArray not found#"
+		- "#Instantiated class toArray not found#"
