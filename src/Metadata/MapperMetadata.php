@@ -8,6 +8,20 @@ use AutoMapper\AutoMapper;
 
 class MapperMetadata
 {
+    private const FORBIDEN_CHARACTERS_REPLACEMENT = [
+        '\\' => '_',
+        '/' => '_',
+        ':' => '_',
+        '*' => '_',
+        '?' => '_',
+        '"' => '_',
+        '<' => '_',
+        '>' => '_',
+        '|' => '_',
+        ' ' => '_',
+        '[]' => 'Array',
+    ];
+
     /** @var class-string<object> */
     public string $className;
 
@@ -42,7 +56,7 @@ class MapperMetadata
         }
 
         /** @var class-string<object> $className */
-        $className = sprintf('%s%s_%s', $this->classPrefix, str_replace('\\', '_', $this->source), str_replace('\\', '_', $this->target));
+        $className = sprintf('%s%s_%s', $this->classPrefix, str_replace(array_keys(self::FORBIDEN_CHARACTERS_REPLACEMENT), self::FORBIDEN_CHARACTERS_REPLACEMENT, $this->source), str_replace(array_keys(self::FORBIDEN_CHARACTERS_REPLACEMENT), self::FORBIDEN_CHARACTERS_REPLACEMENT, $this->target));
         $this->className = $className;
     }
 
