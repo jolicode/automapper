@@ -13,7 +13,6 @@ use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\PropertyMetadata;
 use AutoMapper\Transformer\AllowNullValueTransformerInterface;
 use PhpParser\Node\Arg;
-use PhpParser\Node\ArrayItem;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Name;
@@ -22,10 +21,8 @@ use PhpParser\Node\Stmt;
 use PhpParser\Parser;
 use PhpParser\ParserFactory;
 
-// compatibility with nikic/php-parser 4.x
-if (!class_exists(ArrayItem::class) && class_exists(Expr\ArrayItem::class)) {
-    class_alias(Expr\ArrayItem::class, ArrayItem::class);
-}
+use function AutoMapper\PhpParser\create_expr_array_item;
+use function AutoMapper\PhpParser\create_scalar_int;
 
 /**
  * @internal
@@ -193,10 +190,10 @@ final readonly class CreateTargetStatementsGenerator
         $defaultValueExpr = new Expr\Throw_(
             new Expr\New_(new Name\FullyQualified(MissingConstructorArgumentsException::class), [
                 new Arg(new Scalar\String_(sprintf('Cannot create an instance of "%s" from mapping data because its constructor requires the following parameters to be present : "$%s".', $metadata->mapperMetadata->target, $propertyMetadata->target->property))),
-                new Arg(new Scalar\LNumber(0)),
+                new Arg(create_scalar_int(0)),
                 new Arg(new Expr\ConstFetch(new Name('null'))),
-                new Arg(new Expr\Array_([
-                    new ArrayItem(new Scalar\String_($propertyMetadata->target->property)),
+                new Arg(new Expr\Array_([ // @phpstan-ignore argument.type
+                    create_expr_array_item(new Scalar\String_($propertyMetadata->target->property)),
                 ])),
                 new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
             ])
@@ -256,10 +253,10 @@ final readonly class CreateTargetStatementsGenerator
 
         $defaultValueExpr = new Expr\Throw_(new Expr\New_(new Name\FullyQualified(MissingConstructorArgumentsException::class), [
             new Arg(new Scalar\String_(sprintf('Cannot create an instance of "%s" from mapping data because its constructor requires the following parameters to be present : "$%s".', $metadata->mapperMetadata->target, $constructorParameter->getName()))),
-            new Arg(new Scalar\LNumber(0)),
+            new Arg(create_scalar_int(0)),
             new Arg(new Expr\ConstFetch(new Name('null'))),
-            new Arg(new Expr\Array_([
-                new ArrayItem(new Scalar\String_($constructorParameter->getName())),
+            new Arg(new Expr\Array_([ // @phpstan-ignore argument.type
+                create_expr_array_item(new Scalar\String_($constructorParameter->getName())),
             ])),
             new Arg(new Scalar\String_($constructorParameter->getName())),
         ]));

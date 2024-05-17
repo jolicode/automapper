@@ -56,7 +56,10 @@
     "autoload": {
         "psr-4": {
             "AutoMapper\\": "src/"
-        }
+        },
+        "files": [
+            "src/php-parser.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

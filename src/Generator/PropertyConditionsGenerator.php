@@ -9,7 +9,6 @@ use AutoMapper\MapperContext;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\PropertyMetadata;
 use PhpParser\Node\Arg;
-use PhpParser\Node\ArrayItem;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
 use PhpParser\Node\Scalar;
@@ -18,10 +17,8 @@ use PhpParser\Parser;
 use PhpParser\ParserFactory;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
-// compatibility with nikic/php-parser 4.x
-if (!class_exists(ArrayItem::class) && class_exists(Expr\ArrayItem::class)) {
-    class_alias(Expr\ArrayItem::class, ArrayItem::class);
-}
+use function AutoMapper\PhpParser\create_expr_array_item;
+use function AutoMapper\PhpParser\create_scalar_int;
 
 /**
  * We generate a list of conditions that will allow the field to be mapped to the target.
@@ -175,8 +172,8 @@ final readonly class PropertyConditionsGenerator
                         new Expr\Array_()
                     )
                 ),
-                new Arg(new Expr\Array_(array_map(function (string $group) {
-                    return new ArrayItem(new Scalar\String_($group));
+                new Arg(new Expr\Array_(array_map(function (string $group) { // @phpstan-ignore argument.type
+                    return create_expr_array_item(new Scalar\String_($group));
                 }, $groups))),
             ])
         );
@@ -228,7 +225,7 @@ final readonly class PropertyConditionsGenerator
                 new Expr\ArrayDimFetch($variableRegistry->getContext(), new Scalar\String_(MapperContext::DEPTH)),
                 new Expr\ConstFetch(new Name('0'))
             ),
-            new Scalar\LNumber($propertyMetadata->maxDepth)
+            create_scalar_int($propertyMetadata->maxDepth),
         );
     }
 

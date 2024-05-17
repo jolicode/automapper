@@ -9,7 +9,8 @@ use AutoMapper\Metadata\PropertyMetadata;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
-use PhpParser\Node\Scalar;
+
+use function AutoMapper\PhpParser\create_scalar_int;
 
 /**
  * Transformer array decorator.
@@ -43,14 +44,12 @@ final readonly class ArrayTransformer extends AbstractArrayTransformer implement
             ]
         );
 
-        $intScalar = class_exists(Scalar\Int_::class) ? new Scalar\Int_(0) : new Scalar\LNumber(0);
-
         if ($this->itemTransformer instanceof CheckTypeInterface) {
             $itemCheck = $this->itemTransformer->getCheckExpression(new Expr\FuncCall(new Name('current'), [new Arg($input)]), $target, $propertyMapping, $uniqueVariableScope, $source);
 
             if ($itemCheck) {
                 return new Expr\BinaryOp\BooleanAnd($isArrayCheck, new Expr\BinaryOp\BooleanOr(
-                    new Expr\BinaryOp\Identical($intScalar, new Expr\FuncCall(new Name('count'), [new Arg($input)])),
+                    new Expr\BinaryOp\Identical(create_scalar_int(0), new Expr\FuncCall(new Name('count'), [new Arg($input)])),
                     $itemCheck
                 ));
             }
