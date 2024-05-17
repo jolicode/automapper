@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#139](https://github.com/jolicode/automapper/pull/139) Fix unreachable variable in BuitinTransformer
 - [GH#138](https://github.com/jolicode/automapper/pull/138) Declare CopyTransformerFactory as a service
 - [GH#142](https://github.com/jolicode/automapper/pull/142) Make MapperMetadata non-internal because it is used within PropertyTransformerSupportInterface interface
+- [GH#148](https://github.com/jolicode/automapper/pull/148) Handle deprecated class LNumber in nikic/php-parser v5
 
 ## [9.0.1] - 2024-05-10
 ### Fixed
