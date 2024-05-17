@@ -53,6 +53,7 @@ use AutoMapper\Tests\Fixtures\SourceForConstructorWithDefaultValues;
 use AutoMapper\Tests\Fixtures\Transformer\MoneyTransformerFactory;
 use AutoMapper\Tests\Fixtures\Uninitialized;
 use AutoMapper\Tests\Fixtures\UserPromoted;
+use MongoDB\BSON\Document;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -232,6 +233,22 @@ class AutoMapperTest extends AutoMapperBaseTest
 
         self::assertInstanceOf(\ArrayObject::class, $user);
         self::assertEquals(1, $user['id']);
+    }
+
+    /**
+     * @requires extension mongodb
+     */
+    public function testAutoMapperFromMongoDBDocument(): void
+    {
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+
+        $user = Document::fromPHP(['id' => 1]);
+
+        /** @var Fixtures\UserDTO $userDto */
+        $userDto = $this->autoMapper->map($user, Fixtures\UserDTO::class);
+
+        self::assertInstanceOf(Fixtures\UserDTO::class, $userDto);
+        self::assertEquals(1, $userDto->id);
     }
 
     public function testNotReadable(): void
