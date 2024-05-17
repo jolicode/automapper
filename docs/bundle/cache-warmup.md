@@ -13,7 +13,7 @@ To avoid this problem, you can specify the mappings you want to generate in the 
 
 ```yaml
 automapper:
-  mappings:
+  mapping:
     mappers:
       - source: App\Entity\User
         target: App\Api\DTO\User
@@ -36,7 +36,7 @@ You can also define a list of paths where the mappers are located, and the bundl
 
 ```yaml
 automapper:
-  mappings:
+  mapping:
     paths:
       - "%kernel.project_dir%/src/Entity"
 ```
