@@ -44,7 +44,12 @@ final readonly class Configuration
          *
          * @var list<class-string<\ArrayAccess<string, mixed>>> $arrayAccessClasses
          */
-        public array $arrayAccessClasses = [\ArrayObject::class, Document::class, BSONDocument::class],
+        public array $arrayAccessClasses = [],
     ) {
+        $this->arrayAccessClasses[] = \ArrayObject::class;
+        if (class_exists(Document::class, false)) {
+            $this->arrayAccessClasses[] = Document::class;
+            $this->arrayAccessClasses[] = BSONDocument::class;
+        }
     }
 }
