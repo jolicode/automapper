@@ -17,6 +17,8 @@ use PhpParser\Node\Scalar;
  *
  * @param int                  $value      Value of the number
  * @param array<string, mixed> $attributes Additional attributes
+ *
+ * @internal
  */
 function create_scalar_int(int $value, array $attributes = []): Scalar\Int_|Scalar\LNumber
 {
@@ -32,6 +34,8 @@ function create_scalar_int(int $value, array $attributes = []): Scalar\Int_|Scal
  * @param Expr|null            $key        Key
  * @param bool                 $byRef      Whether to assign by reference
  * @param array<string, mixed> $attributes Additional attributes
+ *
+ * @internal
  */
 function create_expr_array_item(Expr $value, Expr $key = null, bool $byRef = false, array $attributes = [], bool $unpack = false): Node\ArrayItem|Expr\ArrayItem
 {
