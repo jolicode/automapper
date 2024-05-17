@@ -108,8 +108,9 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
             $targetType = $target;
         }
 
-        if ('array' === $sourceType && 'array' === $targetType) {
-            throw new InvalidMappingException('Cannot map this value, both source and target are array.');
+        if (('array' === $sourceType || $this->metadataRegistry->isArrayAccess($sourceType))
+            && ('array' === $targetType || $this->metadataRegistry->isArrayAccess($targetType))) {
+            throw new InvalidMappingException('Cannot map this value, both source and target are array or ArrayAccess.');
         }
 
         return $this->getMapper($sourceType, $targetType)->map($source, $context);
