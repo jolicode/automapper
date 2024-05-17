@@ -210,6 +210,41 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertEquals($user, $userStd);
     }
 
+    public function testAutoMapperFromArrayObject(): void
+    {
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+
+        $user = new \ArrayObject(['id' => 1]);
+
+        /** @var Fixtures\UserDTO $userDto */
+        $userDto = $this->autoMapper->map($user, Fixtures\UserDTO::class);
+
+        self::assertInstanceOf(Fixtures\UserDTO::class, $userDto);
+        self::assertEquals(1, $userDto->id);
+    }
+
+    public function testAutoMapperToArrayObject(): void
+    {
+        $userDto = new Fixtures\UserDTO();
+        $userDto->id = 1;
+
+        $user = $this->autoMapper->map($userDto, \ArrayObject::class);
+
+        self::assertInstanceOf(\ArrayObject::class, $user);
+        self::assertEquals(1, $user['id']);
+    }
+
+    public function testAutoMapperArrayObjectToArrayObject(): void
+    {
+        $user = new \ArrayObject(['id' => 1, 'nested' => new \ArrayObject(['id' => 2])]);
+        $userStd = $this->autoMapper->map($user, \ArrayObject::class);
+
+        self::assertInstanceOf(\ArrayObject::class, $userStd);
+        self::assertNotSame($user, $userStd);
+        self::assertNotSame($user['nested'], $userStd['nested']);
+        self::assertEquals($user, $userStd);
+    }
+
     public function testNotReadable(): void
     {
         $this->buildAutoMapper(classPrefix: 'CustomDateTime_');

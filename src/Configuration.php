@@ -9,6 +9,14 @@ use MongoDB\Model\BSONDocument;
 
 final readonly class Configuration
 {
+    /**
+     * @var list<class-string<\ArrayAccess<string, mixed>>>
+     */
+    public array $arrayAccessClasses;
+
+    /**
+     * @param list<class-string<\ArrayAccess<string, mixed>>> $arrayAccessClasses classes with unknown properties, implemeting ArrayAccess
+     */
     public function __construct(
         /**
          * Class prefix used to prefix the class name of the generated mappers.
@@ -39,17 +47,16 @@ final readonly class Configuration
          * Does the mapper should throw an exception if the target is read-only.
          */
         public bool $allowReadOnlyTargetToPopulate = false,
-        /**
-         * Classes with unknown properties, implemeting ArrayAccess.
-         *
-         * @var list<class-string<\ArrayAccess<string, mixed>>> $arrayAccessClasses
-         */
-        public array $arrayAccessClasses = [],
+        array $arrayAccessClasses = [],
     ) {
-        $this->arrayAccessClasses[] = \ArrayObject::class;
+        $arrayAccessClasses[] = \ArrayObject::class;
+
+        // Classes provided by the mongodb extension and mongodb/mongodb package
         if (class_exists(Document::class, false)) {
-            $this->arrayAccessClasses[] = Document::class;
-            $this->arrayAccessClasses[] = BSONDocument::class;
+            $arrayAccessClasses[] = Document::class;
+            $arrayAccessClasses[] = BSONDocument::class;
         }
+
+        $this->arrayAccessClasses = $arrayAccessClasses;
     }
 }

@@ -2,10 +2,10 @@ parameters:
 	level: max
 	paths:
 		- ../../src/
-
-	tmpDir: cache
 	scanFiles:
 		- stubs/mongodb.php
+
+	tmpDir: cache
 
 	ignoreErrors:
 		- "#Instantiated class fromIteratorToArray not found#"
