@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [9.0.2] - 2024-05-23
 ### Deprecated
 - [GH#136](https://github.com/jolicode/automapper/pull/136) Deprecate the ability to inject AST transformer factories withing stand-alone AutoMapper
 
@@ -310,7 +312,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * [AutoMapper] [GH#179](https://github.com/janephp/janephp/pull/179) Fixing incompatible changes in Symfony 5.0
 
-[Unreleased]: https://github.com/jolicode/automapper/compare/9.0.1...HEAD
+[Unreleased]: https://github.com/jolicode/automapper/compare/9.0.2...HEAD
+[9.0.2]: https://github.com/janephp/janephp/compare/9.0.1...9.0.2
 [9.0.1]: https://github.com/janephp/janephp/compare/9.0.0...9.0.1
 [9.0.0]: https://github.com/janephp/janephp/compare/9.0.0-beta.2...9.0.0
 [9.0.0-beta.2]: https://github.com/janephp/janephp/compare/9.0.0-beta.1...9.0.0-beta.2
