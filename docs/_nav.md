@@ -13,6 +13,7 @@
     - [Transformer](mapping/transformer.md)
     - [Provider](mapping/provider.md)
     - [Mapping inheritance](mapping/inheritance.md)
+    - [DateTime format](mapping/date-time.md)
 - [Symfony Bundle](bundle/index.md)
     - [Installation](bundle/installation.md)
     - [Configuration](bundle/configuration.md)

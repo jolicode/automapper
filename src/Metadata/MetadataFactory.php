@@ -232,7 +232,7 @@ final class MetadataFactory
             }
 
             if ($propertyMappedEvent->source->dateTimeFormat === null) {
-                $propertyMappedEvent->source->dateTimeFormat = $extractor->getDateTimeFormat($mapperMetadata->source, $propertyMappedEvent->source->property);
+                $propertyMappedEvent->source->dateTimeFormat = $extractor->getDateTimeFormat($propertyMappedEvent);
             }
 
             // Create the target property metadata
@@ -261,7 +261,7 @@ final class MetadataFactory
             }
 
             if ($propertyMappedEvent->target->dateTimeFormat === null) {
-                $propertyMappedEvent->target->dateTimeFormat = $extractor->getDateTimeFormat($mapperMetadata->target, $propertyMappedEvent->target->property);
+                $propertyMappedEvent->target->dateTimeFormat = $extractor->getDateTimeFormat($propertyMappedEvent);
             }
 
             $sourcePropertyMetadata = SourcePropertyMetadata::fromEvent($propertyMappedEvent->source);

@@ -9,7 +9,9 @@ use AutoMapper\MapperContext;
 use AutoMapper\Symfony\ExpressionLanguageProvider;
 use AutoMapper\Tests\Fixtures\MapTo\BadMapToTransformer;
 use AutoMapper\Tests\Fixtures\MapTo\Bar;
+use AutoMapper\Tests\Fixtures\MapTo\DateTimeFormatMapTo;
 use AutoMapper\Tests\Fixtures\MapTo\FooMapTo;
+use AutoMapper\Tests\Fixtures\MapTo\MapperDateTimeFormatMapTo;
 use AutoMapper\Tests\Fixtures\MapTo\PriorityMapTo;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\FooDependency;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\TransformerWithDependency;
@@ -130,5 +132,41 @@ class AutoMapperMapToTest extends AutoMapperBaseTest
 
         $this->expectException(BadMapDefinitionException::class);
         $this->autoMapper->map($foo, 'array');
+    }
+
+    public function testDateTimeFormat(): void
+    {
+        $normal = new \DateTime();
+        $immutable = new \DateTimeImmutable();
+
+        $foo = new DateTimeFormatMapTo($normal, $immutable, $normal);
+        $result = $this->autoMapper->map($foo, 'array');
+
+        self::assertArrayHasKey('normal', $result);
+        self::assertSame($normal->format(\DateTimeInterface::ATOM), $result['normal']);
+        self::assertArrayHasKey('immutable', $result);
+        self::assertSame($immutable->format(\DateTimeInterface::RFC822), $result['immutable']);
+        self::assertArrayHasKey('interface', $result);
+        self::assertSame($normal->format(\DateTimeInterface::RFC7231), $result['interface']);
+
+        $bar = new MapperDateTimeFormatMapTo($normal, $immutable, $normal);
+        $result = $this->autoMapper->map($bar, 'array');
+
+        self::assertArrayHasKey('normal', $result);
+        self::assertSame($normal->format(\DateTimeInterface::ATOM), $result['normal']);
+        self::assertArrayHasKey('immutable', $result);
+        self::assertSame($immutable->format(\DateTimeInterface::ATOM), $result['immutable']);
+        self::assertArrayHasKey('interface', $result);
+        self::assertSame($normal->format(\DateTimeInterface::RFC7231), $result['interface']);
+
+        $baz = new MapperDateTimeFormatMapTo($normal, $immutable, $normal);
+        $result = $this->autoMapper->map($baz, 'array', [MapperContext::DATETIME_FORMAT => \DateTimeInterface::RFC822]);
+
+        self::assertArrayHasKey('normal', $result);
+        self::assertSame($normal->format(\DateTimeInterface::RFC822), $result['normal']);
+        self::assertArrayHasKey('immutable', $result);
+        self::assertSame($immutable->format(\DateTimeInterface::RFC822), $result['immutable']);
+        self::assertArrayHasKey('interface', $result);
+        self::assertSame($normal->format(\DateTimeInterface::RFC822), $result['interface']);
     }
 }

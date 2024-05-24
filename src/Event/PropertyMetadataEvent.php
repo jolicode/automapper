@@ -23,6 +23,7 @@ final class PropertyMetadataEvent
         public ?TypesMatching $types = null,
         public ?int $maxDepth = null,
         public ?TransformerInterface $transformer = null,
+        public ?string $dateTimeFormat = null,
         public ?bool $ignored = null,
         public ?string $ignoreReason = null,
         public ?string $if = null,
