@@ -20,11 +20,22 @@ You can also limit the scope of the `#[Mapper]` attribute to a specific source o
 #[Mapper(source: EntityDto::class, constructorStrategy: ConstructorStrategy::NEVER)]
 ```
 
+## DateTime format
+
+You can override DateTime format for a whole class by using `#[Mapper]` attribute:
+
+```php
+#[Mapper(dateTimeFormat: \DateTimeInterface::ATOM)]
+```
+
+This way, all your class properties that are DateTime will be transformed to string with the corresponding format.
+For more details about how each DateTime format configuration works together please read the dedicated page:
+[DateTime format](./date-time.md).
+
 ## Priority
 
 If multiple `#[Mapper]` attributes are defined for the same mapping, the one with the highest priority will be used.
 
-```php
 ```php
 #[Mapper(source: EntityDto::class, constructorStrategy: ConstructorStrategy::NEVER, priority: 2)]
 class Entity
