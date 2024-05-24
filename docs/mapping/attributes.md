@@ -98,3 +98,16 @@ class EntityDto
     public string $title;
 }
 ```
+
+## DateTime format
+
+You can override DateTime format for a property by using `#[MapTo]` or `#[MapFrom]` attributes:
+
+```php
+#[MapTo(dateTimeFormat: \DateTimeInterface::ATOM)]
+#[MapFrom(dateTimeFormat: \DateTimeInterface::ATOM)]
+```
+
+This way, your DateTime property will be transformed to string with the corresponding format.
+For more details about how each DateTime format configuration works together please read the dedicated page:
+[DateTime format](./date-time.md).
