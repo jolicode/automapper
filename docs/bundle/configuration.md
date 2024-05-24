@@ -45,7 +45,9 @@ automapper:
     * When set to `always`, AutoMapper will always use the constructor, even if some mandatory properties are missing. 
       In this case you may need to [provide a default value for the missing properties using the context](../getting-started/context.md).
 
-* `date_time_format` (default: `\DateTimeInterface::RFC3339`): The format to use to transform a date from/to a string;
+* `date_time_format` (default: `\DateTimeInterface::RFC3339`): The format to use to transform a date from/to a string,
+  can be overwritten by the attributes thanks to `dateTimeFormat` property, see [DateTime format](../mapping/date-time.md)
+  for more details about it;
 * `check_attributes` (default: `true`): Check if the field should be mapped at runtime, this allow you to have dynamic
   partial mapping, if you don't use this feature set it to false as it will improve the performance;
 * `auto_register` (default: `true`): If the bundle should auto register the mappers in the container when it does not

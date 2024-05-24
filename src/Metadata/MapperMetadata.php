@@ -26,6 +26,7 @@ class MapperMetadata
         public string $target,
         public bool $registered,
         private string $classPrefix = 'Mapper_',
+        public ?string $dateTimeFormat = null,
     ) {
         if (class_exists($this->source) && $this->source !== \stdClass::class) {
             $reflectionSource = new \ReflectionClass($this->source);

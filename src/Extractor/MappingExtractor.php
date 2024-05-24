@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Extractor;
 
 use AutoMapper\Configuration;
+use AutoMapper\Event\PropertyMetadataEvent;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyReadInfo;
 use Symfony\Component\PropertyInfo\PropertyReadInfoExtractorInterface;
@@ -119,8 +120,16 @@ abstract class MappingExtractor implements MappingExtractorInterface
         return null;
     }
 
-    public function getDateTimeFormat(string $class, string $property): string
+    public function getDateTimeFormat(PropertyMetadataEvent $propertyMetadataEvent): string
     {
+        if (null !== $propertyMetadataEvent->dateTimeFormat) {
+            return $propertyMetadataEvent->dateTimeFormat;
+        }
+
+        if (null !== $propertyMetadataEvent->mapperMetadata->dateTimeFormat) {
+            return $propertyMetadataEvent->mapperMetadata->dateTimeFormat;
+        }
+
         return $this->configuration->dateTimeFormat;
     }
 }
