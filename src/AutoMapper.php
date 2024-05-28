@@ -83,8 +83,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
 
         $mapper->registerMappers($this);
 
-        /** @var GeneratedMapper<Source, Target>|GeneratedMapper<array<mixed>, Target>|GeneratedMapper<Source, array<mixed>> */
-        return $this->mapperRegistry[$className];
+        return $mapper;
     }
 
     public function map(array|object $source, string|array|object $target, array $context = []): array|object|null
