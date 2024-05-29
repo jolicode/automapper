@@ -75,7 +75,7 @@ class AutoMapperExtension extends Extension
             ;
         } else {
             $isDebug = $container->getParameter('kernel.debug');
-            $generateStrategy = $config['loader']['reload_strategy'] ?? $isDebug ? FileReloadStrategy::ALWAYS->value : FileReloadStrategy::NEVER->value;
+            $generateStrategy = $config['loader']['reload_strategy'] ?? ($isDebug ? FileReloadStrategy::ALWAYS->value : FileReloadStrategy::NEVER->value);
             $generateStrategy = FileReloadStrategy::tryFrom($generateStrategy);
 
             $container

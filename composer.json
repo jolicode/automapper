@@ -29,6 +29,7 @@
         "api-platform/core": "^3.0.4",
         "doctrine/annotations": "~1.0",
         "doctrine/inflector": "^2.0",
+        "matthiasnoback/symfony-dependency-injection-test": "^5.1",
         "moneyphp/money": "^3.3.2",
         "phpunit/phpunit": "^9.0",
         "symfony/browser-kit": "^6.4 || ^7.0",
