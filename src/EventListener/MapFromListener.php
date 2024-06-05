@@ -85,10 +85,10 @@ final readonly class MapFromListener extends MapListener
             priority: $mapFrom->priority,
         );
 
-        if (\array_key_exists($property->target->property, $event->properties) && $event->properties[$property->target->property]->priority >= $property->priority) {
-            return;
-        }
+//        if (\array_key_exists($property->target->property, $event->properties) && $event->properties[$property->target->property]->priority >= $property->priority) {
+//            return;
+//        }
 
-        $event->properties[$property->target->property] = $property;
+        $event->properties[$property->target->property][] = $property;
     }
 }

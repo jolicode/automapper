@@ -191,7 +191,7 @@ final class MetadataFactory
 
             $this->eventDispatcher->dispatch($propertyEvent);
 
-            $propertyEvents[$propertyEvent->target->property] = $propertyEvent;
+            $propertyEvents[$propertyEvent->target->property][] = $propertyEvent;
         }
 
         foreach ($extractor->getProperties($mapperMetadata->target) as $property) {
@@ -203,13 +203,24 @@ final class MetadataFactory
 
             $this->eventDispatcher->dispatch($propertyEvent);
 
-            $propertyEvents[$propertyEvent->target->property] = $propertyEvent;
+            $propertyEvents[$propertyEvent->target->property][] = $propertyEvent;
         }
 
-        foreach ($mapperEvent->properties as $propertyEvent) {
-            $this->eventDispatcher->dispatch($propertyEvent);
+        foreach ($mapperEvent->properties as $propertiesEvent) {
+            $replaceProperties = [] ;
+            if (!is_array($propertiesEvent))
+                $propertiesEvent = [$propertiesEvent];
 
-            $propertyEvents[$propertyEvent->target->property] = $propertyEvent;
+            foreach ($propertiesEvent as $propertyEvent) {
+                $this->eventDispatcher->dispatch($propertyEvent);
+                $replaceProperties[] = $propertyEvent;
+            }
+
+            if (count($replaceProperties) > 0)
+            {
+                $propertyEvents[$propertyEvent->target->property] = $replaceProperties;
+            }
+
         }
 
         // Sort transformations by property name, to ensure consistent order, and easier debugging
@@ -217,7 +228,8 @@ final class MetadataFactory
 
         $propertiesMapping = [];
 
-        foreach ($propertyEvents as $propertyMappedEvent) {
+        foreach ($propertyEvents as $propertiesMappedEvent) {
+            foreach ($propertiesMappedEvent as $propertyMappedEvent) {
             // Create the source property metadata
             if ($propertyMappedEvent->source->accessor === null) {
                 $propertyMappedEvent->source->accessor = $extractor->getReadAccessor($mapperMetadata->source, $propertyMappedEvent->source->property);
@@ -304,6 +316,9 @@ final class MetadataFactory
                 $propertyMappedEvent->groups,
                 $propertyMappedEvent->disableGroupsCheck,
             );
+
+        }
+
         }
 
         return new GeneratorMetadata(
