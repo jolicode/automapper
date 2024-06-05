@@ -67,6 +67,8 @@ class AutoMapperExtension extends Extension
             ->setArgument('$allowReadOnlyTargetToPopulate', $config['allow_readonly_target_to_populate'])
         ;
 
+        $container->setParameter('automapper.map_private_properties', $config['map_private_properties']);
+
         $container->registerForAutoconfiguration(PropertyTransformerInterface::class)->addTag('automapper.property_transformer');
 
         if ($config['loader']['eval']) {
