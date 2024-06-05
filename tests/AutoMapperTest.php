@@ -48,6 +48,8 @@ use AutoMapper\Tests\Fixtures\ObjectsUnion\ObjectsUnionProperty;
 use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
 use AutoMapper\Tests\Fixtures\Order;
 use AutoMapper\Tests\Fixtures\PetOwner;
+use AutoMapper\Tests\Fixtures\PrivatePropertyInConstructors\ChildClass;
+use AutoMapper\Tests\Fixtures\PrivatePropertyInConstructors\OtherClass;
 use AutoMapper\Tests\Fixtures\Provider\CustomProvider;
 use AutoMapper\Tests\Fixtures\SourceForConstructorWithDefaultValues;
 use AutoMapper\Tests\Fixtures\Transformer\MoneyTransformerFactory;
@@ -1522,5 +1524,30 @@ class AutoMapperTest extends AutoMapperBaseTest
 
         self::assertInstanceOf(Fixtures\Issue111\Foo::class, $foo);
         self::assertEquals([new Colour('red'), new Colour('green'), new Colour('blue')], $foo->getColours());
+    }
+
+    public function testItCanMapFromArrayToClassesWithPrivatePropertiesInConstructor(): void
+    {
+        self::assertEquals(
+            new ChildClass(parentProp: 'foo', childProp: 'bar'),
+            $this->autoMapper->map(
+                [
+                    'parentProp' => 'foo',
+                    'childProp' => 'bar',
+                ],
+                ChildClass::class
+            )
+        );
+    }
+
+    public function testItCanMapToClassesWithPrivatePropertiesInConstructor(): void
+    {
+        self::assertEquals(
+            new ChildClass(parentProp: 'foo', childProp: 'bar'),
+            $this->autoMapper->map(
+                new OtherClass(parentProp: 'foo', childProp: 'bar'),
+                ChildClass::class
+            )
+        );
     }
 }

@@ -194,7 +194,7 @@ final class MetadataFactory
             $propertyEvents[$propertyEvent->target->property] = $propertyEvent;
         }
 
-        foreach ($extractor->getProperties($mapperMetadata->target) as $property) {
+        foreach ($extractor->getProperties($mapperMetadata->target, withConstructorParameters: true) as $property) {
             if (isset($propertyEvents[$property])) {
                 continue;
             }
