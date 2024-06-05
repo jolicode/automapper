@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - [GH#158](https://github.com/jolicode/automapper/pull/158) Actually read reload_strategy from bundle configuration
 - [GH#137](https://github.com/jolicode/automapper/pull/137) Always allow to write private props in constructor
+- [GH#129](https://github.com/jolicode/automapper/pull/129) Use map_private_properties when configuring ReflectionExtractor
 
 ## [9.0.2] - 2024-05-23
 ### Deprecated
