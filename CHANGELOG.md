@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.1.0] - 2024-06-06
 ### Added
 - [GH#153](https://github.com/jolicode/automapper/pull/153) Handle DateTime format in MapTo/MapFrom/Mapper attributes
 
@@ -320,7 +321,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * [AutoMapper] [GH#179](https://github.com/janephp/janephp/pull/179) Fixing incompatible changes in Symfony 5.0
 
-[Unreleased]: https://github.com/jolicode/automapper/compare/9.0.2...HEAD
+[Unreleased]: https://github.com/jolicode/automapper/compare/9.1.0...HEAD
+[9.1.0]: https://github.com/janephp/janephp/compare/9.0.2...9.1.0
 [9.0.2]: https://github.com/janephp/janephp/compare/9.0.1...9.0.2
 [9.0.1]: https://github.com/janephp/janephp/compare/9.0.0...9.0.1
 [9.0.0]: https://github.com/janephp/janephp/compare/9.0.0-beta.2...9.0.0
