@@ -95,22 +95,28 @@ final class ReadAccessor
                  *
                  * @see \AutoMapper\Extractor\ReadAccessor::getExtractCallback()
                  *
-                 * $this->extractCallbacks['method_name']($input)
+                 * $propertyValue ??= $this->extractCallbacks['method_name']($input)
                  */
-                return new Expr\FuncCall(
-                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractCallbacks'), new Scalar\String_($this->property ?? $this->accessor)),
-                    [
-                        new Arg($input),
-                    ]
+                return new Expr\AssignOp\Coalesce(
+                    new Expr\Variable(name: ($this->property ?? $this->accessor) . 'Value'),
+                    new Expr\FuncCall(
+                        new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractCallbacks'), new Scalar\String_($this->property ?? $this->accessor)),
+                        [
+                            new Arg($input),
+                        ]
+                    )
                 );
             }
 
             /*
              * Use the method call to read the value
              *
-             * $input->method_name(...$args)
+             * $propertyValue ??= $input->method_name(...$args)
              */
-            return new Expr\MethodCall($input, $this->accessor, $methodCallArguments);
+            return new Expr\AssignOp\Coalesce(
+                new Expr\Variable(name: ($this->property ?? $this->accessor) . 'Value'),
+                new Expr\MethodCall($input, $this->accessor, $methodCallArguments)
+            );
         }
 
         if (self::TYPE_PROPERTY === $this->type) {
