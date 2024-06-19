@@ -62,7 +62,7 @@ trait GetTypeTrait
 
             if (
                 $tagDocNode->value instanceof ParamTagValueNode
-                && $tagName !== '@param'
+                && $tagName === '@param'
                 && $tagDocNode->value->parameterName !== '$' . $property
             ) {
                 continue;

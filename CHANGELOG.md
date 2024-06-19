@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- [GH#164](https://github.com/jolicode/automapper/pull/164) Fix type extract with @param in constructor doc block
+
 ## [9.1.0] - 2024-06-06
 ### Added
 - [GH#153](https://github.com/jolicode/automapper/pull/153) Handle DateTime format in MapTo/MapFrom/Mapper attributes
