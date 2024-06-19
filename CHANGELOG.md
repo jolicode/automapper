@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.1.1] - 2024-06-19
 ### Fixed
 - [GH#164](https://github.com/jolicode/automapper/pull/164) Fix type extract with @param in constructor doc block
 
@@ -324,7 +325,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * [AutoMapper] [GH#179](https://github.com/janephp/janephp/pull/179) Fixing incompatible changes in Symfony 5.0
 
-[Unreleased]: https://github.com/jolicode/automapper/compare/9.1.0...HEAD
+[Unreleased]: https://github.com/jolicode/automapper/compare/9.1.1...HEAD
+[9.1.1]: https://github.com/janephp/janephp/compare/9.1.0...9.1.1
 [9.1.0]: https://github.com/janephp/janephp/compare/9.0.2...9.1.0
 [9.0.2]: https://github.com/janephp/janephp/compare/9.0.1...9.0.2
 [9.0.1]: https://github.com/janephp/janephp/compare/9.0.0...9.0.1
