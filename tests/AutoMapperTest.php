@@ -1550,4 +1550,17 @@ class AutoMapperTest extends AutoMapperBaseTest
             )
         );
     }
+
+    public function testParamDocBlock(): void
+    {
+        $this->buildAutoMapper();
+
+        $foo = new Fixtures\IssueParamDocBlock\Foo('bar', ['foo1', 'foo2']);
+        $array = $this->autoMapper->map($foo, 'array');
+
+        self::assertSame([
+            'bar' => 'bar',
+            'foo' => ['foo1', 'foo2'],
+        ], $array);
+    }
 }
