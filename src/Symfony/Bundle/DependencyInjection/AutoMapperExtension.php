@@ -25,6 +25,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Uid\AbstractUid;
@@ -53,6 +54,7 @@ class AutoMapperExtension extends Extension
         $loader->load('expression_language.php');
         $loader->load('generator.php');
         $loader->load('metadata.php');
+        $loader->load('property_info.php');
         $loader->load('provider.php');
         $loader->load('symfony.php');
         $loader->load('transformers.php');
@@ -66,6 +68,11 @@ class AutoMapperExtension extends Extension
             ->setArgument('$mapPrivateProperties', $config['map_private_properties'])
             ->setArgument('$allowReadOnlyTargetToPopulate', $config['allow_readonly_target_to_populate'])
         ;
+
+        if ($config['map_private_properties']) {
+            $container->getDefinition('automapper.property_info.reflection_extractor')
+                ->replaceArgument('$accessFlags', ReflectionExtractor::ALLOW_PUBLIC | ReflectionExtractor::ALLOW_PRIVATE | ReflectionExtractor::ALLOW_PROTECTED);
+        }
 
         $container->setParameter('automapper.map_private_properties', $config['map_private_properties']);
 

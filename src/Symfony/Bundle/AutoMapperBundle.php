@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AutoMapper\Symfony\Bundle;
 
 use AutoMapper\Symfony\Bundle\DependencyInjection\AutoMapperExtension;
-use AutoMapper\Symfony\Bundle\DependencyInjection\Compiler\PropertyInfoPass;
 use AutoMapper\Symfony\Bundle\DependencyInjection\Compiler\TransformerFactoryPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
@@ -17,7 +16,6 @@ class AutoMapperBundle extends Bundle
     {
         parent::build($container);
 
-        $container->addCompilerPass(new PropertyInfoPass());
         $container->addCompilerPass(new TransformerFactoryPass());
     }
 
