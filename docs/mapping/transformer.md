@@ -144,7 +144,7 @@ class UrlTransformer implements PropertyTransformerInterface, PropertyTransforme
             return false;
         }
 
-        return $sourceUniqueType->getBuiltinType() === 'int' && $source->name === 'id' && $target->name === 'url';
+        return $sourceUniqueType->getBuiltinType() === 'int' && $source->property === 'id' && $target->property === 'url';
     }
     
     public function transform(mixed $value, object|array $source, array $context): mixed
