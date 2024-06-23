@@ -172,11 +172,12 @@ final class MetadataFactory
     {
         $extractor = $this->sourceTargetPropertiesMappingExtractor;
 
-        if ('array' === $mapperMetadata->source || 'stdClass' === $mapperMetadata->source) {
+        $classes = array_merge(['array', \stdClass::class], $this->configuration->arrayAccessClasses);
+        if (\in_array($mapperMetadata->source, $classes, true)) {
             $extractor = $this->fromTargetPropertiesMappingExtractor;
         }
 
-        if ('array' === $mapperMetadata->target || 'stdClass' === $mapperMetadata->target) {
+        if (\in_array($mapperMetadata->target, $classes, true)) {
             $extractor = $this->fromSourcePropertiesMappingExtractor;
         }
 

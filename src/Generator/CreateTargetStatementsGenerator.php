@@ -109,10 +109,6 @@ final readonly class CreateTargetStatementsGenerator
      */
     private function constructorArguments(GeneratorMetadata $metadata): array
     {
-        if (!$metadata->isTargetUserDefined()) {
-            return [];
-        }
-
         $targetConstructor = $metadata->mapperMetadata->targetReflectionClass?->getConstructor();
 
         if (!$targetConstructor || !$metadata->hasConstructor()) {
