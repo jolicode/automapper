@@ -25,6 +25,7 @@ use AutoMapper\Tests\Fixtures\BuiltinClass;
 use AutoMapper\Tests\Fixtures\ClassWithMapToContextAttribute;
 use AutoMapper\Tests\Fixtures\ClassWithNullablePropertyInConstructor;
 use AutoMapper\Tests\Fixtures\ClassWithPrivateProperty;
+use AutoMapper\Tests\Fixtures\ComposeModels\Compose;
 use AutoMapper\Tests\Fixtures\ConstructorWithDefaultValues;
 use AutoMapper\Tests\Fixtures\DifferentSetterGetterType;
 use AutoMapper\Tests\Fixtures\Dog;
@@ -64,6 +65,7 @@ use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
 use Symfony\Component\Uid\Ulid;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
@@ -1562,5 +1564,15 @@ class AutoMapperTest extends AutoMapperBaseTest
             'bar' => 'bar',
             'foo' => ['foo1', 'foo2'],
         ], $array);
+    }
+
+    public function testComposeSpec(): void
+    {
+        $this->buildAutoMapper();
+
+        $data = Yaml::parse(file_get_contents(__DIR__ . '/Fixtures/ComposeModels/docker-starter-compose.yaml'));
+        $dockerStarter = $this->autoMapper->map($data, Compose::class);
+
+        dd($dockerStarter);
     }
 }
