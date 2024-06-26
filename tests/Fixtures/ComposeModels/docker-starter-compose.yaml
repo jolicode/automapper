@@ -1,0 +1,94 @@
+volumes:
+  postgres-data: {}
+  elasticsearch-data: {}
+
+services:
+  router:
+    build: services/router
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./services/router/certs:/etc/ssl/certs"
+    network_mode: host
+    profiles:
+      - default
+
+  frontend:
+    build:
+      context: services/php
+      target: frontend
+    depends_on:
+      - postgres
+      - elasticsearch
+      - mail
+    volumes:
+      - "../..:/var/www:cached"
+    environment:
+      - "PHP_VERSION=${PHP_VERSION}"
+    profiles:
+      - default
+    labels:
+      - "traefik.enable=true"
+      - "project-name=${PROJECT_NAME}"
+      - "traefik.http.routers.${PROJECT_NAME}-frontend.rule=Host(${PROJECT_DOMAINS})"
+      - "traefik.http.routers.${PROJECT_NAME}-frontend.tls=true"
+      - "traefik.http.routers.${PROJECT_NAME}-frontend-unsecure.rule=Host(${PROJECT_DOMAINS})"
+      - "traefik.http.routers.${PROJECT_NAME}-frontend-unsecure.middlewares=redirect-to-https@file"
+
+  postgres:
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=app
+      - POSTGRES_PASSWORD=app
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    profiles:
+      - default
+
+  elasticsearch:
+    image: elasticsearch:7.8.0
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    environment:
+      - "discovery.type=single-node"
+    labels:
+      - "traefik.enable=true"
+      - "project-name=${PROJECT_NAME}"
+      - "traefik.http.routers.${PROJECT_NAME}-elasticsearch.rule=Host(`elasticsearch.${PROJECT_ROOT_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}-elasticsearch.tls=true"
+    profiles:
+      - default
+
+  kibana:
+    image: kibana:7.8.0
+    depends_on:
+      - elasticsearch
+    labels:
+      - "traefik.enable=true"
+      - "project-name=${PROJECT_NAME}"
+      - "traefik.http.routers.${PROJECT_NAME}-kibana.rule=Host(`kibana.${PROJECT_ROOT_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}-kibana.tls=true"
+    profiles:
+      - default
+
+  mail:
+    image: axllent/mailpit
+    environment:
+      - MP_SMTP_BIND_ADDR=0.0.0.0:25
+    labels:
+      - "traefik.enable=true"
+      - "project-name=${PROJECT_NAME}"
+      - "traefik.http.routers.${PROJECT_NAME}-mail.rule=Host(`mail.${PROJECT_ROOT_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}-mail.tls=true"
+      - "traefik.http.services.mail.loadbalancer.server.port=8025"
+    profiles:
+      - default
+
+  blackfire:
+    image: blackfire/blackfire
+    environment:
+      BLACKFIRE_SERVER_ID: FIXME
+      BLACKFIRE_SERVER_TOKEN: FIXME
+      BLACKFIRE_CLIENT_ID: FIXME
+      BLACKFIRE_CLIENT_TOKEN: FIXME
+    profiles:
+      - default
