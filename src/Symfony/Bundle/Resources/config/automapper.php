@@ -12,10 +12,13 @@ use AutoMapper\Generator\MapperGenerator;
 use AutoMapper\Loader\ClassLoaderInterface;
 use AutoMapper\Loader\EvalLoader;
 use AutoMapper\Loader\FileLoader;
+use AutoMapper\Loader\FileReloadStrategy;
 use AutoMapper\Metadata\MetadataFactory;
 use AutoMapper\Provider\ProviderRegistry;
 use AutoMapper\Symfony\ExpressionLanguageProvider;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
+use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Lock\Store\FlockStore;
 
 return static function (ContainerConfigurator $container) {
     $container->services()
@@ -30,6 +33,13 @@ return static function (ContainerConfigurator $container) {
             ->alias(AutoMapperInterface::class, AutoMapper::class)->public()
             ->alias(AutoMapperRegistryInterface::class, AutoMapper::class)->public()
 
+        ->set('automapper.file_loader_lock_factory_store')
+            ->class(FlockStore::class)
+        ->set('automapper.file_loader_lock_factory')
+            ->class(LockFactory::class)
+            ->args([
+                service('automapper.file_loader_lock_factory_store'),
+            ])
         ->set(EvalLoader::class)
             ->args([
                 service(MapperGenerator::class),
@@ -41,7 +51,8 @@ return static function (ContainerConfigurator $container) {
                 service(MapperGenerator::class),
                 service(MetadataFactory::class),
                 '%kernel.cache_dir%/automapper',
-                true,
+                service('automapper.file_loader_lock_factory'),
+                FileReloadStrategy::ALWAYS,
             ])
 
         ->set(Configuration::class)

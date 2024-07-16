@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Fixed
+- [GH#174](https://github.com/jolicode/automapper/pull/174) Fix race condition when writing generated mappers
 - [GH#167](https://github.com/jolicode/automapper/pull/167) Fix property metadata attribute name in docs
 - [GH#166](https://github.com/jolicode/automapper/pull/166) Remove cache for property info, use specific services instead
 
