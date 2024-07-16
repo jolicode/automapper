@@ -21,6 +21,7 @@
         "symfony/deprecation-contracts": "^3.0",
         "symfony/event-dispatcher": "^6.4 || ^7.0",
         "symfony/expression-language": "^6.4 || ^7.0",
+        "symfony/lock": "^6.4 || ^7.0",
         "symfony/property-info": "^6.4 || ^7.0",
         "symfony/property-access": "^6.4 || ^7.0",
         "phpdocumentor/type-resolver": "^1.7"
