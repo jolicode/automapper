@@ -67,7 +67,7 @@ abstract readonly class AbstractArrayTransformer implements TransformerInterface
             $itemStatements[] = new Stmt\Expression($this->getAssignExpr($valuesVar, $output, $loopKeyVar, $assignByRef));
         }
 
-        $statements[] = new Stmt\Foreach_($input, $loopValueVar, [
+        $statements[] = new Stmt\Foreach_(new Expr\BinaryOp\Coalesce($input, new Expr\Array_()), $loopValueVar, [
             'stmts' => $itemStatements,
             'keyVar' => $loopKeyVar,
         ]);
