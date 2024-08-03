@@ -31,7 +31,7 @@ $autoMapper = AutoMapper::create(providers: [new MyProvider()]);
 ```
 
 > [!NOTE]
-> When using the Symfony Bundle version of the AutoMapper, you can use the `auto_mapper.provider` tag to register the provider.
+> When using the Symfony Bundle version of the AutoMapper, you can use the `automapper.provider` tag to register the provider.
 > If you have autoconfiguration enabled, you do not need to register the provider manually as the tag will be automatically added.
 
 Then you can use the `#[MapProvider]` attribute on top of the `target` class that you want to use this provider.
