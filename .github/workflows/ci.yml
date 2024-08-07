@@ -12,9 +12,7 @@ jobs:
           php-version: 8.2
           coverage: none
       - name: install PHP CS Fixer
-        uses: ramsey/composer-install@v2
-        with:
-          composer-options: '--working-dir=tools/php-cs-fixer'
+        run: 'composer install -n --prefer-dist --optimize-autoloader --working-dir=tools/php-cs-fixer'
       - name: 'php-cs-fixer check'
         run: 'tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config=tools/php-cs-fixer/.php-cs-fixer.php --dry-run --diff'
   phpstan:
@@ -35,9 +33,7 @@ jobs:
       - name: composer install
         run: composer update --prefer-stable
       - name: install phpstan
-        uses: ramsey/composer-install@v2
-        with:
-          composer-options: '--working-dir=tools/phpstan'
+        run: 'composer install -n --prefer-dist --optimize-autoloader --working-dir=tools/phpstan'
       - name: 'phpstan check'
         run: 'tools/phpstan/vendor/bin/phpstan analyse --configuration=tools/phpstan/phpstan.neon'
   tests:

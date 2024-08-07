@@ -205,6 +205,14 @@ final readonly class CreateTargetStatementsGenerator
             $defaultValueExpr = new Expr\ConstFetch(new Name('null'));
         }
 
+        if ($defaultValueExpr instanceof Expr\Array_) {
+            // $constructarg_3 = count($values) > 0 ? $values : array();
+            $argumentAssignedValue = new Expr\Ternary(new Expr\BinaryOp\Greater(new Expr\FuncCall(new Name('count'), [new Arg($output)]), create_scalar_int(0)), $output, $defaultValueExpr);
+        } else {
+            // $constructarg_0 = $values ?? array();
+            $argumentAssignedValue = new Expr\BinaryOp\Coalesce($output, $defaultValueExpr);
+        }
+
         return [
             new Stmt\If_(new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'hasConstructorArgument', [
                 new Arg($variableRegistry->getContext()),
@@ -221,7 +229,7 @@ final readonly class CreateTargetStatementsGenerator
                 ],
                 'else' => new Stmt\Else_([
                     ...$propStatements,
-                    new Stmt\Expression(new Expr\Assign($constructVar, new Expr\BinaryOp\Coalesce($output, $defaultValueExpr))),
+                    new Stmt\Expression(new Expr\Assign($constructVar, $argumentAssignedValue)),
                 ]),
             ]),
             new Arg($constructVar, name: new Identifier($parameter->getName())),
