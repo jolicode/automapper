@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator;
 
+use AutoMapper\Configuration;
 use AutoMapper\Exception\CompileException;
 use AutoMapper\MapperContext;
 use AutoMapper\Metadata\GeneratorMetadata;
@@ -30,6 +31,7 @@ final readonly class PropertyConditionsGenerator
     private Parser $parser;
 
     public function __construct(
+        private Configuration $configuration,
         private ExpressionLanguage $expressionLanguage,
         Parser $parser = null,
     ) {
@@ -42,6 +44,7 @@ final readonly class PropertyConditionsGenerator
 
         $conditions[] = $this->propertyExistsForStdClass($metadata, $propertyMetadata);
         $conditions[] = $this->propertyExistsForArray($metadata, $propertyMetadata);
+        $conditions[] = $this->propertyExistsForArrayAccess($metadata, $propertyMetadata);
         $conditions[] = $this->isAllowedAttribute($metadata, $propertyMetadata);
 
         if (!$propertyMetadata->disableGroupsCheck) {
@@ -118,6 +121,26 @@ final readonly class PropertyConditionsGenerator
             new Arg(new Scalar\String_($propertyMetadata->source->property)),
             new Arg($metadata->variableRegistry->getSourceInput()),
         ]);
+    }
+
+    /**
+     * In case of source is an ArrayAccess implementation listed in the config.
+     *
+     * ```php
+     * $source->offsetExists('propertyName').
+     * ```
+     */
+    private function propertyExistsForArrayAccess(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
+    {
+        if (!$propertyMetadata->source->checkExists || !\in_array($metadata->mapperMetadata->source, $this->configuration->arrayAccessClasses, true)) {
+            return null;
+        }
+
+        return new Expr\MethodCall(
+            $metadata->variableRegistry->getSourceInput(),
+            'offsetExists',
+            [new Arg(new Scalar\String_($propertyMetadata->source->property))],
+        );
     }
 
     /**

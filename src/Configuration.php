@@ -4,8 +4,19 @@ declare(strict_types=1);
 
 namespace AutoMapper;
 
+use MongoDB\BSON\Document;
+use MongoDB\Model\BSONDocument;
+
 final readonly class Configuration
 {
+    /**
+     * @var list<class-string<\ArrayAccess<string, mixed>>>
+     */
+    public array $arrayAccessClasses;
+
+    /**
+     * @param list<class-string<\ArrayAccess<string, mixed>>> $arrayAccessClasses classes with unknown properties, implemeting ArrayAccess
+     */
     public function __construct(
         /**
          * Class prefix used to prefix the class name of the generated mappers.
@@ -36,6 +47,16 @@ final readonly class Configuration
          * Does the mapper should throw an exception if the target is read-only.
          */
         public bool $allowReadOnlyTargetToPopulate = false,
+        array $arrayAccessClasses = [],
     ) {
+        $arrayAccessClasses[] = \ArrayObject::class;
+
+        // Classes provided by the mongodb extension and mongodb/mongodb package
+        if (class_exists(Document::class, false)) {
+            $arrayAccessClasses[] = Document::class;
+            $arrayAccessClasses[] = BSONDocument::class;
+        }
+
+        $this->arrayAccessClasses = $arrayAccessClasses;
     }
 }

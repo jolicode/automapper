@@ -2,9 +2,11 @@ parameters:
 	level: max
 	paths:
 		- ../../src/
+	scanFiles:
+		- stubs/mongodb.php
 
 	tmpDir: cache
 
 	ignoreErrors:
-	    - "#Instantiated class fromIteratorToArray not found#"
-	    - "#Instantiated class toArray not found#"
+		- "#Instantiated class fromIteratorToArray not found#"
+		- "#Instantiated class toArray not found#"

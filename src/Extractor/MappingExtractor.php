@@ -32,7 +32,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
      */
     public function getProperties(string $class, bool $withConstructorParameters = false): iterable
     {
-        if ($class === 'array' || $class === \stdClass::class) {
+        if ($class === 'array' || $class === \stdClass::class || \in_array($class, $this->configuration->arrayAccessClasses, true)) {
             return [];
         }
 
@@ -72,7 +72,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
 
     public function getReadAccessor(string $class, string $property): ?ReadAccessor
     {
-        if ('array' === $class) {
+        if ('array' === $class || \in_array($class, $this->configuration->arrayAccessClasses, true)) {
             return new ReadAccessor(ReadAccessor::TYPE_ARRAY_DIMENSION, $property);
         }
 
@@ -139,7 +139,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
 
     public function getCheckExists(string $class, string $property): bool
     {
-        if ('array' === $class || \stdClass::class === $class) {
+        if ('array' === $class || \stdClass::class === $class || \in_array($class, $this->configuration->arrayAccessClasses, true)) {
             return true;
         }
 
