@@ -27,7 +27,7 @@ The `Configuration` object allows you to define the following options:
 The prefix to use for the generated mappers class names. It can be useful to change it you have a different AutoMapper 
 instance in your application and they should not conflict when mapping the same classes.
 
-* `constructorStrategy` (default: `always`)
+* `constructorStrategy` (default: `auto`)
 
 If the generated mapper should use the constructor to instantiate the target. When set to auto, AutoMapper will use the
 constructor if all mandatory properties are present in the source object, otherwise it will not use it.
