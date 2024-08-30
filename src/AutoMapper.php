@@ -22,6 +22,8 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Lock\Store\FlockStore;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
@@ -181,10 +183,12 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
             $expressionLanguage,
         );
 
+        $lockFactory = new LockFactory(new FlockStore());
+
         if (null === $cacheDirectory) {
             $loader = new EvalLoader($mapperGenerator, $metadataFactory);
         } else {
-            $loader = new FileLoader($mapperGenerator, $metadataFactory, $cacheDirectory);
+            $loader = new FileLoader($mapperGenerator, $metadataFactory, $cacheDirectory, $lockFactory);
         }
 
         return new self($loader, $customTransformerRegistry, $metadataRegistry, $providerRegistry, $expressionLanguageProvider);
