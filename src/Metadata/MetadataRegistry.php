@@ -110,4 +110,9 @@ class MetadataRegistry implements \IteratorAggregate, \Countable
     {
         return \count($this->registry, \COUNT_RECURSIVE);
     }
+
+    public function isArrayAccess(string $type): bool
+    {
+        return \in_array($type, $this->configuration->arrayAccessClasses, true);
+    }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator;
 
+use AutoMapper\Configuration;
 use AutoMapper\Exception\ReadOnlyTargetException;
 use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
 use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
@@ -27,6 +28,7 @@ final readonly class MapMethodStatementsGenerator
     private PropertyStatementsGenerator $propertyStatementsGenerator;
 
     public function __construct(
+        Configuration $configuration,
         DiscriminatorStatementsGenerator $discriminatorStatementsGeneratorSource,
         DiscriminatorStatementsGenerator $discriminatorStatementsGeneratorTarget,
         CachedReflectionStatementsGenerator $cachedReflectionStatementsGenerator,
@@ -37,7 +39,7 @@ final readonly class MapMethodStatementsGenerator
             $discriminatorStatementsGeneratorTarget,
             $cachedReflectionStatementsGenerator,
         );
-        $this->propertyStatementsGenerator = new PropertyStatementsGenerator($expressionLanguage);
+        $this->propertyStatementsGenerator = new PropertyStatementsGenerator($configuration, $expressionLanguage);
     }
 
     /**

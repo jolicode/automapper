@@ -67,6 +67,7 @@ class AutoMapperExtension extends Extension
             ->setArgument('$autoRegister', $config['auto_register'])
             ->setArgument('$mapPrivateProperties', $config['map_private_properties'])
             ->setArgument('$allowReadOnlyTargetToPopulate', $config['allow_readonly_target_to_populate'])
+            ->setArgument('$arrayAccessClasses', $config['array_access_classes'])
         ;
 
         if ($config['map_private_properties']) {
