@@ -20,6 +20,9 @@ use PhpParser\Node\Param;
 use PhpParser\Node\Stmt;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
+use function AutoMapper\PhpParser\create_declare_item;
+use function AutoMapper\PhpParser\create_scalar_int;
+
 /**
  * Generates code for a mapping class.
  *
@@ -58,22 +61,31 @@ final readonly class MapperGenerator
     /**
      * Generate Class AST given metadata for a mapper.
      *
+     * @return Stmt[]
+     *
      * @throws CompileException
      * @throws InvalidMappingException
      */
-    public function generate(GeneratorMetadata $metadata): Stmt\Class_
+    public function generate(GeneratorMetadata $metadata): array
     {
         if ($this->disableGeneratedMapper) {
             throw new InvalidMappingException('No mapper found for source ' . $metadata->mapperMetadata->source . ' and target ' . $metadata->mapperMetadata->target);
         }
 
-        return (new Builder\Class_($metadata->mapperMetadata->className))
+        $statements = [];
+        if ($metadata->strictTypes) {
+            // @phpstan-ignore argument.type
+            $statements[] = new Stmt\Declare_([create_declare_item('strict_types', create_scalar_int(1))]);
+        }
+        $statements[] = (new Builder\Class_($metadata->mapperMetadata->className))
             ->makeFinal()
             ->extend(GeneratedMapper::class)
             ->addStmt($this->constructorMethod($metadata))
             ->addStmt($this->mapMethod($metadata))
             ->addStmt($this->registerMappersMethod($metadata))
             ->getNode();
+
+        return $statements;
     }
 
     /**

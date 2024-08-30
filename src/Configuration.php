@@ -36,6 +36,10 @@ final readonly class Configuration
          * Does the mapper should throw an exception if the target is read-only.
          */
         public bool $allowReadOnlyTargetToPopulate = false,
+        /**
+         * Add declare(strict_types=1) to generated code.
+         */
+        public bool $strictTypes = false,
     ) {
     }
 }

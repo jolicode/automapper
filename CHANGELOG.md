@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- [GH#180](https://github.com/jolicode/automapper/pull/180) Add configuration to generate code with strict types
+
 ### Fixed
 - [GH#167](https://github.com/jolicode/automapper/pull/167) Fix property metadata attribute name in docs
 - [GH#166](https://github.com/jolicode/automapper/pull/166) Remove cache for property info, use specific services instead

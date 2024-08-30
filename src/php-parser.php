@@ -43,3 +43,19 @@ function create_expr_array_item(Expr $value, Expr $key = null, bool $byRef = fal
 
     return new $class($value, $key, $byRef, $attributes, $unpack);
 }
+
+/**
+ * Constructs a declare key=>value pair node.
+ *
+ * @param string|Node\Identifier $key        Key
+ * @param Expr                   $value      Value
+ * @param array<string, mixed>   $attributes Additional attributes
+ *
+ * @internal
+ */
+function create_declare_item($key, Expr $value, array $attributes = []): Node\DeclareItem|Node\Stmt\DeclareDeclare
+{
+    $class = class_exists(Node\DeclareItem::class) ? Node\DeclareItem::class : Node\Stmt\DeclareDeclare::class;
+
+    return new $class($key, $value, $attributes);
+}
