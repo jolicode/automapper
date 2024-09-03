@@ -312,6 +312,7 @@ final class MetadataFactory
             $mapperEvent->checkAttributes ?? $this->configuration->attributeChecking,
             $mapperEvent->constructorStrategy ?? $this->configuration->constructorStrategy,
             $mapperEvent->allowReadOnlyTargetToPopulate ?? $this->configuration->allowReadOnlyTargetToPopulate,
+            $mapperEvent->strictTypes ?? $this->configuration->strictTypes,
             $mapperEvent->provider,
         );
     }

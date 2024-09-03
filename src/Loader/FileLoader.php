@@ -88,8 +88,9 @@ final class FileLoader implements ClassLoaderInterface
         $className = $mapperMetadata->className;
         $classPath = $this->directory . \DIRECTORY_SEPARATOR . $className . '.php';
 
-        $generatorMetadata = $this->metadataFactory->getGeneratorMetadata($mapperMetadata->source, $mapperMetadata->target);
-        $classCode = $this->printer->prettyPrint([$this->generator->generate($generatorMetadata)]);
+        $classCode = $this->printer->prettyPrint($this->generator->generate(
+            $this->metadataFactory->getGeneratorMetadata($mapperMetadata->source, $mapperMetadata->target)
+        ));
 
         $this->write($classPath, "<?php\n\n" . $classCode . "\n");
 

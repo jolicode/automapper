@@ -22,6 +22,7 @@ final class GenerateMapperEvent
         public ?bool $checkAttributes = null,
         public ?ConstructorStrategy $constructorStrategy = null,
         public ?bool $allowReadOnlyTargetToPopulate = null,
+        public ?bool $strictTypes = null,
     ) {
     }
 }

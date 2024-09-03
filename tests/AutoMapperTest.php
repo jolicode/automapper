@@ -785,6 +785,24 @@ class AutoMapperTest extends AutoMapperBaseTest
         $automapper->getMapper(Fixtures\User::class, Fixtures\UserDTO::class);
     }
 
+    public function testStrictTypes(): void
+    {
+        $this->expectException(\TypeError::class);
+
+        $automapper = AutoMapper::create(new Configuration(strictTypes: true, classPrefix: 'StrictTypes_'));
+        $data = ['foo' => 1.1];
+        $automapper->map($data, Fixtures\IntDTO::class);
+    }
+
+    public function testStrictTypesFromMapper(): void
+    {
+        $this->expectException(\TypeError::class);
+
+        $automapper = AutoMapper::create(new Configuration(strictTypes: false, classPrefix: 'StrictTypesFromMapper_'));
+        $data = ['foo' => 1.1];
+        $automapper->map($data, Fixtures\IntDTOWithMapper::class);
+    }
+
     public function testWithMixedArray(): void
     {
         $user = new Fixtures\User(1, 'yolo', '13');

@@ -31,9 +31,9 @@ final readonly class EvalLoader implements ClassLoaderInterface
 
     public function loadClass(MapperMetadata $mapperMetadata): void
     {
-        $class = $this->generator->generate($this->metadataFactory->getGeneratorMetadata($mapperMetadata->source, $mapperMetadata->target));
-
-        eval($this->printer->prettyPrint([$class]));
+        eval($this->printer->prettyPrint($this->generator->generate(
+            $this->metadataFactory->getGeneratorMetadata($mapperMetadata->source, $mapperMetadata->target)
+        )));
     }
 
     public function buildMappers(MetadataRegistry $registry): bool

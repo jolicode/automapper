@@ -23,6 +23,7 @@ final readonly class Mapper
         public ?bool $checkAttributes = null,
         public ?ConstructorStrategy $constructorStrategy = null,
         public ?bool $allowReadOnlyTargetToPopulate = null,
+        public ?bool $strictTypes = null,
         public int $priority = 0,
         public ?string $dateTimeFormat = null,
     ) {
