@@ -29,7 +29,7 @@ final class AutoMapperExtensionTest extends AbstractExtensionTestCase
         $this->container->setParameter('kernel.debug', $debug);
         $this->load(['loader' => $config]);
 
-        $this->assertContainerBuilderHasServiceDefinitionWithArgument(FileLoader::class, 3, $expectedValue);
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument(FileLoader::class, 4, $expectedValue);
     }
 
     public static function provideReloadStrategyConfiguration(): iterable

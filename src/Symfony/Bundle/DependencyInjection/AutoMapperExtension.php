@@ -89,7 +89,7 @@ class AutoMapperExtension extends Extension
 
             $container
                 ->getDefinition(FileLoader::class)
-                ->replaceArgument(3, $generateStrategy);
+                ->replaceArgument(4, $generateStrategy);
 
             $container
                 ->setAlias(ClassLoaderInterface::class, FileLoader::class)
