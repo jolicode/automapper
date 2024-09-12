@@ -525,6 +525,15 @@ class AutoMapperTest extends AutoMapperBaseTest
         $this->autoMapper->map($data, ConstructorWithDefaultValues::class);
     }
 
+    public function testConstructorWithDefaultFromStdClass(): void
+    {
+        $data = (object) ['baz' => 'baz'];
+        /** @var ConstructorWithDefaultValues $object */
+        $object = $this->autoMapper->map($data, ConstructorWithDefaultValues::class);
+
+        self::assertInstanceOf(ConstructorWithDefaultValues::class, $object);
+    }
+
     public function testConstructorWithDefault(): void
     {
         $user = new Fixtures\UserDTONoAge();
