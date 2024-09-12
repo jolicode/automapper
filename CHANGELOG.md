@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - [GH#180](https://github.com/jolicode/automapper/pull/180) Add configuration to generate code with strict types
 
+### Fixed
+- [GH#184](https://github.com/jolicode/automapper/pull/184) Fix error when mapping from stdClass to constructor with nullable/optional arguments
+
 ## [9.1.2] - 2024-09-03
 ### Fixed
 - [GH#174](https://github.com/jolicode/automapper/pull/174) Fix race condition when writing generated mappers
@@ -157,7 +160,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - [GH#22](https://github.com/jolicode/automapper/pull/22) Added generic AST extractor
 - [GH#21](https://github.com/jolicode/automapper/pull/21) Add VERSION constants within AutoMapper class and use it for transformers hashes
- 
+
 ### Changed
 - [GH#19](https://github.com/jolicode/automapper/pull/19) Use attributes everywhere instead of annotations
 - [GH#18](https://github.com/jolicode/automapper/pull/18) Symfony 7 support
