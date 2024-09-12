@@ -206,11 +206,15 @@ final readonly class CreateTargetStatementsGenerator
         }
 
         if ($defaultValueExpr instanceof Expr\Array_) {
-            // $constructarg_3 = count($values) > 0 ? $values : array();
-            $argumentAssignedValue = new Expr\Ternary(new Expr\BinaryOp\Greater(new Expr\FuncCall(new Name('count'), [new Arg($output)]), create_scalar_int(0)), $output, $defaultValueExpr);
+            // $constructarg = count($values) > 0 ? $values : {expression};
+            $argumentAssignClosure = static fn (Expr $expr) => new Expr\Assign($constructVar, new Expr\Ternary(
+                new Expr\BinaryOp\Greater(new Expr\FuncCall(new Name('count'), [new Arg($output)]), create_scalar_int(0)),
+                $output,
+                $expr,
+            ));
         } else {
-            // $constructarg_0 = $values ?? array();
-            $argumentAssignedValue = new Expr\BinaryOp\Coalesce($output, $defaultValueExpr);
+            // $constructarg = $values ?? {expression};
+            $argumentAssignClosure = static fn (Expr $expr) => new Expr\Assign($constructVar, new Expr\BinaryOp\Coalesce($output, $expr));
         }
 
         return [
@@ -221,15 +225,15 @@ final readonly class CreateTargetStatementsGenerator
             ]), [
                 'stmts' => [
                     ...$propStatements,
-                    new Stmt\Expression(new Expr\Assign($constructVar, new Expr\BinaryOp\Coalesce($output, new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'getConstructorArgument', [
+                    new Stmt\Expression($argumentAssignClosure(new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'getConstructorArgument', [
                         new Arg($variableRegistry->getContext()),
                         new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
                         new Arg(new Scalar\String_($propertyMetadata->target->property)),
-                    ])))),
+                    ]))),
                 ],
                 'else' => new Stmt\Else_([
                     ...$propStatements,
-                    new Stmt\Expression(new Expr\Assign($constructVar, $argumentAssignedValue)),
+                    new Stmt\Expression($argumentAssignClosure($defaultValueExpr)),
                 ]),
             ]),
             new Arg($constructVar, name: new Identifier($parameter->getName())),

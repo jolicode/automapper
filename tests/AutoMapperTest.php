@@ -469,6 +469,19 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertTrue($userDto->getConstructor());
     }
 
+    public function testConstructorArrayArgumentFromContext(): void
+    {
+        $data = ['baz' => 'baz'];
+        /** @var ConstructorWithDefaultValues $userDto */
+        $object = $this->autoMapper->map($data, ConstructorWithDefaultValues::class, [MapperContext::CONSTRUCTOR_ARGUMENTS => [
+            ConstructorWithDefaultValues::class => ['someOtters' => [1]],
+        ]]);
+
+        self::assertInstanceOf(ConstructorWithDefaultValues::class, $object);
+        self::assertSame('baz', $object->baz);
+        self::assertSame([1], $object->someOtters);
+    }
+
     public function testConstructorNotAllowed(): void
     {
         $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, constructorStrategy: ConstructorStrategy::NEVER, classPrefix: 'NotAllowedMapper_');
