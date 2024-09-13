@@ -11,6 +11,7 @@ readonly class ConstructorWithDefaultValues
         public ?int $foo = 1,
         public int $bar = 0,
         public array $someOtters = [],
+        public ?IntDTO $nullableObject = null,
     ) {
     }
 }
