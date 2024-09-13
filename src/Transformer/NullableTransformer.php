@@ -11,7 +11,7 @@ use PhpParser\Node\Name;
 use PhpParser\Node\Stmt;
 
 /**
- * Tansformer decorator to handle null values.
+ * Transformer decorator to handle null values.
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
  *
@@ -51,9 +51,9 @@ final readonly class NullableTransformer implements TransformerInterface, Depend
             $itemStatements[] = new Stmt\Expression(new $assignClass($newOutput, $output));
         }
 
-        if ($input instanceof Expr\ArrayDimFetch) {
+        if ($propertyMapping->source->checkExists) {
             /*
-             * if `$input` is an array access, let's validate if the array key exists and is not null:
+             * if `$input` is an array access or stdClass, let's validate if the key exists and is not null:
              *
              * if (isset($value['key'])) {
              */

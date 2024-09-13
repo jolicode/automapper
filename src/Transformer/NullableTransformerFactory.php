@@ -21,10 +21,6 @@ final class NullableTransformerFactory implements TransformerFactoryInterface, P
 
     public function getTransformer(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
-        if (null !== $target->parameterInConstructor) {
-            return null;
-        }
-
         $sourceType = $types->getSourceUniqueType();
 
         if (null === $sourceType) {

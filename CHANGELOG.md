@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - [GH#184](https://github.com/jolicode/automapper/pull/184) Fix error when mapping from stdClass to constructor with nullable/optional arguments
 - [GH#185](https://github.com/jolicode/automapper/pull/185) Fix constructor with default parameter array does not work with constructor_arguments context
+- [GH#187](https://github.com/jolicode/automapper/pull/187) Fix regression after [GH#184](https://github.com/jolicode/automapper/pull/184)
 
 ## [9.1.2] - 2024-09-03
 ### Fixed
