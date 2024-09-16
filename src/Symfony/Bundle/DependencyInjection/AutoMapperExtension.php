@@ -67,6 +67,9 @@ class AutoMapperExtension extends Extension
             ->setArgument('$autoRegister', $config['auto_register'])
             ->setArgument('$mapPrivateProperties', $config['map_private_properties'])
             ->setArgument('$allowReadOnlyTargetToPopulate', $config['allow_readonly_target_to_populate'])
+            ->setArgument('$reloadStrategy', $reloadStrategy = FileReloadStrategy::from($config['loader']['reload_strategy'] ?? (
+                $container->getParameter('kernel.debug') ? FileReloadStrategy::ALWAYS->value : FileReloadStrategy::NEVER->value
+            )))
         ;
 
         if ($config['map_private_properties']) {
@@ -83,13 +86,9 @@ class AutoMapperExtension extends Extension
                 ->setAlias(ClassLoaderInterface::class, EvalLoader::class)
             ;
         } else {
-            $isDebug = $container->getParameter('kernel.debug');
-            $generateStrategy = $config['loader']['reload_strategy'] ?? ($isDebug ? FileReloadStrategy::ALWAYS->value : FileReloadStrategy::NEVER->value);
-            $generateStrategy = FileReloadStrategy::tryFrom($generateStrategy);
-
             $container
                 ->getDefinition(FileLoader::class)
-                ->replaceArgument(4, $generateStrategy);
+                ->replaceArgument(4, $reloadStrategy);
 
             $container
                 ->setAlias(ClassLoaderInterface::class, FileLoader::class)

@@ -188,7 +188,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         if (null === $cacheDirectory) {
             $loader = new EvalLoader($mapperGenerator, $metadataFactory);
         } else {
-            $loader = new FileLoader($mapperGenerator, $metadataFactory, $cacheDirectory, $lockFactory);
+            $loader = new FileLoader($mapperGenerator, $metadataFactory, $cacheDirectory, $lockFactory, $configuration->reloadStrategy);
         }
 
         return new self($loader, $customTransformerRegistry, $metadataRegistry, $providerRegistry, $expressionLanguageProvider);
