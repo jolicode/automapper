@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper;
 
+use AutoMapper\Loader\FileReloadStrategy;
+
 final readonly class Configuration
 {
     public function __construct(
@@ -40,6 +42,10 @@ final readonly class Configuration
          * Add declare(strict_types=1) to generated code.
          */
         public bool $strictTypes = false,
+        /**
+         * The strategy to use to generate the mappers between each request.
+         */
+        public FileReloadStrategy $reloadStrategy = FileReloadStrategy::ON_CHANGE,
     ) {
     }
 }
