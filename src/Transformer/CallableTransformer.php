@@ -24,37 +24,20 @@ class CallableTransformer implements TransformerInterface, AllowNullValueTransfo
 
     public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): array
     {
-        if ($this->callableIsMethodFromSource) {
-            $newInput = new Expr\MethodCall(
-                $source,
+        if ($this->callableIsMethodFromSource || $this->callableIsMethodFromTarget) {
+            return [new Expr\MethodCall(
+                $this->callableIsMethodFromSource ? $source : new Expr\Variable('result'),
                 $this->callable,
-                [
-                    new Arg($input),
-                ]
-            );
-
-            return [$newInput, []];
+                [new Arg($input), new Arg($source), new Arg(new Expr\Variable('context'))],
+            ), []];
         }
 
-        if ($this->callableIsMethodFromTarget) {
-            $newInput = new Expr\MethodCall(
-                new Expr\Variable('result'),
-                $this->callable,
-                [
-                    new Arg($input),
-                ]
-            );
-
-            return [$newInput, []];
-        }
-
-        $newInput = new Expr\FuncCall(
+        return [new Expr\FuncCall(
             new Scalar\String_($this->callable),
-            [
-                new Arg($input),
-            ]
-        );
-
-        return [$newInput, []];
+            // Internal functions throws ArgumentCountError when too many arguments are passed
+            \function_exists($this->callable) && (new \ReflectionFunction($this->callable))->isInternal()
+                ? [new Arg($input)]
+                : [new Arg($input), new Arg($source), new Arg(new Expr\Variable('context'))]
+        ), []];
     }
 }
