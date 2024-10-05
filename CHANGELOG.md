@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#187](https://github.com/jolicode/automapper/pull/187) Fix regression after [GH#184](https://github.com/jolicode/automapper/pull/184)
 - [GH#192](https://github.com/jolicode/automapper/pull/192) Fix source and context not passed to callable transformer
 
+### Changed
+- [GH#186](https://github.com/jolicode/automapper/pull/186) Optimize creation from constructor
+
 ## [9.1.2] - 2024-09-03
 ### Fixed
 - [GH#174](https://github.com/jolicode/automapper/pull/174) Fix race condition when writing generated mappers
