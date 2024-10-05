@@ -20,7 +20,7 @@ class Bar
     public function __construct(
         public string $bar,
         public string $baz,
-        #[MapFrom(property: 'foo')]
+        #[MapFrom(property: 'foo', transformer: 'htmlspecialchars')]
         public string $from,
     ) {
     }
@@ -36,12 +36,12 @@ class Bar
         return $this->b;
     }
 
-    public function transformC(string $c): string
+    public function transformC(string $c, array $source, array $context): string
     {
         return 'transformC_' . $c;
     }
 
-    public static function transformDStatic(string $c): string
+    public static function transformDStatic(string $c, array $source, array $context): string
     {
         return 'transformDStatic_' . $c;
     }
