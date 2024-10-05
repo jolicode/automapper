@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - [GH#180](https://github.com/jolicode/automapper/pull/180) Add configuration to generate code with strict types
 - [GH#183](https://github.com/jolicode/automapper/pull/183) Ability to change reload strategy from AutoMapper::create()
+- [GH#193](https://github.com/jolicode/automapper/pull/193) add icon to symfony profiler
 
 ### Fixed
 - [GH#184](https://github.com/jolicode/automapper/pull/184) Fix error when mapping from stdClass to constructor with nullable/optional arguments
