@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\Extractor;
 
-use phpDocumentor\Reflection\Types\ContextFactory;
 use PHPStan\PhpDocParser\Ast\PhpDoc\InvalidTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\ParamTagValueNode;
 use PHPStan\PhpDocParser\Lexer\Lexer;
@@ -36,10 +35,6 @@ trait GetTypeTrait
         }
 
         if (!class_exists(PhpDocParser::class)) {
-            return null;
-        }
-
-        if (!class_exists(ContextFactory::class)) {
             return null;
         }
 

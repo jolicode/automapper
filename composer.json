@@ -23,8 +23,7 @@
         "symfony/expression-language": "^6.4 || ^7.0",
         "symfony/lock": "^6.4 || ^7.0",
         "symfony/property-info": "^6.4 || ^7.0",
-        "symfony/property-access": "^6.4 || ^7.0",
-        "phpdocumentor/type-resolver": "^1.7"
+        "symfony/property-access": "^6.4 || ^7.0"
     },
     "require-dev": {
         "api-platform/core": "^3.0.4",
