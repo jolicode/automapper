@@ -20,6 +20,7 @@ use PhpParser\PrettyPrinterAbstract;
  */
 final class EvalLoader implements ClassLoaderInterface
 {
+    /** @var array<class-string, true> */
     private static array $lockMap = [];
 
     public function __construct(
@@ -34,7 +35,7 @@ final class EvalLoader implements ClassLoaderInterface
         if (isset(self::$lockMap[$mapperMetadata->className])) {
             do {
                 usleep(100000); // 0.1 second
-            } while (isset(self::$lockMap[$mapperMetadata->className]));
+            } while (isset(self::$lockMap[$mapperMetadata->className])); // @phpstan-ignore isset.offset
 
             if (class_exists($mapperMetadata->className, false)) {
                 return;
