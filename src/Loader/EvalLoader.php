@@ -16,24 +16,39 @@ use PhpParser\PrettyPrinterAbstract;
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
  *
- *  @internal
+ * @internal
  */
-final readonly class EvalLoader implements ClassLoaderInterface
+final class EvalLoader implements ClassLoaderInterface
 {
-    private PrettyPrinterAbstract $printer;
+    private static array $lockMap = [];
 
     public function __construct(
-        private MapperGenerator $generator,
-        private MetadataFactory $metadataFactory,
+        private readonly MapperGenerator $generator,
+        private readonly MetadataFactory $metadataFactory,
+        private readonly PrettyPrinterAbstract $printer = new Standard(),
     ) {
-        $this->printer = new Standard();
     }
 
     public function loadClass(MapperMetadata $mapperMetadata): void
     {
-        eval($this->printer->prettyPrint($this->generator->generate(
-            $this->metadataFactory->getGeneratorMetadata($mapperMetadata->source, $mapperMetadata->target)
-        )));
+        if (isset(self::$lockMap[$mapperMetadata->className])) {
+            do {
+                usleep(100000); // 0.1 second
+            } while (isset(self::$lockMap[$mapperMetadata->className]));
+
+            if (class_exists($mapperMetadata->className, false)) {
+                return;
+            }
+        }
+
+        self::$lockMap[$mapperMetadata->className] = true;
+        try {
+            eval($this->printer->prettyPrint($this->generator->generate(
+                $this->metadataFactory->getGeneratorMetadata($mapperMetadata->source, $mapperMetadata->target)
+            )));
+        } finally {
+            unset(self::$lockMap[$mapperMetadata->className]);
+        }
     }
 
     public function buildMappers(MetadataRegistry $registry): bool
