@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Normalizer\Features;
 
+use AutoMapper\MapperContext;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 /**
@@ -28,7 +29,7 @@ trait SkipNullValuesTestTrait
         $dummy->bar = 'present';
 
         $normalizer = $this->getNormalizerForSkipNullValues();
-        $result = $normalizer->normalize($dummy, null, ['skip_null_values' => true]);
+        $result = $normalizer->normalize($dummy, null, [MapperContext::SKIP_NULL_VALUES => true]);
         $this->assertSame(['bar' => 'present', 'fooBar' => 'present'], $result);
     }
 }

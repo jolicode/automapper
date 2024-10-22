@@ -17,7 +17,7 @@
     ],
     "require": {
         "php": "^8.2",
-        "nikic/php-parser": "^4.18 || ^5.0",
+        "nikic/php-parser": "^5.0",
         "symfony/deprecation-contracts": "^3.0",
         "symfony/event-dispatcher": "^6.4 || ^7.0",
         "symfony/expression-language": "^6.4 || ^7.0",

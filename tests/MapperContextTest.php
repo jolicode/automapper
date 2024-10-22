@@ -7,6 +7,7 @@ namespace AutoMapper\Tests;
 use AutoMapper\Exception\CircularReferenceException;
 use AutoMapper\Exception\InvalidArgumentException;
 use AutoMapper\MapperContext;
+use AutoMapper\Tests\Fixtures\UserDTO;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -20,9 +21,11 @@ class MapperContextTest extends TestCase
         $context->setAllowedAttributes(['id', 'age']);
         $context->setIgnoredAttributes(['age']);
 
-        self::assertTrue(MapperContext::isAllowedAttribute($context->toArray(), 'id', true));
-        self::assertFalse(MapperContext::isAllowedAttribute($context->toArray(), 'age', true));
-        self::assertFalse(MapperContext::isAllowedAttribute($context->toArray(), 'name', true));
+        $user = new UserDTO();
+
+        self::assertTrue(MapperContext::isAllowedAttribute($context->toArray(), 'id', function () use ($user) { return !isset($user->id) && null === $user->id; }, false));
+        self::assertFalse(MapperContext::isAllowedAttribute($context->toArray(), 'age', function () use ($user) { return !isset($user->age) && null === $user->age; }, false));
+        self::assertFalse(MapperContext::isAllowedAttribute($context->toArray(), 'name', function () { return false; }, false));
     }
 
     public function testCircularReferenceLimit(): void
@@ -121,6 +124,12 @@ class MapperContextTest extends TestCase
 
     public function testWithNewContextAllowedAttributesNested(): void
     {
+        $data = new \stdClass();
+        $data->foo = new \stdClass();
+        $data->foo->bar = 'baz';
+        $data->bar = 'popo';
+        $data->baz = 'papa';
+
         $context = [
             MapperContext::ALLOWED_ATTRIBUTES => [
                 'foo' => ['bar'],
@@ -128,7 +137,7 @@ class MapperContextTest extends TestCase
             ],
         ];
 
-        self::assertTrue(MapperContext::isAllowedAttribute($context, 'foo', true));
+        self::assertTrue(MapperContext::isAllowedAttribute($context, 'foo', function () use ($data) { return !isset($data->foo) && null === $data->foo; }, false));
         $newContext = MapperContext::withNewContext($context, 'foo');
 
         self::assertEquals(['bar'], $newContext[MapperContext::ALLOWED_ATTRIBUTES]);
@@ -136,8 +145,9 @@ class MapperContextTest extends TestCase
 
     public function testSkipNullValues(): void
     {
+        $data = new UserDTO();
         $context = [MapperContext::SKIP_NULL_VALUES => true];
-        self::assertFalse(MapperContext::isAllowedAttribute($context, 'id', true));
+        self::assertFalse(MapperContext::isAllowedAttribute($context, 'id', function () use ($data) { return !isset($data->id) && null === $data->id; }, false));
     }
 
     /**
