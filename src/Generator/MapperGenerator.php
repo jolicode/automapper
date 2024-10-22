@@ -74,7 +74,6 @@ final readonly class MapperGenerator
 
         $statements = [];
         if ($metadata->strictTypes) {
-            // @phpstan-ignore argument.type
             $statements[] = new Stmt\Declare_([create_declare_item('strict_types', create_scalar_int(1))]);
         }
         $statements[] = (new Builder\Class_($metadata->mapperMetadata->className))

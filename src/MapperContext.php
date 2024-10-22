@@ -28,6 +28,7 @@ use AutoMapper\Exception\InvalidArgumentException;
  *   "deep_target_to_populate"?: bool,
  *   "constructor_arguments"?: array<string, array<string, mixed>>,
  *   "skip_null_values"?: bool,
+ *   "skip_uninitialized_values"?: bool,
  *   "allow_readonly_target_to_populate"?: bool,
  *   "datetime_format"?: string,
  *   "datetime_force_timezone"?: string,
@@ -49,6 +50,7 @@ class MapperContext
     public const DEEP_TARGET_TO_POPULATE = 'deep_target_to_populate';
     public const CONSTRUCTOR_ARGUMENTS = 'constructor_arguments';
     public const SKIP_NULL_VALUES = 'skip_null_values';
+    public const SKIP_UNINITIALIZED_VALUES = 'skip_uninitialized_values';
     public const ALLOW_READONLY_TARGET_TO_POPULATE = 'allow_readonly_target_to_populate';
     public const DATETIME_FORMAT = 'datetime_format';
     public const DATETIME_FORCE_TIMEZONE = 'datetime_force_timezone';
@@ -131,6 +133,13 @@ class MapperContext
     public function setSkipNullValues(bool $skipNullValues): self
     {
         $this->context[self::SKIP_NULL_VALUES] = $skipNullValues;
+
+        return $this;
+    }
+
+    public function setSkipUnitializedValues(bool $skipUnitializedValues): self
+    {
+        $this->context[self::SKIP_UNINITIALIZED_VALUES] = $skipUnitializedValues;
 
         return $this;
     }
@@ -231,9 +240,13 @@ class MapperContext
      *
      * @internal
      */
-    public static function isAllowedAttribute(array $context, string $attribute, bool $valueIsNullOrUndefined): bool
+    public static function isAllowedAttribute(array $context, string $attribute, callable $valueIsNull, bool $valueIsUndefined): bool
     {
-        if (($context[self::SKIP_NULL_VALUES] ?? false) && $valueIsNullOrUndefined) {
+        if (($context[self::SKIP_UNINITIALIZED_VALUES] ?? false) && $valueIsUndefined) {
+            return false;
+        }
+
+        if (($context[self::SKIP_NULL_VALUES] ?? false) && !$valueIsUndefined && $valueIsNull()) {
             return false;
         }
 

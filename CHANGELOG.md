@@ -6,8 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- [GH#200](https://github.com/jolicode/automapper/pull/200) Added skip_uninitialized_values context to skip non initialized properties
+- [GH#200](https://github.com/jolicode/automapper/pull/200) Changed skip_null_values behavior to not handle initialized properties anymore
+
 ### Fixed
 - [GH#207](https://github.com/jolicode/automapper/pull/207) [GH#208](https://github.com/jolicode/automapper/pull/208) Fix implicity nullable parameter deprecations
+
+### Removed 
+- [GH#200](https://github.com/jolicode/automapper/pull/200) Drop nikic/php-parser < 5.0 compatibility
 
 ## [9.2.0] - 2024-11-19
 ### Added
