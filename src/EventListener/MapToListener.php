@@ -38,7 +38,7 @@ final readonly class MapToListener extends MapListener
 
                 if ($reflectionClassOrPropertyOrMethod instanceof \ReflectionClass) {
                     if ($mapToAttributeInstance->property === null) {
-                        throw new BadMapDefinitionException(sprintf('Required `name` property in the "%s" attribute on "%s" class.', MapTo::class, $reflectionClassOrPropertyOrMethod->getName()));
+                        throw new BadMapDefinitionException(sprintf('Required `property` property in the "%s" attribute on "%s" class.', MapTo::class, $reflectionClassOrPropertyOrMethod->getName()));
                     }
 
                     if ($mapToAttributeInstance->transformer === null) {
