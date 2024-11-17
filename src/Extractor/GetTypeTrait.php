@@ -12,6 +12,7 @@ use PHPStan\PhpDocParser\Parser\ConstExprParser;
 use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use PHPStan\PhpDocParser\Parser\TokenIterator;
 use PHPStan\PhpDocParser\Parser\TypeParser;
+use PHPStan\PhpDocParser\ParserConfig;
 use Symfony\Component\PropertyInfo\PhpStan\NameScopeFactory;
 use Symfony\Component\PropertyInfo\Type;
 use Symfony\Component\PropertyInfo\Util\PhpStanTypeHelper;
@@ -43,8 +44,20 @@ trait GetTypeTrait
             return null;
         }
 
-        static $phpDocParser = new PhpDocParser(new TypeParser(new ConstExprParser()), new ConstExprParser());
-        static $lexer = new Lexer();
+        static $phpDocParser = null;
+        static $lexer = null;
+
+        if ($phpDocParser === null || $lexer === null) {
+            if (class_exists(ParserConfig::class)) {
+                $config = new ParserConfig([]);
+                $phpDocParser = new PhpDocParser($config, new TypeParser($config, new ConstExprParser($config)), new ConstExprParser($config));
+                $lexer = new Lexer($config);
+            } else {
+                $phpDocParser = new PhpDocParser(new TypeParser(new ConstExprParser()), new ConstExprParser()); // @phpstan-ignore-line
+                $lexer = new Lexer(); // @phpstan-ignore-line
+            }
+        }
+
         static $nameScopeFactory = new NameScopeFactory();
         static $phpStanTypeHelper = new PhpStanTypeHelper();
 
