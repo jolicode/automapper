@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - [GH#186](https://github.com/jolicode/automapper/pull/186) Optimize creation from constructor
+- [GH#205](https://github.com/jolicode/automapper/pull/205) Add support for phpstan/phpdoc-parser 2
 
 ### Fixed
 - [GH#184](https://github.com/jolicode/automapper/pull/184) Fix error when mapping from stdClass to constructor with nullable/optional arguments
