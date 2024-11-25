@@ -38,7 +38,7 @@ class VatEntity
 
     public function __construct(
         string $countryCode,
-        string $stateCode = null,
+        ?string $stateCode = null,
         float $standardVatRate = 0,
         float $reducedVatRate = 0,
         bool $displayIncVatPrices = false,

@@ -171,7 +171,7 @@ class MapperContext
      *
      * @param MapperContextArray &$context
      */
-    public static function &handleCircularReference(array &$context, string $reference, mixed $object, ?int $circularReferenceLimit = null, callable $callback = null): mixed
+    public static function &handleCircularReference(array &$context, string $reference, mixed $object, ?int $circularReferenceLimit = null, ?callable $callback = null): mixed
     {
         if (null === $callback) {
             $callback = $context[self::CIRCULAR_REFERENCE_HANDLER] ?? null;

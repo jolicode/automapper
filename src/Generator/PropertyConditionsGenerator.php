@@ -31,7 +31,7 @@ final readonly class PropertyConditionsGenerator
 
     public function __construct(
         private ExpressionLanguage $expressionLanguage,
-        Parser $parser = null,
+        ?Parser $parser = null,
     ) {
         $this->parser = $parser ?? (new ParserFactory())->createForHostVersion();
     }

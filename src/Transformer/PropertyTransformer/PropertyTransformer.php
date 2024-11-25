@@ -29,7 +29,7 @@ final readonly class PropertyTransformer implements TransformerInterface, AllowN
     public function __construct(
         private string $propertyTransformerId,
         private array $extraContext = [],
-        Parser $parser = null,
+        ?Parser $parser = null,
     ) {
         $this->parser = $parser ?? (new ParserFactory())->createForHostVersion();
     }

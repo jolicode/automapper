@@ -27,7 +27,7 @@ final class CacheWarmer implements CacheWarmerInterface
         return true;
     }
 
-    public function warmUp(string $cacheDir, string $buildDir = null): array
+    public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         // load all mappers
         $mapping = clone $this->mapping;
