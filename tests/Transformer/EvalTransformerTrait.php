@@ -19,7 +19,7 @@ use Symfony\Component\PropertyInfo\Type;
 
 trait EvalTransformerTrait
 {
-    private function createTransformerFunction(TransformerInterface $transformer, PropertyMetadata $propertyMapping = null): \Closure
+    private function createTransformerFunction(TransformerInterface $transformer, ?PropertyMetadata $propertyMapping = null): \Closure
     {
         if (null === $propertyMapping) {
             $propertyMapping = new PropertyMetadata(
@@ -55,7 +55,7 @@ trait EvalTransformerTrait
         return eval($code);
     }
 
-    private function evalTransformer(TransformerInterface $transformer, mixed $input, PropertyMetadata $propertyMapping = null): mixed
+    private function evalTransformer(TransformerInterface $transformer, mixed $input, ?PropertyMetadata $propertyMapping = null): mixed
     {
         $function = $this->createTransformerFunction($transformer, $propertyMapping);
 

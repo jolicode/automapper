@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Fixed
-- [GH#207](https://github.com/jolicode/automapper/pull/207) Fix implicity nullable parameter deprecations
+- [GH#207](https://github.com/jolicode/automapper/pull/207) [GH#208](https://github.com/jolicode/automapper/pull/208) Fix implicity nullable parameter deprecations
 
 ## [9.2.0] - 2024-11-19
 ### Added

@@ -21,7 +21,7 @@ final readonly class FixedValueTransformer implements TransformerInterface, Allo
 
     public function __construct(
         private mixed $value,
-        Parser $parser = null,
+        ?Parser $parser = null,
     ) {
         $this->parser = $parser ?? (new ParserFactory())->createForHostVersion();
     }

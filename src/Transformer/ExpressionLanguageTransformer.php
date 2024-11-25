@@ -21,7 +21,7 @@ final readonly class ExpressionLanguageTransformer implements TransformerInterfa
 
     public function __construct(
         private string $expression,
-        Parser $parser = null,
+        ?Parser $parser = null,
     ) {
         $this->parser = $parser ?? (new ParserFactory())->createForHostVersion();
     }

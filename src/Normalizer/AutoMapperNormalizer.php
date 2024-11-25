@@ -48,7 +48,7 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
      *
      * @return array<string, mixed>
      */
-    public function normalize(mixed $object, string $format = null, array $context = []): ?array
+    public function normalize(mixed $object, ?string $format = null, array $context = []): ?array
     {
         try {
             return $this->autoMapper->map($object, 'array', $this->createAutoMapperContext($format, $context));
@@ -68,7 +68,7 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
      *
      * @return T|null
      */
-    public function denormalize(mixed $data, string $type, string $format = null, array $context = []): mixed
+    public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): mixed
     {
         try {
             return $this->autoMapper->map($data, $type, $this->createAutoMapperContext($format, $context));
@@ -82,7 +82,7 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
     /**
      * @param array<string, mixed> $context
      */
-    public function supportsNormalization(mixed $data, string $format = null, array $context = []): bool
+    public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
         if (!\is_object($data) || $data instanceof \stdClass) {
             return false;
@@ -102,7 +102,7 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
     /**
      * @param array<string, mixed> $context
      */
-    public function supportsDenormalization(mixed $data, string $type, string $format = null, array $context = []): bool
+    public function supportsDenormalization(mixed $data, string $type, ?string $format = null, array $context = []): bool
     {
         if (!class_exists($type)) {
             return false;
@@ -145,7 +145,7 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
      *
      * @return MapperContextArray
      */
-    private function createAutoMapperContext(string $format = null, array $serializerContext = []): array
+    private function createAutoMapperContext(?string $format = null, array $serializerContext = []): array
     {
         /** @var MapperContextArray $context */
         $context = [];

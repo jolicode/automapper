@@ -125,11 +125,11 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
      */
     public static function create(
         Configuration $configuration = new Configuration(),
-        string $cacheDirectory = null,
-        AdvancedNameConverterInterface $nameConverter = null,
+        ?string $cacheDirectory = null,
+        ?AdvancedNameConverterInterface $nameConverter = null,
         array $transformerFactories = [],
         iterable $propertyTransformers = [],
-        ExpressionLanguageProvider $expressionLanguageProvider = null,
+        ?ExpressionLanguageProvider $expressionLanguageProvider = null,
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
         iterable $providers = [],
     ): AutoMapperInterface {
