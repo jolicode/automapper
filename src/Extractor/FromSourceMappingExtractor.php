@@ -51,7 +51,7 @@ final class FromSourceMappingExtractor extends MappingExtractor
         return $types;
     }
 
-    private function transformType(string $target, Type $type = null): ?Type
+    private function transformType(string $target, ?Type $type = null): ?Type
     {
         if (null === $type) {
             return null;

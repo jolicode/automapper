@@ -326,8 +326,8 @@ final class MetadataFactory
         MetadataRegistry $metadataRegistry,
         ClassDiscriminatorResolver $classDiscriminatorResolver,
         array $transformerFactories = [],
-        ClassMetadataFactory $classMetadataFactory = null,
-        AdvancedNameConverterInterface $nameConverter = null,
+        ?ClassMetadataFactory $classMetadataFactory = null,
+        ?AdvancedNameConverterInterface $nameConverter = null,
         ExpressionLanguage $expressionLanguage = new ExpressionLanguage(),
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
     ): self {

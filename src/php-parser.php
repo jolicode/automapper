@@ -37,7 +37,7 @@ function create_scalar_int(int $value, array $attributes = []): Scalar\Int_|Scal
  *
  * @internal
  */
-function create_expr_array_item(Expr $value, Expr $key = null, bool $byRef = false, array $attributes = [], bool $unpack = false): Node\ArrayItem|Expr\ArrayItem
+function create_expr_array_item(Expr $value, ?Expr $key = null, bool $byRef = false, array $attributes = [], bool $unpack = false): Node\ArrayItem|Expr\ArrayItem
 {
     $class = class_exists(Node\ArrayItem::class) ? Node\ArrayItem::class : Expr\ArrayItem::class;
 
