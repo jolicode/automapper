@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Fixed
 - [GH#207](https://github.com/jolicode/automapper/pull/207) [GH#208](https://github.com/jolicode/automapper/pull/208) Fix implicity nullable parameter deprecations
+- [GH#212](https://github.com/jolicode/automapper/pull/212) Fix cases where class target has adder and remover AND constructor arguments
 
 ## [9.2.0] - 2024-11-19
 ### Added
