@@ -43,7 +43,7 @@ abstract readonly class AbstractArrayTransformer implements TransformerInterface
         /* Get the transform statements for the source property */
         [$output, $itemStatements] = $this->itemTransformer->transform($loopValueVar, $target, $propertyMapping, $uniqueVariableScope, $source);
 
-        if ($propertyMapping->target->writeMutator && $propertyMapping->target->writeMutator->type === WriteMutator::TYPE_ADDER_AND_REMOVER) {
+        if (null === $propertyMapping->target->parameterInConstructor && $propertyMapping->target->writeMutator && $propertyMapping->target->writeMutator->type === WriteMutator::TYPE_ADDER_AND_REMOVER) {
             /**
              * Use add and remove methods.
              *
