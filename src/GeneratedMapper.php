@@ -48,6 +48,9 @@ abstract class GeneratedMapper implements MapperInterface
     /** @var array<string, callable(): bool>) */
     protected array $extractIsNullCallbacks = [];
 
+    /** @var array<string, callable(): bool>) */
+    protected array $extractIsUndefinedCallbacks = [];
+
     /** @var Target|\ReflectionClass<object> */
     protected mixed $cachedTarget;
 }
