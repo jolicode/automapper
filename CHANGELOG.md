@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [9.2.1] - 2025-01-31
 ### Fixed
 - [GH#207](https://github.com/jolicode/automapper/pull/207) [GH#208](https://github.com/jolicode/automapper/pull/208) Fix implicity nullable parameter deprecations
 - [GH#212](https://github.com/jolicode/automapper/pull/212) Fix cases where class target has adder and remover AND constructor arguments
@@ -350,8 +352,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * [AutoMapper] [GH#179](https://github.com/janephp/janephp/pull/179) Fixing incompatible changes in Symfony 5.0
 
-[Unreleased]: https://github.com/jolicode/automapper/compare/9.1.2...HEAD
-[9.2.0]: https://github.com/janephp/janephp/compare/9.1.1...9.1.2
+[Unreleased]: https://github.com/jolicode/automapper/compare/9.2.1...HEAD
+[9.2.1]: https://github.com/janephp/janephp/compare/9.2.0...9.2.1
+[9.2.0]: https://github.com/janephp/janephp/compare/9.1.2...9.2.0
 [9.1.2]: https://github.com/janephp/janephp/compare/9.1.1...9.1.2
 [9.1.1]: https://github.com/janephp/janephp/compare/9.1.0...9.1.1
 [9.1.0]: https://github.com/janephp/janephp/compare/9.0.2...9.1.0
