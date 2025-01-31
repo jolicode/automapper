@@ -193,7 +193,7 @@ final readonly class CreateTargetStatementsGenerator
                 new Arg(new Scalar\String_(sprintf('Cannot create an instance of "%s" from mapping data because its constructor requires the following parameters to be present : "$%s".', $metadata->mapperMetadata->target, $propertyMetadata->target->property))),
                 new Arg(create_scalar_int(0)),
                 new Arg(new Expr\ConstFetch(new Name('null'))),
-                new Arg(new Expr\Array_([ // @phpstan-ignore argument.type
+                new Arg(new Expr\Array_([
                     create_expr_array_item(new Scalar\String_($propertyMetadata->target->property)),
                 ])),
                 new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
@@ -262,7 +262,7 @@ final readonly class CreateTargetStatementsGenerator
             new Arg(new Scalar\String_(sprintf('Cannot create an instance of "%s" from mapping data because its constructor requires the following parameters to be present : "$%s".', $metadata->mapperMetadata->target, $constructorParameter->getName()))),
             new Arg(create_scalar_int(0)),
             new Arg(new Expr\ConstFetch(new Name('null'))),
-            new Arg(new Expr\Array_([ // @phpstan-ignore argument.type
+            new Arg(new Expr\Array_([
                 create_expr_array_item(new Scalar\String_($constructorParameter->getName())),
             ])),
             new Arg(new Scalar\String_($constructorParameter->getName())),
