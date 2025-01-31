@@ -172,7 +172,7 @@ final readonly class PropertyConditionsGenerator
                         new Expr\Array_()
                     )
                 ),
-                new Arg(new Expr\Array_(array_map(function (string $group) { // @phpstan-ignore argument.type
+                new Arg(new Expr\Array_(array_map(function (string $group) {
                     return create_expr_array_item(new Scalar\String_($group));
                 }, $groups))),
             ])

@@ -136,7 +136,7 @@ final readonly class BuiltinTransformer implements TransformerInterface, CheckTy
 
     private function toArray(Expr $input): Expr
     {
-        return new Expr\Array_([create_expr_array_item($input)]); // @phpstan-ignore argument.type
+        return new Expr\Array_([create_expr_array_item($input)]);
     }
 
     private function fromIteratorToArray(Expr $input): Expr
