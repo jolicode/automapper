@@ -48,6 +48,7 @@ use AutoMapper\Tests\Fixtures\ObjectsUnion\ObjectsUnionProperty;
 use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
 use AutoMapper\Tests\Fixtures\Order;
 use AutoMapper\Tests\Fixtures\PetOwner;
+use AutoMapper\Tests\Fixtures\PetOwnerWithConstructorArguments;
 use AutoMapper\Tests\Fixtures\PrivatePropertyInConstructors\ChildClass;
 use AutoMapper\Tests\Fixtures\PrivatePropertyInConstructors\OtherClass;
 use AutoMapper\Tests\Fixtures\Provider\CustomProvider;
@@ -1086,6 +1087,26 @@ class AutoMapperTest extends AutoMapperBaseTest
 
         self::assertIsArray($petOwnerData->getPets());
         self::assertCount(0, $petOwnerData->getPets());
+    }
+
+    public function testAdderAndRemoverWithConstructorArguments(): void
+    {
+        if (!class_exists(ClassDiscriminatorFromClassMetadata::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
+        $petOwner = [
+            'pets' => [
+                ['type' => 'cat', 'name' => 'Félix'],
+            ],
+        ];
+
+        $petOwnerData = $this->autoMapper->map($petOwner, PetOwnerWithConstructorArguments::class);
+
+        self::assertIsArray($petOwnerData->getPets());
+        self::assertCount(1, $petOwnerData->getPets());
+        self::assertSame('Félix', $petOwnerData->getPets()[0]->name);
+        self::assertSame('cat', $petOwnerData->getPets()[0]->type);
     }
 
     public function testIssueTargetToPopulate(): void
