@@ -31,6 +31,7 @@ use AutoMapper\Transformer\ChainTransformerFactory;
 use AutoMapper\Transformer\CopyTransformerFactory;
 use AutoMapper\Transformer\DateTimeTransformerFactory;
 use AutoMapper\Transformer\DependentTransformerInterface;
+use AutoMapper\Transformer\DoctrineCollectionTransformerFactory;
 use AutoMapper\Transformer\EnumTransformerFactory;
 use AutoMapper\Transformer\MapperDependency;
 use AutoMapper\Transformer\MultipleTransformerFactory;
@@ -370,6 +371,7 @@ final class MetadataFactory
             new UniqueTypeTransformerFactory(),
             new DateTimeTransformerFactory(),
             new BuiltinTransformerFactory(),
+            new DoctrineCollectionTransformerFactory(),
             new ArrayTransformerFactory(),
             new ObjectTransformerFactory(),
             new EnumTransformerFactory(),
