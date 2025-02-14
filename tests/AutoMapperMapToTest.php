@@ -11,6 +11,9 @@ use AutoMapper\Tests\Fixtures\MapTo\BadMapToTransformer;
 use AutoMapper\Tests\Fixtures\MapTo\Bar;
 use AutoMapper\Tests\Fixtures\MapTo\DateTimeFormatMapTo;
 use AutoMapper\Tests\Fixtures\MapTo\FooMapTo;
+use AutoMapper\Tests\Fixtures\MapTo\ManySourceBar;
+use AutoMapper\Tests\Fixtures\MapTo\ManySourceFoo;
+use AutoMapper\Tests\Fixtures\MapTo\ManyTargetBar;
 use AutoMapper\Tests\Fixtures\MapTo\MapperDateTimeFormatMapTo;
 use AutoMapper\Tests\Fixtures\MapTo\PriorityMapTo;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\FooDependency;
@@ -168,5 +171,28 @@ class AutoMapperMapToTest extends AutoMapperBaseTest
         self::assertSame($immutable->format(\DateTimeInterface::RFC822), $result['immutable']);
         self::assertArrayHasKey('interface', $result);
         self::assertSame($normal->format(\DateTimeInterface::RFC822), $result['interface']);
+    }
+
+    public function testStackedAttributes(): void
+    {
+        $source = new ManySourceFoo('2025');
+        $output = $this->autoMapper->map($source, ManyTargetBar::class);
+        self::assertEquals('2025', $output->foo);
+
+        $source = new ManySourceBar('2025');
+        $output = $this->autoMapper->map($source, ManyTargetBar::class);
+        self::assertEquals('', $output->foo);
+
+        $source = ['foo' => '2025'];
+        $output = $this->autoMapper->map($source, ManyTargetBar::class);
+        self::assertEquals('', $output->foo);
+
+        $source = ['dateEffet' => '2025'];
+        $output = $this->autoMapper->map($source, ManyTargetBar::class);
+        self::assertEquals('2025', $output->foo);
+
+        $source = ['dateEffetDeux' => '2025'];
+        $output = $this->autoMapper->map($source, ManyTargetBar::class);
+        self::assertEquals('2025', $output->foo);
     }
 }
