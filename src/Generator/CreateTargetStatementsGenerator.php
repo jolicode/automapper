@@ -8,14 +8,17 @@ use AutoMapper\Exception\CompileException;
 use AutoMapper\Exception\MissingConstructorArgumentsException;
 use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
 use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
+use AutoMapper\Lazy\LazyMap;
 use AutoMapper\MapperContext;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\PropertyMetadata;
 use AutoMapper\Transformer\AllowNullValueTransformerInterface;
 use PhpParser\Node\Arg;
+use PhpParser\Node\ClosureUse;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Name;
+use PhpParser\Node\Param;
 use PhpParser\Node\Scalar;
 use PhpParser\Node\Stmt;
 use PhpParser\Parser;
@@ -49,24 +52,117 @@ final readonly class CreateTargetStatementsGenerator
      * }
      * ```
      */
-    public function generate(GeneratorMetadata $metadata, VariableRegistry $variableRegistry): Stmt
+    public function generate(GeneratorMetadata $metadata, VariableRegistry $variableRegistry, bool $callDoConstruct): Stmt
     {
         $createObjectStatements = [];
 
+        $createObjectStatements[] = $this->lazyLoadStatement($metadata, $variableRegistry, $callDoConstruct);
         $createObjectStatements[] = $this->targetAsArray($metadata);
         $createObjectStatements[] = $this->sourceAndTargetAsStdClass($metadata);
         $createObjectStatements[] = $this->targetAsStdClass($metadata);
         $createObjectStatements = [...$createObjectStatements, ...$this->discriminatorStatementsGeneratorSource->createTargetStatements($metadata)];
         $createObjectStatements = [...$createObjectStatements, ...$this->discriminatorStatementsGeneratorTarget->createTargetStatements($metadata)];
-        $createObjectStatements = [...$createObjectStatements, ...$this->constructorArguments($metadata)];
+        $createObjectStatements[] = $this->lazyLoadStatement($metadata, $variableRegistry, $callDoConstruct);
         $createObjectStatements[] = $this->cachedReflectionStatementsGenerator->createTargetStatement($metadata);
         $createObjectStatements[] = $this->constructorWithoutArgument($metadata);
+
+        if ($callDoConstruct) {
+            $createObjectStatements[] = $this->doConstructStatement($variableRegistry);
+        }
 
         $createObjectStatements = array_values(array_filter($createObjectStatements));
 
         return new Stmt\If_(new Expr\BinaryOp\Identical(new Expr\ConstFetch(new Name('null')), $variableRegistry->getResult()), [
             'stmts' => $createObjectStatements,
         ]);
+    }
+
+    private function lazyLoadStatement(GeneratorMetadata $metadata, VariableRegistry $variableRegistry, bool $callDoConstruct): ?Stmt
+    {
+        /** @var class-string<ClosureUse> $closureUseClass */
+        $closureUseClass = class_exists(ClosureUse::class) ? ClosureUse::class : Arg::class;
+        $doMapStmt = new Stmt\Expression(
+            new Expr\MethodCall(
+                new Expr\Variable('this'),
+                'doMap',
+                [
+                    new Arg($variableRegistry->getSourceInput()),
+                    new Arg($variableRegistry->getResult()),
+                    new Arg($variableRegistry->getContext()),
+                ],
+            )
+        );
+
+        if ($metadata->mapperMetadata->lazyGhostClassName === null) {
+            if ($metadata->mapperMetadata->target === 'array') {
+                return new Stmt\If_(new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'shouldLazyLoad', [
+                    new Arg($variableRegistry->getContext()),
+                ]), [
+                    'stmts' => [
+                        new Stmt\Expression(new Expr\Assign($variableRegistry->getResult(), new Expr\New_(
+                            new Name\FullyQualified(LazyMap::class), [
+                                new Arg(new Expr\Closure([
+                                    'params' => [
+                                        new Param($variableRegistry->getResult(), byRef: true),
+                                    ],
+                                    'stmts' => [$doMapStmt],
+                                    'uses' => [
+                                        new $closureUseClass($variableRegistry->getSourceInput()),
+                                        new $closureUseClass($variableRegistry->getContext()),
+                                    ],
+                                ])),
+                            ]
+                        ))),
+                        new Stmt\Return_($variableRegistry->getResult()),
+                    ],
+                ]);
+            }
+
+            return null;
+        }
+
+        $closureStatements = [];
+
+        if ($callDoConstruct) {
+            $closureStatements[] = $this->doConstructStatement($variableRegistry);
+        }
+
+        $closureStatements[] = $doMapStmt;
+
+        return new Stmt\If_(new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'shouldLazyLoad', [
+            new Arg($variableRegistry->getContext()),
+        ]), [
+            'stmts' => [
+                new Stmt\Expression(new Expr\Assign($variableRegistry->getResult(), new Expr\StaticCall(new Name\FullyQualified($metadata->mapperMetadata->lazyGhostClassName), 'createLazyGhost', [
+                    new Arg(new Expr\Closure([
+                        'params' => [
+                            new Param($variableRegistry->getResult()),
+                        ],
+                        'stmts' => $closureStatements,
+                        'uses' => [
+                            new $closureUseClass($variableRegistry->getSourceInput()),
+                            new $closureUseClass($variableRegistry->getContext()),
+                        ],
+                    ])),
+                ]))),
+                new Stmt\Return_($variableRegistry->getResult()),
+            ],
+        ]);
+    }
+
+    private function doConstructStatement(VariableRegistry $variableRegistry): Stmt
+    {
+        return new Stmt\Expression(
+            new Expr\MethodCall(
+                new Expr\Variable('this'),
+                'doConstruct',
+                [
+                    new Arg($variableRegistry->getSourceInput()),
+                    new Arg($variableRegistry->getResult()),
+                    new Arg($variableRegistry->getContext()),
+                ],
+            )
+        );
     }
 
     private function targetAsArray(GeneratorMetadata $metadata): ?Stmt
@@ -107,7 +203,7 @@ final readonly class CreateTargetStatementsGenerator
     /**
      * @return list<Stmt>
      */
-    private function constructorArguments(GeneratorMetadata $metadata): array
+    public function getConstructStatements(GeneratorMetadata $metadata): array
     {
         if (!$metadata->isTargetUserDefined()) {
             return [];
@@ -145,12 +241,13 @@ final readonly class CreateTargetStatementsGenerator
         /*
          * Create object with named constructor arguments
          *
-         * $result = new Foo(foo: $constructArg1, bar: $constructArg2, ...);
+         * $result->__construct(foo: $constructArg1, bar: $constructArg2, ...); // If lazy ghost class is available
          */
         $createObjectStatements[] = new Stmt\Expression(
-            new Expr\Assign(
+            new Expr\MethodCall(
                 $metadata->variableRegistry->getResult(),
-                new Expr\New_(new Name\FullyQualified($metadata->mapperMetadata->target), $constructArguments)
+                '__construct',
+                $constructArguments,
             )
         );
 
@@ -308,6 +405,10 @@ final readonly class CreateTargetStatementsGenerator
     {
         if (!$metadata->isTargetUserDefined()
         ) {
+            return null;
+        }
+
+        if ($metadata->mapperMetadata->lazyGhostClassName !== null) {
             return null;
         }
 
