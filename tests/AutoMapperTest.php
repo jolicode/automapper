@@ -27,6 +27,8 @@ use AutoMapper\Tests\Fixtures\ClassWithNullablePropertyInConstructor;
 use AutoMapper\Tests\Fixtures\ClassWithPrivateProperty;
 use AutoMapper\Tests\Fixtures\ConstructorWithDefaultValues;
 use AutoMapper\Tests\Fixtures\DifferentSetterGetterType;
+use AutoMapper\Tests\Fixtures\DoctrineCollections\Book;
+use AutoMapper\Tests\Fixtures\DoctrineCollections\Library;
 use AutoMapper\Tests\Fixtures\Dog;
 use AutoMapper\Tests\Fixtures\Fish;
 use AutoMapper\Tests\Fixtures\FooGenerator;
@@ -56,6 +58,7 @@ use AutoMapper\Tests\Fixtures\SourceForConstructorWithDefaultValues;
 use AutoMapper\Tests\Fixtures\Transformer\MoneyTransformerFactory;
 use AutoMapper\Tests\Fixtures\Uninitialized;
 use AutoMapper\Tests\Fixtures\UserPromoted;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -1623,5 +1626,42 @@ class AutoMapperTest extends AutoMapperBaseTest
             'bar' => 'bar',
             'foo' => ['foo1', 'foo2'],
         ], $array);
+    }
+
+    public function testDoctrineCollectionsToArray(): void
+    {
+        $library = new Library();
+        $library->books = new ArrayCollection([
+            new Book('The Empyrean Onyx Storm'),
+            new Book('Valentina'),
+            new Book('Imbalance'),
+        ]);
+
+        $data = $this->autoMapper->map($library, 'array');
+
+        self::assertCount(3, $data['books']);
+        self::assertEquals('The Empyrean Onyx Storm', $data['books'][0]['name']);
+        self::assertEquals('Valentina', $data['books'][1]['name']);
+        self::assertEquals('Imbalance', $data['books'][2]['name']);
+    }
+
+    public function testArrayToDoctrineCollections(): void
+    {
+        $data = [
+            'books' => [
+                ['name' => 'The Empyrean Onyx Storm'],
+                ['name' => 'Valentina'],
+                ['name' => 'Imbalance'],
+            ],
+        ];
+
+        $library = $this->autoMapper->map($data, Library::class);
+        var_dump($library);
+
+        self::assertInstanceOf(Library::class, $library);
+        self::assertCount(3, $library->books);
+        self::assertEquals('The Empyrean Onyx Storm', $library->books[0]->name);
+        self::assertEquals('Valentina', $library->books[1]->name);
+        self::assertEquals('Imbalance', $library->books[2]->name);
     }
 }
