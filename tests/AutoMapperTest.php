@@ -1656,7 +1656,6 @@ class AutoMapperTest extends AutoMapperBaseTest
         ];
 
         $library = $this->autoMapper->map($data, Library::class);
-        var_dump($library);
 
         self::assertInstanceOf(Library::class, $library);
         self::assertCount(3, $library->books);
