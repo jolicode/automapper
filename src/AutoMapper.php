@@ -116,6 +116,20 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         return $this->getMapper($sourceType, $targetType)->map($source, $context);
     }
 
+    public function mapCollection(iterable $collection, string $target, array $context = []): array
+    {
+        $output = [];
+        foreach ($collection as $k => $item) {
+            if (\is_array($item) && 'array' === $target) {
+                throw new InvalidMappingException('Cannot map this value, both source and target are array.');
+            }
+
+            $output[$k] = $this->map($item, $target, $context);
+        }
+
+        return $output;
+    }
+
     /**
      * @param TransformerFactoryInterface[]                  $transformerFactories
      * @param ProviderInterface[]                            $providers

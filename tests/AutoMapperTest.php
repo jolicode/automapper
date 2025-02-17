@@ -1663,4 +1663,101 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertEquals('Valentina', $library->books[1]->name);
         self::assertEquals('Imbalance', $library->books[2]->name);
     }
+
+    public function testMapCollectionFromArray(): void
+    {
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+
+        $users = [
+            [
+                'id' => 1,
+                'address' => [
+                    'city' => 'Toulon',
+                ],
+                'createdAt' => '1987-04-30T06:00:00Z',
+            ],
+            [
+                'id' => 2,
+                'address' => [
+                    'city' => 'Nantes',
+                ],
+                'createdAt' => '1991-10-01T06:00:00Z',
+            ],
+        ];
+
+        /** @var array<Fixtures\UserDTO> $userDtos */
+        $userDtos = $this->autoMapper->mapCollection($users, Fixtures\UserDTO::class);
+        self::assertCount(2, $userDtos);
+        self::assertEquals(1, $userDtos[0]->id);
+        self::assertInstanceOf(AddressDTO::class, $userDtos[0]->address);
+        self::assertSame('Toulon', $userDtos[0]->address->city);
+        self::assertInstanceOf(\DateTimeInterface::class, $userDtos[0]->createdAt);
+        self::assertEquals(1987, $userDtos[0]->createdAt->format('Y'));
+        self::assertEquals(2, $userDtos[1]->id);
+        self::assertInstanceOf(AddressDTO::class, $userDtos[1]->address);
+        self::assertSame('Nantes', $userDtos[1]->address->city);
+        self::assertInstanceOf(\DateTimeInterface::class, $userDtos[1]->createdAt);
+        self::assertEquals(1991, $userDtos[1]->createdAt->format('Y'));
+    }
+
+    public function testMapCollectionFromArrayCustomDateTime(): void
+    {
+        $this->buildAutoMapper(classPrefix: 'CustomDateTime_', dateTimeFormat: 'U');
+
+        $customFormat = 'U';
+        $users = [
+            [
+                'id' => 1,
+                'address' => [
+                    'city' => 'Toulon',
+                ],
+                'createdAt' => \DateTime::createFromFormat(\DateTime::RFC3339, '1987-04-30T06:00:00Z')->format($customFormat),
+            ],
+            [
+                'id' => 2,
+                'address' => [
+                    'city' => 'Nantes',
+                ],
+                'createdAt' => \DateTime::createFromFormat(\DateTime::RFC3339, '1991-10-01T06:00:00Z')->format($customFormat),
+            ],
+        ];
+
+        /** @var array<Fixtures\UserDTO> $userDtos */
+        $userDtos = $this->autoMapper->mapCollection($users, Fixtures\UserDTO::class);
+        self::assertCount(2, $userDtos);
+
+        self::assertInstanceOf(Fixtures\UserDTO::class, $userDtos[0]);
+        self::assertEquals(\DateTime::createFromFormat(\DateTime::RFC3339, '1987-04-30T06:00:00Z')->format($customFormat), $userDtos[0]->createdAt->format($customFormat));
+        self::assertInstanceOf(Fixtures\UserDTO::class, $userDtos[1]);
+        self::assertEquals(\DateTime::createFromFormat(\DateTime::RFC3339, '1991-10-01T06:00:00Z')->format($customFormat), $userDtos[1]->createdAt->format($customFormat));
+    }
+
+    public function testMapCollectionToArray(): void
+    {
+        $users = [];
+        $address = new Address();
+        $address->setCity('Toulon');
+        $user = new Fixtures\User(1, 'yolo', '13');
+        $user->address = $address;
+        $user->addresses[] = $address;
+        $users[] = $user;
+        $address = new Address();
+        $address->setCity('Nantes');
+        $user = new Fixtures\User(10, 'yolo', '13');
+        $user->address = $address;
+        $user->addresses[] = $address;
+        $users[] = $user;
+
+        $userDatas = $this->autoMapper->mapCollection($users, 'array');
+
+        self::assertIsArray($userDatas);
+        self::assertIsArray($userDatas[0]);
+        self::assertIsArray($userDatas[1]);
+        self::assertEquals(1, $userDatas[0]['id']);
+        self::assertEquals(10, $userDatas[1]['id']);
+        self::assertIsArray($userDatas[0]['address']);
+        self::assertIsString($userDatas[0]['createdAt']);
+        self::assertIsArray($userDatas[1]['address']);
+        self::assertIsString($userDatas[1]['createdAt']);
+    }
 }
