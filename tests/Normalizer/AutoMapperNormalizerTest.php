@@ -141,6 +141,11 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
                     return $context;
                 }
 
+                public function mapCollection(iterable $collection, string $target, array $context = []): array
+                {
+                    return $context;
+                }
+
                 public function getMapper(string $source, string $target): MapperInterface
                 {
                     return new class() implements MapperInterface {

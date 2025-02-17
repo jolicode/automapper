@@ -24,4 +24,16 @@ interface AutoMapperInterface
      * @return ($target is class-string|Target ? Target|null : array<mixed>|null)
      */
     public function map(array|object $source, string|array|object $target, array $context = []): array|object|null;
+
+    /**
+     * @template Source of object
+     * @template Target of object
+     *
+     * @param iterable<array<mixed>>|iterable<Source> $collection
+     * @param class-string<Target>|'array'            $target
+     * @param MapperContextArray                      $context
+     *
+     * @return ($target is class-string ? array<Target> : array<mixed>)
+     */
+    public function mapCollection(iterable $collection, string $target, array $context = []): array;
 }

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - [GH#223](https://github.com/jolicode/automapper/pull/223) Handle array to Doctrine Collection transformations
+- [GH#225](https://github.com/jolicode/automapper/pull/225) Add mapCollection method to base interface
 
 ## [9.2.1] - 2025-01-31
 ### Fixed
