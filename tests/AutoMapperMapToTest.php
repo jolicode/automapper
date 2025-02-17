@@ -13,6 +13,7 @@ use AutoMapper\Tests\Fixtures\MapTo\DateTimeFormatMapTo;
 use AutoMapper\Tests\Fixtures\MapTo\FooMapTo;
 use AutoMapper\Tests\Fixtures\MapTo\MapperDateTimeFormatMapTo;
 use AutoMapper\Tests\Fixtures\MapTo\PriorityMapTo;
+use AutoMapper\Tests\Fixtures\ObjectProvider\FooProvider;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\FooDependency;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\TransformerWithDependency;
 use Symfony\Component\DependencyInjection\ServiceLocator;
@@ -168,5 +169,28 @@ class AutoMapperMapToTest extends AutoMapperBaseTest
         self::assertSame($immutable->format(\DateTimeInterface::RFC822), $result['immutable']);
         self::assertArrayHasKey('interface', $result);
         self::assertSame($normal->format(\DateTimeInterface::RFC822), $result['interface']);
+    }
+
+    public function testObjectProvider(): void
+    {
+        $this->buildAutoMapper(providers: [new FooProvider()]);
+
+        $array = [
+            'foo' => ['bar' => 'Hello'],
+            'collection' => [
+                ['bar' => 'Hello'],
+                ['bar' => 'Hello'],
+            ],
+        ];
+
+        $result = $this->autoMapper->map($array, Fixtures\ObjectProvider\Baz::class);
+
+        self::assertInstanceOf(Fixtures\ObjectProvider\Baz::class, $result);
+        self::assertInstanceOf(Fixtures\ObjectProvider\Foo::class, $result->foo);
+        self::assertEquals('World', $result->foo->getBar());
+        foreach ($result->collection as $item) {
+            self::assertInstanceOf(Fixtures\ObjectProvider\Foo::class, $item);
+            self::assertEquals('World', $item->getBar());
+        }
     }
 }
