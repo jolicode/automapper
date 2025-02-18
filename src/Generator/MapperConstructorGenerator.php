@@ -31,6 +31,7 @@ final readonly class MapperConstructorGenerator
         foreach ($metadata->propertiesMetadata as $propertyMetadata) {
             $constructStatements[] = $this->extractCallbackForProperty($metadata, $propertyMetadata);
             $constructStatements[] = $this->extractIsNullCallbackForProperty($metadata, $propertyMetadata);
+            $constructStatements[] = $this->extractIsUndefinedCallbackForProperty($metadata, $propertyMetadata);
             $constructStatements[] = $this->hydrateCallbackForProperty($metadata, $propertyMetadata);
         }
 
@@ -80,6 +81,28 @@ final readonly class MapperConstructorGenerator
             new Expr\Assign(
                 new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractIsNullCallbacks'), new Scalar\String_($propertyMetadata->source->property)),
                 $extractNullCallback
+            ));
+    }
+
+    /**
+     * Add read callback to the constructor of the generated mapper.
+     *
+     * ```php
+     * $this->extractIsUndefinedCallbacks['propertyName'] = $extractIsNullCallback;
+     * ```
+     */
+    private function extractIsUndefinedCallbackForProperty(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Stmt\Expression
+    {
+        $extractUndefinedCallback = $propertyMetadata->source->accessor?->getExtractIsUndefinedCallback($metadata->mapperMetadata->source);
+
+        if (!$extractUndefinedCallback) {
+            return null;
+        }
+
+        return new Stmt\Expression(
+            new Expr\Assign(
+                new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractIsUndefinedCallbacks'), new Scalar\String_($propertyMetadata->source->property)),
+                $extractUndefinedCallback
             ));
     }
 

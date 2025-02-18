@@ -138,7 +138,11 @@ final readonly class PropertyConditionsGenerator
         return new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'isAllowedAttribute', [
             new Arg($variableRegistry->getContext()),
             new Arg(new Scalar\String_($propertyMetadata->source->property)),
-            new Arg($propertyMetadata->source->accessor->getIsNullExpression($variableRegistry->getSourceInput())),
+            new Arg(new Expr\Closure([
+                'uses' => [new Expr\ClosureUse($variableRegistry->getSourceInput())],
+                'stmts' => [new Stmt\Return_($propertyMetadata->source->accessor->getIsNullExpression($variableRegistry->getSourceInput()))],
+            ])),
+            new Arg($propertyMetadata->source->accessor->getIsUndefinedExpression($variableRegistry->getSourceInput())),
         ]);
     }
 

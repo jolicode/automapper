@@ -44,6 +44,8 @@ use AutoMapper\Tests\Fixtures\HasDateTimeWithNullValue;
 use AutoMapper\Tests\Fixtures\Issue111\Colour;
 use AutoMapper\Tests\Fixtures\Issue111\ColourTransformer;
 use AutoMapper\Tests\Fixtures\Issue111\FooDto;
+use AutoMapper\Tests\Fixtures\Issue189\User as Issue189User;
+use AutoMapper\Tests\Fixtures\Issue189\UserPatchInput as Issue189UserPatchInput;
 use AutoMapper\Tests\Fixtures\ObjectsUnion\Bar;
 use AutoMapper\Tests\Fixtures\ObjectsUnion\Foo;
 use AutoMapper\Tests\Fixtures\ObjectsUnion\ObjectsUnionProperty;
@@ -1013,7 +1015,7 @@ class AutoMapperTest extends AutoMapperBaseTest
         $input = new Fixtures\SkipNullValues\Input();
 
         /** @var Fixtures\SkipNullValues\Entity $entity */
-        $entity = $this->autoMapper->map($input, $entity, ['skip_null_values' => true]);
+        $entity = $this->autoMapper->map($input, $entity, [MapperContext::SKIP_NULL_VALUES => true]);
         self::assertEquals('foobar', $entity->getName());
     }
 
@@ -1377,7 +1379,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
         self::assertSame(
             ['bar' => 'bar'],
-            $this->autoMapper->map(new Uninitialized(), 'array', ['skip_null_values' => true])
+            $this->autoMapper->map(new Uninitialized(), 'array', [MapperContext::SKIP_UNINITIALIZED_VALUES => true])
         );
     }
 
@@ -1759,5 +1761,19 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertIsString($userDatas[0]['createdAt']);
         self::assertIsArray($userDatas[1]['address']);
         self::assertIsString($userDatas[1]['createdAt']);
+    }
+
+    public function testUninitializedProperties(): void
+    {
+        $payload = new Issue189UserPatchInput();
+        $payload->firstName = 'John';
+        $payload->lastName = 'Doe';
+
+        /** @var Issue189User $data */
+        $data = $this->autoMapper->map($payload, Issue189User::class, [MapperContext::SKIP_UNINITIALIZED_VALUES => true]);
+
+        $this->assertEquals('John', $data->getFirstName());
+        $this->assertEquals('Doe', $data->getLastName());
+        $this->assertTrue(!isset($data->birthDate));
     }
 }

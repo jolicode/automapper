@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - [GH#223](https://github.com/jolicode/automapper/pull/223) Handle array to Doctrine Collection transformations
 - [GH#225](https://github.com/jolicode/automapper/pull/225) Add mapCollection method to base interface
+- [GH#200](https://github.com/jolicode/automapper/pull/200) Added skip_uninitialized_values context to skip non initialized properties
+- [GH#200](https://github.com/jolicode/automapper/pull/200) Changed skip_null_values behavior to not handle initialized properties anymore
+
+### Removed
+- [GH#200](https://github.com/jolicode/automapper/pull/200) Drop nikic/php-parser < 5.0 compatibility
 
 ## [9.2.1] - 2025-01-31
 ### Fixed

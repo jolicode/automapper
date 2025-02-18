@@ -121,6 +121,26 @@ $target = $autoMapper->map($source, $target, ['skip_null_values' => true]);
 assert($target->name === 'Jane'); // true
 ```
 
+### Skip uninitialized values
+
+Like for null values and `skip_null_values`, in some case having an uninitialized value may precise that the value should not be mapped and the target should keep its value.
+
+You can enable this behavior by passing the `skip_uninitialized_values` option.
+
+```php
+class User
+{
+    public string $name;
+}
+
+$source = new User(); // do not initialize $name property
+$target = new UserDTO();
+$target->name = 'Jane';
+$target = $autoMapper->map($source, $target, ['skip_uninitialized_values' => true]);
+
+assert($target->name === 'Jane'); // true
+```
+
 ### Date Time format
 
 When mapping a `DateTimeInterface` object to a string, AutoMapper will format the date, you can change the format by
