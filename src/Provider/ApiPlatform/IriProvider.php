@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace AutoMapper\Provider\ApiPlatform;
 
-use ApiPlatform\Api\IriConverterInterface;
-use ApiPlatform\Api\ResourceClassResolverInterface;
+use ApiPlatform\Api\IriConverterInterface as LegacyIriConverterInterface;
+use ApiPlatform\Api\ResourceClassResolverInterface as LegacyResourceClassResolverInterface;
+use ApiPlatform\Metadata\IriConverterInterface;
+use ApiPlatform\Metadata\ResourceClassResolverInterface;
 use AutoMapper\MapperContext;
 use AutoMapper\Provider\EarlyReturn;
 use AutoMapper\Provider\ProviderInterface;
@@ -13,8 +15,8 @@ use AutoMapper\Provider\ProviderInterface;
 final readonly class IriProvider implements ProviderInterface
 {
     public function __construct(
-        private IriConverterInterface $iriConverter,
-        private ResourceClassResolverInterface $resourceClassResolver
+        private LegacyIriConverterInterface|IriConverterInterface $iriConverter,
+        private LegacyResourceClassResolverInterface|ResourceClassResolverInterface $resourceClassResolver
     ) {
     }
 
