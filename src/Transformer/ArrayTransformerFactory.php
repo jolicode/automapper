@@ -31,12 +31,24 @@ final class ArrayTransformerFactory extends AbstractUniqueTypeTransformerFactory
             return null;
         }
 
-        if ([] === $sourceType->getCollectionValueTypes() || [] === $targetType->getCollectionValueTypes()) {
+        $sourceCollections = $sourceType->getCollectionValueTypes();
+        $targetCollections = $targetType->getCollectionValueTypes();
+
+        if ([] === $sourceCollections && [] !== $targetCollections) {
+            // consider array as a collection of array
+            $sourceCollections = [new Type(Type::BUILTIN_TYPE_ARRAY, false, null, false)];
+        }
+
+        if ([] !== $sourceCollections && [] === $targetCollections) {
+            // consider array as a collection of array
+            $targetCollections = [new Type(Type::BUILTIN_TYPE_ARRAY, false, null, false)];
+        }
+
+        if ([] === $sourceCollections || [] === $targetCollections) {
             return new DictionaryTransformer(new CopyTransformer());
         }
 
-        $types = TypesMatching::fromSourceAndTargetTypes($sourceType->getCollectionValueTypes(), $targetType->getCollectionValueTypes());
-
+        $types = TypesMatching::fromSourceAndTargetTypes($sourceCollections, $targetCollections);
         $subItemTransformer = $this->chainTransformerFactory->getTransformer($types, $source, $target, $mapperMetadata);
 
         if (null !== $subItemTransformer) {

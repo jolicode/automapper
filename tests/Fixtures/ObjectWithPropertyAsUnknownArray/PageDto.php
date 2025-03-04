@@ -1,6 +1,8 @@
 <?php
 
-namespace AutoMapper\Tests\Fixtures\IssueGreg;
+declare(strict_types=1);
+
+namespace AutoMapper\Tests\Fixtures\ObjectWithPropertyAsUnknownArray;
 
 final readonly class PageDto
 {
