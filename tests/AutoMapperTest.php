@@ -475,6 +475,46 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertTrue($userDto->getConstructor());
     }
 
+    public function testConstructorAndRelationMissing(): void
+    {
+        $user = ['name' => 'foo'];
+        /** @var Fixtures\UserConstructorDTOWithRelation $userDto */
+        $userDto = $this->autoMapper->map($user, Fixtures\UserConstructorDTOWithRelation::class);
+
+        self::assertInstanceOf(Fixtures\UserConstructorDTOWithRelation::class, $userDto);
+        self::assertSame(1, $userDto->int->foo);
+        self::assertSame('foo', $userDto->name);
+        self::assertSame(30, $userDto->age);
+    }
+
+    public function testConstructorAndRelationMissing2(): void
+    {
+        $user = ['name' => 'foo', 'int' => new Fixtures\IntDTO(1)];
+        /** @var Fixtures\UserConstructorDTOWithRelation $userDto */
+        $userDto = $this->autoMapper->map($user, Fixtures\UserConstructorDTOWithRelation::class);
+
+        self::assertInstanceOf(Fixtures\UserConstructorDTOWithRelation::class, $userDto);
+        self::assertSame(1, $userDto->int->foo);
+        self::assertSame('foo', $userDto->name);
+        self::assertSame(30, $userDto->age);
+    }
+
+    public function testConstructorAndRelationMissingAndContext(): void
+    {
+        $user = ['name' => 'foo'];
+        /** @var Fixtures\UserConstructorDTOWithRelation $userDto */
+        $userDto = $this->autoMapper->map($user, Fixtures\UserConstructorDTOWithRelation::class, [
+            MapperContext::CONSTRUCTOR_ARGUMENTS => [
+                Fixtures\UserConstructorDTO::class => ['int' => new Fixtures\IntDTO(1)],
+            ],
+        ]);
+
+        self::assertInstanceOf(Fixtures\UserConstructorDTOWithRelation::class, $userDto);
+        self::assertSame(1, $userDto->int->foo);
+        self::assertSame('foo', $userDto->name);
+        self::assertSame(30, $userDto->age);
+    }
+
     public function testConstructorArrayArgumentFromContext(): void
     {
         $data = ['baz' => 'baz'];
