@@ -46,10 +46,13 @@ use AutoMapper\Tests\Fixtures\Issue111\ColourTransformer;
 use AutoMapper\Tests\Fixtures\Issue111\FooDto;
 use AutoMapper\Tests\Fixtures\Issue189\User as Issue189User;
 use AutoMapper\Tests\Fixtures\Issue189\UserPatchInput as Issue189UserPatchInput;
+use AutoMapper\Tests\Fixtures\IssueGreg\ComponentDto;
+use AutoMapper\Tests\Fixtures\IssueGreg\Page;
+use AutoMapper\Tests\Fixtures\IssueGreg\PageDto;
+use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
 use AutoMapper\Tests\Fixtures\ObjectsUnion\Bar;
 use AutoMapper\Tests\Fixtures\ObjectsUnion\Foo;
 use AutoMapper\Tests\Fixtures\ObjectsUnion\ObjectsUnionProperty;
-use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
 use AutoMapper\Tests\Fixtures\Order;
 use AutoMapper\Tests\Fixtures\PetOwner;
 use AutoMapper\Tests\Fixtures\PetOwnerWithConstructorArguments;
@@ -901,6 +904,21 @@ class AutoMapperTest extends AutoMapperBaseTest
         $bar = $this->autoMapper->map($foo, Fixtures\Issue425\Bar::class);
 
         self::assertEquals($data, $bar->property);
+    }
+
+    public function testIssueGreg(): void
+    {
+        $entity = new Page();
+        $entity->components[] = ['name' => 'my name'];
+
+        $bar = $this->autoMapper->map($entity, PageDto::class);
+        // With the following line, it works, so it's possible!
+        // $bar = $this->autoMapper->map($this->autoMapper->map($entity, 'array'), PageDto::class);;
+
+        self::assertEquals('my title', $bar->title);
+        self::assertCount(1, $bar->components);
+        self::assertInstanceOf(ComponentDto::class, $bar->components[0]);
+        self::assertEquals('my name', $bar->components[0]->name);
     }
 
     public function testArrayWithKeys(): void
