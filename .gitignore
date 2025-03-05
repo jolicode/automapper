@@ -5,5 +5,7 @@ vendor/
 tests/cache/
 tests/Bundle/Resources/var
 tools/phpstan/cache/
+cache/
 site/
 .build/
+.castor*
