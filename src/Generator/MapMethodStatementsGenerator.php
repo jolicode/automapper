@@ -32,12 +32,16 @@ final readonly class MapMethodStatementsGenerator
         CachedReflectionStatementsGenerator $cachedReflectionStatementsGenerator,
         ExpressionLanguage $expressionLanguage,
     ) {
+        $propertyConditionGenerator = new PropertyConditionsGenerator($expressionLanguage);
+
         $this->createObjectStatementsGenerator = new CreateTargetStatementsGenerator(
             $discriminatorStatementsGeneratorSource,
             $discriminatorStatementsGeneratorTarget,
             $cachedReflectionStatementsGenerator,
+            $propertyConditionGenerator
         );
-        $this->propertyStatementsGenerator = new PropertyStatementsGenerator($expressionLanguage);
+
+        $this->propertyStatementsGenerator = new PropertyStatementsGenerator($propertyConditionGenerator);
     }
 
     /**
