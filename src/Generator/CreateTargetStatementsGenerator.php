@@ -35,6 +35,7 @@ final readonly class CreateTargetStatementsGenerator
         private DiscriminatorStatementsGenerator $discriminatorStatementsGeneratorSource,
         private DiscriminatorStatementsGenerator $discriminatorStatementsGeneratorTarget,
         private CachedReflectionStatementsGenerator $cachedReflectionStatementsGenerator,
+        private PropertyConditionsGenerator $propertyConditionsGenerator,
         ?Parser $parser = null,
     ) {
         $this->parser = $parser ?? (new ParserFactory())->createForHostVersion();
@@ -161,12 +162,12 @@ final readonly class CreateTargetStatementsGenerator
      * If source missing a constructor argument, check if there is a constructor argument in the context, otherwise we use the default value or throw exception.
      *
      * ```php
-     *  {transformation of value}
-     *  $constructarg = $value ?? (
-     *      MapperContext::hasConstructorArgument($context, $target, 'propertyName')
-     *          ? MapperContext::getConstructorArgument($context, $target, 'propertyName')
-     *          : {defaultValueExpr} // default value or throw exception
-     *  )
+     *
+     *  if ($value not defined) {
+     *      $constructarg = MapperContext::hasConstructorArgument($context, $target, 'propertyName') ? MapperContext::getConstructorArgument($context, $target, 'propertyName') : {defaultValueExpr} // default value or throw exception
+     *  } else {
+     *      $constructarg = transformation of value
+     *  }
      * ```
      *
      * @return array{Stmt[], Arg, string}|array{null, null, null}
@@ -177,6 +178,12 @@ final readonly class CreateTargetStatementsGenerator
         $constructVar = $variableRegistry->getVariableWithUniqueName('constructArg');
         $fieldValueExpr = $propertyMetadata->source->accessor?->getExpression($variableRegistry->getSourceInput());
 
+        $condition = $this->propertyConditionsGenerator->generate(
+            $metadata,
+            $propertyMetadata,
+            true
+        );
+
         if (null === $fieldValueExpr) {
             if (!($propertyMetadata->transformer instanceof AllowNullValueTransformerInterface)) {
                 return [null, null, null];
@@ -184,9 +191,6 @@ final readonly class CreateTargetStatementsGenerator
 
             $fieldValueExpr = new Expr\ConstFetch(new Name('null'));
         }
-
-        /* Get extract and transform statements for this property */
-        [$output, $propStatements] = $propertyMetadata->transformer->transform($fieldValueExpr, $constructVar, $propertyMetadata, $variableRegistry->getUniqueVariableScope(), $variableRegistry->getSourceInput());
 
         $defaultValueExpr = new Expr\Throw_(
             new Expr\New_(new Name\FullyQualified(MissingConstructorArgumentsException::class), [
@@ -206,36 +210,42 @@ final readonly class CreateTargetStatementsGenerator
             $defaultValueExpr = new Expr\ConstFetch(new Name('null'));
         }
 
-        if ($defaultValueExpr instanceof Expr\Array_) {
-            // $constructarg = count($values) > 0 ? $values : {expression};
-            $argumentAssignClosure = static fn (Expr $expr) => new Expr\Assign($constructVar, new Expr\Ternary(
-                new Expr\BinaryOp\Greater(new Expr\FuncCall(new Name('count'), [new Arg($output)]), create_scalar_int(0)),
-                $output,
-                $expr,
-            ));
-        } else {
-            // $constructarg = $values ?? {expression};
-            $argumentAssignClosure = static fn (Expr $expr) => new Expr\Assign($constructVar, new Expr\BinaryOp\Coalesce($output, $expr));
+        /* Get extract and transform statements for this property */
+        [$output, $propStatements] = $propertyMetadata->transformer->transform($fieldValueExpr, $constructVar, $propertyMetadata, $variableRegistry->getUniqueVariableScope(), $variableRegistry->getSourceInput());
+
+        if (!$condition) {
+            return [
+                [
+                    new Stmt\Expression(new Expr\Assign($constructVar, $output)),
+                ],
+                new Arg($constructVar, name: new Identifier($parameter->getName())),
+                $parameter->getName(),
+            ];
         }
 
         return [
             [
-                ...$propStatements,
-                new Stmt\Expression($argumentAssignClosure(
-                    new Expr\Ternary(
-                        new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'hasConstructorArgument', [
-                            new Arg($variableRegistry->getContext()),
-                            new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
-                            new Arg(new Scalar\String_($propertyMetadata->target->property)),
-                        ]),
-                        new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'getConstructorArgument', [
-                            new Arg($variableRegistry->getContext()),
-                            new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
-                            new Arg(new Scalar\String_($propertyMetadata->target->property)),
-                        ]),
-                        $defaultValueExpr,
-                    ),
-                )),
+                new Stmt\If_($condition, [
+                    'stmts' => [
+                        ...$propStatements,
+                        new Stmt\Expression(new Expr\Assign($constructVar, $output)),
+                    ],
+                    'else' => new Stmt\Else_([
+                        new Stmt\Expression(new Expr\Assign($constructVar, new Expr\Ternary(
+                            new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'hasConstructorArgument', [
+                                new Arg($variableRegistry->getContext()),
+                                new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
+                                new Arg(new Scalar\String_($propertyMetadata->target->property)),
+                            ]),
+                            new Expr\StaticCall(new Name\FullyQualified(MapperContext::class), 'getConstructorArgument', [
+                                new Arg($variableRegistry->getContext()),
+                                new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
+                                new Arg(new Scalar\String_($propertyMetadata->target->property)),
+                            ]),
+                            $defaultValueExpr,
+                        ))),
+                    ]),
+                ]),
             ],
             new Arg($constructVar, name: new Identifier($parameter->getName())),
             $parameter->getName(),

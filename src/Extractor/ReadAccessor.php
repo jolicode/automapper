@@ -199,7 +199,7 @@ final class ReadAccessor
              *
              * isset($input['property_name']) && null === $input->property_name
              */
-            return new Expr\BinaryOp\LogicalAnd(new Expr\BooleanNot(new Expr\Isset_([new Expr\PropertyFetch($input, $this->accessor)])), new Expr\BinaryOp\Identical(new Expr\ConstFetch(new Name('null')), new Expr\PropertyFetch($input, $this->accessor)));
+            return new Expr\BinaryOp\LogicalAnd(new Expr\BooleanNot(new Expr\Isset_([new Expr\ArrayDimFetch($input, new Scalar\String_($this->accessor))])), new Expr\BinaryOp\Identical(new Expr\ConstFetch(new Name('null')), new Expr\ArrayDimFetch($input, new Scalar\String_($this->accessor))));
         }
 
         if (self::TYPE_SOURCE === $this->type) {

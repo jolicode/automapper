@@ -36,26 +36,30 @@ final readonly class PropertyConditionsGenerator
         $this->parser = $parser ?? (new ParserFactory())->createForHostVersion();
     }
 
-    public function generate(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
+    public function generate(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata, bool $onlyExists = false): ?Expr
     {
         $conditions = [];
 
         $conditions[] = $this->propertyExistsForStdClass($metadata, $propertyMetadata);
         $conditions[] = $this->propertyExistsForArray($metadata, $propertyMetadata);
-        $conditions[] = $this->isAllowedAttribute($metadata, $propertyMetadata);
 
-        if (!$propertyMetadata->disableGroupsCheck) {
-            $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->groups); // Property groups
+        if (!$onlyExists) {
+            $conditions[] = $this->isAllowedAttribute($metadata, $propertyMetadata);
 
-            if ($propertyMetadata->groups === null) {
-                $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->source->groups); // Source groups
-                $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->target->groups); // Target groups
+            if (!$propertyMetadata->disableGroupsCheck) {
+                $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->groups); // Property groups
+
+                if ($propertyMetadata->groups === null) {
+                    $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->source->groups); // Source groups
+                    $conditions[] = $this->groupsCheck($metadata->variableRegistry, $propertyMetadata->target->groups); // Target groups
+                }
+
+                $conditions[] = $this->noGroupsCheck($metadata, $propertyMetadata);
             }
 
-            $conditions[] = $this->noGroupsCheck($metadata, $propertyMetadata);
+            $conditions[] = $this->maxDepthCheck($metadata, $propertyMetadata);
         }
 
-        $conditions[] = $this->maxDepthCheck($metadata, $propertyMetadata);
         $conditions[] = $this->customCondition($metadata, $propertyMetadata);
 
         $conditions = array_values(array_filter($conditions));

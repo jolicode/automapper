@@ -38,8 +38,12 @@ abstract class AutoMapperBaseTest extends TestCase
         ?ExpressionLanguageProvider $expressionLanguageProvider = null,
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
     ): AutoMapper {
-        $fs = new Filesystem();
-        $fs->remove(__DIR__ . '/cache/');
+        $skipCacheRemove = $_SERVER['SKIP_CACHE_REMOVE'] ?? false;
+
+        if (!$skipCacheRemove) {
+            $fs = new Filesystem();
+            $fs->remove(__DIR__ . '/cache/');
+        }
 
         $configuration = new Configuration(
             classPrefix: $classPrefix,
