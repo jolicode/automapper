@@ -15,6 +15,7 @@ use AutoMapper\Loader\EvalLoader;
 use AutoMapper\Loader\FileLoader;
 use AutoMapper\Loader\FileReloadStrategy;
 use AutoMapper\Normalizer\AutoMapperNormalizer;
+use AutoMapper\Provider\ProviderInterface;
 use AutoMapper\Symfony\Bundle\CacheWarmup\CacheWarmer;
 use AutoMapper\Symfony\Bundle\ReflectionClassRecursiveIterator;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
@@ -80,6 +81,8 @@ class AutoMapperExtension extends Extension
         $container->setParameter('automapper.map_private_properties', $config['map_private_properties']);
 
         $container->registerForAutoconfiguration(PropertyTransformerInterface::class)->addTag('automapper.property_transformer');
+
+        $container->registerForAutoconfiguration(ProviderInterface::class)->addTag('automapper.provider');
 
         if ($config['loader']['eval']) {
             $container
