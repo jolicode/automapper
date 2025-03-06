@@ -216,6 +216,7 @@ final readonly class CreateTargetStatementsGenerator
         if (!$condition) {
             return [
                 [
+                    ...$propStatements,
                     new Stmt\Expression(new Expr\Assign($constructVar, $output)),
                 ],
                 new Arg($constructVar, name: new Identifier($parameter->getName())),
