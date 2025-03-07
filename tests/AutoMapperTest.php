@@ -71,6 +71,7 @@ use Symfony\Component\Serializer\Attribute\Ignore;
 use Symfony\Component\Serializer\Attribute\MaxDepth;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
+use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\Uid\Ulid;
 use Symfony\Component\Uid\Uuid;
 
@@ -752,9 +753,9 @@ class AutoMapperTest extends AutoMapperBaseTest
             self::markTestSkipped('Symfony Serializer is required to run this test.');
         }
 
-        if (Kernel::MAJOR_VERSION < 6) {
-            $nameConverter = new class() implements AdvancedNameConverterInterface {
-                public function normalize($propertyName, ?string $class = null, ?string $format = null, array $context = [])
+        if (Kernel::MAJOR_VERSION >= 7 && Kernel::MINOR_VERSION >= 2) {
+            $nameConverter = new class() implements NameConverterInterface {
+                public function normalize($propertyName, ?string $class = null, ?string $format = null, array $context = []): string
                 {
                     if ('id' === $propertyName) {
                         return '@id';
@@ -763,7 +764,7 @@ class AutoMapperTest extends AutoMapperBaseTest
                     return $propertyName;
                 }
 
-                public function denormalize($propertyName, ?string $class = null, ?string $format = null, array $context = [])
+                public function denormalize($propertyName, ?string $class = null, ?string $format = null, array $context = []): string
                 {
                     if ('@id' === $propertyName) {
                         return 'id';

@@ -6,11 +6,12 @@ namespace AutoMapper\EventListener\Symfony;
 
 use AutoMapper\Event\PropertyMetadataEvent;
 use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
+use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 
 final readonly class AdvancedNameConverterListener
 {
     public function __construct(
-        private AdvancedNameConverterInterface $nameConverter
+        private AdvancedNameConverterInterface|NameConverterInterface $nameConverter
     ) {
     }
 
