@@ -26,6 +26,7 @@ use AutoMapper\Tests\Fixtures\ClassWithMapToContextAttribute;
 use AutoMapper\Tests\Fixtures\ClassWithNullablePropertyInConstructor;
 use AutoMapper\Tests\Fixtures\ClassWithPrivateProperty;
 use AutoMapper\Tests\Fixtures\ConstructorWithDefaultValues;
+use AutoMapper\Tests\Fixtures\ConstructorWithDefaultValuesAsObjects;
 use AutoMapper\Tests\Fixtures\DifferentSetterGetterType;
 use AutoMapper\Tests\Fixtures\DoctrineCollections\Book;
 use AutoMapper\Tests\Fixtures\DoctrineCollections\Library;
@@ -41,6 +42,7 @@ use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithImmutableInstance;
 use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithMutableInstance;
 use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithNullValue;
 use AutoMapper\Tests\Fixtures\HasDateTimeWithNullValue;
+use AutoMapper\Tests\Fixtures\IntDTO;
 use AutoMapper\Tests\Fixtures\Issue111\Colour;
 use AutoMapper\Tests\Fixtures\Issue111\ColourTransformer;
 use AutoMapper\Tests\Fixtures\Issue111\FooDto;
@@ -506,7 +508,7 @@ class AutoMapperTest extends AutoMapperBaseTest
         /** @var Fixtures\UserConstructorDTOWithRelation $userDto */
         $userDto = $this->autoMapper->map($user, Fixtures\UserConstructorDTOWithRelation::class, [
             MapperContext::CONSTRUCTOR_ARGUMENTS => [
-                Fixtures\UserConstructorDTOWithRelation::class => ['int' => new Fixtures\IntDTO(1)],
+                Fixtures\UserConstructorDTOWithRelation::class => ['int' => new IntDTO(1)],
             ],
         ]);
 
@@ -606,6 +608,27 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertSame('10', $userDto->getId());
         self::assertSame('foo', $userDto->getName());
         self::assertSame(30, $userDto->getAge());
+    }
+
+    public function testConstructorWithDefaultsAsObjects(): void
+    {
+        $data = ['baz' => 'baz'];
+        /** @var ConstructorWithDefaultValuesAsObjects $object */
+        $object = $this->autoMapper->map($data, ConstructorWithDefaultValuesAsObjects::class);
+
+        self::assertInstanceOf(ConstructorWithDefaultValuesAsObjects::class, $object);
+        self::assertInstanceOf(\DateTimeImmutable::class, $object->date);
+        self::assertInstanceOf(IntDTO::class, $object->IntDTO);
+        self::assertSame('baz', $object->baz);
+
+        $stdClassData = (object) $data;
+        /** @var ConstructorWithDefaultValuesAsObjects $object */
+        $object = $this->autoMapper->map($stdClassData, ConstructorWithDefaultValuesAsObjects::class);
+
+        self::assertInstanceOf(ConstructorWithDefaultValuesAsObjects::class, $object);
+        self::assertInstanceOf(\DateTimeImmutable::class, $object->date);
+        self::assertInstanceOf(IntDTO::class, $object->IntDTO);
+        self::assertSame('baz', $object->baz);
     }
 
     public function testConstructorDisable(): void
@@ -860,7 +883,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
         $automapper = AutoMapper::create(new Configuration(strictTypes: true, classPrefix: 'StrictTypes_'));
         $data = ['foo' => 1.1];
-        $automapper->map($data, Fixtures\IntDTO::class);
+        $automapper->map($data, IntDTO::class);
     }
 
     public function testStrictTypesFromMapper(): void
