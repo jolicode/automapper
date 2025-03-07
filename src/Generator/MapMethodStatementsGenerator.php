@@ -38,7 +38,6 @@ final readonly class MapMethodStatementsGenerator
             $discriminatorStatementsGeneratorSource,
             $discriminatorStatementsGeneratorTarget,
             $cachedReflectionStatementsGenerator,
-            $propertyConditionGenerator
         );
 
         $this->propertyStatementsGenerator = new PropertyStatementsGenerator($propertyConditionGenerator);

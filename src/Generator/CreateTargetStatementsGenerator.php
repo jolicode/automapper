@@ -29,7 +29,6 @@ final readonly class CreateTargetStatementsGenerator
         private DiscriminatorStatementsGenerator $discriminatorStatementsGeneratorSource,
         private DiscriminatorStatementsGenerator $discriminatorStatementsGeneratorTarget,
         private CachedReflectionStatementsGenerator $cachedReflectionStatementsGenerator,
-        private PropertyConditionsGenerator $propertyConditionsGenerator,
     ) {
     }
 
@@ -177,12 +176,7 @@ final readonly class CreateTargetStatementsGenerator
     {
         $variableRegistry = $metadata->variableRegistry;
         $fieldValueExpr = $propertyMetadata->source->accessor?->getExpression($variableRegistry->getSourceInput());
-
-        $conditionDefined = $this->propertyConditionsGenerator->generate(
-            $metadata,
-            $propertyMetadata,
-            true
-        );
+        $conditionDefined = $propertyMetadata->source->accessor?->getIsDefinedExpression($variableRegistry->getSourceInput(), $parameter->allowsNull());
 
         if (null === $fieldValueExpr) {
             if (!($propertyMetadata->transformer instanceof AllowNullValueTransformerInterface)) {
