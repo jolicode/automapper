@@ -29,6 +29,7 @@ use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
+use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 
 /**
  * Maps a source data structure (object or array) to a target one.
@@ -140,7 +141,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
     public static function create(
         Configuration $configuration = new Configuration(),
         ?string $cacheDirectory = null,
-        ?AdvancedNameConverterInterface $nameConverter = null,
+        AdvancedNameConverterInterface|NameConverterInterface|null $nameConverter = null,
         array $transformerFactories = [],
         iterable $propertyTransformers = [],
         ?ExpressionLanguageProvider $expressionLanguageProvider = null,

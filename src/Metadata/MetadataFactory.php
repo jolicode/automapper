@@ -51,6 +51,7 @@ use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
+use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\Uid\AbstractUid;
 
 /**
@@ -328,7 +329,7 @@ final class MetadataFactory
         ClassDiscriminatorResolver $classDiscriminatorResolver,
         array $transformerFactories = [],
         ?ClassMetadataFactory $classMetadataFactory = null,
-        ?AdvancedNameConverterInterface $nameConverter = null,
+        AdvancedNameConverterInterface|NameConverterInterface|null $nameConverter = null,
         ExpressionLanguage $expressionLanguage = new ExpressionLanguage(),
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
     ): self {
