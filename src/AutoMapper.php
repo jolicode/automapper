@@ -38,7 +38,7 @@ use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
  */
 class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
 {
-    public const VERSION = '10.0.0-dev';
+    public const VERSION = '9.3.0';
 
     /** @var array<GeneratedMapper<object, object>|GeneratedMapper<array<mixed>, object>|GeneratedMapper<object, array<mixed>>> */
     private array $mapperRegistry = [];

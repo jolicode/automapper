@@ -6,14 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [9.3.0] - 2025-03-07
 ### Added
 - [GH#223](https://github.com/jolicode/automapper/pull/223) Handle array to Doctrine Collection transformations
 - [GH#225](https://github.com/jolicode/automapper/pull/225) Add mapCollection method to base interface
 - [GH#200](https://github.com/jolicode/automapper/pull/200) Added skip_uninitialized_values context to skip non initialized properties
 - [GH#200](https://github.com/jolicode/automapper/pull/200) Changed skip_null_values behavior to not handle initialized properties anymore
+- [GH#230](https://github.com/jolicode/automapper/pull/230) Allow to map unknown array into object when it's nested
+- [GH#235](https://github.com/jolicode/automapper/pull/235) Add possibility to use the `NameConverterInterface` from symfony 7.2
 
 ### Removed
 - [GH#200](https://github.com/jolicode/automapper/pull/200) Drop nikic/php-parser < 5.0 compatibility
+
+### Fixed
+- [GH#231](https://github.com/jolicode/automapper/pull/231) Fix cases where constructor arguments were missing but not detected
+- [GH#188](https://github.com/jolicode/automapper/pull/188) Correctly handle default constructor arguments when they are objects.
+- [GH#234](https://github.com/jolicode/automapper/pull/234) Fix custom providers not being registered inside the bundle
+
+### Miscellaneous
+- [GH#232](https://github.com/jolicode/automapper/pull/232) Use castor for local and CI checks on the library
 
 ## [9.2.1] - 2025-01-31
 ### Fixed
@@ -360,7 +372,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * [AutoMapper] [GH#179](https://github.com/janephp/janephp/pull/179) Fixing incompatible changes in Symfony 5.0
 
-[Unreleased]: https://github.com/jolicode/automapper/compare/9.2.1...HEAD
+[Unreleased]: https://github.com/jolicode/automapper/compare/9.3.0...HEAD
+[9.3.0]: https://github.com/janephp/janephp/compare/9.2.1...9.3.0
 [9.2.1]: https://github.com/janephp/janephp/compare/9.2.0...9.2.1
 [9.2.0]: https://github.com/janephp/janephp/compare/9.1.2...9.2.0
 [9.1.2]: https://github.com/janephp/janephp/compare/9.1.1...9.1.2
