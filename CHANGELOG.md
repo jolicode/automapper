@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+## [9.3.0] - 2025-03-07
+### Fixed
+- [GH#236](https://github.com/jolicode/automapper/pull/236) Fix null values being used in constructor arguments when not allowed
 
 ## [9.3.0] - 2025-03-07
 ### Added
