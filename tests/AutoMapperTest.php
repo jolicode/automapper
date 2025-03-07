@@ -42,6 +42,7 @@ use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithImmutableInstance;
 use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithMutableInstance;
 use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithNullValue;
 use AutoMapper\Tests\Fixtures\HasDateTimeWithNullValue;
+use AutoMapper\Tests\Fixtures\IntDTO;
 use AutoMapper\Tests\Fixtures\Issue111\Colour;
 use AutoMapper\Tests\Fixtures\Issue111\ColourTransformer;
 use AutoMapper\Tests\Fixtures\Issue111\FooDto;
@@ -507,7 +508,7 @@ class AutoMapperTest extends AutoMapperBaseTest
         /** @var Fixtures\UserConstructorDTOWithRelation $userDto */
         $userDto = $this->autoMapper->map($user, Fixtures\UserConstructorDTOWithRelation::class, [
             MapperContext::CONSTRUCTOR_ARGUMENTS => [
-                Fixtures\UserConstructorDTOWithRelation::class => ['int' => new Fixtures\IntDTO(1)],
+                Fixtures\UserConstructorDTOWithRelation::class => ['int' => new IntDTO(1)],
             ],
         ]);
 
@@ -617,7 +618,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
         self::assertInstanceOf(ConstructorWithDefaultValuesAsObjects::class, $object);
         self::assertInstanceOf(\DateTimeImmutable::class, $object->date);
-        self::assertInstanceOf(\Fixtures\IntDTO::class, $object->IntDTO);
+        self::assertInstanceOf(IntDTO::class, $object->IntDTO);
         self::assertSame('baz', $object->baz);
 
         $stdClassData = (object) $data;
@@ -626,7 +627,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
         self::assertInstanceOf(ConstructorWithDefaultValuesAsObjects::class, $object);
         self::assertInstanceOf(\DateTimeImmutable::class, $object->date);
-        self::assertInstanceOf(\Fixtures\IntDTO::class, $object->IntDTO);
+        self::assertInstanceOf(IntDTO::class, $object->IntDTO);
         self::assertSame('baz', $object->baz);
     }
 
@@ -882,7 +883,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
         $automapper = AutoMapper::create(new Configuration(strictTypes: true, classPrefix: 'StrictTypes_'));
         $data = ['foo' => 1.1];
-        $automapper->map($data, Fixtures\IntDTO::class);
+        $automapper->map($data, IntDTO::class);
     }
 
     public function testStrictTypesFromMapper(): void
