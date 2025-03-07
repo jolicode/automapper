@@ -154,6 +154,59 @@ final class ReadAccessor
         throw new CompileException('Invalid accessor for read expression');
     }
 
+    public function getIsDefinedExpression(Expr\Variable $input, bool $nullable = false): ?Expr
+    {
+        // It is not possible to check if the underlying data is defined, assumes it is, php will throw an error if it is not
+        if (!$nullable && \in_array($this->type, [self::TYPE_METHOD, self::TYPE_SOURCE])) {
+            return null;
+        }
+
+        if (self::TYPE_PROPERTY === $this->type) {
+            if ($this->private) {
+                /*
+                 * When the property is private we use the extract callback that can read this value
+                 *
+                 * @see \AutoMapper\Extractor\ReadAccessor::getExtractIsUndefinedCallback()
+                 *
+                 * !$this->extractIsUndefinedCallbacks['property_name']($input)
+                 */
+                return new Expr\BooleanNot(new Expr\FuncCall(
+                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractIsUndefinedCallbacks'), new Scalar\String_($this->accessor)),
+                    [
+                        new Arg($input),
+                    ]
+                ));
+            }
+
+            /*
+             * Use the property fetch to read the value
+             *
+             * return isset($input->property_name);
+             */
+            if (!$nullable) {
+                return new Expr\Isset_([new Expr\PropertyFetch($input, $this->accessor)]);
+            }
+
+            // return property_exists($input, $this->accessor);
+            return new Expr\FuncCall(new Name('property_exists'), [new Arg($input), new Arg(new Scalar\String_($this->accessor))]);
+        }
+
+        if (self::TYPE_ARRAY_DIMENSION === $this->type) {
+            /*
+             * Use the array dim fetch to read the value
+             *
+             * isset($input['property_name'])
+             */
+            if (!$nullable) {
+                return new Expr\Isset_([new Expr\ArrayDimFetch($input, new Scalar\String_($this->accessor))]);
+            }
+
+            return new Expr\FuncCall(new Name('array_key_exists'), [new Arg(new Scalar\String_($this->accessor)), new Arg($input)]);
+        }
+
+        return null;
+    }
+
     public function getIsNullExpression(Expr\Variable $input): Expr
     {
         if (self::TYPE_METHOD === $this->type) {

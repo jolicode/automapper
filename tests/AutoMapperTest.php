@@ -481,6 +481,23 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertTrue($userDto->getConstructor());
     }
 
+    public function testConstructorWithNullSource(): void
+    {
+        $user = new Fixtures\UserDTO();
+        $user->id = 10;
+        $user->setName('foo');
+        $user->age = null;
+        /** @var Fixtures\UserConstructorDTO $userDto */
+        $userDto = $this->autoMapper->map($user, Fixtures\UserConstructorDTO::class);
+
+        self::assertInstanceOf(Fixtures\UserConstructorDTO::class, $userDto);
+        self::assertSame('10', $userDto->getId());
+        self::assertSame('foo', $userDto->getName());
+        // since age is null we take default value from constructor
+        self::assertSame(30, $userDto->getAge());
+        self::assertTrue($userDto->getConstructor());
+    }
+
     public function testConstructorAndRelationMissing(): void
     {
         $user = ['name' => 'foo'];
