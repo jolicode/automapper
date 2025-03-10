@@ -13,7 +13,7 @@ use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\MetadataFactory;
 use AutoMapper\Metadata\MetadataRegistry;
 use AutoMapper\Metadata\PropertyMetadata;
-use AutoMapper\Tests\AutoMapperBaseTest;
+use AutoMapper\Tests\AutoMapperTestCase;
 use AutoMapper\Tests\Fixtures;
 use AutoMapper\Transformer\ArrayTransformerFactory;
 use AutoMapper\Transformer\BuiltinTransformerFactory;
@@ -31,7 +31,7 @@ use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 /**
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
  */
-class MetadataFactoryTest extends AutoMapperBaseTest
+class MetadataFactoryTest extends AutoMapperTestCase
 {
     protected MetadataFactory $factory;
 

@@ -1,0 +1,9 @@
+AutoMapper\Tests\AutoMapperTest\SymfonyUId\SymfonyUlidUser {
+  -ulid: Symfony\Component\Uid\Ulid {
+    #uid: "01EXE87A54256F05N8P6SB2M9M"
+    toBase58: "1BW5skaQFE4XVqyhSXjpoV"
+    toRfc4122: "01775c83-a8a4-114c-f016-a8b1b2b15134"
+    time: "2021-02-01 07:34:28.260 UTC"
+  }
+  +name: "Grégoire Pineau"
+}

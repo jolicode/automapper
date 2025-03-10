@@ -13,7 +13,6 @@ use AutoMapper\Exception\InvalidMappingException;
 use AutoMapper\Exception\MissingConstructorArgumentsException;
 use AutoMapper\Exception\ReadOnlyTargetException;
 use AutoMapper\MapperContext;
-use AutoMapper\Provider\EarlyReturn;
 use AutoMapper\Tests\Fixtures\Address;
 use AutoMapper\Tests\Fixtures\AddressDTO;
 use AutoMapper\Tests\Fixtures\AddressDTOReadonlyClass;
@@ -21,20 +20,14 @@ use AutoMapper\Tests\Fixtures\AddressDTOWithReadonly;
 use AutoMapper\Tests\Fixtures\AddressDTOWithReadonlyPromotedProperty;
 use AutoMapper\Tests\Fixtures\AddressType;
 use AutoMapper\Tests\Fixtures\AddressWithEnum;
-use AutoMapper\Tests\Fixtures\BuiltinClass;
 use AutoMapper\Tests\Fixtures\ClassWithMapToContextAttribute;
 use AutoMapper\Tests\Fixtures\ClassWithNullablePropertyInConstructor;
 use AutoMapper\Tests\Fixtures\ClassWithPrivateProperty;
 use AutoMapper\Tests\Fixtures\ConstructorWithDefaultValues;
 use AutoMapper\Tests\Fixtures\ConstructorWithDefaultValuesAsObjects;
-use AutoMapper\Tests\Fixtures\DifferentSetterGetterType;
-use AutoMapper\Tests\Fixtures\DoctrineCollections\Book;
-use AutoMapper\Tests\Fixtures\DoctrineCollections\Library;
 use AutoMapper\Tests\Fixtures\Dog;
 use AutoMapper\Tests\Fixtures\Fish;
 use AutoMapper\Tests\Fixtures\FooGenerator;
-use AutoMapper\Tests\Fixtures\FooProvider;
-use AutoMapper\Tests\Fixtures\GroupOverride;
 use AutoMapper\Tests\Fixtures\HasDateTime;
 use AutoMapper\Tests\Fixtures\HasDateTimeImmutable;
 use AutoMapper\Tests\Fixtures\HasDateTimeImmutableWithNullValue;
@@ -43,48 +36,45 @@ use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithMutableInstance;
 use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithNullValue;
 use AutoMapper\Tests\Fixtures\HasDateTimeWithNullValue;
 use AutoMapper\Tests\Fixtures\IntDTO;
-use AutoMapper\Tests\Fixtures\Issue111\Colour;
-use AutoMapper\Tests\Fixtures\Issue111\ColourTransformer;
-use AutoMapper\Tests\Fixtures\Issue111\FooDto;
-use AutoMapper\Tests\Fixtures\Issue189\User as Issue189User;
-use AutoMapper\Tests\Fixtures\Issue189\UserPatchInput as Issue189UserPatchInput;
-use AutoMapper\Tests\Fixtures\ObjectsUnion\Bar;
-use AutoMapper\Tests\Fixtures\ObjectsUnion\Foo;
-use AutoMapper\Tests\Fixtures\ObjectsUnion\ObjectsUnionProperty;
 use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
-use AutoMapper\Tests\Fixtures\ObjectWithPropertyAsUnknownArray\ComponentDto;
-use AutoMapper\Tests\Fixtures\ObjectWithPropertyAsUnknownArray\Page;
-use AutoMapper\Tests\Fixtures\ObjectWithPropertyAsUnknownArray\PageDto;
 use AutoMapper\Tests\Fixtures\Order;
 use AutoMapper\Tests\Fixtures\PetOwner;
 use AutoMapper\Tests\Fixtures\PetOwnerWithConstructorArguments;
-use AutoMapper\Tests\Fixtures\PrivatePropertyInConstructors\ChildClass;
-use AutoMapper\Tests\Fixtures\PrivatePropertyInConstructors\OtherClass;
-use AutoMapper\Tests\Fixtures\Provider\CustomProvider;
 use AutoMapper\Tests\Fixtures\SourceForConstructorWithDefaultValues;
 use AutoMapper\Tests\Fixtures\Transformer\MoneyTransformerFactory;
 use AutoMapper\Tests\Fixtures\Uninitialized;
-use AutoMapper\Tests\Fixtures\UserPromoted;
-use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\Kernel;
-use Symfony\Component\Serializer\Attribute\Groups;
-use Symfony\Component\Serializer\Attribute\Ignore;
-use Symfony\Component\Serializer\Attribute\MaxDepth;
-use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
-use Symfony\Component\Uid\Ulid;
-use Symfony\Component\Uid\Uuid;
+use Symfony\Component\VarDumper\Dumper\CliDumper;
+use Symfony\Component\VarDumper\Test\VarDumperTestTrait;
 
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-class AutoMapperTest extends AutoMapperBaseTest
+class AutoMapperTest extends AutoMapperTestCase
 {
+    use VarDumperTestTrait;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->setUpVarDumper([
+            \Throwable::class => function (\Throwable $e) {
+                return [
+                    'class' => $e::class,
+                    'message' => $e->getMessage(),
+                ];
+            },
+        ], CliDumper::DUMP_LIGHT_ARRAY);
+    }
+
     public function testAutoMapping(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
         $address = new Address();
         $address->setCity('Toulon');
@@ -112,7 +102,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testAutoMapperFromArray(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+        AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
         $user = [
             'id' => 1,
@@ -135,7 +125,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testAutoMapperFromArrayCustomDateTime(): void
     {
-        $this->buildAutoMapper(classPrefix: 'CustomDateTime_', dateTimeFormat: 'U');
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(classPrefix: 'CustomDateTime_', dateTimeFormat: 'U');
 
         $customFormat = 'U';
         $dateTime = \DateTime::createFromFormat(\DateTime::RFC3339, '1987-04-30T06:00:00Z');
@@ -186,7 +176,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testAutoMapperFromStdObject(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
         $user = new \stdClass();
         $user->id = 1;
@@ -209,24 +199,9 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertEquals(1, $user->id);
     }
 
-    public function testAutoMapperStdObjectToStdObject(): void
-    {
-        $user = new \stdClass();
-        $user->id = 1;
-        $nestedStd = new \stdClass();
-        $nestedStd->id = 2;
-        $user->nestedStd = $nestedStd;
-        $userStd = $this->autoMapper->map($user, \stdClass::class);
-
-        self::assertInstanceOf(\stdClass::class, $userStd);
-        self::assertNotSame($user, $userStd);
-        self::assertNotSame($user->nestedStd, $userStd->nestedStd);
-        self::assertEquals($user, $userStd);
-    }
-
     public function testNotReadable(): void
     {
-        $this->buildAutoMapper(classPrefix: 'CustomDateTime_');
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(classPrefix: 'CustomDateTime_');
 
         $address = new Address();
         $address->setCity('test');
@@ -248,20 +223,6 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertNull($city);
     }
 
-    public function testNoTypes(): void
-    {
-        $this->buildAutoMapper(classPrefix: 'NotReadable_');
-
-        $address = new Fixtures\AddressNoTypes();
-        $address->city = 'test';
-
-        $addressArray = $this->autoMapper->map($address, 'array');
-
-        self::assertIsArray($addressArray);
-        self::assertArrayHasKey('city', $addressArray);
-        self::assertEquals('test', $addressArray['city']);
-    }
-
     public function testNoTransformer(): void
     {
         $addressFoo = new Fixtures\AddressFoo();
@@ -274,21 +235,8 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertNull($addressBar->city);
     }
 
-    public function testNoProperties(): void
-    {
-        $noProperties = new Fixtures\FooNoProperties();
-        $noPropertiesMapped = $this->autoMapper->map($noProperties, Fixtures\FooNoProperties::class);
-
-        self::assertInstanceOf(Fixtures\FooNoProperties::class, $noPropertiesMapped);
-        self::assertNotSame($noProperties, $noPropertiesMapped);
-    }
-
     public function testGroupsSourceTarget(): void
     {
-        if (!class_exists(Groups::class)) {
-            self::markTestSkipped('Symfony Serializer is required to run this test.');
-        }
-
         $foo = new Fixtures\Foo();
         $foo->setId(10);
 
@@ -320,10 +268,6 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testGroupsToArray(): void
     {
-        if (!class_exists(Groups::class)) {
-            self::markTestSkipped('Symfony Serializer is required to run this test.');
-        }
-
         $foo = new Fixtures\Foo();
         $foo->setId(10);
 
@@ -345,16 +289,12 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testSkippedGroups(): void
     {
-        if (!class_exists(Groups::class)) {
-            self::markTestSkipped('Symfony Serializer is required to run this test.');
-        }
-
         $eventDispatcher = new EventDispatcher();
         $eventDispatcher->addListener(PropertyMetadataEvent::class, function (PropertyMetadataEvent $event) {
             $event->disableGroupsCheck = true;
         });
 
-        $this->buildAutoMapper(eventDispatcher: $eventDispatcher, classPrefix: 'SkippedGroups_');
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(eventDispatcher: $eventDispatcher, classPrefix: 'SkippedGroups_');
 
         $foo = new Fixtures\Foo();
         $foo->setId(10);
@@ -414,27 +354,6 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertSame($newNode, $newNode['parent']['parent']['parent']);
     }
 
-    public function testCircularReferenceDeep(): void
-    {
-        $foo = new Fixtures\CircularFoo();
-        $bar = new Fixtures\CircularBar();
-        $baz = new Fixtures\CircularBaz();
-
-        $foo->bar = $bar;
-        $bar->baz = $baz;
-        $baz->foo = $foo;
-
-        $newFoo = $this->autoMapper->map($foo, Fixtures\CircularFoo::class);
-
-        self::assertNotSame($foo, $newFoo);
-        self::assertNotNull($newFoo->bar);
-        self::assertNotSame($bar, $newFoo->bar);
-        self::assertNotNull($newFoo->bar->baz);
-        self::assertNotSame($baz, $newFoo->bar->baz);
-        self::assertNotNull($newFoo->bar->baz->foo);
-        self::assertSame($newFoo, $newFoo->bar->baz->foo);
-    }
-
     public function testCircularReferenceArray(): void
     {
         $nodeA = new Fixtures\Node();
@@ -449,20 +368,6 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertIsArray($newNode['childs'][0]);
         self::assertIsArray($newNode['childs'][0]['childs'][0]);
         self::assertSame($newNode, $newNode['childs'][0]['childs'][0]);
-    }
-
-    public function testPrivate(): void
-    {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
-
-        $user = new Fixtures\PrivateUser(10, 'foo', 'bar');
-        /** @var Fixtures\PrivateUserDTO $userDto */
-        $userDto = $this->autoMapper->map($user, Fixtures\PrivateUserDTO::class);
-
-        self::assertInstanceOf(Fixtures\PrivateUserDTO::class, $userDto);
-        self::assertSame(10, $userDto->getId());
-        self::assertSame('foo', $userDto->getFirstName());
-        self::assertSame('bar', $userDto->getLastName());
     }
 
     public function testConstructor(): void
@@ -498,43 +403,6 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertTrue($userDto->getConstructor());
     }
 
-    public function testConstructorAndRelationMissing(): void
-    {
-        $user = ['name' => 'foo'];
-        $this->expectException(MissingConstructorArgumentsException::class);
-
-        /** @var Fixtures\UserConstructorDTOWithRelation $userDto */
-        $userDto = $this->autoMapper->map($user, Fixtures\UserConstructorDTOWithRelation::class);
-    }
-
-    public function testConstructorAndRelationMissing2(): void
-    {
-        $user = ['name' => 'foo', 'int' => ['foo' => 1]];
-        /** @var Fixtures\UserConstructorDTOWithRelation $userDto */
-        $userDto = $this->autoMapper->map($user, Fixtures\UserConstructorDTOWithRelation::class);
-
-        self::assertInstanceOf(Fixtures\UserConstructorDTOWithRelation::class, $userDto);
-        self::assertSame(1, $userDto->int->foo);
-        self::assertSame('foo', $userDto->name);
-        self::assertSame(30, $userDto->age);
-    }
-
-    public function testConstructorAndRelationMissingAndContext(): void
-    {
-        $user = ['name' => 'foo'];
-        /** @var Fixtures\UserConstructorDTOWithRelation $userDto */
-        $userDto = $this->autoMapper->map($user, Fixtures\UserConstructorDTOWithRelation::class, [
-            MapperContext::CONSTRUCTOR_ARGUMENTS => [
-                Fixtures\UserConstructorDTOWithRelation::class => ['int' => new IntDTO(1)],
-            ],
-        ]);
-
-        self::assertInstanceOf(Fixtures\UserConstructorDTOWithRelation::class, $userDto);
-        self::assertSame(1, $userDto->int->foo);
-        self::assertSame('foo', $userDto->name);
-        self::assertSame(30, $userDto->age);
-    }
-
     public function testConstructorArrayArgumentFromContext(): void
     {
         $data = ['baz' => 'baz'];
@@ -550,7 +418,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testConstructorNotAllowed(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, constructorStrategy: ConstructorStrategy::NEVER, classPrefix: 'NotAllowedMapper_');
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true, constructorStrategy: ConstructorStrategy::NEVER, classPrefix: 'NotAllowedMapper_');
 
         $user = new Fixtures\UserDTO();
         $user->id = 10;
@@ -569,7 +437,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testConstructorForced(): void
     {
-        $this->buildAutoMapper(constructorStrategy: ConstructorStrategy::ALWAYS, classPrefix: 'AlwaysConstructorMapper_');
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(constructorStrategy: ConstructorStrategy::ALWAYS, classPrefix: 'AlwaysConstructorMapper_');
 
         $data = ['baz' => 'baz'];
         /** @var ConstructorWithDefaultValues $object */
@@ -595,7 +463,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testConstructorForcedException(): void
     {
-        $this->buildAutoMapper(constructorStrategy: ConstructorStrategy::ALWAYS, classPrefix: 'AlwaysConstructorMapper_');
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(constructorStrategy: ConstructorStrategy::ALWAYS, classPrefix: 'AlwaysConstructorMapper_');
         $data = new SourceForConstructorWithDefaultValues();
         $data->foo = 10;
 
@@ -650,7 +518,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testConstructorDisable(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
         $user = new Fixtures\UserDTONoName();
         $user->id = 10;
@@ -661,45 +529,6 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertSame('10', $userDto->getId());
         self::assertNull($userDto->getName());
         self::assertNull($userDto->getAge());
-    }
-
-    public function testMaxDepth(): void
-    {
-        if (!class_exists(MaxDepth::class)) {
-            self::markTestSkipped('Symfony Serializer is required to run this test.');
-        }
-
-        $foo = new Fixtures\FooMaxDepth(0, new Fixtures\FooMaxDepth(1, new Fixtures\FooMaxDepth(2, new Fixtures\FooMaxDepth(3, new Fixtures\FooMaxDepth(4)))));
-        $fooArray = $this->autoMapper->map($foo, 'array');
-
-        self::assertNotNull($fooArray['child']);
-        self::assertNotNull($fooArray['child']['child']);
-        self::assertFalse(isset($fooArray['child']['child']['child']));
-    }
-
-    public function testIgnoreInSource(): void
-    {
-        if (!class_exists(Ignore::class)) {
-            self::markTestSkipped('Symfony Serializer is required to run this test.');
-        }
-
-        $foo = new Fixtures\FooIgnore();
-        $foo->id = 5;
-        $fooArray = $this->autoMapper->map($foo, 'array');
-
-        self::assertSame([], $fooArray);
-    }
-
-    public function testIgnoreInTarget(): void
-    {
-        if (!class_exists(Ignore::class)) {
-            self::markTestSkipped('Symfony Serializer is required to run this test.');
-        }
-
-        $foo = new Fixtures\Foo();
-        $fooIgnore = $this->autoMapper->map($foo, Fixtures\FooIgnore::class);
-
-        self::assertNull($fooIgnore->id);
     }
 
     public function testObjectToPopulate(): void
@@ -769,7 +598,7 @@ class AutoMapperTest extends AutoMapperBaseTest
         $address->setCity('some city');
         $user->setAddress($address);
 
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
         /** @var Fixtures\UserDTO $userDto */
         $userDto = $this->autoMapper->map($user, Fixtures\UserDTO::class, [MapperContext::ALLOWED_ATTRIBUTES => ['id', 'age', 'address']]);
@@ -789,10 +618,6 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testNameConverter(): void
     {
-        if (!interface_exists(AdvancedNameConverterInterface::class)) {
-            self::markTestSkipped('Symfony Serializer is required to run this test.');
-        }
-
         if (Kernel::MAJOR_VERSION >= 7 && Kernel::MINOR_VERSION >= 2) {
             $nameConverter = new class() implements NameConverterInterface {
                 public function normalize($propertyName, ?string $class = null, ?string $format = null, array $context = []): string
@@ -863,11 +688,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testDiscriminator(): void
     {
-        if (!class_exists(ClassDiscriminatorFromClassMetadata::class)) {
-            self::markTestSkipped('Symfony Serializer is required to run this test.');
-        }
-
-        $this->buildAutoMapper(classPrefix: 'Discriminator');
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(classPrefix: 'Discriminator');
 
         $data = [
             'type' => 'cat',
@@ -926,7 +747,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testCustomTransformerFromArrayToObject(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, transformerFactories: [new MoneyTransformerFactory()]);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true, transformerFactories: [new MoneyTransformerFactory()]);
 
         $data = [
             'id' => 4582,
@@ -945,7 +766,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testCustomTransformerFromObjectToArray(): void
     {
-        $this->buildAutoMapper(transformerFactories: [new MoneyTransformerFactory()]);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(transformerFactories: [new MoneyTransformerFactory()]);
 
         $order = new Order();
         $order->id = 4582;
@@ -961,7 +782,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testCustomTransformerFromObjectToObject(): void
     {
-        $this->buildAutoMapper(transformerFactories: [new MoneyTransformerFactory()]);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(transformerFactories: [new MoneyTransformerFactory()]);
 
         $order = new Order();
         $order->id = 4582;
@@ -975,163 +796,9 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertEquals('EUR', $newOrder->price->getCurrency()->getCode());
     }
 
-    public function testIssue425(): void
-    {
-        $data = [1, 2, 3, 4, 5];
-        $foo = new Fixtures\Issue425\Foo($data);
-        $bar = $this->autoMapper->map($foo, Fixtures\Issue425\Bar::class);
-
-        self::assertEquals($data, $bar->property);
-    }
-
-    public function testObjectWithPropertyAsUnknownArrayToObject(): void
-    {
-        $entity = new Page();
-        $entity->components[] = ['name' => 'my name'];
-
-        $bar = $this->autoMapper->map($entity, PageDto::class);
-
-        self::assertEquals('my title', $bar->title);
-        self::assertCount(1, $bar->components);
-        self::assertInstanceOf(ComponentDto::class, $bar->components[0]);
-        self::assertEquals('my name', $bar->components[0]->name);
-    }
-
-    public function testObjectToObjectWithPropertyAsUnknownArray(): void
-    {
-        $dto = new PageDto('my title', [new ComponentDto('my name')]);
-        $bar = $this->autoMapper->map($dto, Page::class);
-
-        self::assertEquals('my title', $bar->title);
-        self::assertIsArray($bar->components);
-        self::assertCount(1, $bar->components);
-        self::assertIsArray($bar->components[0]);
-        self::assertEquals('my name', $bar->components[0]['name']);
-    }
-
-    public function testArrayWithKeys(): void
-    {
-        $arguments = ['foo', 'azerty' => 'bar', 'baz'];
-        $parameters = new Fixtures\Parameters($arguments);
-
-        $data = $this->autoMapper->map($parameters, 'array');
-        self::assertEquals($arguments, $data['parameters']);
-
-        // ----------------------------------------------------------------------------------------------------
-
-        $arguments = ['foo', 'bar', 'baz'];
-        $parameters = new Fixtures\Parameters($arguments);
-
-        $data = $this->autoMapper->map($parameters, 'array');
-        self::assertEquals($arguments, $data['parameters']);
-
-        // ----------------------------------------------------------------------------------------------------
-
-        $arguments = ['foo' => 'azerty', 'bar' => 'qwerty', 'baz' => 'dvorak'];
-        $parameters = new Fixtures\Parameters($arguments);
-
-        $data = $this->autoMapper->map($parameters, 'array');
-        self::assertEquals($arguments, $data['parameters']);
-    }
-
-    public function testArrayWithFailedKeys(): void
-    {
-        $arguments = ['foo', 'azerty' => 'bar', 'baz'];
-        $parameters = new Fixtures\WrongParameters($arguments);
-
-        $data = $this->autoMapper->map($parameters, 'array');
-        self::assertNotEquals($arguments, $data['parameters']);
-
-        // ----------------------------------------------------------------------------------------------------
-
-        $arguments = ['foo', 'bar', 'baz'];
-        $parameters = new Fixtures\WrongParameters($arguments);
-
-        $data = $this->autoMapper->map($parameters, 'array');
-        self::assertEquals($arguments, $data['parameters']);
-
-        // ----------------------------------------------------------------------------------------------------
-
-        $arguments = ['foo' => 'azerty', 'bar' => 'qwerty', 'baz' => 'dvorak'];
-        $parameters = new Fixtures\WrongParameters($arguments);
-
-        $data = $this->autoMapper->map($parameters, 'array');
-        self::assertNotEquals($arguments, $data['parameters']);
-    }
-
-    public function testSymfonyUlid(): void
-    {
-        // array -> object
-        $data = [
-            'ulid' => '01EXE87A54256F05N8P6SB2M9M',
-            'name' => 'Grégoire Pineau',
-        ];
-        /** @var Fixtures\SymfonyUlidUser $user */
-        $user = $this->autoMapper->map($data, Fixtures\SymfonyUlidUser::class);
-        self::assertInstanceOf(Ulid::class, $user->getUlid());
-        self::assertEquals('01EXE87A54256F05N8P6SB2M9M', $user->getUlid()->toBase32());
-        self::assertEquals('Grégoire Pineau', $user->name);
-
-        // object -> array
-        $user = new Fixtures\SymfonyUlidUser(new Ulid('01EXE89XR69GERC6GV3J4X38FJ'), 'Grégoire Pineau');
-        $data = $this->autoMapper->map($user, 'array');
-        self::assertEquals('01EXE89XR69GERC6GV3J4X38FJ', $data['ulid']);
-        self::assertEquals('Grégoire Pineau', $data['name']);
-
-        // object -> object
-        $user = new Fixtures\SymfonyUlidUser(new Ulid('01EXE8A6TNWVCEGMZ36AX8N9MC'), 'Grégoire Pineau');
-        /** @var Fixtures\SymfonyUlidUser $newUser */
-        $newUser = $this->autoMapper->map($user, Fixtures\SymfonyUlidUser::class);
-        self::assertInstanceOf(Ulid::class, $user->getUlid());
-        self::assertEquals('01EXE8A6TNWVCEGMZ36AX8N9MC', $newUser->getUlid()->toBase32());
-        self::assertEquals('Grégoire Pineau', $newUser->name);
-
-        // array -> object // uuid v1
-        $uuidV1 = Uuid::v1();
-        $data = [
-            'uuid' => $uuidV1->toRfc4122(),
-            'name' => 'Grégoire Pineau',
-        ];
-        /** @var Fixtures\SymfonyUuidUser $user */
-        $user = $this->autoMapper->map($data, Fixtures\SymfonyUuidUser::class);
-        self::assertInstanceOf(Uuid::class, $user->getUuid());
-        self::assertEquals($uuidV1->toRfc4122(), $user->getUuid()->toRfc4122());
-        self::assertEquals('Grégoire Pineau', $user->name);
-        // object -> array // uuid v3
-        $uuidV3 = Uuid::v3(Uuid::v4(), 'jolicode');
-        $user = new Fixtures\SymfonyUuidUser($uuidV3, 'Grégoire Pineau');
-        $data = $this->autoMapper->map($user, 'array');
-        self::assertEquals($uuidV3->toRfc4122(), $data['uuid']);
-        self::assertEquals('Grégoire Pineau', $data['name']);
-
-        // object -> object // uuid v4
-        $uuidV4 = Uuid::v4();
-        $user = new Fixtures\SymfonyUuidUser($uuidV4, 'Grégoire Pineau');
-        /** @var Fixtures\SymfonyUuidUser $newUser */
-        $newUser = $this->autoMapper->map($user, Fixtures\SymfonyUuidUser::class);
-        self::assertInstanceOf(Uuid::class, $user->getUuid());
-        self::assertEquals($uuidV4->toRfc4122(), $newUser->getUuid()->toRfc4122());
-        self::assertEquals('Grégoire Pineau', $newUser->name);
-    }
-
-    public function testSkipNullValues(): void
-    {
-        $entity = new Fixtures\SkipNullValues\Entity();
-        $entity->setName('foobar');
-        $input = new Fixtures\SkipNullValues\Input();
-
-        /** @var Fixtures\SkipNullValues\Entity $entity */
-        $entity = $this->autoMapper->map($input, $entity, [MapperContext::SKIP_NULL_VALUES => true]);
-        self::assertEquals('foobar', $entity->getName());
-    }
-
     public function testAdderAndRemoverWithClass(): void
     {
-        if (!class_exists(ClassDiscriminatorFromClassMetadata::class)) {
-            self::markTestSkipped('Symfony Serializer is required to run this test.');
-        }
-
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
         $petOwner = [
             'pets' => [
@@ -1153,11 +820,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testAdderAndRemoverWithInstance(): void
     {
-        if (!class_exists(ClassDiscriminatorFromClassMetadata::class)) {
-            self::markTestSkipped('Symfony Serializer is required to run this test.');
-        }
-
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
         $fish = new Fish();
         $fish->name = 'Nemo';
@@ -1202,10 +865,6 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testAdderAndRemoverWithConstructorArguments(): void
     {
-        if (!class_exists(ClassDiscriminatorFromClassMetadata::class)) {
-            self::markTestSkipped('Symfony Serializer is required to run this test.');
-        }
-
         $petOwner = [
             'pets' => [
                 ['type' => 'cat', 'name' => 'Félix'],
@@ -1218,27 +877,6 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertCount(1, $petOwnerData->getPets());
         self::assertSame('Félix', $petOwnerData->getPets()[0]->name);
         self::assertSame('cat', $petOwnerData->getPets()[0]->type);
-    }
-
-    public function testIssueTargetToPopulate(): void
-    {
-        $source = new Fixtures\IssueTargetToPopulate\VatModel();
-        $source->setCountryCode('fr');
-        $source->setStandardVatRate(21.0);
-        $source->setReducedVatRate(5.5);
-        $source->setDisplayIncVatPrices(true);
-
-        $target = new Fixtures\IssueTargetToPopulate\VatEntity('en');
-        $target->setId(1);
-
-        /** @var Fixtures\IssueTargetToPopulate\VatEntity $target */
-        $target = $this->autoMapper->map($source, $target);
-
-        self::assertEquals(1, $target->getId());
-        self::assertEquals('fr', $target->getCountryCode());
-        self::assertEquals(21.0, $target->getStandardVatRate());
-        self::assertEquals(5.5, $target->getReducedVatRate());
-        self::assertTrue($target->isDisplayIncVatPrices());
     }
 
     public function testPartialConstructorWithTargetToPopulate(): void
@@ -1254,7 +892,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testEnum(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
         // enum source
         $address = new AddressWithEnum();
@@ -1300,7 +938,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testTargetReadonlyClassAllowed(): void
     {
-        $this->buildAutoMapper(true);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(true);
 
         $data = ['city' => 'Nantes'];
         $toPopulate = new AddressDTOReadonlyClass('city');
@@ -1316,7 +954,7 @@ class AutoMapperTest extends AutoMapperBaseTest
      */
     public function testReadonly(string $addressWithReadonlyClass): void
     {
-        $this->buildAutoMapper(allowReadOnlyTargetToPopulate: true, mapPrivatePropertiesAndMethod: true);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(allowReadOnlyTargetToPopulate: true, mapPrivatePropertiesAndMethod: true);
 
         $address = new Address();
         $address->setCity('city');
@@ -1445,7 +1083,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testMapClassWithPrivateProperty(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
         self::assertSame(
             ['bar' => 'bar', 'foo' => 'foo'],
@@ -1463,7 +1101,7 @@ class AutoMapperTest extends AutoMapperBaseTest
      */
     public function testItCanDisablePrivatePropertiesMapping(): void
     {
-        $this->buildAutoMapper(classPrefix: 'DontMapPrivate_');
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(classPrefix: 'DontMapPrivate_');
 
         self::assertSame(
             [],
@@ -1481,7 +1119,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testNoErrorWithUninitializedProperty(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
         self::assertSame(
             ['bar' => 'bar'],
@@ -1491,7 +1129,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testMapWithForcedTimeZone(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
         /** @var HasDateTimeImmutable $utc */
         $utc = $this->autoMapper->map(
@@ -1505,7 +1143,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testAutoMappingGenerator(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
         $foo = new FooGenerator();
 
         /** @var Fixtures\BarGenerator $bar */
@@ -1530,29 +1168,6 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertSame([1, 2, 3], $data->array);
     }
 
-    public function testBuiltinClass(): void
-    {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
-
-        self::assertSame(
-            [],
-            $this->autoMapper->map(new BuiltinClass(new \DateInterval('P1Y')), 'array')
-        );
-    }
-
-    public function testObjectsUnion(): void
-    {
-        self::assertSame(
-            ['prop' => ['bar' => 'bar']],
-            $this->autoMapper->map(new ObjectsUnionProperty(new Bar('bar')), 'array')
-        );
-
-        self::assertSame(
-            ['prop' => ['foo' => 'foo']],
-            $this->autoMapper->map(new ObjectsUnionProperty(new Foo('foo')), 'array')
-        );
-    }
-
     public function testMultipleArray(): void
     {
         $now = new \DateTimeImmutable();
@@ -1569,25 +1184,6 @@ class AutoMapperTest extends AutoMapperBaseTest
         $user = $this->autoMapper->map($userDto, 'array');
 
         self::assertSame([0, 1], $user['times']);
-    }
-
-    public function testDifferentSetterGetterType(): void
-    {
-        $object = new DifferentSetterGetterType(AddressType::FLAT);
-        $array = $this->autoMapper->map($object, 'array');
-
-        self::assertSame(['address' => 'flat', 'addressDocBlock' => 'flat'], $array);
-    }
-
-    public function testPromoted(): void
-    {
-        $address = new AddressDTO();
-        $address->city = 'city';
-
-        $object = new UserPromoted([$address, $address]);
-        $array = $this->autoMapper->map($object, 'array');
-
-        self::assertSame(['addresses' => [['city' => 'city'], ['city' => 'city']]], $array);
     }
 
     public function testDateTimeFromString(): void
@@ -1622,7 +1218,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testDiscriminantToArray(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
         $dog = new Dog();
         $dog->bark = 'Wouf';
@@ -1643,138 +1239,9 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertSame('Wouf', $petOwnerData['pets'][0]['bark']);
     }
 
-    public function testGroupOverride(): void
-    {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
-
-        $group = new GroupOverride();
-        $data = $this->autoMapper->map($group, 'array', ['groups' => ['group2']]);
-
-        self::assertSame(['id' => 'id', 'name' => 'name'], $data);
-    }
-
-    public function testProvider(): void
-    {
-        $provided = new FooProvider();
-        $provided->foo = 'bar';
-
-        $this->buildAutoMapper(providers: [new CustomProvider($provided)]);
-
-        $data = $this->autoMapper->map(['bar' => 'foo'], FooProvider::class);
-
-        self::assertSame('bar', $data->foo);
-        self::assertSame('foo', $data->bar);
-
-        $data = $this->autoMapper->map(['bar' => 'foo', 'foo' => 'foo'], FooProvider::class);
-
-        self::assertSame('foo', $data->foo);
-        self::assertSame('foo', $data->bar);
-    }
-
-    public function testProviderEarlyReturn(): void
-    {
-        $provided = new FooProvider();
-        $provided->foo = 'bar';
-        $provided->bar = 'foo';
-
-        $this->buildAutoMapper(providers: [new CustomProvider(new EarlyReturn($provided))]);
-
-        $data = $this->autoMapper->map(['bar' => 'bar', 'foo' => 'foo'], FooProvider::class);
-
-        self::assertSame('bar', $data->foo);
-        self::assertSame('foo', $data->bar);
-    }
-
-    public function testIssue111(): void
-    {
-        $fooDto = new FooDto();
-        $fooDto->colours = ['red', 'green', 'blue'];
-
-        $this->buildAutoMapper(propertyTransformers: [new ColourTransformer()]);
-
-        $foo = $this->autoMapper->map($fooDto, Fixtures\Issue111\Foo::class);
-
-        self::assertInstanceOf(Fixtures\Issue111\Foo::class, $foo);
-        self::assertEquals([new Colour('red'), new Colour('green'), new Colour('blue')], $foo->getColours());
-    }
-
-    public function testItCanMapFromArrayToClassesWithPrivatePropertiesInConstructor(): void
-    {
-        self::assertEquals(
-            new ChildClass(parentProp: 'foo', childProp: 'bar'),
-            $this->autoMapper->map(
-                [
-                    'parentProp' => 'foo',
-                    'childProp' => 'bar',
-                ],
-                ChildClass::class
-            )
-        );
-    }
-
-    public function testItCanMapToClassesWithPrivatePropertiesInConstructor(): void
-    {
-        self::assertEquals(
-            new ChildClass(parentProp: 'foo', childProp: 'bar'),
-            $this->autoMapper->map(
-                new OtherClass(parentProp: 'foo', childProp: 'bar'),
-                ChildClass::class
-            )
-        );
-    }
-
-    public function testParamDocBlock(): void
-    {
-        $this->buildAutoMapper();
-
-        $foo = new Fixtures\IssueParamDocBlock\Foo('bar', ['foo1', 'foo2']);
-        $array = $this->autoMapper->map($foo, 'array');
-
-        self::assertSame([
-            'bar' => 'bar',
-            'foo' => ['foo1', 'foo2'],
-        ], $array);
-    }
-
-    public function testDoctrineCollectionsToArray(): void
-    {
-        $library = new Library();
-        $library->books = new ArrayCollection([
-            new Book('The Empyrean Onyx Storm'),
-            new Book('Valentina'),
-            new Book('Imbalance'),
-        ]);
-
-        $data = $this->autoMapper->map($library, 'array');
-
-        self::assertCount(3, $data['books']);
-        self::assertEquals('The Empyrean Onyx Storm', $data['books'][0]['name']);
-        self::assertEquals('Valentina', $data['books'][1]['name']);
-        self::assertEquals('Imbalance', $data['books'][2]['name']);
-    }
-
-    public function testArrayToDoctrineCollections(): void
-    {
-        $data = [
-            'books' => [
-                ['name' => 'The Empyrean Onyx Storm'],
-                ['name' => 'Valentina'],
-                ['name' => 'Imbalance'],
-            ],
-        ];
-
-        $library = $this->autoMapper->map($data, Library::class);
-
-        self::assertInstanceOf(Library::class, $library);
-        self::assertCount(3, $library->books);
-        self::assertEquals('The Empyrean Onyx Storm', $library->books[0]->name);
-        self::assertEquals('Valentina', $library->books[1]->name);
-        self::assertEquals('Imbalance', $library->books[2]->name);
-    }
-
     public function testMapCollectionFromArray(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
         $users = [
             [
@@ -1810,7 +1277,7 @@ class AutoMapperTest extends AutoMapperBaseTest
 
     public function testMapCollectionFromArrayCustomDateTime(): void
     {
-        $this->buildAutoMapper(classPrefix: 'CustomDateTime_', dateTimeFormat: 'U');
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(classPrefix: 'CustomDateTime_', dateTimeFormat: 'U');
 
         $customFormat = 'U';
         $users = [
@@ -1869,17 +1336,64 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertIsString($userDatas[1]['createdAt']);
     }
 
-    public function testUninitializedProperties(): void
+    /**
+     * @dataProvider provideAutoMapperFixturesTests
+     */
+    public function testAutoMapperFixtures(string $mapFile, string $directory): void
     {
-        $payload = new Issue189UserPatchInput();
-        $payload->firstName = 'John';
-        $payload->lastName = 'Doe';
+        try {
+            $targets = require $mapFile;
+        } catch (\Throwable $e) {
+            throw new \LogicException(sprintf('Unable to load map file "%s".', $mapFile), 0, $e);
+        }
 
-        /** @var Issue189User $data */
-        $data = $this->autoMapper->map($payload, Issue189User::class, [MapperContext::SKIP_UNINITIALIZED_VALUES => true]);
+        if (1 === $targets) {
+            throw new \LogicException(sprintf('The map file "%s" does not return a value.', $mapFile));
+        }
 
-        $this->assertEquals('John', $data->getFirstName());
-        $this->assertEquals('Doe', $data->getLastName());
-        $this->assertTrue(!isset($data->birthDate));
+        if (!$targets instanceof \Generator) {
+            $targets = [$targets];
+        }
+
+        foreach ($targets as $key => $target) {
+            $dump = $this->getDump($target);
+
+            if (0 === $key) {
+                $expectedFile = sprintf('%s/expected.data', $directory);
+            } else {
+                $expectedFile = sprintf('%s/expected.%s.data', $directory, $key);
+            }
+
+            if ($_SERVER['UPDATE_FIXTURES'] ?? false) {
+                file_put_contents($expectedFile, $dump);
+            }
+
+            if (!file_exists($expectedFile)) {
+                throw new \LogicException(sprintf('The expected file "%s" does not exist.', $expectedFile));
+            }
+
+            $expected = trim(file_get_contents($expectedFile));
+
+            $this->assertSame($expected, $dump, sprintf('The dump of the map file "%s" is not as expected.', $key));
+        }
+    }
+
+    public static function provideAutoMapperFixturesTests(): iterable
+    {
+        $directories = (new Finder())
+            ->in(__DIR__ . '/AutoMapperTest')
+            ->depth(0)
+            ->directories()
+        ;
+
+        foreach ($directories as $directory) {
+            $mapFile = $directory->getRealPath() . '/map.php';
+
+            if (!file_exists($mapFile)) {
+                throw new \LogicException(sprintf('The map file "%s" does not exist.', $mapFile));
+            }
+
+            yield $directory->getBasename() => [$mapFile, $directory->getRealPath()];
+        }
     }
 }

@@ -1,0 +1,9 @@
+AutoMapper\Tests\AutoMapperTest\Issue425\Bar {
+  +property: [
+    1
+    2
+    3
+    4
+    5
+  ]
+}

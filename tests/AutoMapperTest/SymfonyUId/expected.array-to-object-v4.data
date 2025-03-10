@@ -1,0 +1,8 @@
+AutoMapper\Tests\AutoMapperTest\SymfonyUId\SymfonyUuidUser {
+  -uuid: Symfony\Component\Uid\Uuid {
+    #uid: "9dbee72c-ebe5-450e-843c-bb06ea7fd4be"
+    toBase58: "LUnjmkZGWrPYUEHdNgy1eD"
+    toBase32: "4XQVKJSTZ58M788F5V0VN7ZN5Y"
+  }
+  +name: "Grégoire Pineau"
+}

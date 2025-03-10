@@ -7,7 +7,7 @@ namespace AutoMapper\Tests\Extractor;
 use AutoMapper\Configuration;
 use AutoMapper\Extractor\FromSourceMappingExtractor;
 use AutoMapper\Metadata\MapperMetadata;
-use AutoMapper\Tests\AutoMapperBaseTest;
+use AutoMapper\Tests\AutoMapperTestCase;
 use AutoMapper\Tests\Fixtures;
 use Symfony\Component\PropertyInfo\Extractor\PhpStanExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
@@ -16,7 +16,7 @@ use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 /**
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
  */
-class FromSourceMappingExtractorTest extends AutoMapperBaseTest
+class FromSourceMappingExtractorTest extends AutoMapperTestCase
 {
     protected FromSourceMappingExtractor $fromSourceMappingExtractor;
 

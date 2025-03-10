@@ -1,0 +1,4 @@
+AutoMapper\Tests\AutoMapperTest\PrivatePropertyInConstructors\ChildClass {
+  -parentProp: "foo"
+  -childProp: "bar"
+}

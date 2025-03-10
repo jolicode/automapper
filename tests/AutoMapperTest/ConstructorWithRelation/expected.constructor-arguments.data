@@ -1,0 +1,7 @@
+AutoMapper\Tests\AutoMapperTest\ConstructorWithRelation\UserConstructorDTOWithRelation {
+  +int: AutoMapper\Tests\AutoMapperTest\ConstructorWithRelation\IntDto {
+    +foo: 1
+  }
+  +name: "foo"
+  +age: 30
+}
