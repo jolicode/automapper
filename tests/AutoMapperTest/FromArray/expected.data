@@ -1,0 +1,17 @@
+AutoMapper\Tests\Fixtures\UserDTO {
+  +id: 1
+  -name: null
+  +age: null
+  +yearOfBirth: null
+  +email: null
+  +address: AutoMapper\Tests\Fixtures\AddressDTO {
+    +city: "Toulon"
+  }
+  +addresses: []
+  +createdAt: false
+  +money: null
+  +languages: []
+  +generator: []
+  +array: []
+  +times: []
+}

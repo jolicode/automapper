@@ -48,13 +48,13 @@ use AutoMapper\Tests\Fixtures\Issue111\ColourTransformer;
 use AutoMapper\Tests\Fixtures\Issue111\FooDto;
 use AutoMapper\Tests\Fixtures\Issue189\User as Issue189User;
 use AutoMapper\Tests\Fixtures\Issue189\UserPatchInput as Issue189UserPatchInput;
-use AutoMapper\Tests\Fixtures\ObjectsUnion\Bar;
-use AutoMapper\Tests\Fixtures\ObjectsUnion\Foo;
-use AutoMapper\Tests\Fixtures\ObjectsUnion\ObjectsUnionProperty;
 use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
 use AutoMapper\Tests\Fixtures\ObjectWithPropertyAsUnknownArray\ComponentDto;
 use AutoMapper\Tests\Fixtures\ObjectWithPropertyAsUnknownArray\Page;
 use AutoMapper\Tests\Fixtures\ObjectWithPropertyAsUnknownArray\PageDto;
+use AutoMapper\Tests\Fixtures\ObjectsUnion\Bar;
+use AutoMapper\Tests\Fixtures\ObjectsUnion\Foo;
+use AutoMapper\Tests\Fixtures\ObjectsUnion\ObjectsUnionProperty;
 use AutoMapper\Tests\Fixtures\Order;
 use AutoMapper\Tests\Fixtures\PetOwner;
 use AutoMapper\Tests\Fixtures\PetOwnerWithConstructorArguments;
@@ -67,6 +67,7 @@ use AutoMapper\Tests\Fixtures\Uninitialized;
 use AutoMapper\Tests\Fixtures\UserPromoted;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Attribute\Ignore;
@@ -76,12 +77,23 @@ use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\Uid\Ulid;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\VarDumper\Dumper\CliDumper;
+use Symfony\Component\VarDumper\Test\VarDumperTestTrait;
 
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
 class AutoMapperTest extends AutoMapperBaseTest
 {
+    use VarDumperTestTrait;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->setUpVarDumper([], CliDumper::DUMP_LIGHT_ARRAY | CliDumper::DUMP_COMMA_SEPARATOR);
+    }
+
     public function testAutoMapping(): void
     {
         $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
@@ -110,27 +122,58 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertSame(20.10, $userDto->money[0]);
     }
 
-    public function testAutoMapperFromArray(): void
+    /**
+     * @dataProvider providerAutoMapperTests
+     */
+    public function testAutoMapper(string $initFile, string $expectedFile): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+        try {
+            $init = require $initFile;
+        } catch (\Throwable $e) {
+            $this->fail(sprintf("Unable to load input file \"%s\".\n%s", $initFile, $e));
+        }
 
-        $user = [
-            'id' => 1,
-            'address' => [
-                'city' => 'Toulon',
-            ],
-            'createdAt' => '1987-04-30T06:00:00Z',
-        ];
+        $input = $init[0] ?? throw new \LogicException('The input file must return an array with at least two elements.');
+        $target = $init[1] ?? throw new \LogicException('The input file must return an array with at least two elements.');
+        $automapperOptions = $init[2] ?? [];
 
-        /** @var Fixtures\UserDTO $userDto */
-        $userDto = $this->autoMapper->map($user, Fixtures\UserDTO::class);
+        $this->buildAutoMapper(...$automapperOptions);
 
-        self::assertInstanceOf(Fixtures\UserDTO::class, $userDto);
-        self::assertEquals(1, $userDto->id);
-        self::assertInstanceOf(AddressDTO::class, $userDto->address);
-        self::assertSame('Toulon', $userDto->address->city);
-        self::assertInstanceOf(\DateTimeInterface::class, $userDto->createdAt);
-        self::assertEquals(1987, $userDto->createdAt->format('Y'));
+        $userDto = $this->autoMapper->map($input, $target);
+
+        $dump = $this->getDump($userDto);
+
+        if ($_SERVER['UPDATE_FIXTURES'] ?? false) {
+            file_put_contents($expectedFile, $dump);
+        }
+
+        $expected = file_get_contents($expectedFile);
+
+        $this->assertSame($expected, $dump);
+    }
+
+    public static function providerAutoMapperTests(): iterable
+    {
+        $directories = (new Finder())
+            ->in(__DIR__ . '/AutoMapperTest')
+            ->depth(0)
+            ->directories()
+        ;
+
+        foreach ($directories as $directory) {
+            $initFile = $directory->getRealPath() . '/init.php';
+            $expectedFile = $directory->getRealPath() . '/expected.data';
+
+            if (!file_exists($initFile)) {
+                throw new \LogicException(sprintf('The init file "%s" does not exist.', $initFile));
+            }
+
+            if (!file_exists($expectedFile)) {
+                throw new \LogicException(sprintf('The expected file "%s" does not exist.', $expectedFile));
+            }
+
+            yield $directory->getBasename() => [$initFile, $expectedFile];
+        }
     }
 
     public function testAutoMapperFromArrayCustomDateTime(): void
