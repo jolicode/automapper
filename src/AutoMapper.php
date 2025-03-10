@@ -147,6 +147,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         ?ExpressionLanguageProvider $expressionLanguageProvider = null,
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
         iterable $providers = [],
+        bool $removeDefaultProperties = false,
     ): AutoMapperInterface {
         if (\count($transformerFactories) > 0) {
             trigger_deprecation('jolicode/automapper', '9.0', 'The "$transformerFactories" property will be removed in version 10.0, AST transformer factories must be included within AutoMapper.', __METHOD__);
@@ -189,7 +190,8 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
             $classMetadataFactory,
             $nameConverter,
             $expressionLanguage,
-            $eventDispatcher
+            $eventDispatcher,
+            $removeDefaultProperties,
         );
 
         $mapperGenerator = new MapperGenerator(

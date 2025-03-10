@@ -68,6 +68,26 @@ class AutoMapperNormalizerTest extends AutoMapperTestCase
         $normalized = $this->normalizer->normalize($object);
         self::assertIsArray($normalized);
         self::assertEquals($expected['id'], $normalized['id']);
+        self::assertEquals($expected['id'], $normalized['_id']);
+        self::assertEquals($expected['name'], $normalized['name']);
+        self::assertEquals($expected['age'], $normalized['age']);
+    }
+
+    public function testNormalizeNoDefaultProperties(): void
+    {
+        $object = new Fixtures\User(1, 'Jack', 37);
+        $expected = ['id' => 1, 'name' => 'Jack', 'age' => 37];
+
+        $normalizer = new AutoMapperNormalizer(AutoMapperBuilder::buildAutoMapper(
+            mapPrivatePropertiesAndMethod: true,
+            classPrefix: 'AutoMapperNoDefaultProperties_',
+            removeDefaultProperties: true
+        ));
+        $normalized = $normalizer->normalize($object);
+
+        self::assertIsArray($normalized);
+        self::assertArrayNotHasKey('id', $normalized);
+        self::assertEquals($expected['id'], $normalized['_id']);
         self::assertEquals($expected['name'], $normalized['name']);
         self::assertEquals($expected['age'], $normalized['age']);
     }
