@@ -519,6 +519,30 @@ class AutoMapperTest extends AutoMapperBaseTest
         self::assertSame(30, $userDto->age);
     }
 
+    public function testConstructorWithRelationAndReadonlyAndList(): void
+    {
+        $entity = new Fixtures\ConstructorWithRelationAndReadonlyAndList\Entity(
+            'my id',
+            ['fr', 'en'],
+            ['page1' => ['foo'], 'page2' => ['bar']],
+        );
+
+        /** @var Fixtures\ConstructorWithRelationAndReadonlyAndList\Target $target */
+        $target = $this->autoMapper->map($entity, Fixtures\ConstructorWithRelationAndReadonlyAndList\Target::class, [
+            MapperContext::CONSTRUCTOR_ARGUMENTS => [
+                Fixtures\ConstructorWithRelationAndReadonlyAndList\Target::class => [
+                    'entity' => $entity,
+                ],
+            ],
+        ]);
+
+        $this->assertInstanceOf(Fixtures\ConstructorWithRelationAndReadonlyAndList\Target::class, $target);
+        $this->assertInstanceOf(Fixtures\ConstructorWithRelationAndReadonlyAndList\Entity::class, $target->getEntity());
+        $this->assertSame('my id', $target->id);
+        $this->assertSame(['fr', 'en'], $target->locales);
+        $this->assertSame(['page1' => ['foo'], 'page2' => ['bar']], $target->pages);
+    }
+
     public function testConstructorAndRelationMissingAndContext(): void
     {
         $user = ['name' => 'foo'];

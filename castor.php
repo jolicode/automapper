@@ -15,7 +15,7 @@ function qa_cs_check()
     ]);
 }
 
-#[AsTask('cs:fix', namespace: 'qa', description: 'Fix all coding standards')]
+#[AsTask('cs:fix', namespace: 'qa', description: 'Fix all coding standards', aliases: ['cs'])]
 function qa_cs_fix()
 {
     php_cs_fixer(['fix', '--config', __DIR__ . '/.php-cs-fixer.php'], '3.50', [
@@ -23,7 +23,7 @@ function qa_cs_fix()
     ]);
 }
 
-#[AsTask('phpstan', namespace: 'qa', description: 'Run PHPStan for static analysis')]
+#[AsTask('phpstan', namespace: 'qa', description: 'Run PHPStan for static analysis', aliases: ['phpstan'])]
 function qa_phpstan()
 {
     phpstan(['analyse', '--configuration', __DIR__ . '/phpstan.neon', '--memory-limit=-1'], '1.11.1');
