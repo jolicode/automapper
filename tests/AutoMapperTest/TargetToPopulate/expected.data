@@ -1,0 +1,8 @@
+AutoMapper\Tests\AutoMapperTest\TargetToPopulate\VatEntity {
+  -id: 1
+  -countryCode: "fr"
+  -stateCode: null
+  -standardVatRate: 21.0
+  -reducedVatRate: 5.5
+  -displayIncVatPrices: true
+}

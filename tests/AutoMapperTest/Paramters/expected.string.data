@@ -1,0 +1,7 @@
+[
+  "parameters" => [
+    "foo" => "azerty"
+    "bar" => "qwerty"
+    "baz" => "dvorak"
+  ]
+]

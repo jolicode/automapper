@@ -22,11 +22,11 @@ use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\TransformerWithDepen
 use AutoMapper\Tests\Fixtures\User;
 use AutoMapper\Tests\Fixtures\UserDTO;
 
-class AutoMapperWithCustomTransformerTest extends AutoMapperBaseTest
+class AutoMapperWithCustomTransformerTest extends AutoMapperTestCase
 {
     public function testFromSourceCanUseCustomTransformer(): void
     {
-        $this->buildAutoMapper(classPrefix: 'FromSourceCustomTransformer_', propertyTransformers: [
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(classPrefix: 'FromSourceCustomTransformer_', propertyTransformers: [
             new FromSourceCustomModelTransformer(),
             new FromSourceCustomPropertyTransformer(),
         ]);
@@ -48,7 +48,7 @@ class AutoMapperWithCustomTransformerTest extends AutoMapperBaseTest
 
     public function testPrioritizedCustomTransformer(): void
     {
-        $this->buildAutoMapper(classPrefix: 'PrioritizedCustomTransformer_', propertyTransformers: [
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(classPrefix: 'PrioritizedCustomTransformer_', propertyTransformers: [
             new FromSourceCustomModelTransformer(),
             new PrioritizedFromSourcePropertyPriorityTransformer(),
         ]);
@@ -61,7 +61,7 @@ class AutoMapperWithCustomTransformerTest extends AutoMapperBaseTest
 
     public function testFromTargetCanUseCustomTransformer(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'FromTargetCustomTransformer_', propertyTransformers: [
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'FromTargetCustomTransformer_', propertyTransformers: [
             new FromTargetCustomModelTransformer(),
             new FromTargetCustomPropertyTransformer(),
         ]);
@@ -85,7 +85,7 @@ class AutoMapperWithCustomTransformerTest extends AutoMapperBaseTest
      */
     public function testFromSourceToTargetCanUseCustomTransformer(string|object $target): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'SourceTargetCustomTransformer_', propertyTransformers: [
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'SourceTargetCustomTransformer_', propertyTransformers: [
             new SourceTargetCustomModelTransformer(),
             new SourceTargetCustomPropertyTransformer(),
         ]);
@@ -106,7 +106,7 @@ class AutoMapperWithCustomTransformerTest extends AutoMapperBaseTest
 
     public function testFromSourceToTargetMultipleFieldsTransformation(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'SourceTargetMultiFieldsCustomPropertyTransformer_', propertyTransformers: [
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'SourceTargetMultiFieldsCustomPropertyTransformer_', propertyTransformers: [
             new SourceTargetMultiFieldsCustomPropertyTransformer(),
         ]);
 
@@ -120,8 +120,8 @@ class AutoMapperWithCustomTransformerTest extends AutoMapperBaseTest
 
     public function testCustomTransformerWithDependency(): void
     {
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'TransformerWithDependency');
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'TransformerWithDependency', propertyTransformers: [
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'TransformerWithDependency');
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'TransformerWithDependency', propertyTransformers: [
             new TransformerWithDependency(new FooDependency()),
         ]);
 

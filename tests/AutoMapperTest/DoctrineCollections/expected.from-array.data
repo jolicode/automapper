@@ -1,0 +1,15 @@
+AutoMapper\Tests\AutoMapperTest\DoctrineCollections\Library {
+  +books: Doctrine\Common\Collections\ArrayCollection {
+    -elements: [
+      AutoMapper\Tests\AutoMapperTest\DoctrineCollections\Book {
+        +name: "The Empyrean Onyx Storm"
+      }
+      AutoMapper\Tests\AutoMapperTest\DoctrineCollections\Book {
+        +name: "Valentina"
+      }
+      AutoMapper\Tests\AutoMapperTest\DoctrineCollections\Book {
+        +name: "Imbalance"
+      }
+    ]
+  }
+}

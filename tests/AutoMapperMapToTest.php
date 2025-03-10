@@ -20,7 +20,7 @@ use Symfony\Component\DependencyInjection\ServiceLocator;
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
  */
-class AutoMapperMapToTest extends AutoMapperBaseTest
+class AutoMapperMapToTest extends AutoMapperTestCase
 {
     public function testMapTo()
     {
@@ -40,7 +40,7 @@ class AutoMapperMapToTest extends AutoMapperBaseTest
             'transformerWithDependency' => fn () => fn () => new TransformerWithDependency(new FooDependency()),
         ]));
 
-        $this->buildAutoMapper(propertyTransformers: [new TransformerWithDependency(new FooDependency())], expressionLanguageProvider: $expressionLanguageProvider);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(propertyTransformers: [new TransformerWithDependency(new FooDependency())], expressionLanguageProvider: $expressionLanguageProvider);
 
         $foo = new FooMapTo('foo');
         $bar = $this->autoMapper->map($foo, 'array');
@@ -86,7 +86,7 @@ class AutoMapperMapToTest extends AutoMapperBaseTest
             'transformerWithDependency' => fn () => fn () => new TransformerWithDependency(new FooDependency()),
         ]));
 
-        $this->buildAutoMapper(propertyTransformers: [new TransformerWithDependency(new FooDependency())], expressionLanguageProvider: $expressionLanguageProvider);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(propertyTransformers: [new TransformerWithDependency(new FooDependency())], expressionLanguageProvider: $expressionLanguageProvider);
 
         $foo = new FooMapTo('foo');
         $bar = $this->autoMapper->map($foo, 'array');

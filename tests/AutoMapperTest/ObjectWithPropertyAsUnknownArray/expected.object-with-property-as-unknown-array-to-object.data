@@ -1,0 +1,8 @@
+AutoMapper\Tests\AutoMapperTest\ObjectWithPropertyAsUnknownArray\PageDto {
+  +title: "my title"
+  +components: [
+    AutoMapper\Tests\AutoMapperTest\ObjectWithPropertyAsUnknownArray\ComponentDto {
+      +name: "my name"
+    }
+  ]
+}
