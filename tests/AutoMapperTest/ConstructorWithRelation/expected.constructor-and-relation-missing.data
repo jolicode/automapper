@@ -1,0 +1,4 @@
+AutoMapper\Exception\MissingConstructorArgumentsException {
+  +class: "AutoMapper\Exception\MissingConstructorArgumentsException"
+  +message: "Cannot create an instance of "AutoMapper\Tests\AutoMapperTest\ConstructorWithRelation\UserConstructorDTOWithRelation" from mapping data because its constructor requires the following parameters to be present : "$int"."
+}

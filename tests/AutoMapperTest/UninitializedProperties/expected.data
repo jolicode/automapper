@@ -1,0 +1,5 @@
+AutoMapper\Tests\AutoMapperTest\UninitializedProperties\User {
+  +lastName: "Doe"
+  +firstName: "John"
+  +birthDate: ? ?DateTimeImmutable
+}

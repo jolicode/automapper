@@ -1,0 +1,4 @@
+AutoMapper\Tests\AutoMapperTest\Provider\MyObject {
+  +foo: "bar"
+  +bar: "foo"
+}

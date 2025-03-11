@@ -1,0 +1,7 @@
+AutoMapper\Tests\AutoMapperTest\CircularReferenceDeep\CircularFoo {#1
+  +bar: AutoMapper\Tests\AutoMapperTest\CircularReferenceDeep\CircularBar {
+    +baz: AutoMapper\Tests\AutoMapperTest\CircularReferenceDeep\CircularBaz {
+      +foo: AutoMapper\Tests\AutoMapperTest\CircularReferenceDeep\CircularFoo {#1}
+    }
+  }
+}

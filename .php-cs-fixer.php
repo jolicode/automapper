@@ -24,6 +24,7 @@ return (new PhpCsFixer\Config())
         'no_trailing_comma_in_singleline' => false,
         'function_declaration' => ['trailing_comma_single_line' => true],
         'phpdoc_to_comment' => ['allow_before_return_statement' => true],
+        'psr_autoloading'  => false, // Does not work well with "map.php" files in tests
         PhpCsFixerCustomFixers\Fixer\MultilinePromotedPropertiesFixer::name() => true,
     ])
     ->setFinder($finder)

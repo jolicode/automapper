@@ -1,0 +1,7 @@
+[
+  "parameters" => [
+    0 => "foo"
+    "azerty" => "bar"
+    1 => "baz"
+  ]
+]

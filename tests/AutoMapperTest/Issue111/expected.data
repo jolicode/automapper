@@ -1,0 +1,13 @@
+AutoMapper\Tests\AutoMapperTest\Issue111\Foo {
+  -colours: [
+    AutoMapper\Tests\AutoMapperTest\Issue111\Colour {
+      +name: "red"
+    }
+    AutoMapper\Tests\AutoMapperTest\Issue111\Colour {
+      +name: "green"
+    }
+    AutoMapper\Tests\AutoMapperTest\Issue111\Colour {
+      +name: "blue"
+    }
+  ]
+}

@@ -9,7 +9,8 @@ use AutoMapper\AutoMapperRegistryInterface;
 use AutoMapper\MapperContext;
 use AutoMapper\MapperInterface;
 use AutoMapper\Normalizer\AutoMapperNormalizer;
-use AutoMapper\Tests\AutoMapperBaseTest;
+use AutoMapper\Tests\AutoMapperBuilder;
+use AutoMapper\Tests\AutoMapperTestCase;
 use AutoMapper\Tests\Fixtures;
 use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
 use AutoMapper\Tests\Normalizer\Features\AttributesTestTrait;
@@ -32,7 +33,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 /**
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
  */
-class AutoMapperNormalizerTest extends AutoMapperBaseTest
+class AutoMapperNormalizerTest extends AutoMapperTestCase
 {
     use AttributesTestTrait;
     use CallbacksTestTrait;
@@ -55,7 +56,7 @@ class AutoMapperNormalizerTest extends AutoMapperBaseTest
         }
 
         parent::setUp();
-        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
         $this->normalizer = new AutoMapperNormalizer($this->autoMapper);
     }
 

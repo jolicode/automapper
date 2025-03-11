@@ -1,0 +1,8 @@
+AutoMapper\Tests\AutoMapperTest\ObjectWithPropertyAsUnknownArray\Page {
+  +title: "my title"
+  +components: [
+    [
+      "name" => "my name"
+    ]
+  ]
+}
