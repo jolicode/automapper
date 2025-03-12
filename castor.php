@@ -24,7 +24,12 @@ function qa_cs_fix()
 }
 
 #[AsTask('phpstan', namespace: 'qa', description: 'Run PHPStan for static analysis')]
-function qa_phpstan()
+function qa_phpstan(bool $generateBaseline = false)
 {
-    phpstan(['analyse', '--configuration', __DIR__ . '/phpstan.neon', '--memory-limit=-1'], '1.11.1');
+    $params = ['analyse', '--configuration', __DIR__ . '/phpstan.neon', '--memory-limit=-1', '-v'];
+    if ($generateBaseline) {
+        $params[] = '--generate-baseline';
+    }
+
+    phpstan($params, '1.11.1');
 }
