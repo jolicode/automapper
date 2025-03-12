@@ -10,7 +10,7 @@ Then configure the bundle to your needs, for example:
 automapper:
   class_prefix: "Symfony_Mapper_"
   constructor_strategy: 'auto'
-  date_time_format: !php/const:DateTimeInterface::RFC3339
+  date_time_format: !php/const DateTimeInterface::RFC3339
   check_attributes: true
   auto_register: true
   map_private_properties: true
