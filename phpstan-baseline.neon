@@ -1,0 +1,81 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Call to method isResourceClass\\(\\) on an unknown class ApiPlatform\\\\Api\\\\ResourceClassResolverInterface\\.$#"
+			count: 2
+			path: src/EventListener/ApiPlatform/JsonLdListener.php
+
+		-
+			message: "#^Parameter \\$resourceClassResolver of method AutoMapper\\\\EventListener\\\\ApiPlatform\\\\JsonLdListener\\:\\:__construct\\(\\) has invalid type ApiPlatform\\\\Api\\\\ResourceClassResolverInterface\\.$#"
+			count: 1
+			path: src/EventListener/ApiPlatform/JsonLdListener.php
+
+		-
+			message: "#^Property AutoMapper\\\\EventListener\\\\ApiPlatform\\\\JsonLdListener\\:\\:\\$resourceClassResolver has unknown class ApiPlatform\\\\Api\\\\ResourceClassResolverInterface as its type\\.$#"
+			count: 1
+			path: src/EventListener/ApiPlatform/JsonLdListener.php
+
+		-
+			message: "#^Call to method getResourceFromIri\\(\\) on an unknown class ApiPlatform\\\\Api\\\\IriConverterInterface\\.$#"
+			count: 2
+			path: src/Provider/ApiPlatform/IriProvider.php
+
+		-
+			message: "#^Call to method isResourceClass\\(\\) on an unknown class ApiPlatform\\\\Api\\\\ResourceClassResolverInterface\\.$#"
+			count: 1
+			path: src/Provider/ApiPlatform/IriProvider.php
+
+		-
+			message: "#^Parameter \\$iriConverter of method AutoMapper\\\\Provider\\\\ApiPlatform\\\\IriProvider\\:\\:__construct\\(\\) has invalid type ApiPlatform\\\\Api\\\\IriConverterInterface\\.$#"
+			count: 1
+			path: src/Provider/ApiPlatform/IriProvider.php
+
+		-
+			message: "#^Parameter \\$resourceClassResolver of method AutoMapper\\\\Provider\\\\ApiPlatform\\\\IriProvider\\:\\:__construct\\(\\) has invalid type ApiPlatform\\\\Api\\\\ResourceClassResolverInterface\\.$#"
+			count: 1
+			path: src/Provider/ApiPlatform/IriProvider.php
+
+		-
+			message: "#^Property AutoMapper\\\\Provider\\\\ApiPlatform\\\\IriProvider\\:\\:\\$iriConverter has unknown class ApiPlatform\\\\Api\\\\IriConverterInterface as its type\\.$#"
+			count: 1
+			path: src/Provider/ApiPlatform/IriProvider.php
+
+		-
+			message: "#^Property AutoMapper\\\\Provider\\\\ApiPlatform\\\\IriProvider\\:\\:\\$resourceClassResolver has unknown class ApiPlatform\\\\Api\\\\ResourceClassResolverInterface as its type\\.$#"
+			count: 1
+			path: src/Provider/ApiPlatform/IriProvider.php
+
+		-
+			message: "#^Call to method getResourceClass\\(\\) on an unknown class ApiPlatform\\\\Api\\\\ResourceClassResolverInterface\\.$#"
+			count: 1
+			path: src/Transformer/ApiPlatform/JsonLdContextTransformer.php
+
+		-
+			message: "#^Call to method isResourceClass\\(\\) on an unknown class ApiPlatform\\\\Api\\\\ResourceClassResolverInterface\\.$#"
+			count: 1
+			path: src/Transformer/ApiPlatform/JsonLdContextTransformer.php
+
+		-
+			message: "#^Parameter \\$resourceClassResolver of method AutoMapper\\\\Transformer\\\\ApiPlatform\\\\JsonLdContextTransformer\\:\\:__construct\\(\\) has invalid type ApiPlatform\\\\Api\\\\ResourceClassResolverInterface\\.$#"
+			count: 1
+			path: src/Transformer/ApiPlatform/JsonLdContextTransformer.php
+
+		-
+			message: "#^Property AutoMapper\\\\Transformer\\\\ApiPlatform\\\\JsonLdContextTransformer\\:\\:\\$resourceClassResolver has unknown class ApiPlatform\\\\Api\\\\ResourceClassResolverInterface as its type\\.$#"
+			count: 1
+			path: src/Transformer/ApiPlatform/JsonLdContextTransformer.php
+
+		-
+			message: "#^Call to method getIriFromResource\\(\\) on an unknown class ApiPlatform\\\\Api\\\\IriConverterInterface\\.$#"
+			count: 1
+			path: src/Transformer/ApiPlatform/JsonLdIdTransformer.php
+
+		-
+			message: "#^Parameter \\$iriConverter of method AutoMapper\\\\Transformer\\\\ApiPlatform\\\\JsonLdIdTransformer\\:\\:__construct\\(\\) has invalid type ApiPlatform\\\\Api\\\\IriConverterInterface\\.$#"
+			count: 1
+			path: src/Transformer/ApiPlatform/JsonLdIdTransformer.php
+
+		-
+			message: "#^Property AutoMapper\\\\Transformer\\\\ApiPlatform\\\\JsonLdIdTransformer\\:\\:\\$iriConverter has unknown class ApiPlatform\\\\Api\\\\IriConverterInterface as its type\\.$#"
+			count: 1
+			path: src/Transformer/ApiPlatform/JsonLdIdTransformer.php
