@@ -7,6 +7,7 @@
 - [Mapping](mapping/index.md)
     - [MapTo and MapFrom attributes](mapping/attributes.md)
     - [Symfony Serializer](mapping/serializer.md)
+    - [Mapping Collections](mapping/map-collection.md)
     - [Ignoring properties](mapping/ignoring-properties.md)
     - [Conditional mapping](mapping/conditional-mapping.md)
     - [Groups](mapping/groups.md)
