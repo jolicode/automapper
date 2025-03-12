@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Fixtures;
 
+use AutoMapper\Attribute\MapTo;
+
 class User
 {
     /**
      * @var int
      */
+    #[MapTo(target: 'array', property: '_id')]
     private $id;
 
     /**
