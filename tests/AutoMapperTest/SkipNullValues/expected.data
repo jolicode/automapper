@@ -1,0 +1,3 @@
+AutoMapper\Tests\AutoMapperTest\SkipNullValues\Entity {
+  -name: "foobar"
+}

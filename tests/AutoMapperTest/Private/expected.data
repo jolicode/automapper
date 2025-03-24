@@ -1,0 +1,5 @@
+AutoMapper\Tests\AutoMapperTest\Private\PrivateUserDTO {
+  -id: 10
+  -firstName: "foo"
+  -lastName: "bar"
+}
