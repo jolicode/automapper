@@ -26,6 +26,15 @@ $target = $automapper->map($source, Target::class);
 That's it! `AutoMapper` will find the best way to map from `$source` object to a new `Target` object. It will also
 generate a PHP class that will do the mapping for you and serve as a cache for future mapping.
 
+### Mapping Collections
+
+AutoMapper can also map collections of objects with the `mapCollection` method:
+
+```php
+$sources = [$source1, $source2, $source3];
+$targets = $automapper->mapCollection($sources, Target::class);
+```
+
 Of course there are many ways to customize the mapping, this documentation will explain all of them.
 
 ## Installation 📦
