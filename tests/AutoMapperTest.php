@@ -1216,6 +1216,50 @@ class AutoMapperTest extends AutoMapperTestCase
         self::assertEquals('Mapper_AutoMapper_Tests_Fixtures_Proxy_array', $mapper::class);
     }
 
+    public function testDiscriminatorMapAndInterface(): void
+    {
+        if (!class_exists(ClassDiscriminatorFromClassMetadata::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
+        $this->buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+
+        $typeA = new Fixtures\DiscriminatorMapAndInterface\TypeA('my name');
+        $something = new Fixtures\DiscriminatorMapAndInterface\Something($typeA);
+
+        $mapped = $this->autoMapper->map($something, 'array');
+
+        $expected = [
+            'myInterface' => [
+                'type' => 'type_a',
+                'name' => 'my name',
+            ],
+        ];
+        self::assertSame($expected, $mapped);
+    }
+
+    public function testDiscriminatorMapAndInterface2(): void
+    {
+        if (!class_exists(ClassDiscriminatorFromClassMetadata::class)) {
+            self::markTestSkipped('Symfony Serializer is required to run this test.');
+        }
+
+        $this->buildAutoMapper(classPrefix: 'Discriminator2');
+
+        $something = [
+            'myInterface' => [
+                'type' => 'type_a',
+                'name' => 'my name',
+            ],
+        ];
+
+        $mapped = $this->autoMapper->map($something, Fixtures\DiscriminatorMapAndInterface\Something::class);
+
+        self::assertInstanceOf(Fixtures\DiscriminatorMapAndInterface\Something::class, $mapped);
+        self::assertInstanceOf(Fixtures\DiscriminatorMapAndInterface\TypeA::class, $mapped->myInterface);
+        self::assertSame('my name', $mapped->myInterface->name);
+        }
+
     public function testDiscriminantToArray(): void
     {
         $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
