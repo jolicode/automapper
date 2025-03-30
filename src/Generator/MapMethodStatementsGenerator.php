@@ -316,6 +316,9 @@ final readonly class MapMethodStatementsGenerator
                     new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
                     new Arg($variableRegistry->getSourceInput()),
                     new Arg($variableRegistry->getContext()),
+                    new Arg(new Expr\MethodCall(new Expr\Variable('this'), 'getTargetIdentifiers', [
+                        new Arg(new Expr\Variable('value')),
+                    ])),
                 ]),
             )
         );

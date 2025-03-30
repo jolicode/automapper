@@ -86,12 +86,16 @@ final readonly class MapperGenerator
             ->addStmt($this->mapMethod($metadata))
             ->addStmt($this->registerMappersMethod($metadata));
 
-        if ($sourceHashMethod = $this->getSourceHashMethod($metadata)) {
+        if ($sourceHashMethod = $this->identifierHashGenerator->getSourceHashMethod($metadata)) {
             $builder->addStmt($sourceHashMethod);
         }
 
-        if ($targetHashMethod = $this->getTargetHashMethod($metadata)) {
+        if ($targetHashMethod = $this->identifierHashGenerator->getTargetHashMethod($metadata)) {
             $builder->addStmt($targetHashMethod);
+        }
+
+        if ($targetIdentifierMethod = $this->identifierHashGenerator->getTargetIdentifiersMethod($metadata)) {
+            $builder->addStmt($targetIdentifierMethod);
         }
 
         $statements[] = $builder->getNode();
@@ -172,62 +176,6 @@ final readonly class MapperGenerator
                 type: new Name(AutoMapperRegistryInterface::class))
             )
             ->addStmts($this->injectMapperMethodStatementsGenerator->getStatements($param, $metadata))
-            ->getNode();
-    }
-
-    /**
-     * Create the getSourceHash method for this mapper.
-     *
-     * ```php
-     * public function getSourceHash(mixed $source, mixed $target): ?string {
-     *    ... // statements
-     * }
-     * ```
-     */
-    private function getSourceHashMethod(GeneratorMetadata $metadata): ?Stmt\ClassMethod
-    {
-        $stmts = $this->identifierHashGenerator->getStatements($metadata, true);
-
-        if (empty($stmts)) {
-            return null;
-        }
-
-        return (new Builder\Method('getSourceHash'))
-            ->makePublic()
-            ->setReturnType('?string')
-            ->addParam(new Param(
-                var: new Expr\Variable('value'),
-                type: new Name('mixed'))
-            )
-            ->addStmts($stmts)
-            ->getNode();
-    }
-
-    /**
-     * Create the getTargetHash method for this mapper.
-     *
-     * ```php
-     * public function getSourceHash(mixed $source, mixed $target): ?string {
-     *    ... // statements
-     * }
-     * ```
-     */
-    private function getTargetHashMethod(GeneratorMetadata $metadata): ?Stmt\ClassMethod
-    {
-        $stmts = $this->identifierHashGenerator->getStatements($metadata, false);
-
-        if (empty($stmts)) {
-            return null;
-        }
-
-        return (new Builder\Method('getTargetHash'))
-            ->makePublic()
-            ->setReturnType('?string')
-            ->addParam(new Param(
-                var: new Expr\Variable('value'),
-                type: new Name('mixed'))
-            )
-            ->addStmts($stmts)
             ->getNode();
     }
 }

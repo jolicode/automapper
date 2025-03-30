@@ -65,7 +65,6 @@ final readonly class BuiltinTransformer implements TransformerInterface, CheckTy
         Type::BUILTIN_TYPE_INT => 'is_int',
         Type::BUILTIN_TYPE_FLOAT => 'is_float',
         Type::BUILTIN_TYPE_STRING => 'is_string',
-        Type::BUILTIN_TYPE_NULL => 'is_null',
         Type::BUILTIN_TYPE_ARRAY => 'is_array',
         Type::BUILTIN_TYPE_OBJECT => 'is_object',
         Type::BUILTIN_TYPE_RESOURCE => 'is_resource',
@@ -117,6 +116,10 @@ final readonly class BuiltinTransformer implements TransformerInterface, CheckTy
 
     public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): ?Expr
     {
+        if ($this->sourceType->getBuiltinType() === Type::BUILTIN_TYPE_NULL) {
+            return null;
+        }
+
         $condition = new Expr\FuncCall(
             new Name(self::CONDITION_MAPPING[$this->sourceType->getBuiltinType()]),
             [

@@ -8,6 +8,7 @@ use AutoMapper\AutoMapper;
 use AutoMapper\Configuration;
 use AutoMapper\ConstructorStrategy;
 use AutoMapper\Symfony\ExpressionLanguageProvider;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -29,6 +30,7 @@ class AutoMapperBuilder
         ?ExpressionLanguageProvider $expressionLanguageProvider = null,
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
         bool $removeDefaultProperties = false,
+        ?EntityManagerInterface $entityManager = null,
     ): AutoMapper {
         $skipCacheRemove = $_SERVER['SKIP_CACHE_REMOVE'] ?? false;
 
@@ -54,6 +56,7 @@ class AutoMapperBuilder
             eventDispatcher: $eventDispatcher,
             providers: $providers,
             removeDefaultProperties: $removeDefaultProperties,
+            entityManager: $entityManager,
         );
     }
 }

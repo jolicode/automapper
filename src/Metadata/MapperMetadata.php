@@ -22,7 +22,9 @@ class MapperMetadata
      * @param class-string<object>|'array' $target
      */
     public function __construct(
+        /** @var class-string<object>|'array' $source */
         public string $source,
+        /** @var class-string<object>|'array' $target */
         public string $target,
         public bool $registered,
         private string $classPrefix = 'Mapper_',

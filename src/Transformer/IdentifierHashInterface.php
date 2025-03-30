@@ -30,4 +30,14 @@ interface IdentifierHashInterface
      * ```
      */
     public function getTargetHashExpression(Expr $target): Expr;
+
+    /**
+     * Return an expression to get identifier of the target.
+     *
+     * As an example:
+     * ```php
+     * return $input->id;
+     * ```
+     */
+    public function getIdentifierExpression(Expr $input): Expr;
 }

@@ -36,6 +36,11 @@ abstract class GeneratedMapper implements MapperInterface
     {
     }
 
+    public function getTargetIdentifiers(mixed $value): mixed
+    {
+        return null;
+    }
+
     public function getSourceHash(mixed $value): ?string
     {
         return null;
