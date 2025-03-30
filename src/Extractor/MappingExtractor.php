@@ -70,7 +70,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
         }
     }
 
-    public function getReadAccessor(string $class, string $property): ?ReadAccessor
+    public function getReadAccessor(string $class, string $property, bool $allowExtraProperties = false): ?ReadAccessor
     {
         if ('array' === $class) {
             return new ReadAccessor(ReadAccessor::TYPE_ARRAY_DIMENSION, $property);
@@ -83,6 +83,14 @@ abstract class MappingExtractor implements MappingExtractorInterface
         $readInfo = $this->readInfoExtractor->getReadInfo($class, $property);
 
         if (null === $readInfo) {
+            if ($allowExtraProperties) {
+                $implements = class_implements($class);
+
+                if ($implements !== false && \in_array(\ArrayAccess::class, $implements, true)) {
+                    return new ReadAccessor(ReadAccessor::TYPE_ARRAY_ACCESS, $property);
+                }
+            }
+
             return null;
         }
 
@@ -101,15 +109,27 @@ abstract class MappingExtractor implements MappingExtractorInterface
         );
     }
 
-    public function getWriteMutator(string $source, string $target, string $property, array $context = []): ?WriteMutator
+    public function getWriteMutator(string $source, string $target, string $property, array $context = [], bool $allowExtraProperties = false): ?WriteMutator
     {
         $writeInfo = $this->writeInfoExtractor->getWriteInfo($target, $property, $context);
 
-        if (null === $writeInfo) {
-            return null;
-        }
+        if (null === $writeInfo || PropertyWriteInfo::TYPE_NONE === $writeInfo->getType()) {
+            if ('array' === $target) {
+                return new WriteMutator(WriteMutator::TYPE_ARRAY_DIMENSION, $property, false);
+            }
 
-        if (PropertyWriteInfo::TYPE_NONE === $writeInfo->getType()) {
+            if (\stdClass::class === $target) {
+                return new WriteMutator(WriteMutator::TYPE_PROPERTY, $property, false);
+            }
+
+            if ($allowExtraProperties) {
+                $implements = class_implements($target);
+
+                if ($implements !== false && \in_array(\ArrayAccess::class, $implements, true)) {
+                    return new WriteMutator(WriteMutator::TYPE_ARRAY_DIMENSION, $property, false);
+                }
+            }
+
             return null;
         }
 

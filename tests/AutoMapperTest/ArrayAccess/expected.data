@@ -1,0 +1,4 @@
+AutoMapper\Tests\AutoMapperTest\ArrayAccess\Foo {
+  +foo: "foofoo"
+  +bar: 10
+}
