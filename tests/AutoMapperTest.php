@@ -46,6 +46,7 @@ use AutoMapper\Tests\Fixtures\Uninitialized;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\VarDumper\Dumper\CliDumper;
@@ -1258,7 +1259,7 @@ class AutoMapperTest extends AutoMapperTestCase
         self::assertInstanceOf(Fixtures\DiscriminatorMapAndInterface\Something::class, $mapped);
         self::assertInstanceOf(Fixtures\DiscriminatorMapAndInterface\TypeA::class, $mapped->myInterface);
         self::assertSame('my name', $mapped->myInterface->name);
-        }
+    }
 
     public function testDiscriminantToArray(): void
     {
