@@ -74,7 +74,11 @@ final class MetadataFactory
         private readonly EventDispatcherInterface $eventDispatcher,
         public readonly MetadataRegistry $metadataRegistry,
         private readonly ClassDiscriminatorResolver $classDiscriminatorResolver,
+        private readonly bool $removeDefaultProperties = false,
     ) {
+        if (!$this->removeDefaultProperties) {
+            trigger_deprecation('jolicode/automapper', '9.4', 'Not removing default properties is deprecated, pass this parameter to true and add necessary attributes if needed', __CLASS__);
+        }
     }
 
     /**
@@ -192,7 +196,7 @@ final class MetadataFactory
 
         // First get properties from the source
         foreach ($extractor->getProperties($mapperMetadata->source) as $property) {
-            $propertyEvent = new PropertyMetadataEvent($mapperMetadata, new SourcePropertyMetadataEvent($property), new TargetPropertyMetadataEvent($property));
+            $propertyEvent = new PropertyMetadataEvent($mapperMetadata, new SourcePropertyMetadataEvent($property), new TargetPropertyMetadataEvent($property), isFromDefaultExtractor: true);
 
             $this->eventDispatcher->dispatch($propertyEvent);
 
@@ -204,7 +208,7 @@ final class MetadataFactory
                 continue;
             }
 
-            $propertyEvent = new PropertyMetadataEvent($mapperMetadata, new SourcePropertyMetadataEvent($property), new TargetPropertyMetadataEvent($property));
+            $propertyEvent = new PropertyMetadataEvent($mapperMetadata, new SourcePropertyMetadataEvent($property), new TargetPropertyMetadataEvent($property), isFromDefaultExtractor: true);
 
             $this->eventDispatcher->dispatch($propertyEvent);
 
@@ -213,6 +217,15 @@ final class MetadataFactory
 
         foreach ($mapperEvent->properties as $propertyEvent) {
             $this->eventDispatcher->dispatch($propertyEvent);
+
+            if ($this->removeDefaultProperties) {
+                foreach ($propertyEvents as $propertyEventExisting) {
+                    if ($propertyEventExisting->source->property === $propertyEvent->source->property && $propertyEventExisting->isFromDefaultExtractor && !$propertyEventExisting->ignored) {
+                        $propertyEventExisting->ignored = true;
+                        $propertyEventExisting->ignoreReason = 'Default property is ignored because a custom property is defined.';
+                    }
+                }
+            }
 
             $propertyEvents[$propertyEvent->target->property] = $propertyEvent;
         }
@@ -340,6 +353,7 @@ final class MetadataFactory
         AdvancedNameConverterInterface|NameConverterInterface|null $nameConverter = null,
         ExpressionLanguage $expressionLanguage = new ExpressionLanguage(),
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
+        bool $removeDefaultProperties = false,
     ): self {
         // Create property info extractors
         $flags = ReflectionExtractor::ALLOW_PUBLIC;
@@ -428,6 +442,7 @@ final class MetadataFactory
             $eventDispatcher,
             $metadataRegistry,
             $classDiscriminatorResolver,
+            $removeDefaultProperties,
         );
     }
 }

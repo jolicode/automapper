@@ -28,6 +28,7 @@ class AutoMapperBuilder
         string $dateTimeFormat = \DateTimeInterface::RFC3339,
         ?ExpressionLanguageProvider $expressionLanguageProvider = null,
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
+        bool $removeDefaultProperties = false,
     ): AutoMapper {
         $skipCacheRemove = $_SERVER['SKIP_CACHE_REMOVE'] ?? false;
 
@@ -52,6 +53,7 @@ class AutoMapperBuilder
             expressionLanguageProvider: $expressionLanguageProvider,
             eventDispatcher: $eventDispatcher,
             providers: $providers,
+            removeDefaultProperties: $removeDefaultProperties,
         );
     }
 }
