@@ -51,6 +51,7 @@ use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
+use Symfony\Component\Serializer\NameConverter\MetadataAwareNameConverter;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\Uid\AbstractUid;
 
@@ -343,14 +344,13 @@ final class MetadataFactory
         $reflectionExtractor = new ReflectionExtractor(accessFlags: $flags);
         $phpStanExtractor = new PhpStanExtractor();
 
-        if (null !== $nameConverter) {
-            $eventDispatcher->addListener(PropertyMetadataEvent::class, new AdvancedNameConverterListener($nameConverter));
-        }
-
         if (null !== $classMetadataFactory) {
+            $eventDispatcher->addListener(PropertyMetadataEvent::class, new AdvancedNameConverterListener(new MetadataAwareNameConverter($classMetadataFactory, $nameConverter)));
             $eventDispatcher->addListener(PropertyMetadataEvent::class, new SerializerMaxDepthListener($classMetadataFactory));
             $eventDispatcher->addListener(PropertyMetadataEvent::class, new SerializerGroupListener($classMetadataFactory));
             $eventDispatcher->addListener(PropertyMetadataEvent::class, new SerializerIgnoreListener($classMetadataFactory));
+        } elseif (null !== $nameConverter) {
+            $eventDispatcher->addListener(PropertyMetadataEvent::class, new AdvancedNameConverterListener($nameConverter));
         }
 
         $eventDispatcher->addListener(PropertyMetadataEvent::class, new MapToContextListener($reflectionExtractor));

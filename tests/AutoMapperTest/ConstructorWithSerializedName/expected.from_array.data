@@ -1,0 +1,4 @@
+AutoMapper\Tests\AutoMapperTest\ConstructorWithSerializedName\Bar {
+  +isStatic: true
+}
+

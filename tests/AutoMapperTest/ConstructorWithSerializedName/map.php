@@ -16,9 +16,6 @@ final readonly class Bar
     }
 }
 
-$autoMapper = AutoMapperBuilder::buildAutoMapper();
-
-
 return (function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 

@@ -11,12 +11,8 @@ parameters:
 	ignoreErrors:
 		- "#Instantiated class fromIteratorToArray not found#"
 		- "#Instantiated class toArray not found#"
-		-
-			message: "#^Method Symfony\\\\Component\\\\Serializer\\\\NameConverter\\\\NameConverterInterface\\:\\:denormalize\\(\\) invoked with 2 parameters, 1 required\\.$#"
-			count: 1
-			path: src/EventListener/Symfony/AdvancedNameConverterListener.php
 
 		-
 			message: "#^Method Symfony\\\\Component\\\\Serializer\\\\NameConverter\\\\NameConverterInterface\\:\\:normalize\\(\\) invoked with 2 parameters, 1 required\\.$#"
-			count: 1
+			count: 2
 			path: src/EventListener/Symfony/AdvancedNameConverterListener.php
