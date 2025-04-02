@@ -136,10 +136,15 @@ class AutoMapperExtension extends Extension
         }
 
         if (null !== $config['name_converter']) {
-            $container
-                ->getDefinition(AdvancedNameConverterListener::class)
-                ->replaceArgument(0, new Reference($config['name_converter']))
-                ->addTag('kernel.event_listener', ['event' => PropertyMetadataEvent::class, 'priority' => -64]);
+            if ($container->has('automapper.mapping.metadata_aware_name_converter')) {
+                $container->getDefinition('automapper.mapping.metadata_aware_name_converter')
+                    ->setArgument(1, new Reference($config['name_converter']));
+            } else {
+                $container
+                    ->getDefinition(AdvancedNameConverterListener::class)
+                    ->replaceArgument(0, new Reference($config['name_converter']))
+                    ->addTag('kernel.event_listener', ['event' => PropertyMetadataEvent::class, 'priority' => -64]);
+            }
         }
 
         $configMappingRegistry = $container->getDefinition('automapper.config_mapping_registry');

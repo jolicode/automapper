@@ -18,7 +18,7 @@ final readonly class AdvancedNameConverterListener
     public function __invoke(PropertyMetadataEvent $event): void
     {
         if (($event->mapperMetadata->source === 'array' || $event->mapperMetadata->source === \stdClass::class) && $event->source->property === $event->target->property) {
-            $event->source->property = $this->nameConverter->denormalize($event->target->property, $event->mapperMetadata->target);
+            $event->source->property = $this->nameConverter->normalize($event->target->property, $event->mapperMetadata->target);
         }
 
         if (($event->mapperMetadata->target === 'array' || $event->mapperMetadata->target === \stdClass::class) && $event->source->property === $event->target->property) {
