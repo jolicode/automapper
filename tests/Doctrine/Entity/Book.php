@@ -26,11 +26,11 @@ class Book
     public string $author = '';
 
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'book', cascade: ['persist', 'remove'])]
+    /** @var Collection<int, Review> */
     public Collection $reviews;
 
     public function __construct()
     {
         $this->reviews = new ArrayCollection();
-
     }
 }

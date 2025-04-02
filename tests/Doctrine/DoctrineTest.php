@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Doctrine;
 
+use AutoMapper\Tests\AutoMapperBuilder;
 use AutoMapper\Tests\AutoMapperTestCase;
 use AutoMapper\Tests\Doctrine\Entity\Book;
 use Doctrine\DBAL\DriverManager;
@@ -23,9 +24,12 @@ class DoctrineTest extends AutoMapperTestCase
     {
         parent::setUp();
         $this->buildDatabase();
+
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(entityManager: $this->entityManager);
     }
 
-    private function buildDatabase() {
+    private function buildDatabase()
+    {
         // delete the database file
         if (file_exists(__DIR__ . '/db.sqlite')) {
             unlink(__DIR__ . '/db.sqlite');
