@@ -104,7 +104,7 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
      */
     public function supportsDenormalization(mixed $data, string $type, ?string $format = null, array $context = []): bool
     {
-        if (!class_exists($type)) {
+        if (!class_exists($type) && !interface_exists($type)) {
             return false;
         }
 

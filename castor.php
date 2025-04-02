@@ -33,3 +33,26 @@ function qa_phpstan(bool $generateBaseline = false)
 
     phpstan($params, '1.11.1');
 }
+
+#[AsTask('mapper', namespace: 'debug', description: 'Debug a mapper', aliases: ['debug'])]
+function debug_mapper(string $source, string $target)
+{
+    require_once __DIR__ . '/vendor/autoload.php';
+
+    $automapper = AutoMapper\AutoMapper::create();
+    // get private property loader value
+    $loader = new ReflectionProperty($automapper, 'classLoader');
+    $loader = $loader->getValue($automapper);
+
+    // get metadata factory
+    $metadataFactory = new ReflectionProperty($loader, 'metadataFactory');
+    $metadataFactory = $metadataFactory->getValue($loader);
+
+    $command = new AutoMapper\Symfony\Bundle\Command\DebugMapperCommand($metadataFactory);
+    $input = new Symfony\Component\Console\Input\ArrayInput([
+        'source' => $source,
+        'target' => $target,
+    ]);
+
+    $command->run($input, \Castor\output());
+}

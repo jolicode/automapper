@@ -38,7 +38,7 @@ class MetadataCollector extends AbstractDataCollector
         foreach ($this->metadataFactory->listMetadata() as $metadata) {
             $fileCode = null;
 
-            if (class_exists($metadata->mapperMetadata->className)) {
+            if (class_exists($metadata->mapperMetadata->className) || interface_exists($metadata->mapperMetadata->className)) {
                 $reflectionClass = new \ReflectionClass($metadata->mapperMetadata->className);
 
                 if (($fileName = $reflectionClass->getFileName()) !== false && ($content = @file_get_contents($fileName)) !== false) {
