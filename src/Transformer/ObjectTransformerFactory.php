@@ -62,7 +62,7 @@ final class ObjectTransformerFactory extends AbstractUniqueTypeTransformerFactor
             return true;
         }
 
-        if (!class_exists($class)) {
+        if (!class_exists($class) && !interface_exists($class)) {
             return false;
         }
 

@@ -136,7 +136,7 @@ final class WriteMutator
      */
     public function getTypes(string $target): ?array
     {
-        if (self::TYPE_METHOD === $this->type && class_exists($target)) {
+        if (self::TYPE_METHOD === $this->type && (class_exists($target) || interface_exists($target))) {
             try {
                 $reflectionMethod = new \ReflectionMethod($target, $this->property);
 
@@ -169,7 +169,7 @@ final class WriteMutator
             }
         }
 
-        if (self::TYPE_PROPERTY === $this->type && class_exists($target)) {
+        if (self::TYPE_PROPERTY === $this->type && (class_exists($target) || interface_exists($target))) {
             try {
                 $reflectionProperty = new \ReflectionProperty($target, $this->property);
 

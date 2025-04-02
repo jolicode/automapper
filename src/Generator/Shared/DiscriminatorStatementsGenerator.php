@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AutoMapper\Generator\Shared;
 
 use AutoMapper\Metadata\GeneratorMetadata;
-use AutoMapper\Transformer\AllowNullValueTransformerInterface;
 use AutoMapper\Transformer\TransformerInterface;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
@@ -54,11 +53,34 @@ final readonly class DiscriminatorStatementsGenerator
         $fieldValueExpr = $propertyMetadata->source->accessor?->getExpression($variableRegistry->getSourceInput());
 
         if (null === $fieldValueExpr) {
-            if (!($propertyMetadata->transformer instanceof AllowNullValueTransformerInterface)) {
+            if (!$this->fromSource) {
                 return [];
             }
 
-            $fieldValueExpr = new Expr\ConstFetch(new Name('null'));
+            $createObjectStatements = [];
+
+            // This means we cannot get type from the source, so we get it from the classname
+            foreach ($this->classDiscriminatorResolver->discriminatorMapperNames($metadata, $this->fromSource) as $className => $discriminatorMapperName) {
+                $createObjectStatements[] = new Stmt\If_(new Expr\Instanceof_(new Expr\Variable('value'), new Name($className)), [
+                    'stmts' => [
+                        new Stmt\Return_(
+                            new Expr\MethodCall(
+                                new Expr\ArrayDimFetch(
+                                    new Expr\PropertyFetch(new Expr\Variable('this'), 'mappers'),
+                                    new Scalar\String_($discriminatorMapperName)
+                                ),
+                                'map',
+                                [
+                                    new Arg($variableRegistry->getSourceInput()),
+                                    new Arg(new Expr\Variable('context')),
+                                ]
+                            )
+                        ),
+                    ],
+                ]);
+            }
+
+            return $createObjectStatements;
         }
 
         // Generate the code that allows to put the type into the output variable,

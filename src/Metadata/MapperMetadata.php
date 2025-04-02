@@ -28,14 +28,14 @@ class MapperMetadata
         private string $classPrefix = 'Mapper_',
         public ?string $dateTimeFormat = null,
     ) {
-        if (class_exists($this->source) && $this->source !== \stdClass::class) {
+        if ((class_exists($this->source) || interface_exists($this->source)) && $this->source !== \stdClass::class) {
             $reflectionSource = new \ReflectionClass($this->source);
             $this->sourceReflectionClass = $reflectionSource;
         } else {
             $this->sourceReflectionClass = null;
         }
 
-        if (class_exists($this->target) && $this->target !== \stdClass::class) {
+        if ((class_exists($this->target) || interface_exists($this->target)) && $this->target !== \stdClass::class) {
             $reflectionTarget = new \ReflectionClass($this->target);
             $this->targetReflectionClass = $reflectionTarget;
         } else {

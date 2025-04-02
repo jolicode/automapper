@@ -429,7 +429,7 @@ final class ReadAccessor
      */
     public function getTypes(string $class): ?array
     {
-        if (self::TYPE_METHOD === $this->type && class_exists($class)) {
+        if (self::TYPE_METHOD === $this->type && (class_exists($class) || interface_exists($class))) {
             try {
                 $reflectionMethod = new \ReflectionMethod($class, $this->accessor);
 
@@ -455,7 +455,7 @@ final class ReadAccessor
             }
         }
 
-        if (self::TYPE_PROPERTY === $this->type && class_exists($class)) {
+        if (self::TYPE_PROPERTY === $this->type && (class_exists($class) || interface_exists($class))) {
             try {
                 $reflectionProperty = new \ReflectionProperty($class, $this->accessor);
 
