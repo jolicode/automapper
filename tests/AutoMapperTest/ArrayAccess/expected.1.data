@@ -1,0 +1,9 @@
+AutoMapper\Tests\AutoMapperTest\ArrayAccess\LikeArray {
+  storage: [
+    "bar" => 2
+    "foo" => "foo"
+  ]
+  flag::STD_PROP_LIST: false
+  flag::ARRAY_AS_PROPS: false
+  iteratorClass: "ArrayIterator"
+}

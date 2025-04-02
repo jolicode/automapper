@@ -4,13 +4,9 @@ declare(strict_types=1);
 
 namespace AutoMapper\Extractor;
 
-use AutoMapper\Configuration;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
 use AutoMapper\Metadata\TypesMatching;
-use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
-use Symfony\Component\PropertyInfo\PropertyReadInfoExtractorInterface;
-use Symfony\Component\PropertyInfo\PropertyWriteInfoExtractorInterface;
 use Symfony\Component\PropertyInfo\Type;
 
 /**
@@ -24,15 +20,6 @@ use Symfony\Component\PropertyInfo\Type;
  */
 final class FromTargetMappingExtractor extends MappingExtractor
 {
-    public function __construct(
-        Configuration $configuration,
-        PropertyInfoExtractorInterface $propertyInfoExtractor,
-        PropertyReadInfoExtractorInterface $readInfoExtractor,
-        PropertyWriteInfoExtractorInterface $writeInfoExtractor,
-    ) {
-        parent::__construct($configuration, $propertyInfoExtractor, $readInfoExtractor, $writeInfoExtractor);
-    }
-
     public function getTypes(string $source, SourcePropertyMetadata $sourceProperty, string $target, TargetPropertyMetadata $targetProperty): TypesMatching
     {
         $types = new TypesMatching();

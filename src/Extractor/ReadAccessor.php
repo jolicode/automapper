@@ -30,6 +30,7 @@ final class ReadAccessor
     public const TYPE_PROPERTY = 2;
     public const TYPE_ARRAY_DIMENSION = 3;
     public const TYPE_SOURCE = 4;
+    public const TYPE_ARRAY_ACCESS = 5;
 
     /**
      * @param array<string, string> $context
@@ -138,7 +139,7 @@ final class ReadAccessor
             return new Expr\PropertyFetch($input, $this->accessor);
         }
 
-        if (self::TYPE_ARRAY_DIMENSION === $this->type) {
+        if (self::TYPE_ARRAY_DIMENSION === $this->type || self::TYPE_ARRAY_ACCESS === $this->type) {
             /*
              * Use the array dim fetch to read the value
              *
@@ -204,6 +205,10 @@ final class ReadAccessor
             return new Expr\FuncCall(new Name('array_key_exists'), [new Arg(new Scalar\String_($this->accessor)), new Arg($input)]);
         }
 
+        if (self::TYPE_ARRAY_ACCESS === $this->type) {
+            return new Expr\MethodCall($input, 'offsetExists', [new Arg(new Scalar\String_($this->accessor))]);
+        }
+
         return null;
     }
 
@@ -246,7 +251,7 @@ final class ReadAccessor
             return new Expr\BinaryOp\LogicalAnd(new Expr\BooleanNot(new Expr\Isset_([new Expr\PropertyFetch($input, $this->accessor)])), new Expr\BinaryOp\Identical(new Expr\ConstFetch(new Name('null')), new Expr\PropertyFetch($input, $this->accessor)));
         }
 
-        if (self::TYPE_ARRAY_DIMENSION === $this->type) {
+        if (self::TYPE_ARRAY_DIMENSION === $this->type || self::TYPE_ARRAY_ACCESS === $this->type) {
             /*
              * Use the array dim fetch to read the value
              *
@@ -306,6 +311,10 @@ final class ReadAccessor
              * !array_key_exists('property_name', $input)
              */
             return new Expr\BooleanNot(new Expr\FuncCall(new Name('array_key_exists'), [new Arg(new Scalar\String_($this->accessor)), new Arg($input)]));
+        }
+
+        if (self::TYPE_ARRAY_ACCESS === $this->type) {
+            return new Expr\BooleanNot(new Expr\MethodCall($input, 'offsetExists', [new Arg(new Scalar\String_($this->accessor))]));
         }
 
         throw new CompileException('Invalid accessor for read expression');

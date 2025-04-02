@@ -57,3 +57,8 @@ Setting this to false will make the `AutoMapper` throw an exception if the mappe
 
 This can be useful if you want to pre generate all the mappers and have tests to ensure that all the mappers are
 generated.
+
+* `allowExtraProperties` (default: `false`)
+
+Settings this to true will allow the mapper to map extra properties from the source object to the target object when
+the source or the target implements the `ArrayAccess` interface.

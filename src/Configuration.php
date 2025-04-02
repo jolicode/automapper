@@ -46,6 +46,10 @@ final readonly class Configuration
          * The strategy to use to generate the mappers between each request.
          */
         public FileReloadStrategy $reloadStrategy = FileReloadStrategy::ON_CHANGE,
+        /**
+         * Allow extra properties to be mapped when the target or the source implements ArrayAccess class.
+         */
+        public bool $allowExtraProperties = false,
     ) {
     }
 }

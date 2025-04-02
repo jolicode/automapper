@@ -26,6 +26,7 @@ final readonly class Mapper
         public ?bool $strictTypes = null,
         public int $priority = 0,
         public ?string $dateTimeFormat = null,
+        public ?bool $allowExtraProperties = null,
     ) {
     }
 }

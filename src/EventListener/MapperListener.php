@@ -73,6 +73,7 @@ final readonly class MapperListener
         $event->constructorStrategy ??= $mapper->constructorStrategy;
         $event->allowReadOnlyTargetToPopulate ??= $mapper->allowReadOnlyTargetToPopulate;
         $event->strictTypes ??= $mapper->strictTypes;
+        $event->allowExtraProperties ??= $mapper->allowExtraProperties;
         $event->mapperMetadata->dateTimeFormat = $mapper->dateTimeFormat;
     }
 }
