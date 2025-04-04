@@ -26,7 +26,7 @@ final class ArrayToDoctrineCollectionTransformer implements TransformerInterface
     ) {
     }
 
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr\Variable $existingValue = null): array
     {
         /**
          * $collection = new ArrayCollection();.
@@ -62,8 +62,42 @@ final class ArrayToDoctrineCollectionTransformer implements TransformerInterface
         ];
 
         $loopValueVar = new Expr\Variable($uniqueVariableScope->getUniqueName('value'));
-        [$output, $itemStatements] = $this->itemTransformer->transform($loopValueVar, $target, $propertyMapping, $uniqueVariableScope, $source);
-        $itemStatements[] = new Stmt\Expression(new Expr\MethodCall($collectionVar, 'add', [new Arg($output)]));
+
+        $itemStatements = [];
+        $existingValue = null;
+
+        if ($this->itemTransformer instanceof IdentifiersEqualInterface && $propertyMapping->target->readAccessor !== null) {
+            $existingValue = new Expr\Variable($uniqueVariableScope->getUniqueName('existingValue'));
+            $loopExistingValueVar = new Expr\Variable($uniqueVariableScope->getUniqueName('existingValueItem'));
+
+            $itemStatements[] = new Stmt\Expression(new Expr\Assign($existingValue, new Expr\ConstFetch(new Name('null'))));
+            $itemStatements[] = new Stmt\Foreach_($collectionVar, $loopExistingValueVar, [
+                'stmts' => [
+                    new Stmt\If_($this->itemTransformer->getAreIdentifiersEqualExpression($loopValueVar, $loopExistingValueVar), [
+                        'stmts' => [
+                            new Stmt\Expression(new Expr\Assign($existingValue, $loopExistingValueVar)),
+                            new Stmt\Break_(),
+                        ],
+                    ]),
+                ],
+            ]);
+        }
+
+        [$output, $transformStatements] = $this->itemTransformer->transform($loopValueVar, $target, $propertyMapping, $uniqueVariableScope, $source, $existingValue);
+        $itemStatements = array_merge($itemStatements, $transformStatements);
+
+        if ($existingValue) {
+            $itemStatements[] = new Stmt\If_(new Expr\BinaryOp\Identical(new Expr\ConstFetch(new Name('null')), $existingValue), [
+                'stmts' => [
+                    new Stmt\Expression(new Expr\MethodCall($collectionVar, 'add', [new Arg($output)])),
+                ],
+                'else' => new Stmt\Else_([
+                    new Stmt\Expression($output),
+                ]),
+            ]);
+        } else {
+            $itemStatements[] = new Stmt\Expression(new Expr\MethodCall($collectionVar, 'add', [new Arg($output)]));
+        }
 
         $statements[] = new Stmt\Foreach_(new Expr\BinaryOp\Coalesce($input, new Expr\Array_()), $loopValueVar, [
             'stmts' => $itemStatements,

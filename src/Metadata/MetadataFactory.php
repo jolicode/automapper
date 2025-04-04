@@ -315,6 +315,10 @@ final class MetadataFactory
                 $propertyMappedEvent->ignoreReason = 'Property cannot be write on target.';
             }
 
+            if ($propertyMappedEvent->identifier === null) {
+                $propertyMappedEvent->identifier = $extractor->isIdentifier($mapperMetadata->targetReflectionClass, $targetPropertyMetadata);
+            }
+
             $propertiesMapping[] = new PropertyMetadata(
                 $sourcePropertyMetadata,
                 $targetPropertyMetadata,
@@ -326,6 +330,7 @@ final class MetadataFactory
                 $propertyMappedEvent->if,
                 $propertyMappedEvent->groups,
                 $propertyMappedEvent->disableGroupsCheck,
+                $propertyMappedEvent->identifier ?? false,
             );
         }
 

@@ -36,6 +36,11 @@ abstract class GeneratedMapper implements MapperInterface
     {
     }
 
+    public function areIdentifiersEquals(mixed $source, mixed $target): bool
+    {
+        return false;
+    }
+
     /** @var array<string, MapperInterface<object, object>|MapperInterface<object, array<mixed>>|MapperInterface<array<mixed>, object>> */
     protected array $mappers = [];
 
@@ -50,6 +55,15 @@ abstract class GeneratedMapper implements MapperInterface
 
     /** @var array<string, callable(): bool>) */
     protected array $extractIsUndefinedCallbacks = [];
+
+    /** @var array<string, callable(): mixed> */
+    protected array $extractTargetCallbacks = [];
+
+    /** @var array<string, callable(): bool>) */
+    protected array $extractTargetIsNullCallbacks = [];
+
+    /** @var array<string, callable(): bool>) */
+    protected array $extractTargetIsUndefinedCallbacks = [];
 
     /** @var Target|\ReflectionClass<object> */
     protected mixed $cachedTarget;
