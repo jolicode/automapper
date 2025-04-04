@@ -20,11 +20,12 @@ use Symfony\Component\PropertyInfo\Type;
  *
  * @internal
  */
-final readonly class ObjectTransformer implements TransformerInterface, DependentTransformerInterface, AssignedByReferenceTransformerInterface, CheckTypeInterface
+final class ObjectTransformer implements TransformerInterface, DependentTransformerInterface, AssignedByReferenceTransformerInterface, CheckTypeInterface
 {
     public function __construct(
-        private Type $sourceType,
-        private Type $targetType,
+        private readonly Type $sourceType,
+        private readonly Type $targetType,
+        public bool $deepTargetToPopulate = true,
     ) {
     }
 
@@ -38,7 +39,7 @@ final readonly class ObjectTransformer implements TransformerInterface, Dependen
         ];
 
         // ($context['deep_target_to_populate'] ?? false) ? $source->property : null
-        if ($propertyMapping->target->readAccessor !== null) {
+        if ($propertyMapping->target->readAccessor !== null && $this->deepTargetToPopulate) {
             $newContextArgs[] = new Arg(
                 new Expr\Ternary(
                     new Expr\BinaryOp\Coalesce(

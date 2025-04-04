@@ -1,0 +1,16 @@
+AutoMapper\Tests\AutoMapperTest\DeepPopulateWithArrayCollection\Foo {
+  +bars: [
+    AutoMapper\Tests\AutoMapperTest\DeepPopulateWithArrayCollection\Bar {
+      +bar: "bar1"
+    }
+    AutoMapper\Tests\AutoMapperTest\DeepPopulateWithArrayCollection\Bar {
+      +bar: "bar2"
+    }
+    AutoMapper\Tests\AutoMapperTest\DeepPopulateWithArrayCollection\Bar {
+      +bar: "bar3"
+    }
+    AutoMapper\Tests\AutoMapperTest\DeepPopulateWithArrayCollection\Bar {
+      +bar: "bar4"
+    }
+  ]
+}

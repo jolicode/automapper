@@ -6,9 +6,11 @@ namespace AutoMapper\Transformer;
 
 use AutoMapper\Extractor\WriteMutator;
 use AutoMapper\Generator\UniqueVariableScope;
+use AutoMapper\MapperContext;
 use AutoMapper\Metadata\PropertyMetadata;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
+use PhpParser\Node\Scalar;
 use PhpParser\Node\Stmt;
 
 /**
@@ -31,8 +33,21 @@ abstract readonly class AbstractArrayTransformer implements TransformerInterface
          * $values = [];.
          */
         $valuesVar = new Expr\Variable($uniqueVariableScope->getUniqueName('values'));
+        $baseAssign = new Expr\Array_();
+
+        if ($propertyMapping->target->readAccessor !== null) {
+            $baseAssign = new Expr\Ternary(
+                new Expr\BinaryOp\Coalesce(
+                    new Expr\ArrayDimFetch(new Expr\Variable('context'), new Scalar\String_(MapperContext::DEEP_TARGET_TO_POPULATE)),
+                    new Expr\ConstFetch(new Name('false'))
+                ),
+                $propertyMapping->target->readAccessor->getExpression(new Expr\Variable('result')),
+                new Expr\Array_()
+            );
+        }
+
         $statements = [
-            new Stmt\Expression(new Expr\Assign($valuesVar, new Expr\Array_())),
+            new Stmt\Expression(new Expr\Assign($valuesVar, $baseAssign)),
         ];
 
         $loopValueVar = new Expr\Variable($uniqueVariableScope->getUniqueName('value'));

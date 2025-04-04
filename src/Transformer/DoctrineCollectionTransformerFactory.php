@@ -36,6 +36,10 @@ final class DoctrineCollectionTransformerFactory extends AbstractUniqueTypeTrans
                 return null;
             }
 
+            if ($subItemTransformer instanceof ObjectTransformer) {
+                $subItemTransformer->deepTargetToPopulate = false;
+            }
+
             return new ArrayToDoctrineCollectionTransformer($subItemTransformer);
         }
 

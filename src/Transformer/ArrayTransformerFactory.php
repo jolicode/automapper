@@ -52,6 +52,10 @@ final class ArrayTransformerFactory extends AbstractUniqueTypeTransformerFactory
         $subItemTransformer = $this->chainTransformerFactory->getTransformer($types, $source, $target, $mapperMetadata);
 
         if (null !== $subItemTransformer) {
+            if ($subItemTransformer instanceof ObjectTransformer) {
+                $subItemTransformer->deepTargetToPopulate = false;
+            }
+
             $sourceCollectionKeyTypes = $sourceType->getCollectionKeyTypes();
             $sourceCollectionKeyType = $sourceCollectionKeyTypes[0] ?? null;
 
