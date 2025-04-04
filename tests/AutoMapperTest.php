@@ -839,13 +839,11 @@ class AutoMapperTest extends AutoMapperTestCase
         $this->autoMapper->map($petOwnerAsArray, $petOwner);
 
         self::assertIsArray($petOwner->getPets());
-        self::assertCount(3, $petOwner->getPets());
-        self::assertSame('Nemo', $petOwner->getPets()[0]->name);
-        self::assertSame('fish', $petOwner->getPets()[0]->type);
-        self::assertSame('Félix', $petOwner->getPets()[1]->name);
-        self::assertSame('cat', $petOwner->getPets()[1]->type);
-        self::assertSame('Coco', $petOwner->getPets()[2]->name);
-        self::assertSame('dog', $petOwner->getPets()[2]->type);
+        self::assertCount(2, $petOwner->getPets());
+        self::assertSame('Félix', $petOwner->getPets()[0]->name);
+        self::assertSame('cat', $petOwner->getPets()[0]->type);
+        self::assertSame('Coco', $petOwner->getPets()[1]->name);
+        self::assertSame('dog', $petOwner->getPets()[1]->type);
     }
 
     public function testAdderAndRemoverWithNull(): void

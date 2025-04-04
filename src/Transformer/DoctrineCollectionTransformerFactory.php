@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
+use AutoMapper\Extractor\WriteMutator;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
@@ -38,6 +39,10 @@ final class DoctrineCollectionTransformerFactory extends AbstractUniqueTypeTrans
 
             if ($subItemTransformer instanceof ObjectTransformer) {
                 $subItemTransformer->deepTargetToPopulate = false;
+            }
+
+            if ($target->writeMutator?->type === WriteMutator::TYPE_ADDER_AND_REMOVER) {
+                return new ArrayTransformer($subItemTransformer);
             }
 
             return new ArrayToDoctrineCollectionTransformer($subItemTransformer);

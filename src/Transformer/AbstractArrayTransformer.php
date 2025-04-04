@@ -64,6 +64,17 @@ abstract readonly class AbstractArrayTransformer implements TransformerInterface
              *
              * $target->add($output);
              */
+            $loopRemoveValueVar = new Expr\Variable($uniqueVariableScope->getUniqueName('removeValue'));
+            $removeExpr = $propertyMapping->target->writeMutator->getRemoveExpression($target, $loopRemoveValueVar);
+
+            if ($propertyMapping->target->readAccessor !== null && $removeExpr !== null) {
+                $statements[] = new Stmt\Foreach_($propertyMapping->target->readAccessor->getExpression($target), $loopRemoveValueVar, [
+                    'stmts' => [
+                        new Stmt\Expression($removeExpr),
+                    ],
+                ]);
+            }
+
             $mappedValueVar = new Expr\Variable($uniqueVariableScope->getUniqueName('mappedValue'));
             $itemStatements[] = new Stmt\Expression(new Expr\Assign($mappedValueVar, $output));
             $itemStatements[] = new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name('null')), $mappedValueVar), [
