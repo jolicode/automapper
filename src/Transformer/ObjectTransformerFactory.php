@@ -47,7 +47,7 @@ final class ObjectTransformerFactory extends AbstractUniqueTypeTransformerFactor
             return false;
         }
 
-        if (Type::BUILTIN_TYPE_ARRAY === $type->getBuiltinType() && $type->isCollection()) {
+        if (Type::BUILTIN_TYPE_ARRAY === $type->getBuiltinType() && $type->isCollection() && $type->getCollectionValueTypes()) {
             return false;
         }
 

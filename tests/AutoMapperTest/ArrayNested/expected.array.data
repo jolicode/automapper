@@ -1,0 +1,9 @@
+AutoMapper\Tests\AutoMapperTest\ArrayNested\TestTarget {
+  -endpoints: AutoMapper\Tests\AutoMapperTest\ArrayNested\TestSubTarget {
+    -endpoint: "https://example.com"
+    -params: [
+      "param1"
+      "param2"
+    ]
+  }
+}
