@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace AutoMapper\Transformer;
 
 use AutoMapper\Generator\UniqueVariableScope;
+use AutoMapper\MapperContext;
 use AutoMapper\Metadata\PropertyMetadata;
 use Doctrine\Common\Collections\ArrayCollection;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
+use PhpParser\Node\Scalar;
 use PhpParser\Node\Stmt;
 
 /**
@@ -30,8 +32,22 @@ final class ArrayToDoctrineCollectionTransformer implements TransformerInterface
          * $collection = new ArrayCollection();.
          */
         $collectionVar = new Expr\Variable($uniqueVariableScope->getUniqueName('collection'));
+
+        $baseAssign = new Expr\New_(new Name(ArrayCollection::class));
+
+        if ($propertyMapping->target->readAccessor !== null) {
+            $baseAssign = new Expr\Ternary(
+                new Expr\BinaryOp\Coalesce(
+                    new Expr\ArrayDimFetch(new Expr\Variable('context'), new Scalar\String_(MapperContext::DEEP_TARGET_TO_POPULATE)),
+                    new Expr\ConstFetch(new Name('false'))
+                ),
+                $propertyMapping->target->readAccessor->getExpression(new Expr\Variable('result')),
+                $baseAssign,
+            );
+        }
+
         $statements = [
-            new Stmt\Expression(new Expr\Assign($collectionVar, new Expr\New_(new Name(ArrayCollection::class)))),
+            new Stmt\Expression(new Expr\Assign($collectionVar, $baseAssign)),
         ];
 
         $loopValueVar = new Expr\Variable($uniqueVariableScope->getUniqueName('value'));

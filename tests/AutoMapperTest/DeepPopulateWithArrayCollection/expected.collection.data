@@ -1,0 +1,18 @@
+AutoMapper\Tests\AutoMapperTest\DeepPopulateWithArrayCollection\FooWithArrayCollection {
+  +bars: Doctrine\Common\Collections\ArrayCollection {
+    -elements: [
+      AutoMapper\Tests\AutoMapperTest\DeepPopulateWithArrayCollection\Bar {
+        +bar: "bar1"
+      }
+      AutoMapper\Tests\AutoMapperTest\DeepPopulateWithArrayCollection\Bar {
+        +bar: "bar2"
+      }
+      AutoMapper\Tests\AutoMapperTest\DeepPopulateWithArrayCollection\Bar {
+        +bar: "bar3"
+      }
+      AutoMapper\Tests\AutoMapperTest\DeepPopulateWithArrayCollection\Bar {
+        +bar: "bar4"
+      }
+    ]
+  }
+}

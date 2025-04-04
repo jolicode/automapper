@@ -35,9 +35,13 @@ function qa_phpstan(bool $generateBaseline = false)
 }
 
 #[AsTask('mapper', namespace: 'debug', description: 'Debug a mapper', aliases: ['debug'])]
-function debug_mapper(string $source, string $target)
+function debug_mapper(string $source, string $target, string $load = '')
 {
     require_once __DIR__ . '/vendor/autoload.php';
+
+    if ($load) {
+        require_once $load;
+    }
 
     $automapper = AutoMapper\AutoMapper::create();
     // get private property loader value
