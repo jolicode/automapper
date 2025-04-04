@@ -1,0 +1,18 @@
+AutoMapper\Tests\AutoMapperTest\DeepPopulateMergeExisting\FooWithArrayCollection {
+  +bars: Doctrine\Common\Collections\ArrayCollection {
+    -elements: [
+      AutoMapper\Tests\AutoMapperTest\DeepPopulateMergeExisting\Bar {
+        -id: 1
+        +bar: "bar3"
+      }
+      AutoMapper\Tests\AutoMapperTest\DeepPopulateMergeExisting\Bar {
+        -id: 2
+        +bar: "bar2"
+      }
+      AutoMapper\Tests\AutoMapperTest\DeepPopulateMergeExisting\Bar {
+        -id: 10
+        +bar: "bar4"
+      }
+    ]
+  }
+}

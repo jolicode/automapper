@@ -24,7 +24,7 @@ final readonly class TargetEnumTransformer implements TransformerInterface
     ) {
     }
 
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr\Variable $existingValue = null): array
     {
         /*
          * Transform a string into a BackendEnum.

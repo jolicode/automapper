@@ -20,7 +20,7 @@ use Symfony\Component\PropertyInfo\Type;
  *
  * @internal
  */
-final class ObjectTransformer implements TransformerInterface, DependentTransformerInterface, AssignedByReferenceTransformerInterface, CheckTypeInterface
+final class ObjectTransformer implements TransformerInterface, DependentTransformerInterface, AssignedByReferenceTransformerInterface, CheckTypeInterface, IdentifiersEqualInterface
 {
     public function __construct(
         private readonly Type $sourceType,
@@ -29,7 +29,7 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
     ) {
     }
 
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr\Variable $existingValue = null): array
     {
         $mapperName = $this->getDependencyName();
 
@@ -47,6 +47,17 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
                         new Expr\ConstFetch(new Name('false'))
                     ),
                     $propertyMapping->target->readAccessor->getExpression(new Expr\Variable('result')),
+                    new Expr\ConstFetch(new Name('null'))
+                )
+            );
+        } elseif ($existingValue !== null) {
+            $newContextArgs[] = new Arg(
+                new Expr\Ternary(
+                    new Expr\BinaryOp\Coalesce(
+                        new Expr\ArrayDimFetch(new Expr\Variable('context'), new Scalar\String_(MapperContext::DEEP_TARGET_TO_POPULATE)),
+                        new Expr\ConstFetch(new Name('false'))
+                    ),
+                    $existingValue,
                     new Expr\ConstFetch(new Name('null'))
                 )
             );
@@ -131,5 +142,18 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
         }
 
         return $targetTypeName;
+    }
+
+    public function getAreIdentifiersEqualExpression(Expr $source, Expr $target): Expr
+    {
+        $mapperName = $this->getDependencyName();
+
+        return new Expr\MethodCall(new Expr\ArrayDimFetch(
+            new Expr\PropertyFetch(new Expr\Variable('this'), 'mappers'),
+            new Scalar\String_($mapperName)
+        ), 'areIdentifiersEquals', [
+            new Arg($source),
+            new Arg($target),
+        ]);
     }
 }
