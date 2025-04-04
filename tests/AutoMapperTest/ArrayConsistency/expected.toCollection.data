@@ -1,0 +1,9 @@
+AutoMapper\Tests\AutoMapperTest\ArrayConsistency\ToCollection {
+  +values: Doctrine\Common\Collections\ArrayCollection {
+    -elements: [
+      1
+      2
+      3
+    ]
+  }
+}
