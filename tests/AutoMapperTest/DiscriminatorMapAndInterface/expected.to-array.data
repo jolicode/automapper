@@ -1,0 +1,6 @@
+[
+  "myInterface" => [
+    "name" => "my name"
+    "type" => "type_a"
+  ]
+]
