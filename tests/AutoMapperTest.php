@@ -46,7 +46,6 @@ use AutoMapper\Tests\Fixtures\Uninitialized;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\Kernel;
-use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\VarDumper\Dumper\CliDumper;
@@ -1215,50 +1214,6 @@ class AutoMapperTest extends AutoMapperTestCase
 
         self::assertNotEquals('Mapper_MongoDBODMProxies___PM___AutoMapper_Tests_Fixtures_Proxy_Generated_array', $mapper::class);
         self::assertEquals('Mapper_AutoMapper_Tests_Fixtures_Proxy_array', $mapper::class);
-    }
-
-    public function testDiscriminatorMapAndInterface3(): void
-    {
-        if (!class_exists(ClassDiscriminatorFromClassMetadata::class)) {
-            self::markTestSkipped('Symfony Serializer is required to run this test.');
-        }
-
-        $autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
-
-        $typeA = new Fixtures\DiscriminatorMapAndInterface\TypeA('my name');
-        $something = new Fixtures\DiscriminatorMapAndInterface\Something($typeA);
-
-        $mapped = $autoMapper->map($something, 'array');
-
-        $expected = [
-            'myInterface' => [
-                'name' => 'my name',
-                'type' => 'type_a',
-            ],
-        ];
-        self::assertSame($expected, $mapped);
-    }
-
-    public function testDiscriminatorMapAndInterface2(): void
-    {
-        if (!class_exists(ClassDiscriminatorFromClassMetadata::class)) {
-            self::markTestSkipped('Symfony Serializer is required to run this test.');
-        }
-
-        $autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
-
-        $something = [
-            'myInterface' => [
-                'type' => 'type_a',
-                'name' => 'my name',
-            ],
-        ];
-
-        $mapped = $autoMapper->map($something, Fixtures\DiscriminatorMapAndInterface\Something::class);
-
-        self::assertInstanceOf(Fixtures\DiscriminatorMapAndInterface\Something::class, $mapped);
-        self::assertInstanceOf(Fixtures\DiscriminatorMapAndInterface\TypeA::class, $mapped->myInterface);
-        self::assertSame('my name', $mapped->myInterface->name);
     }
 
     public function testDiscriminantToArray(): void

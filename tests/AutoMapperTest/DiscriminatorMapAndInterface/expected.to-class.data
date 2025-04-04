@@ -1,0 +1,5 @@
+AutoMapper\Tests\AutoMapperTest\DiscriminatorMapAndInterface\Something {
+  +myInterface: AutoMapper\Tests\AutoMapperTest\DiscriminatorMapAndInterface\TypeA {
+    +name: "my name"
+  }
+}
