@@ -27,7 +27,7 @@ abstract readonly class AbstractArrayTransformer implements TransformerInterface
 
     abstract protected function getAssignExpr(Expr $valuesVar, Expr $outputVar, Expr $loopKeyVar, bool $assignByRef): Expr;
 
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr\Variable $existingValue = null): array
     {
         /**
          * $values = [];.
@@ -64,10 +64,32 @@ abstract readonly class AbstractArrayTransformer implements TransformerInterface
         $loopValueVar = new Expr\Variable($uniqueVariableScope->getUniqueName('value'));
         $loopKeyVar = new Expr\Variable($uniqueVariableScope->getUniqueName('key'));
 
+        $itemStatements = [];
+        $existingValue = null;
+
+        if ($this->itemTransformer instanceof IdentifiersEqualInterface && $propertyMapping->target->readAccessor !== null) {
+            $existingValue = new Expr\Variable($uniqueVariableScope->getUniqueName('existingValue'));
+            $loopExistingValueVar = new Expr\Variable($uniqueVariableScope->getUniqueName('existingValueItem'));
+
+            $itemStatements[] = new Stmt\Expression(new Expr\Assign($existingValue, new Expr\ConstFetch(new Name('null'))));
+            $itemStatements[] = new Stmt\Foreach_($valuesVar, $loopExistingValueVar, [
+                'stmts' => [
+                    new Stmt\If_($this->itemTransformer->getAreIdentifiersEqualExpression($loopValueVar, $loopExistingValueVar), [
+                        'stmts' => [
+                            new Stmt\Expression(new Expr\Assign($existingValue, $loopExistingValueVar)),
+                            new Stmt\Break_(),
+                        ],
+                    ]),
+                ],
+            ]);
+        }
+
         $assignByRef = $this->itemTransformer instanceof AssignedByReferenceTransformerInterface && $this->itemTransformer->assignByRef();
 
         /* Get the transform statements for the source property */
-        [$output, $itemStatements] = $this->itemTransformer->transform($loopValueVar, $target, $propertyMapping, $uniqueVariableScope, $source);
+        [$output, $transformStatements] = $this->itemTransformer->transform($loopValueVar, $target, $propertyMapping, $uniqueVariableScope, $source, $existingValue);
+
+        $itemStatements = array_merge($itemStatements, $transformStatements);
 
         if (null === $propertyMapping->target->parameterInConstructor && $propertyMapping->target->writeMutator && $propertyMapping->target->writeMutator->type === WriteMutator::TYPE_ADDER_AND_REMOVER) {
             /**
@@ -93,15 +115,28 @@ abstract readonly class AbstractArrayTransformer implements TransformerInterface
                     new Stmt\Expression($propertyMapping->target->writeMutator->getExpression($target, $mappedValueVar, $assignByRef)),
                 ],
             ]);
+
+        // @TODO handle existingValue
         } else {
-            /*
-             * Assign the value to the array.
-             *
-             * $values[] = $output;
-             * or
-             * $values[$key] = $output;
-             */
-            $itemStatements[] = new Stmt\Expression($this->getAssignExpr($valuesVar, $output, $loopKeyVar, $assignByRef));
+            if ($existingValue) {
+                $itemStatements[] = new Stmt\If_(new Expr\BinaryOp\Identical(new Expr\ConstFetch(new Name('null')), $existingValue), [
+                    'stmts' => [
+                        new Stmt\Expression($this->getAssignExpr($valuesVar, $output, $loopKeyVar, $assignByRef)),
+                    ],
+                    'else' => new Stmt\Else_([
+                        new Stmt\Expression($output),
+                    ]),
+                ]);
+            } else {
+                /*
+                 * Assign the value to the array.
+                 *
+                 * $values[] = $output;
+                 * or
+                 * $values[$key] = $output;
+                 */
+                $itemStatements[] = new Stmt\Expression($this->getAssignExpr($valuesVar, $output, $loopKeyVar, $assignByRef));
+            }
         }
 
         $statements[] = new Stmt\Foreach_(new Expr\BinaryOp\Coalesce($input, new Expr\Array_()), $loopValueVar, [

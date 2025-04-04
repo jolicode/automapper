@@ -26,7 +26,7 @@ final readonly class ExpressionLanguageTransformer implements TransformerInterfa
         $this->parser = $parser ?? (new ParserFactory())->createForHostVersion();
     }
 
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr\Variable $existingValue = null): array
     {
         $expr = $this->parser->parse('<?php ' . $this->expression . ';')[0] ?? null;
 

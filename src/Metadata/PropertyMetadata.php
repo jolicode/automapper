@@ -29,6 +29,7 @@ final class PropertyMetadata
         public ?string $if = null,
         public ?array $groups = null,
         public ?bool $disableGroupsCheck = null,
+        public bool $identifier = false,
     ) {
     }
 }
