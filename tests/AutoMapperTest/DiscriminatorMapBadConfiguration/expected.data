@@ -1,0 +1,6 @@
+// This is not god! It should raise a proper exception, telling the key
+// `linkType` is not present is the source
+Error {
+  +class: "Error"
+  +message: "Cannot instantiate abstract class AutoMapper\Tests\AutoMapperTest\DiscriminatorMapBadConfiguration\LinkType"
+}
