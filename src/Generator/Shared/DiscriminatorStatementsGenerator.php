@@ -122,8 +122,7 @@ final readonly class DiscriminatorStatementsGenerator
         if (!$isDefinedExpression) {
             return $discriminateStatements;
         }
-        $cannotCreateTarget = ($metadata->mapperMetadata->targetReflectionClass?->isAbstract()
-            || $metadata->mapperMetadata->targetReflectionClass?->isInterface()) ?? false;
+        $cannotCreateTarget = !($metadata->mapperMetadata->targetReflectionClass === null) && !$metadata->mapperMetadata->targetReflectionClass->isInstantiable();
 
         $if = new Stmt\If_($isDefinedExpression, [
             'stmts' => $discriminateStatements,
@@ -140,7 +139,7 @@ final readonly class DiscriminatorStatementsGenerator
         return $statements;
     }
 
-    private function supports(GeneratorMetadata $metadata): bool
+    public function supports(GeneratorMetadata $metadata): bool
     {
         if (!$this->classDiscriminatorResolver->hasClassDiscriminator($metadata, $this->fromSource)) {
             return false;

@@ -1,0 +1,6 @@
+AutoMapper\Tests\AutoMapperTest\DiscriminatorPopulate\LinkWrapper {
+  +link: AutoMapper\Tests\AutoMapperTest\DiscriminatorPopulate\DefaultLinkType {
+    +link: "https://example.com/new"
+    +description: "description"
+  }
+}

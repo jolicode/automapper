@@ -52,9 +52,13 @@ final readonly class MapMethodStatementsGenerator
 
         $statements = [$this->ifSourceIsNullReturnNull($metadata)];
         $statements = [...$statements, ...$this->handleCircularReference($metadata)];
-        $statements = [...$statements, ...$this->initializeTargetToPopulate($metadata)];
-        $statements = [...$statements, ...$this->initializeTargetFromProvider($metadata)];
-        $statements[] = $this->createObjectStatementsGenerator->generate($metadata, $variableRegistry);
+
+        if ($this->createObjectStatementsGenerator->canUseTargetToPopulate($metadata)) {
+            $statements = [...$statements, ...$this->initializeTargetToPopulate($metadata)];
+            $statements = [...$statements, ...$this->initializeTargetFromProvider($metadata)];
+        }
+
+        $statements = [...$statements, ...$this->createObjectStatementsGenerator->generate($metadata, $variableRegistry)];
 
         $addedDependenciesStatements = $this->handleDependencies($metadata);
 
