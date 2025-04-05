@@ -286,7 +286,7 @@ final class MetadataFactory
             $targetPropertyMetadata = TargetPropertyMetadata::fromEvent($propertyMappedEvent->target);
 
             if (null === $propertyMappedEvent->types) {
-                $propertyMappedEvent->types = $extractor->getTypes($mapperMetadata->source, $sourcePropertyMetadata, $mapperMetadata->target, $targetPropertyMetadata);
+                $propertyMappedEvent->types = $extractor->getTypes($mapperMetadata->source, $sourcePropertyMetadata, $mapperMetadata->target, $targetPropertyMetadata, $propertyMappedEvent->extractTypesFromGetter ?? $this->configuration->extractTypesFromGetter);
             }
 
             if (null === $propertyMappedEvent->transformer) {

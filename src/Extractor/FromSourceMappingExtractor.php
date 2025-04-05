@@ -20,7 +20,7 @@ use Symfony\Component\PropertyInfo\Type;
  */
 final class FromSourceMappingExtractor extends MappingExtractor
 {
-    public function getTypes(string $source, SourcePropertyMetadata $sourceProperty, string $target, TargetPropertyMetadata $targetProperty): TypesMatching
+    public function getTypes(string $source, SourcePropertyMetadata $sourceProperty, string $target, TargetPropertyMetadata $targetProperty, bool $extractTypesFromGetter): TypesMatching
     {
         $types = new TypesMatching();
         $sourceTypes = $this->propertyInfoExtractor->getTypes($source, $sourceProperty->property, [
