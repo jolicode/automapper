@@ -35,6 +35,7 @@ final readonly class MapperGenerator
     private MapperConstructorGenerator $mapperConstructorGenerator;
     private InjectMapperMethodStatementsGenerator $injectMapperMethodStatementsGenerator;
     private MapMethodStatementsGenerator $mapMethodStatementsGenerator;
+    private IdentifierEqualGenerator $identifierHashGenerator;
     private bool $disableGeneratedMapper;
 
     public function __construct(
@@ -54,6 +55,7 @@ final readonly class MapperGenerator
         );
 
         $this->injectMapperMethodStatementsGenerator = new InjectMapperMethodStatementsGenerator();
+        $this->identifierHashGenerator = new IdentifierEqualGenerator();
 
         $this->disableGeneratedMapper = !$configuration->autoRegister;
     }
@@ -76,13 +78,19 @@ final readonly class MapperGenerator
         if ($metadata->strictTypes) {
             $statements[] = new Stmt\Declare_([create_declare_item('strict_types', create_scalar_int(1))]);
         }
-        $statements[] = (new Builder\Class_($metadata->mapperMetadata->className))
+
+        $builder = (new Builder\Class_($metadata->mapperMetadata->className))
             ->makeFinal()
             ->extend(GeneratedMapper::class)
             ->addStmt($this->constructorMethod($metadata))
             ->addStmt($this->mapMethod($metadata))
-            ->addStmt($this->registerMappersMethod($metadata))
-            ->getNode();
+            ->addStmt($this->registerMappersMethod($metadata));
+
+        if ($areIdentifiersEqualsMethod = $this->registerAreIdentifiersEqualsMethod($metadata)) {
+            $builder->addStmt($areIdentifiersEqualsMethod);
+        }
+
+        $statements[] = $builder->getNode();
 
         return $statements;
     }
@@ -160,6 +168,38 @@ final readonly class MapperGenerator
                 type: new Name(AutoMapperRegistryInterface::class))
             )
             ->addStmts($this->injectMapperMethodStatementsGenerator->getStatements($param, $metadata))
+            ->getNode();
+    }
+
+    /**
+     * Create the areIdentifiersEquals method for this mapper.
+     *
+     * ```php
+     * public function areIdentifiersEquals(mixed $source, mixed $target): bool {
+     *    ... // statements
+     * }
+     * ```
+     */
+    private function registerAreIdentifiersEqualsMethod(GeneratorMetadata $metadata): ?Stmt\ClassMethod
+    {
+        $stmts = $this->identifierHashGenerator->getStatements($metadata);
+
+        if (empty($stmts)) {
+            return null;
+        }
+
+        return (new Builder\Method('areIdentifiersEquals'))
+            ->makePublic()
+            ->setReturnType('bool')
+            ->addParam(new Param(
+                var: new Expr\Variable('source'),
+                type: new Name('mixed'))
+            )
+            ->addParam(new Param(
+                var: new Expr\Variable('target'),
+                type: new Name('mixed'))
+            )
+            ->addStmts($stmts)
             ->getNode();
     }
 }
