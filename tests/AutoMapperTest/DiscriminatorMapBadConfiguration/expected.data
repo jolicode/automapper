@@ -1,6 +1,4 @@
-// This is not god! It should raise a proper exception, telling the key
-// `linkType` is not present is the source
-Error {
-  +class: "Error"
-  +message: "Cannot instantiate abstract class AutoMapper\Tests\AutoMapperTest\DiscriminatorMapBadConfiguration\LinkType"
+AutoMapper\Exception\CannotCreateTargetException {
+  +class: "AutoMapper\Exception\CannotCreateTargetException"
+  +message: "Cannot create target object, because the target is abstract or an interface, and the property "linkType" is not defined, or the value does not match any discriminator type."
 }

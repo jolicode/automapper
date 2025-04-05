@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator\Shared;
 
+use AutoMapper\Exception\CannotCreateTargetException;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Transformer\TransformerInterface;
 use PhpParser\Node\Arg;
@@ -85,7 +86,7 @@ final readonly class DiscriminatorStatementsGenerator
 
         // Generate the code that allows to put the type into the output variable,
         // so we are able to determine which mapper to use
-        [$output, $createObjectStatements] = $propertyMetadata->transformer->transform(
+        [$output, $discriminateStatements] = $propertyMetadata->transformer->transform(
             $fieldValueExpr,
             $variableRegistry->getResult(),
             $propertyMetadata,
@@ -94,7 +95,7 @@ final readonly class DiscriminatorStatementsGenerator
         );
 
         foreach ($this->classDiscriminatorResolver->discriminatorMapperNamesIndexedByTypeValue($metadata, $this->fromSource) as $typeValue => $discriminatorMapperName) {
-            $createObjectStatements[] = new Stmt\If_(
+            $discriminateStatements[] = new Stmt\If_(
                 new Expr\BinaryOp\Identical(new Scalar\String_($typeValue), $output),
                 [
                     'stmts' => [
@@ -116,7 +117,27 @@ final readonly class DiscriminatorStatementsGenerator
             );
         }
 
-        return $createObjectStatements;
+        $isDefinedExpression = $propertyMetadata->source->accessor?->getIsDefinedExpression($variableRegistry->getSourceInput());
+
+        if (!$isDefinedExpression) {
+            return $discriminateStatements;
+        }
+        $cannotCreateTarget = ($metadata->mapperMetadata->targetReflectionClass?->isAbstract()
+            || $metadata->mapperMetadata->targetReflectionClass?->isInterface()) ?? false;
+
+        $if = new Stmt\If_($isDefinedExpression, [
+            'stmts' => $discriminateStatements,
+        ]);
+
+        $statements = [$if];
+
+        if ($cannotCreateTarget) {
+            $statements[] = new Stmt\Expression(new Expr\Throw_(new Expr\New_(new Name(CannotCreateTargetException::class), [
+                new Arg(new Scalar\String_('Cannot create target object, because the target is abstract or an interface, and the property "' . $propertyMetadata->source->property . '" is not defined, or the value does not match any discriminator type.')),
+            ])));
+        }
+
+        return $statements;
     }
 
     private function supports(GeneratorMetadata $metadata): bool

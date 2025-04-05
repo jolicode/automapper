@@ -346,6 +346,10 @@ final readonly class CreateTargetStatementsGenerator
             return null;
         }
 
+        if ($metadata->mapperMetadata->targetReflectionClass?->isInstantiable() === false) {
+            return null;
+        }
+
         return new Stmt\Expression(new Expr\Assign($metadata->variableRegistry->getResult(), new Expr\New_(new Name\FullyQualified($metadata->mapperMetadata->target))));
     }
 }
