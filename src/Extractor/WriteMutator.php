@@ -35,6 +35,7 @@ final class WriteMutator
         private readonly string $property,
         private readonly bool $private = false,
         public readonly ?\ReflectionParameter $parameter = null,
+        private readonly ?string $removeMethodName = null,
     ) {
     }
 
@@ -98,6 +99,22 @@ final class WriteMutator
         }
 
         throw new CompileException('Invalid accessor for write expression');
+    }
+
+    public function getRemoveExpression(Expr $object, Expr $value): ?Expr
+    {
+        if (self::TYPE_ADDER_AND_REMOVER === $this->type && $this->removeMethodName) {
+            /*
+             * Create method call expression to remove value
+             *
+             * $object->removeMethodName($value);
+             */
+            return new Expr\MethodCall($object, $this->removeMethodName, [
+                new Arg($value),
+            ]);
+        }
+
+        return null;
     }
 
     /**

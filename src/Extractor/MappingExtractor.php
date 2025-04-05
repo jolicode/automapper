@@ -112,6 +112,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
     public function getWriteMutator(string $source, string $target, string $property, array $context = [], bool $allowExtraProperties = false): ?WriteMutator
     {
         $writeInfo = $this->writeInfoExtractor->getWriteInfo($target, $property, $context);
+        $removeMethodName = null;
 
         if (null === $writeInfo || PropertyWriteInfo::TYPE_NONE === $writeInfo->getType()) {
             if ('array' === $target) {
@@ -147,13 +148,16 @@ abstract class MappingExtractor implements MappingExtractorInterface
 
         if (PropertyWriteInfo::TYPE_ADDER_AND_REMOVER === $writeInfo->getType()) {
             $type = WriteMutator::TYPE_ADDER_AND_REMOVER;
+            $removeMethodName = $writeInfo->getRemoverInfo()->getName();
             $writeInfo = $writeInfo->getAdderInfo();
         }
 
         return new WriteMutator(
             $type,
             $writeInfo->getName(),
-            PropertyReadInfo::VISIBILITY_PUBLIC !== $writeInfo->getVisibility()
+            PropertyReadInfo::VISIBILITY_PUBLIC !== $writeInfo->getVisibility(),
+            null,
+            $removeMethodName,
         );
     }
 

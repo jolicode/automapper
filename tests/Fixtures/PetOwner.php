@@ -33,6 +33,7 @@ class PetOwner
 
         if ($index !== false) {
             unset($this->pets[$index]);
+            $this->pets = array_values($this->pets);
         }
     }
 }
