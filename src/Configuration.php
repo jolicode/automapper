@@ -50,6 +50,14 @@ final readonly class Configuration
          * Allow extra properties to be mapped when the target or the source implements ArrayAccess class.
          */
         public bool $allowExtraProperties = false,
+        /**
+         * When extracting types from a target property we generally try to use the one from where we write.
+         *
+         * However, this may cause bad type in case of covariance where the type should be extracted from the setter.
+         *
+         * Enable this option to extract the type from the getter instead of the setter.
+         */
+        public bool $extractTypesFromGetter = false,
     ) {
     }
 }

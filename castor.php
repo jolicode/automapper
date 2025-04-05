@@ -39,9 +39,22 @@ function debug_mapper(string $source, string $target, string $load = '')
 {
     require_once __DIR__ . '/vendor/autoload.php';
 
-    if ($load) {
-        require_once $load;
-    }
+    // special autoloader for "AutoMapperTests"
+    spl_autoload_register(function (string $class) {
+        if (!str_starts_with($class, 'AutoMapper\\Tests\\AutoMapperTest\\')) {
+            return false;
+        }
+
+        // split on namespace separator
+        $parts = explode('\\', $class);
+        // get second part
+        $testDirectory = $parts[3] ?? '';
+        $mapFile = __DIR__ . '/tests/AutoMapperTest/' . $testDirectory . '/map.php';
+
+        if (file_exists($mapFile)) {
+            require_once $mapFile;
+        }
+    });
 
     $automapper = AutoMapper\AutoMapper::create();
     // get private property loader value

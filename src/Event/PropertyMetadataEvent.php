@@ -31,6 +31,7 @@ final class PropertyMetadataEvent
         public ?bool $disableGroupsCheck = null,
         public int $priority = 0,
         public readonly bool $isFromDefaultExtractor = false,
+        public ?bool $extractTypesFromGetter = null,
     ) {
     }
 }

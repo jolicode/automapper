@@ -18,6 +18,7 @@ final readonly class ReadWriteTypeExtractor implements PropertyTypeExtractorInte
 {
     public const READ_ACCESSOR = 'read_accessor';
     public const WRITE_MUTATOR = 'write_mutator';
+    public const EXTRACT_TYPE_FROM_GETTER = 'extract_type_from_getter';
 
     /**
      * @param array<string, mixed> $context
@@ -28,7 +29,7 @@ final readonly class ReadWriteTypeExtractor implements PropertyTypeExtractorInte
             return $accessor->getTypes($class);
         }
 
-        if (($mutator = $context[self::WRITE_MUTATOR] ?? false) && $mutator instanceof WriteMutator) {
+        if (!($context[self::EXTRACT_TYPE_FROM_GETTER] ?? false) && ($mutator = $context[self::WRITE_MUTATOR] ?? false) && $mutator instanceof WriteMutator) {
             return $mutator->getTypes($class);
         }
 

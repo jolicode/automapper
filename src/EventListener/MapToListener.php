@@ -72,7 +72,7 @@ final readonly class MapToListener extends MapListener
         $sourceProperty = new SourcePropertyMetadata($property);
         $targetProperty = new TargetPropertyMetadata($mapTo->property ?? $property);
 
-        $property = new PropertyMetadataEvent(
+        $propertyMetadata = new PropertyMetadataEvent(
             mapperMetadata: $event->mapperMetadata,
             source: $sourceProperty,
             target: $targetProperty,
@@ -84,12 +84,13 @@ final readonly class MapToListener extends MapListener
             if: $mapTo->if,
             groups: $mapTo->groups,
             priority: $mapTo->priority,
+            extractTypesFromGetter: $mapTo->extractTypesFromGetter,
         );
 
-        if (\array_key_exists($property->target->property, $event->properties) && $event->properties[$property->target->property]->priority >= $property->priority) {
+        if (\array_key_exists($propertyMetadata->target->property, $event->properties) && $event->properties[$propertyMetadata->target->property]->priority >= $propertyMetadata->priority) {
             return;
         }
 
-        $event->properties[$property->target->property] = $property;
+        $event->properties[$propertyMetadata->target->property] = $propertyMetadata;
     }
 }
