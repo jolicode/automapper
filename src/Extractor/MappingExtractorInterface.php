@@ -27,7 +27,7 @@ interface MappingExtractorInterface
      */
     public function getProperties(string $class): iterable;
 
-    public function getTypes(string $source, SourcePropertyMetadata $sourceProperty, string $target, TargetPropertyMetadata $targetProperty): TypesMatching;
+    public function getTypes(string $source, SourcePropertyMetadata $sourceProperty, string $target, TargetPropertyMetadata $targetProperty, bool $extractTypesFromGetter): TypesMatching;
 
     public function getDateTimeFormat(PropertyMetadataEvent $propertyMetadataEvent): string;
 

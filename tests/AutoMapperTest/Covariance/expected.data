@@ -1,0 +1,3 @@
+AutoMapper\Tests\AutoMapperTest\Covariance\ExtendedA {
+  #b: AutoMapper\Tests\AutoMapperTest\Covariance\ExtendedB {}
+}

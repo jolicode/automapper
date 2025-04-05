@@ -20,11 +20,12 @@ use Symfony\Component\PropertyInfo\Type;
  */
 final class FromTargetMappingExtractor extends MappingExtractor
 {
-    public function getTypes(string $source, SourcePropertyMetadata $sourceProperty, string $target, TargetPropertyMetadata $targetProperty): TypesMatching
+    public function getTypes(string $source, SourcePropertyMetadata $sourceProperty, string $target, TargetPropertyMetadata $targetProperty, bool $extractTypesFromGetter): TypesMatching
     {
         $types = new TypesMatching();
         $targetTypes = $this->propertyInfoExtractor->getTypes($target, $targetProperty->property, [
             ReadWriteTypeExtractor::WRITE_MUTATOR => $targetProperty->writeMutator,
+            ReadWriteTypeExtractor::EXTRACT_TYPE_FROM_GETTER => $extractTypesFromGetter,
         ]) ?? [];
 
         foreach ($targetTypes as $type) {
