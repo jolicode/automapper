@@ -31,7 +31,7 @@ function qa_phpstan(bool $generateBaseline = false)
         $params[] = '--generate-baseline';
     }
 
-    phpstan($params, '1.11.1');
+    phpstan($params, '1.12.23');
 }
 
 #[AsTask('mapper', namespace: 'debug', description: 'Debug a mapper', aliases: ['debug'])]
