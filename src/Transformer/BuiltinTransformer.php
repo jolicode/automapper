@@ -80,7 +80,7 @@ final readonly class BuiltinTransformer implements TransformerInterface, CheckTy
     ) {
     }
 
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr\Variable $existingValue = null): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr $existingValue = null): array
     {
         $targetTypes = array_map(function (Type $type) {
             return $type->getBuiltinType();

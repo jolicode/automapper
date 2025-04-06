@@ -36,9 +36,14 @@ abstract class GeneratedMapper implements MapperInterface
     {
     }
 
-    public function areIdentifiersEquals(mixed $source, mixed $target): bool
+    public function getSourceHash(mixed $value): ?string
     {
-        return false;
+        return null;
+    }
+
+    public function getTargetHash(mixed $value): ?string
+    {
+        return null;
     }
 
     /** @var array<string, MapperInterface<object, object>|MapperInterface<object, array<mixed>>|MapperInterface<array<mixed>, object>> */

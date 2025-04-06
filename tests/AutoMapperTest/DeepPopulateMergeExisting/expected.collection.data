@@ -4,14 +4,12 @@ AutoMapper\Tests\AutoMapperTest\DeepPopulateMergeExisting\FooWithArrayCollection
       AutoMapper\Tests\AutoMapperTest\DeepPopulateMergeExisting\Bar {
         -id: 1
         +bar: "bar3"
-      }
-      AutoMapper\Tests\AutoMapperTest\DeepPopulateMergeExisting\Bar {
-        -id: 2
-        +bar: "bar2"
+        +foo: "foo1"
       }
       AutoMapper\Tests\AutoMapperTest\DeepPopulateMergeExisting\Bar {
         -id: 10
         +bar: "bar4"
+        +foo: "default"
       }
     ]
   }

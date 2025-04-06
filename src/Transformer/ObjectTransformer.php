@@ -20,7 +20,7 @@ use Symfony\Component\PropertyInfo\Type;
  *
  * @internal
  */
-final class ObjectTransformer implements TransformerInterface, DependentTransformerInterface, AssignedByReferenceTransformerInterface, CheckTypeInterface, IdentifiersEqualInterface
+final class ObjectTransformer implements TransformerInterface, DependentTransformerInterface, AssignedByReferenceTransformerInterface, CheckTypeInterface, IdentifierHashInterface
 {
     public function __construct(
         private readonly Type $sourceType,
@@ -29,7 +29,7 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
     ) {
     }
 
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr\Variable $existingValue = null): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr $existingValue = null): array
     {
         $mapperName = $this->getDependencyName();
 
@@ -62,16 +62,7 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
                 )
             );
         } elseif ($existingValue !== null) {
-            $newContextArgs[] = new Arg(
-                new Expr\Ternary(
-                    new Expr\BinaryOp\Coalesce(
-                        new Expr\ArrayDimFetch(new Expr\Variable('context'), new Scalar\String_(MapperContext::DEEP_TARGET_TO_POPULATE)),
-                        new Expr\ConstFetch(new Name('false'))
-                    ),
-                    $existingValue,
-                    new Expr\ConstFetch(new Name('null'))
-                )
-            );
+            $newContextArgs[] = new Arg($existingValue);
         }
 
         /*
@@ -155,15 +146,26 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
         return $targetTypeName;
     }
 
-    public function getAreIdentifiersEqualExpression(Expr $source, Expr $target): Expr
+    public function getSourceHashExpression(Expr $source): Expr
     {
         $mapperName = $this->getDependencyName();
 
         return new Expr\MethodCall(new Expr\ArrayDimFetch(
             new Expr\PropertyFetch(new Expr\Variable('this'), 'mappers'),
             new Scalar\String_($mapperName)
-        ), 'areIdentifiersEquals', [
+        ), 'getSourceHash', [
             new Arg($source),
+        ]);
+    }
+
+    public function getTargetHashExpression(Expr $target): Expr
+    {
+        $mapperName = $this->getDependencyName();
+
+        return new Expr\MethodCall(new Expr\ArrayDimFetch(
+            new Expr\PropertyFetch(new Expr\Variable('this'), 'mappers'),
+            new Scalar\String_($mapperName)
+        ), 'getTargetHash', [
             new Arg($target),
         ]);
     }

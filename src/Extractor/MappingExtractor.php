@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper\Extractor;
 
-use AutoMapper\Attribute\MapIdentifier;
 use AutoMapper\Configuration;
 use AutoMapper\Event\PropertyMetadataEvent;
-use AutoMapper\Metadata\TargetPropertyMetadata;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyReadInfo;
 use Symfony\Component\PropertyInfo\PropertyReadInfoExtractorInterface;
@@ -188,73 +186,5 @@ abstract class MappingExtractor implements MappingExtractorInterface
         }
 
         return $this->configuration->dateTimeFormat;
-    }
-
-    public function isIdentifier(?\ReflectionClass $targetReflectionClass, TargetPropertyMetadata $target): bool
-    {
-        if ($targetReflectionClass === null) {
-            return false;
-        }
-
-        // check on reflection property
-        if ($targetReflectionClass->hasProperty($target->property)) {
-            $reflectionProperty = $targetReflectionClass->getProperty($target->property);
-
-            if (\count($reflectionProperty->getAttributes(MapIdentifier::class)) > 0) {
-                return true;
-            }
-        }
-
-        // check on the getter to read, it may not be defined yet so we cannot skip this everytime
-        if ($target->readAccessor !== null) {
-            // check with read accessor on property
-            if ($target->readAccessor->type === ReadAccessor::TYPE_PROPERTY && $targetReflectionClass->hasProperty(
-                $target->readAccessor->property
-            )) {
-                $reflectionProperty = $targetReflectionClass->getProperty(
-                    $target->readAccessor->property
-                );
-
-                if (\count($reflectionProperty->getAttributes(MapIdentifier::class)) > 0) {
-                    return true;
-                }
-            }
-
-            // check with read accessor on method
-            if ($target->readAccessor->type === ReadAccessor::TYPE_METHOD && $targetReflectionClass->hasMethod(
-                $target->readAccessor->property
-            )) {
-                $reflectionMethod = $targetReflectionClass->getMethod(
-                    $target->readAccessor->property
-                );
-
-                if (\count($reflectionMethod->getAttributes(MapIdentifier::class)) > 0) {
-                    return true;
-                }
-            }
-        }
-
-        // same for the write mutator, we cannot globally skip this check as it may be defined latter
-        if ($target->writeMutator !== null) {
-            // check for property
-            if ($target->writeMutator->type === WriteMutator::TYPE_PROPERTY && $targetReflectionClass->hasProperty($target->writeMutator->property)) {
-                $reflectionProperty = $targetReflectionClass->getProperty(
-                    $target->writeMutator->property
-                );
-
-                if (\count($reflectionProperty->getAttributes(MapIdentifier::class)) > 0) {
-                    return true;
-                }
-            }
-
-            // check for parameter in constructor
-            if ($target->writeMutator->type === WriteMutator::TYPE_CONSTRUCTOR && $target->writeMutator->parameter !== null) {
-                if (\count($target->writeMutator->parameter->getAttributes(MapIdentifier::class)) > 0) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 }
