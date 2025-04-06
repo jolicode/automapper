@@ -40,8 +40,10 @@ final readonly class CreateTargetStatementsGenerator
      *    ... // create object statements
      * }
      * ```
+     *
+     * @return list<Stmt>
      */
-    public function generate(GeneratorMetadata $metadata, VariableRegistry $variableRegistry): Stmt
+    public function generate(GeneratorMetadata $metadata, VariableRegistry $variableRegistry): array
     {
         $createObjectStatements = [];
 
@@ -56,9 +58,18 @@ final readonly class CreateTargetStatementsGenerator
 
         $createObjectStatements = array_values(array_filter($createObjectStatements));
 
-        return new Stmt\If_(new Expr\BinaryOp\Identical(new Expr\ConstFetch(new Name('null')), $variableRegistry->getResult()), [
-            'stmts' => $createObjectStatements,
-        ]);
+        if ($this->canUseTargetToPopulate($metadata)) {
+            return [new Stmt\If_(new Expr\BinaryOp\Identical(new Expr\ConstFetch(new Name('null')), $variableRegistry->getResult()), [
+                'stmts' => $createObjectStatements,
+            ])];
+        }
+
+        return $createObjectStatements;
+    }
+
+    public function canUseTargetToPopulate(GeneratorMetadata $metadata): bool
+    {
+        return !$this->discriminatorStatementsGeneratorTarget->supports($metadata);
     }
 
     private function targetAsArray(GeneratorMetadata $metadata): ?Stmt
@@ -343,6 +354,10 @@ final readonly class CreateTargetStatementsGenerator
         $targetConstructor = $metadata->mapperMetadata->targetReflectionClass?->getConstructor();
 
         if ($targetConstructor) {
+            return null;
+        }
+
+        if ($metadata->mapperMetadata->targetReflectionClass?->isInstantiable() === false) {
             return null;
         }
 
