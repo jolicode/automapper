@@ -22,7 +22,7 @@ class CallableTransformer implements TransformerInterface, AllowNullValueTransfo
     ) {
     }
 
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr\Variable $existingValue = null): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr $existingValue = null): array
     {
         if ($this->callableIsMethodFromSource || $this->callableIsMethodFromTarget) {
             return [new Expr\MethodCall(

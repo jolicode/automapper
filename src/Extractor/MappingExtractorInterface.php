@@ -49,9 +49,4 @@ interface MappingExtractorInterface
      * @param array<string, mixed> $context
      */
     public function getWriteMutator(string $source, string $target, string $property, array $context = []): ?WriteMutator;
-
-    /**
-     * Check if a property is an identifier.
-     */
-    public function isIdentifier(?\ReflectionClass $targetReflectionClass, TargetPropertyMetadata $target): bool;
 }

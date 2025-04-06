@@ -35,7 +35,7 @@ final readonly class MapperGenerator
     private MapperConstructorGenerator $mapperConstructorGenerator;
     private InjectMapperMethodStatementsGenerator $injectMapperMethodStatementsGenerator;
     private MapMethodStatementsGenerator $mapMethodStatementsGenerator;
-    private IdentifierEqualGenerator $identifierHashGenerator;
+    private IdentifierHashGenerator $identifierHashGenerator;
     private bool $disableGeneratedMapper;
 
     public function __construct(
@@ -55,7 +55,7 @@ final readonly class MapperGenerator
         );
 
         $this->injectMapperMethodStatementsGenerator = new InjectMapperMethodStatementsGenerator();
-        $this->identifierHashGenerator = new IdentifierEqualGenerator();
+        $this->identifierHashGenerator = new IdentifierHashGenerator();
 
         $this->disableGeneratedMapper = !$configuration->autoRegister;
     }
@@ -86,8 +86,12 @@ final readonly class MapperGenerator
             ->addStmt($this->mapMethod($metadata))
             ->addStmt($this->registerMappersMethod($metadata));
 
-        if ($areIdentifiersEqualsMethod = $this->registerAreIdentifiersEqualsMethod($metadata)) {
-            $builder->addStmt($areIdentifiersEqualsMethod);
+        if ($sourceHashMethod = $this->getSourceHashMethod($metadata)) {
+            $builder->addStmt($sourceHashMethod);
+        }
+
+        if ($targetHashMethod = $this->getTargetHashMethod($metadata)) {
+            $builder->addStmt($targetHashMethod);
         }
 
         $statements[] = $builder->getNode();
@@ -172,31 +176,55 @@ final readonly class MapperGenerator
     }
 
     /**
-     * Create the areIdentifiersEquals method for this mapper.
+     * Create the getSourceHash method for this mapper.
      *
      * ```php
-     * public function areIdentifiersEquals(mixed $source, mixed $target): bool {
+     * public function getSourceHash(mixed $source, mixed $target): ?string {
      *    ... // statements
      * }
      * ```
      */
-    private function registerAreIdentifiersEqualsMethod(GeneratorMetadata $metadata): ?Stmt\ClassMethod
+    private function getSourceHashMethod(GeneratorMetadata $metadata): ?Stmt\ClassMethod
     {
-        $stmts = $this->identifierHashGenerator->getStatements($metadata);
+        $stmts = $this->identifierHashGenerator->getStatements($metadata, true);
 
         if (empty($stmts)) {
             return null;
         }
 
-        return (new Builder\Method('areIdentifiersEquals'))
+        return (new Builder\Method('getSourceHash'))
             ->makePublic()
-            ->setReturnType('bool')
+            ->setReturnType('?string')
             ->addParam(new Param(
-                var: new Expr\Variable('source'),
+                var: new Expr\Variable('value'),
                 type: new Name('mixed'))
             )
+            ->addStmts($stmts)
+            ->getNode();
+    }
+
+    /**
+     * Create the getTargetHash method for this mapper.
+     *
+     * ```php
+     * public function getSourceHash(mixed $source, mixed $target): ?string {
+     *    ... // statements
+     * }
+     * ```
+     */
+    private function getTargetHashMethod(GeneratorMetadata $metadata): ?Stmt\ClassMethod
+    {
+        $stmts = $this->identifierHashGenerator->getStatements($metadata, false);
+
+        if (empty($stmts)) {
+            return null;
+        }
+
+        return (new Builder\Method('getTargetHash'))
+            ->makePublic()
+            ->setReturnType('?string')
             ->addParam(new Param(
-                var: new Expr\Variable('target'),
+                var: new Expr\Variable('value'),
                 type: new Name('mixed'))
             )
             ->addStmts($stmts)

@@ -61,7 +61,7 @@ final class ReadAccessor
      *
      * @throws CompileException
      */
-    public function getExpression(Expr\Variable $input, bool $target = false): Expr
+    public function getExpression(Expr $input, bool $target = false): Expr
     {
         if (self::TYPE_METHOD === $this->type) {
             $methodCallArguments = [];

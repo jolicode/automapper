@@ -26,78 +26,52 @@ final class ArrayToDoctrineCollectionTransformer implements TransformerInterface
     ) {
     }
 
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr\Variable $existingValue = null): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr $existingValue = null): array
     {
         /**
          * $collection = new ArrayCollection();.
          */
         $collectionVar = new Expr\Variable($uniqueVariableScope->getUniqueName('collection'));
-
-        $baseAssign = new Expr\New_(new Name(ArrayCollection::class));
-
-        if ($propertyMapping->target->readAccessor !== null) {
-            $isDefined = $propertyMapping->target->readAccessor->getIsDefinedExpression(new Expr\Variable('result'));
-            $existingValue = $propertyMapping->target->readAccessor->getExpression(new Expr\Variable('result'));
-
-            if (null !== $isDefined) {
-                $existingValue = new Expr\Ternary(
-                    $isDefined,
-                    $existingValue,
-                    $baseAssign
-                );
-            }
-
-            $baseAssign = new Expr\Ternary(
-                new Expr\BinaryOp\Coalesce(
-                    new Expr\ArrayDimFetch(new Expr\Variable('context'), new Scalar\String_(MapperContext::DEEP_TARGET_TO_POPULATE)),
-                    new Expr\ConstFetch(new Name('false'))
-                ),
-                $existingValue,
-                $baseAssign,
-            );
-        }
+        $exisingValuesIndexed = new Expr\Variable($uniqueVariableScope->getUniqueName('existingValuesIndexed'));
 
         $statements = [
-            new Stmt\Expression(new Expr\Assign($collectionVar, $baseAssign)),
+            new Stmt\Expression(new Expr\Assign($collectionVar, new Expr\New_(new Name(ArrayCollection::class)))),
+            new Stmt\Expression(new Expr\Assign($exisingValuesIndexed, new Expr\Array_())),
         ];
 
         $loopValueVar = new Expr\Variable($uniqueVariableScope->getUniqueName('value'));
 
-        $itemStatements = [];
-        $existingValue = null;
+        $existingValue = new Expr\Variable($uniqueVariableScope->getUniqueName('existingValue'));
+        $loopExistingValueVar = new Expr\Variable($uniqueVariableScope->getUniqueName('existingValue'));
 
-        if ($this->itemTransformer instanceof IdentifiersEqualInterface && $propertyMapping->target->readAccessor !== null) {
-            $existingValue = new Expr\Variable($uniqueVariableScope->getUniqueName('existingValue'));
-            $loopExistingValueVar = new Expr\Variable($uniqueVariableScope->getUniqueName('existingValueItem'));
+        [$output, $itemStatements] = $this->itemTransformer->transform($loopValueVar, $target, $propertyMapping, $uniqueVariableScope, $source, $existingValue);
 
-            $itemStatements[] = new Stmt\Expression(new Expr\Assign($existingValue, new Expr\ConstFetch(new Name('null'))));
-            $itemStatements[] = new Stmt\Foreach_($collectionVar, $loopExistingValueVar, [
+        if ($propertyMapping->target->readAccessor !== null && $this->itemTransformer instanceof IdentifierHashInterface) {
+            $hashValueVariable = new Expr\Variable($uniqueVariableScope->getUniqueName('hashValue'));
+            $statements[] = new Stmt\If_(new Expr\BinaryOp\Coalesce(
+                new Expr\ArrayDimFetch(new Expr\Variable('context'), new Scalar\String_(MapperContext::DEEP_TARGET_TO_POPULATE)),
+                new Expr\ConstFetch(new Name('false'))
+            ), [
                 'stmts' => [
-                    new Stmt\If_($this->itemTransformer->getAreIdentifiersEqualExpression($loopValueVar, $loopExistingValueVar), [
+                    new Stmt\Foreach_($propertyMapping->target->readAccessor->getExpression($target), $loopExistingValueVar, [
                         'stmts' => [
-                            new Stmt\Expression(new Expr\Assign($existingValue, $loopExistingValueVar)),
-                            new Stmt\Break_(),
+                            new Stmt\Expression(new Expr\Assign($hashValueVariable, $this->itemTransformer->getTargetHashExpression($loopExistingValueVar))),
+                            new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name('null')), $hashValueVariable), [
+                                'stmts' => [
+                                    new Stmt\Expression(new Expr\Assign(new Expr\ArrayDimFetch($exisingValuesIndexed, $hashValueVariable), $loopExistingValueVar)),
+                                ],
+                            ]),
                         ],
                     ]),
                 ],
             ]);
+
+            $hashValueTargetVariable = new Expr\Variable($uniqueVariableScope->getUniqueName('hashValueTarget'));
+            $itemStatements[] = new Stmt\Expression(new Expr\Assign($hashValueTargetVariable, $this->itemTransformer->getSourceHashExpression($loopValueVar)));
+            $itemStatements[] = new Stmt\Expression(new Expr\Assign($existingValue, new Expr\BinaryOp\Coalesce(new Expr\ArrayDimFetch($exisingValuesIndexed, $hashValueTargetVariable), new Expr\ConstFetch(new Name('null')))));
         }
 
-        [$output, $transformStatements] = $this->itemTransformer->transform($loopValueVar, $target, $propertyMapping, $uniqueVariableScope, $source, $existingValue);
-        $itemStatements = array_merge($itemStatements, $transformStatements);
-
-        if ($existingValue) {
-            $itemStatements[] = new Stmt\If_(new Expr\BinaryOp\Identical(new Expr\ConstFetch(new Name('null')), $existingValue), [
-                'stmts' => [
-                    new Stmt\Expression(new Expr\MethodCall($collectionVar, 'add', [new Arg($output)])),
-                ],
-                'else' => new Stmt\Else_([
-                    new Stmt\Expression($output),
-                ]),
-            ]);
-        } else {
-            $itemStatements[] = new Stmt\Expression(new Expr\MethodCall($collectionVar, 'add', [new Arg($output)]));
-        }
+        $itemStatements[] = new Stmt\Expression(new Expr\MethodCall($collectionVar, 'add', [new Arg($output)]));
 
         $statements[] = new Stmt\Foreach_(new Expr\BinaryOp\Coalesce($input, new Expr\Array_()), $loopValueVar, [
             'stmts' => $itemStatements,

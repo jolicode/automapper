@@ -1,5 +1,5 @@
-AutoMapper\Tests\AutoMapperTest\DeepPopulateMergeExisting\Foo {
-  +bars: [
+AutoMapper\Tests\AutoMapperTest\DeepPopulateMergeExisting\FooAdder {
+  -bars: [
     AutoMapper\Tests\AutoMapperTest\DeepPopulateMergeExisting\Bar {
       -id: 1
       +bar: "bar3"
