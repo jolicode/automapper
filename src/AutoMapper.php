@@ -103,9 +103,11 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         if (\is_object($target)) {
             $targetType = $target::class;
             $context[MapperContext::TARGET_TO_POPULATE] = $target;
+            $context[MapperContext::DEEP_TARGET_TO_POPULATE] ??= true;
         } elseif (\is_array($target)) {
             $targetType = 'array';
             $context[MapperContext::TARGET_TO_POPULATE] = $target;
+            $context[MapperContext::DEEP_TARGET_TO_POPULATE] ??= true;
         } elseif (\is_string($target)) {
             $targetType = $target;
         }

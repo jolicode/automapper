@@ -40,13 +40,24 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
 
         // ($context['deep_target_to_populate'] ?? false) ? $source->property : null
         if ($propertyMapping->target->readAccessor !== null && $this->deepTargetToPopulate) {
+            $isDefined = $propertyMapping->target->readAccessor->getIsDefinedExpression(new Expr\Variable('result'));
+            $existingValue = $propertyMapping->target->readAccessor->getExpression(new Expr\Variable('result'));
+
+            if (null !== $isDefined) {
+                $existingValue = new Expr\Ternary(
+                    $isDefined,
+                    $existingValue,
+                    new Expr\ConstFetch(new Name('null'))
+                );
+            }
+
             $newContextArgs[] = new Arg(
                 new Expr\Ternary(
                     new Expr\BinaryOp\Coalesce(
                         new Expr\ArrayDimFetch(new Expr\Variable('context'), new Scalar\String_(MapperContext::DEEP_TARGET_TO_POPULATE)),
                         new Expr\ConstFetch(new Name('false'))
                     ),
-                    $propertyMapping->target->readAccessor->getExpression(new Expr\Variable('result')),
+                    $existingValue,
                     new Expr\ConstFetch(new Name('null'))
                 )
             );

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\AutoMapperTest\ArrayConsistency;
 
+use AutoMapper\MapperContext;
 use AutoMapper\Tests\AutoMapperBuilder;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -102,11 +103,11 @@ return (function () {
     $toCollection->values->add(5);
     $toCollection->values->add(6);
 
-    yield 'to' => $autoMapper->map($from, $to);
+    yield 'to' => $autoMapper->map($from, $to, [MapperContext::DEEP_TARGET_TO_POPULATE => false]);
 
-    yield 'toAdder' => $autoMapper->map($from, $toAdder);
+    yield 'toAdder' => $autoMapper->map($from, $toAdder, [MapperContext::DEEP_TARGET_TO_POPULATE => false]);
 
-    yield 'toAdderCollection' => $autoMapper->map($from, $toAdderCollection);
+    yield 'toAdderCollection' => $autoMapper->map($from, $toAdderCollection, [MapperContext::DEEP_TARGET_TO_POPULATE => false]);
 
-    yield 'toCollection' => $autoMapper->map($from, $toCollection);
+    yield 'toCollection' => $autoMapper->map($from, $toCollection, [MapperContext::DEEP_TARGET_TO_POPULATE => false]);
 })();
