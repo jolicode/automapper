@@ -36,12 +36,23 @@ final class ArrayToDoctrineCollectionTransformer implements TransformerInterface
         $baseAssign = new Expr\New_(new Name(ArrayCollection::class));
 
         if ($propertyMapping->target->readAccessor !== null) {
+            $isDefined = $propertyMapping->target->readAccessor->getIsDefinedExpression(new Expr\Variable('result'));
+            $existingValue = $propertyMapping->target->readAccessor->getExpression(new Expr\Variable('result'));
+
+            if (null !== $isDefined) {
+                $existingValue = new Expr\Ternary(
+                    $isDefined,
+                    $existingValue,
+                    $baseAssign
+                );
+            }
+
             $baseAssign = new Expr\Ternary(
                 new Expr\BinaryOp\Coalesce(
                     new Expr\ArrayDimFetch(new Expr\Variable('context'), new Scalar\String_(MapperContext::DEEP_TARGET_TO_POPULATE)),
                     new Expr\ConstFetch(new Name('false'))
                 ),
-                $propertyMapping->target->readAccessor->getExpression(new Expr\Variable('result')),
+                $existingValue,
                 $baseAssign,
             );
         }
