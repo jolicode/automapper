@@ -8,13 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-
 - [GH#246](https://github.com/jolicode/automapper/pull/246) Add support for PHP 8.4
 - [GH#246](https://github.com/jolicode/automapper/pull/246) Add support for API Platform 4
+- [GH#252](https://github.com/jolicode/automapper/pull/252) Add support for SerializedName attributes
+- [GH#251](https://github.com/jolicode/automapper/pull/251) Allow to map extra properties on array/object
+- [GH#242](https://github.com/jolicode/automapper/pull/242) Add support for DiscriminatorMap with interface
+- [GH#256](https://github.com/jolicode/automapper/pull/256) Allow nested array to be transformed to object
+- [GH#262](https://github.com/jolicode/automapper/pull/262) Allow to extract types from getter
+- [GH#261](https://github.com/jolicode/automapper/pull/261) Remove existing values when using adder and remover on collection
 
 ### Changed
+- [GH#243](https://github.com/jolicode/automapper/pull/243) [GH#258](https://github.com/jolicode/automapper/pull/258) Clean the tests suite
+- [GH#264](https://github.com/jolicode/automapper/pull/264) Upgrade phpstan to make it work with PHP 8.4
+- [GH#257](https://github.com/jolicode/automapper/pull/257) Better error reporting of missing 'typePropery' when using DiscriminatorMap
+- [GH#265](https://github.com/jolicode/automapper/pull/265) Set deep populate to true if passing an existing value
+- [GH#266](https://github.com/jolicode/automapper/pull/266) Use composer to get installed versions instead of const
 
-## [9.3.0] - 2025-03-07
+### Fixed
+- [GH#244](https://github.com/jolicode/automapper/pull/244) Avoid double CI run
+- [GH#247](https://github.com/jolicode/automapper/pull/247) Update invalid syntax in configuration.md for constant
+- [GH#255](https://github.com/jolicode/automapper/pull/255) Fix array and collection when using deep target populate
+
+## [9.3.1] - 2025-03-07
 ### Fixed
 - [GH#236](https://github.com/jolicode/automapper/pull/236) Fix null values being used in constructor arguments when not allowed
 
@@ -383,7 +398,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * [AutoMapper] [GH#179](https://github.com/janephp/janephp/pull/179) Fixing incompatible changes in Symfony 5.0
 
-[Unreleased]: https://github.com/jolicode/automapper/compare/9.3.0...HEAD
+[Unreleased]: https://github.com/jolicode/automapper/compare/9.3.1...HEAD
+[9.3.1]: https://github.com/janephp/janephp/compare/9.3.0...9.3.1
 [9.3.0]: https://github.com/janephp/janephp/compare/9.2.1...9.3.0
 [9.2.1]: https://github.com/janephp/janephp/compare/9.2.0...9.2.1
 [9.2.0]: https://github.com/janephp/janephp/compare/9.1.2...9.2.0
