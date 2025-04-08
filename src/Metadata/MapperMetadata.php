@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Metadata;
 
 use AutoMapper\AutoMapper;
+use Composer\InstalledVersions;
 
 class MapperMetadata
 {
@@ -67,7 +68,7 @@ class MapperMetadata
             }
         }
 
-        $hash .= AutoMapper::VERSION;
+        $hash .= InstalledVersions::getVersion('jolicode/automapper');
 
         return $hash;
     }
