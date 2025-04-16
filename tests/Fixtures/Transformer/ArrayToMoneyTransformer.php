@@ -21,7 +21,7 @@ use PhpParser\Node\Scalar\String_;
  */
 final class ArrayToMoneyTransformer implements TransformerInterface
 {
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr $existingValue = null): array
     {
         return [new Expr\New_(new Name\FullyQualified(Money::class), [
             new Arg(new Expr\ArrayDimFetch($input, new String_('amount'))),
