@@ -69,10 +69,15 @@ abstract readonly class AbstractArrayTransformer implements TransformerInterface
                 );
 
                 if ($propertyMapping->target->readAccessor !== null && $this->itemTransformer instanceof IdentifierHashInterface) {
+                    $targetHashVar = new Expr\Variable($uniqueVariableScope->getUniqueName('targetHash'));
+
                     $loopExistingStatements[] = new Stmt\If_($isDeepPopulateExpr, [
                         'stmts' => [
-                        new Stmt\Expression(new Expr\Assign(new Expr\ArrayDimFetch($exisingValuesIndexed, $this->itemTransformer->getTargetHashExpression($loopRemoveValueVar)), $loopRemoveValueVar)),
-                            ],
+                            new Stmt\Expression(new Expr\Assign($targetHashVar, $this->itemTransformer->getTargetHashExpression($loopRemoveValueVar))),
+                            new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name('null')), $targetHashVar), [
+                                'stmts' => [new Stmt\Expression(new Expr\Assign(new Expr\ArrayDimFetch($exisingValuesIndexed, $targetHashVar), $loopRemoveValueVar))],
+                            ]),
+                        ],
                     ]);
                 }
 
@@ -96,17 +101,24 @@ abstract readonly class AbstractArrayTransformer implements TransformerInterface
                     new Stmt\Expression($propertyMapping->target->writeMutator->getExpression($target, $mappedValueVar, $assignByRef)),
                 ],
             ]);
-
-        // @TODO handle existingValue
         } else {
             $loopExistingValueVar = new Expr\Variable($uniqueVariableScope->getUniqueName('existingValue'));
 
             if ($propertyMapping->target->readAccessor !== null && $this->itemTransformer instanceof IdentifierHashInterface) {
                 $hashValueVariable = new Expr\Variable($uniqueVariableScope->getUniqueName('hashValue'));
-                $statements[] = new Stmt\If_(new Expr\BinaryOp\Coalesce(
+
+                $isDeepPopulateExpr = new Expr\BinaryOp\Coalesce(
                     new Expr\ArrayDimFetch(new Expr\Variable('context'), new Scalar\String_(MapperContext::DEEP_TARGET_TO_POPULATE)),
                     new Expr\ConstFetch(new Name('false'))
-                ), [
+                );
+
+                $isDefinedExpr = $propertyMapping->target->readAccessor->getIsDefinedExpression(new Expr\Variable('result'));
+
+                if ($isDefinedExpr !== null) {
+                    $isDeepPopulateExpr = new Expr\BinaryOp\BooleanAnd($isDeepPopulateExpr, $isDefinedExpr);
+                }
+
+                $statements[] = new Stmt\If_($isDeepPopulateExpr, [
                     'stmts' => [
                         new Stmt\Foreach_($propertyMapping->target->readAccessor->getExpression($target), $loopExistingValueVar, [
                             'stmts' => [
