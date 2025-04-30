@@ -99,6 +99,29 @@ final readonly class MapMethodStatementsGenerator
         }
 
         if (\count($duplicatedStatements) > 0 && \count($metadata->getPropertiesInConstructor())) {
+            /**
+             * We know that the last statement is an `if` statement (otherwise we can't add an `else` statement).
+             * Without this logic, the addedDependencies would only be called when the target was set. If the target is
+             * `null` instead, the code looked like:
+             *
+             * ```php
+             * if (null !== result) {
+             *       $result = // Extracted with constructor arguments
+             *       $context = \AutoMapper\MapperContext::withReference($context, $sourceHash, $result);
+             *       $context = \AutoMapper\MapperContext::withIncrementedDepth($context);
+             * } else {
+             *      $context = \AutoMapper\MapperContext::withReference($context, $sourceHash, $result);
+             *      $context = \AutoMapper\MapperContext::withIncrementedDepth($context);
+             *
+             *      $source->propertyName = $this->extractCallbacks['propertyName']($source);
+             * }
+             */
+            $lastStatement = $statements[array_key_last($statements)];
+            \assert($lastStatement instanceof Stmt\If_);
+            $lastStatement->stmts = [
+                ...$lastStatement->stmts,
+                ...$addedDependenciesStatements,
+            ];
             /*
              * Generate else statements when the result is already an object, which means it has already been created,
              * so we need to execute the statements that need to be executed before the constructor since the constructor has already been called
