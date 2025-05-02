@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- [GH#274](https://github.com/jolicode/automapper/pull/274) Fix support for Symfony 7.3
+
 ### Added
 - [GH#246](https://github.com/jolicode/automapper/pull/246) Add support for PHP 8.4
 - [GH#246](https://github.com/jolicode/automapper/pull/246) Add support for API Platform 4

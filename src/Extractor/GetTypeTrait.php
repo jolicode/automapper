@@ -13,9 +13,12 @@ use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use PHPStan\PhpDocParser\Parser\TokenIterator;
 use PHPStan\PhpDocParser\Parser\TypeParser;
 use PHPStan\PhpDocParser\ParserConfig;
+use Symfony\Component\PropertyInfo\PhpStan\NameScope;
 use Symfony\Component\PropertyInfo\PhpStan\NameScopeFactory;
 use Symfony\Component\PropertyInfo\Type;
 use Symfony\Component\PropertyInfo\Util\PhpStanTypeHelper;
+use Symfony\Component\TypeInfo\TypeContext\TypeContext;
+use Symfony\Component\TypeInfo\TypeContext\TypeContextFactory;
 
 /**
  * Add helper functions to extract types from a property.
@@ -58,13 +61,12 @@ trait GetTypeTrait
             }
         }
 
-        static $nameScopeFactory = new NameScopeFactory();
         static $phpStanTypeHelper = new PhpStanTypeHelper();
 
         $tokens = new TokenIterator($lexer->tokenize($rawDocNode));
         $docNode = $phpDocParser->parse($tokens);
         $tokens->consumeTokenType(Lexer::TOKEN_END);
-        $nameScope = $nameScopeFactory->create($class, $declaringClass);
+        $nameScope = $this->createNameScope($class, $declaringClass);
 
         $types = [];
 
@@ -158,5 +160,19 @@ trait GetTypeTrait
         }
 
         return $name;
+    }
+
+    private function createNameScope(string $class, string $declaringClass): NameScope|TypeContext
+    {
+        // For Symfony <=7.2. To remove when we drop support for Symfony <= 7.2
+        if (class_exists(NameScopeFactory::class)) {
+            static $nameScopeFactory = new NameScopeFactory();
+
+            return $nameScopeFactory->create($class, $declaringClass);
+        }
+
+        static $typeContextFactory = new TypeContextFactory();
+
+        return $typeContextFactory->createFromClassName($class, $declaringClass);
     }
 }
