@@ -20,6 +20,8 @@ use AutoMapper\Tests\Fixtures\AddressDTOWithReadonly;
 use AutoMapper\Tests\Fixtures\AddressDTOWithReadonlyPromotedProperty;
 use AutoMapper\Tests\Fixtures\AddressType;
 use AutoMapper\Tests\Fixtures\AddressWithEnum;
+use AutoMapper\Tests\Fixtures\Category;
+use AutoMapper\Tests\Fixtures\CategoryDTO;
 use AutoMapper\Tests\Fixtures\ClassWithMapToContextAttribute;
 use AutoMapper\Tests\Fixtures\ClassWithNullablePropertyInConstructor;
 use AutoMapper\Tests\Fixtures\ClassWithPrivateProperty;
@@ -40,6 +42,7 @@ use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
 use AutoMapper\Tests\Fixtures\Order;
 use AutoMapper\Tests\Fixtures\PetOwner;
 use AutoMapper\Tests\Fixtures\PetOwnerWithConstructorArguments;
+use AutoMapper\Tests\Fixtures\Post;
 use AutoMapper\Tests\Fixtures\SourceForConstructorWithDefaultValues;
 use AutoMapper\Tests\Fixtures\Transformer\MoneyTransformerFactory;
 use AutoMapper\Tests\Fixtures\Uninitialized;
@@ -1374,6 +1377,19 @@ class AutoMapperTest extends AutoMapperTestCase
 
             $this->assertSame($expected, $dump, sprintf('The dump of the map file "%s" is not as expected.', $key));
         }
+    }
+
+    public function testCircularReferenceForPromotedProperties(): void
+    {
+        $category = new Category('Category');
+        $category->posts[] = new Post('Example', $category);
+
+        $categoryDTO = $this->autoMapper->map($category, CategoryDTO::class);
+
+        self::assertEquals('Category', $categoryDTO->name);
+        self::assertCount(1, $categoryDTO->posts);
+        self::assertEquals('Example', $categoryDTO->posts[0]->name);
+        self::assertEquals($categoryDTO, $categoryDTO->posts[0]->category);
     }
 
     public static function provideAutoMapperFixturesTests(): iterable
