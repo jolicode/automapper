@@ -9,3 +9,4 @@ cache/
 site/
 .build/
 .castor*
+tests/Doctrine/db.sqlite
