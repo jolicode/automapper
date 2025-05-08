@@ -1,0 +1,5 @@
+AutoMapper\Tests\AutoMapperTest\ArrayNested\UserEntity {
+  +"roles": [
+    "ROLE_USER"
+  ]
+}
