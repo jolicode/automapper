@@ -7,9 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-- [GH#274](https://github.com/jolicode/automapper/pull/274) Fix support for Symfony 7.3
-
+## [9.4.0] - 2025-05-30
 ### Added
 - [GH#246](https://github.com/jolicode/automapper/pull/246) Add support for PHP 8.4
 - [GH#246](https://github.com/jolicode/automapper/pull/246) Add support for API Platform 4
@@ -31,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#244](https://github.com/jolicode/automapper/pull/244) Avoid double CI run
 - [GH#247](https://github.com/jolicode/automapper/pull/247) Update invalid syntax in configuration.md for constant
 - [GH#255](https://github.com/jolicode/automapper/pull/255) Fix array and collection when using deep target populate
+- [GH#274](https://github.com/jolicode/automapper/pull/274) Fix support for Symfony 7.3
 
 ## [9.3.1] - 2025-03-07
 ### Fixed
@@ -401,7 +400,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * [AutoMapper] [GH#179](https://github.com/janephp/janephp/pull/179) Fixing incompatible changes in Symfony 5.0
 
-[Unreleased]: https://github.com/jolicode/automapper/compare/9.3.1...HEAD
+[Unreleased]: https://github.com/jolicode/automapper/compare/9.4.0...HEAD
+[9.4.0]: https://github.com/janephp/janephp/compare/9.3.1...9.4.0
 [9.3.1]: https://github.com/janephp/janephp/compare/9.3.0...9.3.1
 [9.3.0]: https://github.com/janephp/janephp/compare/9.2.1...9.3.0
 [9.2.1]: https://github.com/janephp/janephp/compare/9.2.0...9.2.1

@@ -162,6 +162,9 @@ trait GetTypeTrait
         return $name;
     }
 
+    /**
+     * @phpstan-ignore class.notFound
+     */
     private function createNameScope(string $class, string $declaringClass): NameScope|TypeContext
     {
         // For Symfony <=7.2. To remove when we drop support for Symfony <= 7.2
