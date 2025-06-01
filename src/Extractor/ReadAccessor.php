@@ -32,17 +32,24 @@ final class ReadAccessor
     public const TYPE_SOURCE = 4;
     public const TYPE_ARRAY_ACCESS = 5;
 
+    public const EXTRACT_IS_UNDEFINED_CALLBACK = 'extractIsUndefinedCallbacks';
+    public const EXTRACT_IS_NULL_CALLBACK = 'extractIsNullCallbacks';
+    public const EXTRACT_CALLBACK = 'extractCallbacks';
+    public const EXTRACT_TARGET_IS_UNDEFINED_CALLBACK = 'extractTargetIsUndefinedCallbacks';
+    public const EXTRACT_TARGET_IS_NULL_CALLBACK = 'extractTargetIsNullCallbacks';
+    public const EXTRACT_TARGET_CALLBACK = 'extractTargetCallbacks';
+
     /**
      * @param array<string, string> $context
      */
     public function __construct(
-        private readonly int $type,
-        private readonly string $accessor,
-        private readonly ?string $sourceClass = null,
-        private readonly bool $private = false,
-        private readonly ?string $property = null,
+        public readonly int $type,
+        public readonly string $accessor,
+        public readonly ?string $sourceClass = null,
+        public readonly bool $private = false,
+        public readonly ?string $property = null,
         // will be the name of the property if different from accessor
-        private readonly array $context = [],
+        public readonly array $context = [],
     ) {
         if (self::TYPE_METHOD === $this->type && null === $this->sourceClass) {
             throw new InvalidArgumentException('Source class must be provided when using "method" type.');
@@ -54,7 +61,7 @@ final class ReadAccessor
      *
      * @throws CompileException
      */
-    public function getExpression(Expr $input): Expr
+    public function getExpression(Expr $input, bool $target = false): Expr
     {
         if (self::TYPE_METHOD === $this->type) {
             $methodCallArguments = [];
@@ -99,7 +106,7 @@ final class ReadAccessor
                  * $this->extractCallbacks['method_name']($input)
                  */
                 return new Expr\FuncCall(
-                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractCallbacks'), new Scalar\String_($this->property ?? $this->accessor)),
+                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), $target ? self::EXTRACT_TARGET_CALLBACK : self::EXTRACT_CALLBACK), new Scalar\String_($this->property ?? $this->accessor)),
                     [
                         new Arg($input),
                     ]
@@ -124,7 +131,7 @@ final class ReadAccessor
                  * $this->extractCallbacks['property_name']($input)
                  */
                 return new Expr\FuncCall(
-                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractCallbacks'), new Scalar\String_($this->accessor)),
+                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), $target ? self::EXTRACT_TARGET_CALLBACK : self::EXTRACT_CALLBACK), new Scalar\String_($this->accessor)),
                     [
                         new Arg($input),
                     ]
@@ -155,7 +162,7 @@ final class ReadAccessor
         throw new CompileException('Invalid accessor for read expression');
     }
 
-    public function getIsDefinedExpression(Expr\Variable $input, bool $nullable = false): ?Expr
+    public function getIsDefinedExpression(Expr\Variable $input, bool $nullable = false, bool $target = false): ?Expr
     {
         // It is not possible to check if the underlying data is defined, assumes it is, php will throw an error if it is not
         if (!$nullable && \in_array($this->type, [self::TYPE_METHOD, self::TYPE_SOURCE])) {
@@ -172,7 +179,7 @@ final class ReadAccessor
                  * !$this->extractIsUndefinedCallbacks['property_name']($input)
                  */
                 return new Expr\BooleanNot(new Expr\FuncCall(
-                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractIsUndefinedCallbacks'), new Scalar\String_($this->accessor)),
+                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), $target ? self::EXTRACT_TARGET_IS_UNDEFINED_CALLBACK : self::EXTRACT_IS_UNDEFINED_CALLBACK), new Scalar\String_($this->accessor)),
                     [
                         new Arg($input),
                     ]
@@ -212,7 +219,7 @@ final class ReadAccessor
         return null;
     }
 
-    public function getIsNullExpression(Expr\Variable $input): Expr
+    public function getIsNullExpression(Expr\Variable $input, bool $target = false): Expr
     {
         if (self::TYPE_METHOD === $this->type) {
             $methodCallExpr = $this->getExpression($input);
@@ -236,7 +243,7 @@ final class ReadAccessor
                  * $this->extractIsNullCallbacks['property_name']($input)
                  */
                 return new Expr\FuncCall(
-                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractIsNullCallbacks'), new Scalar\String_($this->accessor)),
+                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), $target ? self::EXTRACT_TARGET_IS_NULL_CALLBACK : self::EXTRACT_IS_NULL_CALLBACK), new Scalar\String_($this->accessor)),
                     [
                         new Arg($input),
                     ]
@@ -270,7 +277,7 @@ final class ReadAccessor
         throw new CompileException('Invalid accessor for read expression');
     }
 
-    public function getIsUndefinedExpression(Expr\Variable $input): Expr
+    public function getIsUndefinedExpression(Expr\Variable $input, bool $target = false): Expr
     {
         if (\in_array($this->type, [self::TYPE_METHOD, self::TYPE_SOURCE])) {
             /*
@@ -289,7 +296,7 @@ final class ReadAccessor
                  * $this->extractIsUndefinedCallbacks['property_name']($input)
                  */
                 return new Expr\FuncCall(
-                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractIsUndefinedCallbacks'), new Scalar\String_($this->accessor)),
+                    new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), $target ? self::EXTRACT_TARGET_IS_UNDEFINED_CALLBACK : self::EXTRACT_IS_UNDEFINED_CALLBACK), new Scalar\String_($this->accessor)),
                     [
                         new Arg($input),
                     ]

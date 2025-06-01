@@ -326,6 +326,7 @@ final class MetadataFactory
                 $propertyMappedEvent->if,
                 $propertyMappedEvent->groups,
                 $propertyMappedEvent->disableGroupsCheck,
+                $propertyMappedEvent->identifier ?? false,
             );
         }
 
