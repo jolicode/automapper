@@ -14,6 +14,7 @@ use AutoMapper\Loader\ClassLoaderInterface;
 use AutoMapper\Loader\EvalLoader;
 use AutoMapper\Loader\FileLoader;
 use AutoMapper\Loader\FileReloadStrategy;
+use AutoMapper\Metadata\MetadataFactory;
 use AutoMapper\Normalizer\AutoMapperNormalizer;
 use AutoMapper\Provider\ProviderInterface;
 use AutoMapper\Symfony\Bundle\CacheWarmup\CacheWarmer;
@@ -71,6 +72,14 @@ class AutoMapperExtension extends Extension
             ->setArgument('$reloadStrategy', $reloadStrategy = FileReloadStrategy::from($config['loader']['reload_strategy'] ?? (
                 $container->getParameter('kernel.debug') ? FileReloadStrategy::ALWAYS->value : FileReloadStrategy::NEVER->value
             )))
+        ;
+
+        if (!$config['remove_default_properties']) {
+            trigger_deprecation('jolicode/automapper', '9.4', 'Not removing default properties is deprecated and will be always true in future versions, set \'remove_default_properties\' config parameter to true, and check that your mapping is correct.', __CLASS__);
+        }
+
+        $container->getDefinition(MetadataFactory::class)
+            ->setArgument('$removeDefaultProperties', $config['remove_default_properties'])
         ;
 
         if ($config['map_private_properties']) {
