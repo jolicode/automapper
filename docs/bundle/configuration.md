@@ -15,6 +15,7 @@ automapper:
   auto_register: true
   map_private_properties: true
   allow_readonly_target_to_populate: false
+  remove_default_properties: true
   normalizer:
     enabled: false
     only_registered_mapping: false
@@ -56,6 +57,10 @@ automapper:
 * `map_private_properties` (default: `true`): If the mapper should map private properties;
 * `allow_readonly_target_to_populate` (default: `false`): Will throw an exception if you use a readonly class as target
   to populate if set to `false`.
+* `remove_default_properties` (default: `false`): Before 9.4 when renaming a property, the mapper would keep the old
+  property name in the target object which resulted in a duplicated property, this option will remove the default properties 
+  from the target object when mapping and will always be true in next major version, you should set it to `true` to avoid
+  any issues in the future;
 * `normalizer`:  Configure how the normalizer should behave;
     * `enabled` (default: `false`): If the normalizer should be enabled;
     * `only_registered_mapping` (default: `false`): If the normalizer should only use the registered mapping;
