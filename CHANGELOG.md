@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [9.4.1] - 2025-06-03
 ### Fixed
 - [GH#278](https://github.com/jolicode/automapper/pull/278) Allow to set remove default property config in symfony bundle
 
@@ -402,7 +404,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * [AutoMapper] [GH#179](https://github.com/janephp/janephp/pull/179) Fixing incompatible changes in Symfony 5.0
 
-[Unreleased]: https://github.com/jolicode/automapper/compare/9.4.0...HEAD
+[Unreleased]: https://github.com/jolicode/automapper/compare/9.4.1...HEAD
+[9.4.1]: https://github.com/janephp/janephp/compare/9.4.0...9.4.1
 [9.4.0]: https://github.com/janephp/janephp/compare/9.3.1...9.4.0
 [9.3.1]: https://github.com/janephp/janephp/compare/9.3.0...9.3.1
 [9.3.0]: https://github.com/janephp/janephp/compare/9.2.1...9.3.0
