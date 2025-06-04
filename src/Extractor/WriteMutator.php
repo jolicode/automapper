@@ -161,7 +161,7 @@ final class WriteMutator
                     $reflectionMethod->getDocComment(),
                     $target,
                     $reflectionMethod->getDeclaringClass()->getName(),
-                    $this->property,
+                    $reflectionMethod->getParameters()[0]->name,
                     '@param'
                 )) {
                     return $types;

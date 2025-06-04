@@ -1,0 +1,8 @@
+AutoMapper\Tests\AutoMapperTest\Issue269\Entity {
+  -paymentMethods: [
+    AutoMapper\Tests\AutoMapperTest\Issue269\PaymentMethod {
+      +name: "First"
+      +value: "First"
+    }
+  ]
+}
