@@ -1363,7 +1363,7 @@ class AutoMapperTest extends AutoMapperTestCase
             }
 
             if ($_SERVER['UPDATE_FIXTURES'] ?? false) {
-                file_put_contents($expectedFile, $dump);
+                file_put_contents($expectedFile, $dump . "\n");
             }
 
             if (!file_exists($expectedFile)) {
