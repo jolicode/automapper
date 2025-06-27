@@ -1,0 +1,14 @@
+AutoMapper\Tests\AutoMapperTest\DeepPopulateMergeExisting\FooAdder {
+  -bars: [
+    AutoMapper\Tests\AutoMapperTest\DeepPopulateMergeExisting\Bar {
+      -id: 1
+      +bar: "bar3"
+      +foo: "foo1"
+    }
+    AutoMapper\Tests\AutoMapperTest\DeepPopulateMergeExisting\Bar {
+      -id: 10
+      +bar: "bar4"
+      +foo: "default"
+    }
+  ]
+}

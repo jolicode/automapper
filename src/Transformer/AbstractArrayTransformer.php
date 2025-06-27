@@ -27,47 +27,30 @@ abstract readonly class AbstractArrayTransformer implements TransformerInterface
 
     abstract protected function getAssignExpr(Expr $valuesVar, Expr $outputVar, Expr $loopKeyVar, bool $assignByRef): Expr;
 
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr $existingValue = null): array
     {
         /**
          * $values = [];.
          */
         $valuesVar = new Expr\Variable($uniqueVariableScope->getUniqueName('values'));
-        $baseAssign = new Expr\Array_();
-
-        if ($propertyMapping->target->readAccessor !== null) {
-            $isDefined = $propertyMapping->target->readAccessor->getIsDefinedExpression(new Expr\Variable('result'));
-            $existingValue = $propertyMapping->target->readAccessor->getExpression(new Expr\Variable('result'));
-
-            if (null !== $isDefined) {
-                $existingValue = new Expr\Ternary(
-                    $isDefined,
-                    $existingValue,
-                    $baseAssign
-                );
-            }
-
-            $baseAssign = new Expr\Ternary(
-                new Expr\BinaryOp\Coalesce(
-                    new Expr\ArrayDimFetch(new Expr\Variable('context'), new Scalar\String_(MapperContext::DEEP_TARGET_TO_POPULATE)),
-                    new Expr\ConstFetch(new Name('false'))
-                ),
-                $existingValue,
-                $baseAssign
-            );
-        }
+        $exisingValuesIndexed = new Expr\Variable($uniqueVariableScope->getUniqueName('existingValuesIndexed'));
 
         $statements = [
-            new Stmt\Expression(new Expr\Assign($valuesVar, $baseAssign)),
+            new Stmt\Expression(new Expr\Assign($valuesVar, new Expr\Array_())),
+            new Stmt\Expression(new Expr\Assign($exisingValuesIndexed, new Expr\Array_())),
         ];
 
         $loopValueVar = new Expr\Variable($uniqueVariableScope->getUniqueName('value'));
         $loopKeyVar = new Expr\Variable($uniqueVariableScope->getUniqueName('key'));
 
+        $itemStatements = [];
+        $existingValue = new Expr\Variable($uniqueVariableScope->getUniqueName('existingValue'));
         $assignByRef = $this->itemTransformer instanceof AssignedByReferenceTransformerInterface && $this->itemTransformer->assignByRef();
 
         /* Get the transform statements for the source property */
-        [$output, $itemStatements] = $this->itemTransformer->transform($loopValueVar, $target, $propertyMapping, $uniqueVariableScope, $source);
+        [$output, $transformStatements] = $this->itemTransformer->transform($loopValueVar, $target, $propertyMapping, $uniqueVariableScope, $source, $existingValue);
+
+        $itemStatements = array_merge($itemStatements, $transformStatements);
 
         if (null === $propertyMapping->target->parameterInConstructor && $propertyMapping->target->writeMutator && $propertyMapping->target->writeMutator->type === WriteMutator::TYPE_ADDER_AND_REMOVER) {
             /**
@@ -79,14 +62,39 @@ abstract readonly class AbstractArrayTransformer implements TransformerInterface
             $removeExpr = $propertyMapping->target->writeMutator->getRemoveExpression($target, $loopRemoveValueVar);
 
             if ($propertyMapping->target->readAccessor !== null && $removeExpr !== null) {
+                $loopExistingStatements = [];
+                $isDeepPopulateExpr = new Expr\BinaryOp\Coalesce(
+                    new Expr\ArrayDimFetch(new Expr\Variable('context'), new Scalar\String_(MapperContext::DEEP_TARGET_TO_POPULATE)),
+                    new Expr\ConstFetch(new Name('false'))
+                );
+
+                if ($propertyMapping->target->readAccessor !== null && $this->itemTransformer instanceof IdentifierHashInterface) {
+                    $targetHashVar = new Expr\Variable($uniqueVariableScope->getUniqueName('targetHash'));
+
+                    $loopExistingStatements[] = new Stmt\If_($isDeepPopulateExpr, [
+                        'stmts' => [
+                            new Stmt\Expression(new Expr\Assign($targetHashVar, $this->itemTransformer->getTargetHashExpression($loopRemoveValueVar))),
+                            new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name('null')), $targetHashVar), [
+                                'stmts' => [new Stmt\Expression(new Expr\Assign(new Expr\ArrayDimFetch($exisingValuesIndexed, $targetHashVar), $loopRemoveValueVar))],
+                            ]),
+                        ],
+                    ]);
+                }
+
+                $loopExistingStatements[] = new Stmt\Expression($removeExpr);
+
                 $statements[] = new Stmt\Foreach_($propertyMapping->target->readAccessor->getExpression($target), $loopRemoveValueVar, [
-                    'stmts' => [
-                        new Stmt\Expression($removeExpr),
-                    ],
+                    'stmts' => $loopExistingStatements,
                 ]);
             }
 
             $mappedValueVar = new Expr\Variable($uniqueVariableScope->getUniqueName('mappedValue'));
+            $hashValueTargetVariable = new Expr\Variable($uniqueVariableScope->getUniqueName('hashValueTarget'));
+
+            if ($propertyMapping->target->readAccessor !== null && $this->itemTransformer instanceof IdentifierHashInterface) {
+                $itemStatements[] = new Stmt\Expression(new Expr\Assign($hashValueTargetVariable, $this->itemTransformer->getSourceHashExpression($loopValueVar)));
+                $itemStatements[] = new Stmt\Expression(new Expr\Assign($existingValue, new Expr\BinaryOp\Coalesce(new Expr\ArrayDimFetch($exisingValuesIndexed, $hashValueTargetVariable), new Expr\ConstFetch(new Name('null')))));
+            }
             $itemStatements[] = new Stmt\Expression(new Expr\Assign($mappedValueVar, $output));
             $itemStatements[] = new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name('null')), $mappedValueVar), [
                 'stmts' => [
@@ -94,13 +102,42 @@ abstract readonly class AbstractArrayTransformer implements TransformerInterface
                 ],
             ]);
         } else {
-            /*
-             * Assign the value to the array.
-             *
-             * $values[] = $output;
-             * or
-             * $values[$key] = $output;
-             */
+            $loopExistingValueVar = new Expr\Variable($uniqueVariableScope->getUniqueName('existingValue'));
+
+            if ($propertyMapping->target->readAccessor !== null && $this->itemTransformer instanceof IdentifierHashInterface) {
+                $hashValueVariable = new Expr\Variable($uniqueVariableScope->getUniqueName('hashValue'));
+
+                $isDeepPopulateExpr = new Expr\BinaryOp\Coalesce(
+                    new Expr\ArrayDimFetch(new Expr\Variable('context'), new Scalar\String_(MapperContext::DEEP_TARGET_TO_POPULATE)),
+                    new Expr\ConstFetch(new Name('false'))
+                );
+
+                $isDefinedExpr = $propertyMapping->target->readAccessor->getIsDefinedExpression(new Expr\Variable('result'));
+
+                if ($isDefinedExpr !== null) {
+                    $isDeepPopulateExpr = new Expr\BinaryOp\BooleanAnd($isDeepPopulateExpr, $isDefinedExpr);
+                }
+
+                $statements[] = new Stmt\If_($isDeepPopulateExpr, [
+                    'stmts' => [
+                        new Stmt\Foreach_($propertyMapping->target->readAccessor->getExpression($target), $loopExistingValueVar, [
+                            'stmts' => [
+                                new Stmt\Expression(new Expr\Assign($hashValueVariable, $this->itemTransformer->getTargetHashExpression($loopExistingValueVar))),
+                                new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name('null')), $hashValueVariable), [
+                                    'stmts' => [
+                                        new Stmt\Expression(new Expr\Assign(new Expr\ArrayDimFetch($exisingValuesIndexed, $hashValueVariable), $loopExistingValueVar)),
+                                    ],
+                                ]),
+                            ],
+                        ]),
+                    ],
+                ]);
+
+                $hashValueTargetVariable = new Expr\Variable($uniqueVariableScope->getUniqueName('hashValueTarget'));
+                $itemStatements[] = new Stmt\Expression(new Expr\Assign($hashValueTargetVariable, $this->itemTransformer->getSourceHashExpression($loopValueVar)));
+                $itemStatements[] = new Stmt\Expression(new Expr\Assign($existingValue, new Expr\BinaryOp\Coalesce(new Expr\ArrayDimFetch($exisingValuesIndexed, $hashValueTargetVariable), new Expr\ConstFetch(new Name('null')))));
+            }
+
             $itemStatements[] = new Stmt\Expression($this->getAssignExpr($valuesVar, $output, $loopKeyVar, $assignByRef));
         }
 

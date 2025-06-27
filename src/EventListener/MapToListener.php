@@ -85,6 +85,7 @@ final readonly class MapToListener extends MapListener
             groups: $mapTo->groups,
             priority: $mapTo->priority,
             extractTypesFromGetter: $mapTo->extractTypesFromGetter,
+            identifier: $mapTo->identifier,
         );
 
         if (\array_key_exists($propertyMetadata->target->property, $event->properties) && $event->properties[$propertyMetadata->target->property]->priority >= $propertyMetadata->priority) {

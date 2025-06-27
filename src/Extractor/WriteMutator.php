@@ -32,8 +32,8 @@ final class WriteMutator
 
     public function __construct(
         public readonly int $type,
-        private readonly string $property,
-        private readonly bool $private = false,
+        public readonly string $property,
+        public readonly bool $private = false,
         public readonly ?\ReflectionParameter $parameter = null,
         private readonly ?string $removeMethodName = null,
     ) {

@@ -20,6 +20,7 @@ final readonly class MapTo
      * @param string[]|null                                                                                            $groups                 The groups to map the property
      * @param string|null                                                                                              $dateTimeFormat         The date-time format to use when transforming this property
      * @param bool|null                                                                                                $extractTypesFromGetter If true, the types will be extracted from the getter method
+     * @param bool|null                                                                                                $identifier             If true, the property will be used as an identifier
      */
     public function __construct(
         public string|array|null $target = null,
@@ -32,6 +33,7 @@ final readonly class MapTo
         public int $priority = 0,
         public ?string $dateTimeFormat = null,
         public ?bool $extractTypesFromGetter = null,
+        public ?bool $identifier = null,
     ) {
     }
 }
