@@ -89,10 +89,6 @@ final class GeneratorMetadata
             return false;
         }
 
-        if ($constructor->getDeclaringClass()->isInterface() || $constructor->getDeclaringClass()->isAbstract()) {
-            return false;
-        }
-
         $parameters = $constructor->getParameters();
         $mandatoryParameters = [];
 
