@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.4.2] - 2025-07-17
+### Changed
+- [GH#286](https://github.com/jolicode/automapper/pull/286) Optimize condition order to avoid unnecessary method calls by prioritizing custom conditions
+
 ## [Unreleased]
 ### Fixed
 - [GH#272](https://github.com/jolicode/automapper/pull/272) Fixed circular references with promoted properties 

@@ -40,6 +40,7 @@ final readonly class PropertyConditionsGenerator
     {
         $conditions = [];
 
+        $conditions[] = $this->customCondition($metadata, $propertyMetadata);
         $conditions[] = $this->propertyExistsForStdClass($metadata, $propertyMetadata);
         $conditions[] = $this->propertyExistsForArray($metadata, $propertyMetadata);
 
@@ -59,8 +60,6 @@ final readonly class PropertyConditionsGenerator
 
             $conditions[] = $this->maxDepthCheck($metadata, $propertyMetadata);
         }
-
-        $conditions[] = $this->customCondition($metadata, $propertyMetadata);
 
         $conditions = array_values(array_filter($conditions));
 
