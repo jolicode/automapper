@@ -11,6 +11,7 @@ class UserApiResource
     public array $roles; // ["ROLE_USER"]
 }
 
+#[\AllowDynamicProperties]
 class UserEntity
 {
     public function setRoles(array $roles)
