@@ -36,6 +36,16 @@ abstract class GeneratedMapper implements MapperInterface
     {
     }
 
+    public function getSourceHash(mixed $value): ?string
+    {
+        return null;
+    }
+
+    public function getTargetHash(mixed $value): ?string
+    {
+        return null;
+    }
+
     /** @var array<string, MapperInterface<object, object>|MapperInterface<object, array<mixed>>|MapperInterface<array<mixed>, object>> */
     protected array $mappers = [];
 
@@ -50,6 +60,15 @@ abstract class GeneratedMapper implements MapperInterface
 
     /** @var array<string, callable(): bool>) */
     protected array $extractIsUndefinedCallbacks = [];
+
+    /** @var array<string, callable(): mixed> */
+    protected array $extractTargetCallbacks = [];
+
+    /** @var array<string, callable(): bool>) */
+    protected array $extractTargetIsNullCallbacks = [];
+
+    /** @var array<string, callable(): bool>) */
+    protected array $extractTargetIsUndefinedCallbacks = [];
 
     /** @var Target|\ReflectionClass<object> */
     protected mixed $cachedTarget;

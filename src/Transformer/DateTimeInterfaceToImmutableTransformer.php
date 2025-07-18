@@ -19,7 +19,7 @@ use PhpParser\Node\Name;
  */
 final class DateTimeInterfaceToImmutableTransformer implements TransformerInterface
 {
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr $existingValue = null): array
     {
         /*
          * Handles all DateTime instance types using createFromInterface.

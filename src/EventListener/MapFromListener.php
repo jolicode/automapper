@@ -84,6 +84,7 @@ final readonly class MapFromListener extends MapListener
             groups: $mapFrom->groups,
             priority: $mapFrom->priority,
             extractTypesFromGetter: $mapFrom->extractTypesFromGetter,
+            identifier: $mapFrom->identifier,
         );
 
         if (\array_key_exists($propertyMetadata->target->property, $event->properties) && $event->properties[$propertyMetadata->target->property]->priority >= $propertyMetadata->priority) {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator;
 
+use AutoMapper\Extractor\ReadAccessor;
 use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\PropertyMetadata;
@@ -32,6 +33,9 @@ final readonly class MapperConstructorGenerator
             $constructStatements[] = $this->extractCallbackForProperty($metadata, $propertyMetadata);
             $constructStatements[] = $this->extractIsNullCallbackForProperty($metadata, $propertyMetadata);
             $constructStatements[] = $this->extractIsUndefinedCallbackForProperty($metadata, $propertyMetadata);
+            $constructStatements[] = $this->extractTargetCallbackForProperty($metadata, $propertyMetadata);
+            $constructStatements[] = $this->extractTargetIsNullCallbackForProperty($metadata, $propertyMetadata);
+            $constructStatements[] = $this->extractTargetIsUndefinedCallbackForProperty($metadata, $propertyMetadata);
             $constructStatements[] = $this->hydrateCallbackForProperty($metadata, $propertyMetadata);
         }
 
@@ -102,6 +106,72 @@ final readonly class MapperConstructorGenerator
         return new Stmt\Expression(
             new Expr\Assign(
                 new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), 'extractIsUndefinedCallbacks'), new Scalar\String_($propertyMetadata->source->property)),
+                $extractUndefinedCallback
+            ));
+    }
+
+    /**
+     * Add read callback to the constructor of the generated mapper.
+     *
+     * ```php
+     * $this->extractCallbacks['propertyName'] = $extractCallback;
+     * ```
+     */
+    private function extractTargetCallbackForProperty(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Stmt\Expression
+    {
+        $extractCallback = $propertyMetadata->target->readAccessor?->getExtractCallback($metadata->mapperMetadata->target);
+
+        if (!$extractCallback) {
+            return null;
+        }
+
+        return new Stmt\Expression(
+            new Expr\Assign(
+                new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), ReadAccessor::EXTRACT_TARGET_CALLBACK), new Scalar\String_($propertyMetadata->target->property)),
+                $extractCallback
+            ));
+    }
+
+    /**
+     * Add read callback to the constructor of the generated mapper.
+     *
+     * ```php
+     * $this->extractIsNullCallbacks['propertyName'] = $extractIsNullCallback;
+     * ```
+     */
+    private function extractTargetIsNullCallbackForProperty(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Stmt\Expression
+    {
+        $extractNullCallback = $propertyMetadata->target->readAccessor?->getExtractIsNullCallback($metadata->mapperMetadata->target);
+
+        if (!$extractNullCallback) {
+            return null;
+        }
+
+        return new Stmt\Expression(
+            new Expr\Assign(
+                new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), ReadAccessor::EXTRACT_TARGET_IS_NULL_CALLBACK), new Scalar\String_($propertyMetadata->target->property)),
+                $extractNullCallback
+            ));
+    }
+
+    /**
+     * Add read callback to the constructor of the generated mapper.
+     *
+     * ```php
+     * $this->extractIsUndefinedCallbacks['propertyName'] = $extractIsNullCallback;
+     * ```
+     */
+    private function extractTargetIsUndefinedCallbackForProperty(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Stmt\Expression
+    {
+        $extractUndefinedCallback = $propertyMetadata->target->readAccessor?->getExtractIsUndefinedCallback($metadata->mapperMetadata->target);
+
+        if (!$extractUndefinedCallback) {
+            return null;
+        }
+
+        return new Stmt\Expression(
+            new Expr\Assign(
+                new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), ReadAccessor::EXTRACT_TARGET_IS_UNDEFINED_CALLBACK), new Scalar\String_($propertyMetadata->target->property)),
                 $extractUndefinedCallback
             ));
     }
