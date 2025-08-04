@@ -9,7 +9,7 @@ use AutoMapper\Tests\AutoMapperBuilder;
 abstract readonly class Fruit
 {
     public function __construct(
-        public int $weight
+        public int $weight,
     ) {
     }
 }

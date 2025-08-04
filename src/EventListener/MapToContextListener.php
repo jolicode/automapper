@@ -16,7 +16,7 @@ use Symfony\Component\PropertyInfo\PropertyReadInfo;
 final readonly class MapToContextListener
 {
     public function __construct(
-        private ReflectionExtractor $extractor
+        private ReflectionExtractor $extractor,
     ) {
     }
 

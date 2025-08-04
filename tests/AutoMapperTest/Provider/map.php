@@ -12,7 +12,7 @@ use AutoMapper\Tests\AutoMapperBuilder;
 final readonly class CustomProvider implements ProviderInterface
 {
     public function __construct(
-        private object|array|null $value
+        private object|array|null $value,
     ) {
     }
 

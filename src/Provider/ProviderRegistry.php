@@ -36,7 +36,7 @@ final readonly class ProviderRegistry
     public function getProvider(string $id): ProviderInterface
     {
         if (!\array_key_exists($id, $this->providers)) {
-            throw new InvalidArgumentException(sprintf('Provider with id "%s" not found.', $id));
+            throw new InvalidArgumentException(\sprintf('Provider with id "%s" not found.', $id));
         }
 
         return $this->providers[$id];

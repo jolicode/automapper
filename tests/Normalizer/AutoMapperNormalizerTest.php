@@ -109,7 +109,7 @@ class AutoMapperNormalizerTest extends AutoMapperTestCase
         self::assertFalse($this->normalizer->supportsNormalization(['foo']));
         self::assertFalse($this->normalizer->supportsNormalization('{"foo":1}'));
 
-        $iterator = new class() implements \IteratorAggregate {
+        $iterator = new class implements \IteratorAggregate {
             public function getIterator(): \Traversable
             {
                 yield 'id' => 1;
@@ -156,7 +156,7 @@ class AutoMapperNormalizerTest extends AutoMapperTestCase
     public function testItUsesSerializerContext(): void
     {
         $normalizer = new AutoMapperNormalizer(
-            new class() implements AutoMapperInterface, AutoMapperRegistryInterface {
+            new class implements AutoMapperInterface, AutoMapperRegistryInterface {
                 public function map(array|object|null $source, string|array|object $target, array $context = []): array|object|null
                 {
                     return $context;
@@ -169,7 +169,7 @@ class AutoMapperNormalizerTest extends AutoMapperTestCase
 
                 public function getMapper(string $source, string $target): MapperInterface
                 {
-                    return new class() implements MapperInterface {
+                    return new class implements MapperInterface {
                         public function &map($value, array $context = []): mixed
                         {
                             return $value;

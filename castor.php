@@ -10,7 +10,7 @@ use function Castor\PHPQa\phpstan;
 #[AsTask('cs:check', namespace: 'qa', description: 'Check for coding standards without fixing them')]
 function qa_cs_check()
 {
-    php_cs_fixer(['fix', '--config', __DIR__ . '/.php-cs-fixer.php', '--dry-run', '--diff'], '3.50', [
+    php_cs_fixer(['fix', '--config', __DIR__ . '/.php-cs-fixer.php', '--dry-run', '--diff'], '3.85.1', [
         'kubawerlos/php-cs-fixer-custom-fixers' => '^3.21',
     ]);
 }
@@ -18,7 +18,7 @@ function qa_cs_check()
 #[AsTask('cs:fix', namespace: 'qa', description: 'Fix all coding standards', aliases: ['cs'])]
 function qa_cs_fix()
 {
-    php_cs_fixer(['fix', '--config', __DIR__ . '/.php-cs-fixer.php', '-v'], '3.50', [
+    php_cs_fixer(['fix', '--config', __DIR__ . '/.php-cs-fixer.php', '-v'], '3.85.1', [
         'kubawerlos/php-cs-fixer-custom-fixers' => '^3.21',
     ]);
 }

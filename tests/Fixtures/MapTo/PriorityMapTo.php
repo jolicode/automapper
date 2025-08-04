@@ -11,7 +11,7 @@ class PriorityMapTo
     public function __construct(
         #[MapTo('array', ignore: true, priority: 0)]
         #[MapTo('array', ignore: false, priority: 10)]
-        public string $foo
+        public string $foo,
     ) {
     }
 }

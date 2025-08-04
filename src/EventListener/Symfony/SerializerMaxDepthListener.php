@@ -10,7 +10,7 @@ use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
 final readonly class SerializerMaxDepthListener
 {
     public function __construct(
-        private ClassMetadataFactoryInterface $classMetadataFactory
+        private ClassMetadataFactoryInterface $classMetadataFactory,
     ) {
     }
 

@@ -16,7 +16,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class DebugMapperCommand extends Command
 {
     public function __construct(
-        private readonly MetadataFactory $metadataFactory
+        private readonly MetadataFactory $metadataFactory,
     ) {
         parent::__construct('debug:mapper');
     }
@@ -72,7 +72,7 @@ final class DebugMapperCommand extends Command
         $style->section('Used Properties:');
 
         $style->table(
-            [sprintf('%s -> %s', $source, $target), 'If', 'Transformer', 'Groups', 'MaxDepth'],
+            [\sprintf('%s -> %s', $source, $target), 'If', 'Transformer', 'Groups', 'MaxDepth'],
             array_map(
                 fn (PropertyMetadata $property) => [
                     $property->source->property . ' -> ' . $property->target->property,
@@ -88,7 +88,7 @@ final class DebugMapperCommand extends Command
         $style->section('Not Used Properties:');
 
         $style->table(
-            [sprintf('%s -> %s', $source, $target), 'Not used reason'],
+            [\sprintf('%s -> %s', $source, $target), 'Not used reason'],
             array_map(
                 fn (PropertyMetadata $property) => [
                     $property->source->property . ' -> ' . $property->target->property,

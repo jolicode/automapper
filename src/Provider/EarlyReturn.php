@@ -13,7 +13,7 @@ final class EarlyReturn
      * @param object|array<mixed>|null $value
      */
     public function __construct(
-        public object|array|null $value
+        public object|array|null $value,
     ) {
     }
 }

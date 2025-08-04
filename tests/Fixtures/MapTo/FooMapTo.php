@@ -19,7 +19,7 @@ class FooMapTo
         #[MapTo('array', property: 'transformFromStringStatic', transformer: 'transformFromStringStatic')]
         #[MapTo('array', property: 'transformFromCustomTransformerService', transformer: TransformerWithDependency::class)]
         #[MapTo('array', property: 'transformFromExpressionLanguage', transformer: "source.foo === 'foo' ? 'transformed' : 'not transformed'")]
-        public string $foo
+        public string $foo,
     ) {
     }
 

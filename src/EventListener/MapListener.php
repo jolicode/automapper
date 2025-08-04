@@ -62,12 +62,12 @@ abstract readonly class MapListener
                 try {
                     $expression = $this->expressionLanguage->compile($transformerCallable, ['value' => 'source', 'context']);
                 } catch (SyntaxError $e) {
-                    throw new BadMapDefinitionException(sprintf('Transformer "%s" targeted by %s transformer on class "%s" is not valid.', $transformerCallable, $attribute::class, $class), 0, $e);
+                    throw new BadMapDefinitionException(\sprintf('Transformer "%s" targeted by %s transformer on class "%s" is not valid.', $transformerCallable, $attribute::class, $class), 0, $e);
                 }
 
                 $transformer = new ExpressionLanguageTransformer($expression);
             } else {
-                throw new BadMapDefinitionException(sprintf('Callable "%s" targeted by %s transformer on class "%s" is not valid.', json_encode($transformerCallable), $attribute::class, $class));
+                throw new BadMapDefinitionException(\sprintf('Callable "%s" targeted by %s transformer on class "%s" is not valid.', json_encode($transformerCallable), $attribute::class, $class));
             }
         }
 

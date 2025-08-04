@@ -43,7 +43,7 @@ class MapperMetadata
         }
 
         /** @var class-string<object> $className */
-        $className = sprintf('%s%s_%s', $this->classPrefix, str_replace('\\', '_', $this->source), str_replace('\\', '_', $this->target));
+        $className = \sprintf('%s%s_%s', $this->classPrefix, str_replace('\\', '_', $this->source), str_replace('\\', '_', $this->target));
         $this->className = $className;
     }
 

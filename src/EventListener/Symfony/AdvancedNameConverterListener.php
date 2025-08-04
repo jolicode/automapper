@@ -11,7 +11,7 @@ use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 final readonly class AdvancedNameConverterListener
 {
     public function __construct(
-        private AdvancedNameConverterInterface|NameConverterInterface $nameConverter
+        private AdvancedNameConverterInterface|NameConverterInterface $nameConverter,
     ) {
     }
 

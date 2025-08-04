@@ -9,7 +9,7 @@ use AutoMapper\Tests\AutoMapperBuilder;
 class BuiltinClass
 {
     public function __construct(
-        public \DateInterval $dateInterval
+        public \DateInterval $dateInterval,
     ) {
     }
 }

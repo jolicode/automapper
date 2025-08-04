@@ -11,7 +11,7 @@ class BadMapToTransformer
     public function __construct(
         // Not valid because it is not static
         #[MapTo(transformer: [self::class, 'transformFoo'])]
-        public string $foo
+        public string $foo,
     ) {
     }
 

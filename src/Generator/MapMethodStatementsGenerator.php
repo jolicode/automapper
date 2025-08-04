@@ -244,7 +244,7 @@ final readonly class MapMethodStatementsGenerator
                 $variableRegistry->getResult(),
                 new Expr\BinaryOp\Coalesce($targetToPopulate, new Expr\ConstFetch(new Name('null')))
             ),
-            ['comments' => [new Comment(sprintf('/** @var %s|null $result */', $metadata->mapperMetadata->target === 'array' ? $metadata->mapperMetadata->target : '\\' . $metadata->mapperMetadata->target))]]
+            ['comments' => [new Comment(\sprintf('/** @var %s|null $result */', $metadata->mapperMetadata->target === 'array' ? $metadata->mapperMetadata->target : '\\' . $metadata->mapperMetadata->target))]]
         );
 
         if (!$metadata->allowReadOnlyTargetToPopulate && $metadata->isTargetReadOnlyClass()) {

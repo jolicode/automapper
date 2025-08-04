@@ -11,7 +11,7 @@ final readonly class Bar
 {
     public function __construct(
         #[SerializedName('is_static')]
-        public bool $isStatic
+        public bool $isStatic,
     ) {
     }
 }

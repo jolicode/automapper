@@ -140,7 +140,7 @@ final class FileLoader implements ClassLoaderInterface
         $fp = fopen($file, 'w');
 
         if (false === $fp) {
-            throw new CompileException(sprintf('Could not open file "%s"', $file));
+            throw new CompileException(\sprintf('Could not open file "%s"', $file));
         }
 
         if (flock($fp, LOCK_EX)) {

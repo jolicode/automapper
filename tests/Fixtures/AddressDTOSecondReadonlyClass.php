@@ -8,7 +8,7 @@ readonly class AddressDTOSecondReadonlyClass
 {
     public function __construct(
         public string $city,
-        public string $postalCode
+        public string $postalCode,
     ) {
     }
 }

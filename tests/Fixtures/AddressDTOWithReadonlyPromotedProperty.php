@@ -7,7 +7,7 @@ namespace AutoMapper\Tests\Fixtures;
 final class AddressDTOWithReadonlyPromotedProperty
 {
     public function __construct(
-        public readonly string $city
+        public readonly string $city,
     ) {
     }
 }

@@ -17,12 +17,12 @@ class ObjectTransformerTest extends TestCase
         $transformer = new ObjectTransformer(new Type('object', false, Foo::class), new Type('object', false, Foo::class));
 
         $function = $this->createTransformerFunction($transformer);
-        $class = new class() {
+        $class = new class {
             public $mappers;
 
             public function __construct()
             {
-                $this->mappers['Mapper_' . Foo::class . '_' . Foo::class] = new class() {
+                $this->mappers['Mapper_' . Foo::class . '_' . Foo::class] = new class {
                     public function map()
                     {
                         return new Foo();

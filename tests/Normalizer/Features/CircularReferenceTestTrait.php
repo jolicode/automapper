@@ -43,7 +43,7 @@ trait CircularReferenceTestTrait
         $obj = $this->getSelfReferencingModel();
 
         $this->expectException(CircularReferenceException::class);
-        $this->expectExceptionMessage(sprintf('A circular reference has been detected when mapping the object of type "%s" (configured limit: %d).', $obj::class, $expectedLimit));
+        $this->expectExceptionMessage(\sprintf('A circular reference has been detected when mapping the object of type "%s" (configured limit: %d).', $obj::class, $expectedLimit));
         $normalizer->normalize($obj, null, $context);
     }
 

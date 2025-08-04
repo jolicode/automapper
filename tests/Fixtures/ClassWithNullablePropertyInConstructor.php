@@ -8,7 +8,7 @@ readonly class ClassWithNullablePropertyInConstructor
 {
     public function __construct(
         public int $foo,
-        public ?int $bar = null
+        public ?int $bar = null,
     ) {
     }
 }
