@@ -31,6 +31,7 @@
     "require-dev": {
         "api-platform/core": "^3.0.4 || ^4",
         "doctrine/annotations": "^2.0",
+        "doctrine/doctrine-bundle": "^2.15",
         "doctrine/collections": "^2.2",
         "doctrine/inflector": "^2.0",
         "doctrine/orm": "^3.3",
