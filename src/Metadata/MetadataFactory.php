@@ -46,7 +46,7 @@ use AutoMapper\Transformer\SymfonyUidTransformerFactory;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use AutoMapper\Transformer\UniqueTypeTransformerFactory;
 use AutoMapper\Transformer\VoidTransformer;
-use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
@@ -358,7 +358,7 @@ final class MetadataFactory
         ExpressionLanguage $expressionLanguage = new ExpressionLanguage(),
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
         bool $removeDefaultProperties = false,
-        ?EntityManagerInterface $entityManager = null,
+        ?ObjectManager $objectManager = null,
     ): self {
         // Create property info extractors
         $flags = ReflectionExtractor::ALLOW_PUBLIC;
@@ -380,9 +380,9 @@ final class MetadataFactory
             $eventDispatcher->addListener(PropertyMetadataEvent::class, new AdvancedNameConverterListener($nameConverter));
         }
 
-        if (null !== $entityManager) {
-            $eventDispatcher->addListener(GenerateMapperEvent::class, new DoctrineProviderListener($entityManager));
-            $eventDispatcher->addListener(PropertyMetadataEvent::class, new DoctrineIdentifierListener($entityManager));
+        if (null !== $objectManager) {
+            $eventDispatcher->addListener(GenerateMapperEvent::class, new DoctrineProviderListener($objectManager));
+            $eventDispatcher->addListener(PropertyMetadataEvent::class, new DoctrineIdentifierListener($objectManager));
         }
 
         $eventDispatcher->addListener(PropertyMetadataEvent::class, new MapToContextListener($reflectionExtractor));

@@ -20,7 +20,7 @@ use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
@@ -150,7 +150,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
         iterable $providers = [],
         bool $removeDefaultProperties = false,
-        ?EntityManagerInterface $entityManager = null,
+        ?ObjectManager $objectManager = null,
     ): AutoMapperInterface {
         if (\count($transformerFactories) > 0) {
             trigger_deprecation('jolicode/automapper', '9.0', 'The "$transformerFactories" property will be removed in version 10.0, AST transformer factories must be included within AutoMapper.', __METHOD__);
@@ -181,8 +181,8 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
 
         $providers = iterator_to_array($providers);
 
-        if (null !== $entityManager) {
-            $providers[] = new DoctrineProvider($entityManager);
+        if (null !== $objectManager) {
+            $providers[] = new DoctrineProvider($objectManager);
         }
 
         $customTransformerRegistry = new PropertyTransformerRegistry($propertyTransformers);
@@ -201,7 +201,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
             $expressionLanguage,
             $eventDispatcher,
             $removeDefaultProperties,
-            $entityManager,
+            $objectManager,
         );
 
         $mapperGenerator = new MapperGenerator(

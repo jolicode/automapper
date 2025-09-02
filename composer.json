@@ -34,7 +34,7 @@
         "doctrine/doctrine-bundle": "^2.15",
         "doctrine/collections": "^2.2",
         "doctrine/inflector": "^2.0",
-        "doctrine/orm": "^3.3",
+        "doctrine/orm": "^2.0 || ^3.0",
         "matthiasnoback/symfony-dependency-injection-test": "^5.1",
         "moneyphp/money": "^3.3.2",
         "phpunit/phpunit": "^9.0",

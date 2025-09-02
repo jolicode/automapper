@@ -6,18 +6,18 @@ namespace AutoMapper\EventListener\Doctrine;
 
 use AutoMapper\Event\GenerateMapperEvent;
 use AutoMapper\Provider\Doctrine\DoctrineProvider;
-use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ObjectManager;
 
 final readonly class DoctrineProviderListener
 {
     public function __construct(
-        private EntityManagerInterface $entityManager
+        private ObjectManager $objectManager
     ) {
     }
 
     public function __invoke(GenerateMapperEvent $event): void
     {
-        if ($event->mapperMetadata->target === 'array' || !$this->entityManager->getMetadataFactory()->hasMetadataFor($event->mapperMetadata->target)) {
+        if ($event->mapperMetadata->target === 'array' || !$this->objectManager->getMetadataFactory()->hasMetadataFor($event->mapperMetadata->target)) {
             return;
         }
 

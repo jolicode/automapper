@@ -28,7 +28,7 @@ class DoctrineTest extends AutoMapperTestCase
         parent::setUp();
         $this->buildDatabase();
 
-        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(entityManager: $this->entityManager);
+        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(objectManager: $this->entityManager);
     }
 
     private function buildDatabase()
