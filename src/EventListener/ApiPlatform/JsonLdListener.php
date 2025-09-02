@@ -68,7 +68,7 @@ final readonly class JsonLdListener
         }
 
         if ($event->mapperMetadata->source === 'array' && $this->resourceClassResolver->isResourceClass($event->mapperMetadata->target)) {
-            $event->provider = IriProvider::class;
+            $event->provider ??= IriProvider::class;
         }
     }
 }

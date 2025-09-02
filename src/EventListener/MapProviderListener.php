@@ -51,6 +51,16 @@ final readonly class MapProviderListener
             }
         }
 
-        $event->provider ??= $provider ?? $defaultMapProvider;
+        $eventProvider = $provider ?? $defaultMapProvider;
+
+        if (null === $eventProvider) {
+            return;
+        }
+
+        if (false === $eventProvider) {
+            $event->provider = null;
+        } else {
+            $event->provider = $eventProvider;
+        }
     }
 }

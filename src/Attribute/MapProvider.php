@@ -8,11 +8,11 @@ namespace AutoMapper\Attribute;
 final readonly class MapProvider
 {
     /**
-     * @param ?string $source   from which source type this provider should apply
-     * @param string  $provider the provider class name or service identifier
+     * @param ?string      $source   from which source type this provider should apply
+     * @param false|string $provider the provider class name or service identifier, set false to disable any provider
      */
     public function __construct(
-        public string $provider,
+        public false|string $provider,
         public ?string $source = null,
     ) {
     }

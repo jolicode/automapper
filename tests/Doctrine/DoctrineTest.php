@@ -8,6 +8,7 @@ use AutoMapper\MapperContext;
 use AutoMapper\Tests\AutoMapperBuilder;
 use AutoMapper\Tests\AutoMapperTestCase;
 use AutoMapper\Tests\Doctrine\Entity\Book;
+use AutoMapper\Tests\Doctrine\Entity\Foo;
 use AutoMapper\Tests\Doctrine\Entity\Review;
 use AutoMapper\Tests\Doctrine\Entity\User;
 use Doctrine\DBAL\DriverManager;
@@ -114,5 +115,27 @@ class DoctrineTest extends AutoMapperTestCase
 
         $this->assertEquals(5, $review->rating);
         $this->assertEquals('Bar', $review->user->name);
+    }
+
+    public function testDisabledProvider(): void
+    {
+        $foo = new Foo();
+        $foo->foo = 'Initial';
+
+        $this->entityManager->persist($foo);
+        $this->entityManager->flush();
+
+        $this->assertNotNull($foo->id);
+
+        $bookArray = $this->autoMapper->map($foo, 'array');
+        $bookArray['foo'] = 'John Doe';
+
+        $this->autoMapper->map($bookArray, Foo::class);
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        $foo = $this->entityManager->find(Foo::class, $foo->id);
+
+        $this->assertEquals('Initial', $foo->foo);
     }
 }

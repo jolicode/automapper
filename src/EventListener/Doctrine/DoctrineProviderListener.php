@@ -21,6 +21,6 @@ final readonly class DoctrineProviderListener
             return;
         }
 
-        $event->provider = DoctrineProvider::class;
+        $event->provider ??= DoctrineProvider::class;
     }
 }
