@@ -11,7 +11,7 @@ use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 final readonly class JsonLdIdTransformer implements PropertyTransformerInterface
 {
     public function __construct(
-        private LegacyIriConverterInterface|IriConverterInterface $iriConverter
+        private LegacyIriConverterInterface|IriConverterInterface $iriConverter,
     ) {
     }
 

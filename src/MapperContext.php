@@ -199,7 +199,7 @@ class MapperContext
 
         if (null !== $circularReferenceLimit) {
             if ($circularReferenceLimit <= ($context[self::CIRCULAR_COUNT_REFERENCE_REGISTRY][$reference] ?? 0)) {
-                throw new CircularReferenceException(sprintf('A circular reference has been detected when mapping the object of type "%s" (configured limit: %d).', \is_object($object) ? $object::class : 'array', $circularReferenceLimit));
+                throw new CircularReferenceException(\sprintf('A circular reference has been detected when mapping the object of type "%s" (configured limit: %d).', \is_object($object) ? $object::class : 'array', $circularReferenceLimit));
             }
 
             $context[self::CIRCULAR_COUNT_REFERENCE_REGISTRY][$reference] ??= 0;
@@ -210,7 +210,7 @@ class MapperContext
         $context[self::CIRCULAR_REFERENCE_REGISTRY] ??= [];
 
         if (!\array_key_exists($reference, $context[self::CIRCULAR_REFERENCE_REGISTRY])) {
-            throw new CircularReferenceException(sprintf('Circular reference detected for reference "%s" but no object found in the registry.', $reference));
+            throw new CircularReferenceException(\sprintf('Circular reference detected for reference "%s" but no object found in the registry.', $reference));
         }
 
         // When no limit defined return the object referenced

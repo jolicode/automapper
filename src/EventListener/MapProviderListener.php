@@ -38,13 +38,13 @@ final readonly class MapProviderListener
 
             if ($mapProvider->source === null) {
                 if ($defaultMapProvider !== null) {
-                    throw new BadMapDefinitionException(sprintf('multiple default providers found for class "%s"', $event->mapperMetadata->targetReflectionClass->getName()));
+                    throw new BadMapDefinitionException(\sprintf('multiple default providers found for class "%s"', $event->mapperMetadata->targetReflectionClass->getName()));
                 }
 
                 $defaultMapProvider = $mapProvider->provider;
             } elseif ($mapProvider->source === $event->mapperMetadata->source) {
                 if ($provider !== null) {
-                    throw new BadMapDefinitionException(sprintf('multiple providers found for class "%s"', $event->mapperMetadata->targetReflectionClass->getName()));
+                    throw new BadMapDefinitionException(\sprintf('multiple providers found for class "%s"', $event->mapperMetadata->targetReflectionClass->getName()));
                 }
 
                 $provider = $mapProvider->provider;

@@ -8,7 +8,7 @@ class Post
 {
     public function __construct(
         public string $name,
-        public Category $category
+        public Category $category,
     ) {
     }
 }

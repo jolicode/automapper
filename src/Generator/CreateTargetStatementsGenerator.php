@@ -204,7 +204,7 @@ final readonly class CreateTargetStatementsGenerator
                 $defaultValueExpr = new Expr\ConstFetch(new Name('null'));
             } else {
                 $defaultValueExpr = new Expr\Throw_(new Expr\New_(new Name\FullyQualified(MissingConstructorArgumentsException::class), [
-                    new Arg(new Scalar\String_(sprintf('Cannot create an instance of "%s" from mapping data because its constructor requires the following parameters to be present : "$%s".', $metadata->mapperMetadata->target, $propertyMetadata->target->property))),
+                    new Arg(new Scalar\String_(\sprintf('Cannot create an instance of "%s" from mapping data because its constructor requires the following parameters to be present : "$%s".', $metadata->mapperMetadata->target, $propertyMetadata->target->property))),
                     new Arg(create_scalar_int(0)),
                     new Arg(new Expr\ConstFetch(new Name('null'))),
                     new Arg(new Expr\Array_([
@@ -296,7 +296,7 @@ final readonly class CreateTargetStatementsGenerator
                 $defaultValueExpr = new Expr\ConstFetch(new Name('null'));
             } else {
                 $defaultValueExpr = new Expr\Throw_(new Expr\New_(new Name\FullyQualified(MissingConstructorArgumentsException::class), [
-                    new Arg(new Scalar\String_(sprintf('Cannot create an instance of "%s" from mapping data because its constructor requires the following parameters to be present : "$%s".', $metadata->mapperMetadata->target, $constructorParameter->getName()))),
+                    new Arg(new Scalar\String_(\sprintf('Cannot create an instance of "%s" from mapping data because its constructor requires the following parameters to be present : "$%s".', $metadata->mapperMetadata->target, $constructorParameter->getName()))),
                     new Arg(create_scalar_int(0)),
                     new Arg(new Expr\ConstFetch(new Name('null'))),
                     new Arg(new Expr\Array_([

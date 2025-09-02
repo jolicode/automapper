@@ -19,7 +19,7 @@ class HomeController extends AbstractController
     public function __construct(
         private AutoMapperInterface $autoMapper,
         #[Autowire('@serializer.normalizer.object')]
-        private NormalizerInterface $serializer
+        private NormalizerInterface $serializer,
     ) {
     }
 

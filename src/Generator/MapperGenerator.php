@@ -140,7 +140,7 @@ final readonly class MapperGenerator
             ->addParam(new Param($metadata->variableRegistry->getContext(), default: new Expr\Array_(), type: new Name('array')))
             ->addStmts($this->mapMethodStatementsGenerator->getStatements($metadata))
             ->setDocComment(
-                sprintf(
+                \sprintf(
                     '/** @param %s $%s */',
                     $metadata->mapperMetadata->source === 'array' ? $metadata->mapperMetadata->source : '\\' . $metadata->mapperMetadata->source,
                     'value'

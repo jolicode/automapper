@@ -15,7 +15,7 @@ class AppKernel extends Kernel
     public function __construct(
         string $environment,
         bool $debug,
-        private ?string $additionalConfigFile = null
+        private ?string $additionalConfigFile = null,
     ) {
         parent::__construct($environment, $debug);
     }

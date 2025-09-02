@@ -18,7 +18,7 @@ final class CacheWarmer implements CacheWarmerInterface
         private readonly MetadataRegistry $mapping,
         private readonly MetadataFactory $metadataFactory,
         private readonly ClassLoaderInterface $classLoader,
-        private readonly string $autoMapperCacheDirectory
+        private readonly string $autoMapperCacheDirectory,
     ) {
     }
 
@@ -43,7 +43,7 @@ final class CacheWarmer implements CacheWarmerInterface
 
         return array_map(
             function ($mapperMetadata) {
-                return sprintf('%s/%s.php', $this->autoMapperCacheDirectory, $mapperMetadata->className);
+                return \sprintf('%s/%s.php', $this->autoMapperCacheDirectory, $mapperMetadata->className);
             },
             iterator_to_array($mapping),
         );

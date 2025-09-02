@@ -16,7 +16,7 @@ final readonly class IriProvider implements ProviderInterface
 {
     public function __construct(
         private LegacyIriConverterInterface|IriConverterInterface $iriConverter,
-        private LegacyResourceClassResolverInterface|ResourceClassResolverInterface $resourceClassResolver
+        private LegacyResourceClassResolverInterface|ResourceClassResolverInterface $resourceClassResolver,
     ) {
     }
 

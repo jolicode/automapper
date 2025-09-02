@@ -622,7 +622,7 @@ class AutoMapperTest extends AutoMapperTestCase
     public function testNameConverter(): void
     {
         if (Kernel::MAJOR_VERSION >= 7 && Kernel::MINOR_VERSION >= 2) {
-            $nameConverter = new class() implements NameConverterInterface {
+            $nameConverter = new class implements NameConverterInterface {
                 public function normalize($propertyName, ?string $class = null, ?string $format = null, array $context = []): string
                 {
                     if ('id' === $propertyName) {
@@ -642,7 +642,7 @@ class AutoMapperTest extends AutoMapperTestCase
                 }
             };
         } else {
-            $nameConverter = new class() implements AdvancedNameConverterInterface {
+            $nameConverter = new class implements AdvancedNameConverterInterface {
                 public function normalize(string $propertyName, ?string $class = null, ?string $format = null, array $context = []): string
                 {
                     if ('id' === $propertyName) {
@@ -1345,11 +1345,11 @@ class AutoMapperTest extends AutoMapperTestCase
         try {
             $targets = require $mapFile;
         } catch (\Throwable $e) {
-            throw new \LogicException(sprintf('Unable to load map file "%s".', $mapFile), 0, $e);
+            throw new \LogicException(\sprintf('Unable to load map file "%s".', $mapFile), 0, $e);
         }
 
         if (1 === $targets) {
-            throw new \LogicException(sprintf('The map file "%s" does not return a value.', $mapFile));
+            throw new \LogicException(\sprintf('The map file "%s" does not return a value.', $mapFile));
         }
 
         if (!$targets instanceof \Generator) {
@@ -1360,9 +1360,9 @@ class AutoMapperTest extends AutoMapperTestCase
             $dump = $this->getDump($target);
 
             if (0 === $key) {
-                $expectedFile = sprintf('%s/expected.data', $directory);
+                $expectedFile = \sprintf('%s/expected.data', $directory);
             } else {
-                $expectedFile = sprintf('%s/expected.%s.data', $directory, $key);
+                $expectedFile = \sprintf('%s/expected.%s.data', $directory, $key);
             }
 
             if ($_SERVER['UPDATE_FIXTURES'] ?? false) {
@@ -1370,12 +1370,12 @@ class AutoMapperTest extends AutoMapperTestCase
             }
 
             if (!file_exists($expectedFile)) {
-                throw new \LogicException(sprintf('The expected file "%s" does not exist.', $expectedFile));
+                throw new \LogicException(\sprintf('The expected file "%s" does not exist.', $expectedFile));
             }
 
             $expected = trim(file_get_contents($expectedFile));
 
-            $this->assertSame($expected, $dump, sprintf('The dump of the map file "%s" is not as expected.', $key));
+            $this->assertSame($expected, $dump, \sprintf('The dump of the map file "%s" is not as expected.', $key));
         }
     }
 
@@ -1404,7 +1404,7 @@ class AutoMapperTest extends AutoMapperTestCase
             $mapFile = $directory->getRealPath() . '/map.php';
 
             if (!file_exists($mapFile)) {
-                throw new \LogicException(sprintf('The map file "%s" does not exist.', $mapFile));
+                throw new \LogicException(\sprintf('The map file "%s" does not exist.', $mapFile));
             }
 
             yield $directory->getBasename() => [$mapFile, $directory->getRealPath()];

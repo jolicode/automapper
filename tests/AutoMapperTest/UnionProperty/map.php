@@ -9,7 +9,7 @@ use AutoMapper\Tests\AutoMapperBuilder;
 final readonly class Bar
 {
     public function __construct(
-        public string $bar
+        public string $bar,
     ) {
     }
 }
@@ -17,7 +17,7 @@ final readonly class Bar
 final readonly class Foo
 {
     public function __construct(
-        public string $foo
+        public string $foo,
     ) {
     }
 }
@@ -25,7 +25,7 @@ final readonly class Foo
 final readonly class ObjectsUnionProperty
 {
     public function __construct(
-        public Foo|Bar $prop
+        public Foo|Bar $prop,
     ) {
     }
 }

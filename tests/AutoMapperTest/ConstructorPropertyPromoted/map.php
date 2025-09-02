@@ -20,7 +20,7 @@ readonly class UserPromoted
      * @param array<AddressDTO> $addresses
      */
     public function __construct(
-        public array $addresses
+        public array $addresses,
     ) {
     }
 }

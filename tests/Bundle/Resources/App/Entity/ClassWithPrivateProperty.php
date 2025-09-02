@@ -7,7 +7,7 @@ namespace AutoMapper\Tests\Bundle\Resources\App\Entity;
 class ClassWithPrivateProperty
 {
     public function __construct(
-        private string $foo
+        private string $foo,
     ) {
     }
 

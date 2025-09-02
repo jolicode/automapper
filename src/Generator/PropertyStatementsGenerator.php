@@ -19,7 +19,7 @@ use PhpParser\Node\Stmt;
 final readonly class PropertyStatementsGenerator
 {
     public function __construct(
-        private PropertyConditionsGenerator $propertyConditionsGenerator
+        private PropertyConditionsGenerator $propertyConditionsGenerator,
     ) {
     }
 

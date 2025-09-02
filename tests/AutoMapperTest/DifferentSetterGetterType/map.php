@@ -17,7 +17,7 @@ class DifferentSetterGetterType
     private AddressType $addressDocBlock;
 
     public function __construct(
-        private AddressType $address
+        private AddressType $address,
     ) {
         $this->addressDocBlock = $address;
     }

@@ -15,7 +15,7 @@ use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerSupportInterfa
 final readonly class TransformerWithDependency implements PropertyTransformerInterface, PropertyTransformerSupportInterface
 {
     public function __construct(
-        private FooDependency $fooDependency
+        private FooDependency $fooDependency,
     ) {
     }
 

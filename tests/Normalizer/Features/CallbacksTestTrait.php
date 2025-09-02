@@ -95,7 +95,7 @@ trait CallbacksTestTrait
 
         $normalizer = $this->getNormalizerForCallbacksWithPropertyTypeExtractor();
 
-        $objWithNoConstructorArgument = new class() extends CallbacksObject {
+        $objWithNoConstructorArgument = new class extends CallbacksObject {
             public function __construct()
             {
             }

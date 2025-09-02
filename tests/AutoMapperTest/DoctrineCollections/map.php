@@ -11,7 +11,7 @@ use Doctrine\Common\Collections\Collection;
 class Book
 {
     public function __construct(
-        public string $name
+        public string $name,
     ) {
     }
 }
