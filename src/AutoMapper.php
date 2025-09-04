@@ -12,6 +12,7 @@ use AutoMapper\Loader\EvalLoader;
 use AutoMapper\Loader\FileLoader;
 use AutoMapper\Metadata\MetadataFactory;
 use AutoMapper\Metadata\MetadataRegistry;
+use AutoMapper\Provider\Doctrine\DoctrineProvider;
 use AutoMapper\Provider\ProviderInterface;
 use AutoMapper\Provider\ProviderRegistry;
 use AutoMapper\Symfony\ExpressionLanguageProvider;
@@ -19,6 +20,7 @@ use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
@@ -148,6 +150,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
         iterable $providers = [],
         bool $removeDefaultProperties = false,
+        ?ObjectManager $objectManager = null,
     ): AutoMapperInterface {
         if (\count($transformerFactories) > 0) {
             trigger_deprecation('jolicode/automapper', '9.0', 'The "$transformerFactories" property will be removed in version 10.0, AST transformer factories must be included within AutoMapper.', __METHOD__);
@@ -176,6 +179,12 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
             $classDiscriminatorFromClassMetadata = new ClassDiscriminatorFromClassMetadata($classMetadataFactory);
         }
 
+        $providers = iterator_to_array($providers);
+
+        if (null !== $objectManager) {
+            $providers[] = new DoctrineProvider($objectManager);
+        }
+
         $customTransformerRegistry = new PropertyTransformerRegistry($propertyTransformers);
         $metadataRegistry = new MetadataRegistry($configuration);
         $providerRegistry = new ProviderRegistry($providers);
@@ -192,6 +201,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
             $expressionLanguage,
             $eventDispatcher,
             $removeDefaultProperties,
+            $objectManager,
         );
 
         $mapperGenerator = new MapperGenerator(

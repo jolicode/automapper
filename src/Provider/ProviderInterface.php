@@ -20,5 +20,5 @@ interface ProviderInterface
      *
      * @return object|array<mixed>|null the value to provide
      */
-    public function provide(string $targetType, mixed $source, array $context): object|array|null;
+    public function provide(string $targetType, mixed $source, array $context, /* mixed $id */): object|array|null;
 }

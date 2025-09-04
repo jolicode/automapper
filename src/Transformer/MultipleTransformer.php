@@ -55,7 +55,6 @@ final class MultipleTransformer implements TransformerInterface, DependentTransf
          */
         foreach ($this->transformers as $transformerData) {
             $transformer = $transformerData['transformer'];
-            $type = $transformerData['type'];
 
             [$transformerOutput, $transformerStatements] = $transformer->transform($input, $target, $propertyMapping, $uniqueVariableScope, $source, $existingValue);
 

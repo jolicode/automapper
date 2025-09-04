@@ -81,15 +81,29 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
 
     public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): ?Expr
     {
-        if ($this->sourceType->getClassName() !== null) {
-            return new Expr\Instanceof_($input, new Name\FullyQualified($this->sourceType->getClassName()));
+        if ($this->sourceType->getBuiltinType() === Type::BUILTIN_TYPE_ARRAY) {
+            $condition = new Expr\FuncCall(
+                new Name('is_array'),
+                [
+                    new Arg($input),
+                ]
+            );
+        } else {
+            if ($this->sourceType->getClassName() !== null) {
+                $condition = new Expr\Instanceof_($input, new Name\FullyQualified($this->sourceType->getClassName()));
+            } else {
+                $condition = new Expr\FuncCall(
+                    new Name('is_object'),
+                    [
+                        new Arg($input),
+                    ]
+                );
+            }
         }
 
-        return new Expr\FuncCall(
-            new Name('is_object'),
-            [
-                new Arg($input),
-            ]
+        return new Expr\BinaryOp\BooleanOr(
+            new Expr\BinaryOp\Identical(new Expr\ConstFetch(new Name('null')), $input),
+            $condition
         );
     }
 
@@ -167,6 +181,18 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
             new Scalar\String_($mapperName)
         ), 'getTargetHash', [
             new Arg($target),
+        ]);
+    }
+
+    public function getIdentifierExpression(Expr $input): Expr
+    {
+        $mapperName = $this->getDependencyName();
+
+        return new Expr\MethodCall(new Expr\ArrayDimFetch(
+            new Expr\PropertyFetch(new Expr\Variable('this'), 'mappers'),
+            new Scalar\String_($mapperName)
+        ), 'getTargetIdentifiers', [
+            new Arg($input),
         ]);
     }
 }

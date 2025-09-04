@@ -144,6 +144,10 @@ class AutoMapperExtension extends Extension
             $loader->load('api_platform.php');
         }
 
+        if ($config['doctrine']) {
+            $loader->load('doctrine.php');
+        }
+
         if (null !== $config['name_converter']) {
             if ($container->has('automapper.mapping.metadata_aware_name_converter')) {
                 $container->getDefinition('automapper.mapping.metadata_aware_name_converter')
