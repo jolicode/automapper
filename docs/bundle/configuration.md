@@ -79,6 +79,10 @@ indicate if we use the attribute of the symfony/serializer during the mapping, t
 `#[MaxDepth]`, `#[Ignore]` and `#[DiscriminatorMap]` attributes;
 * `api_platform` (default: `false`): A boolean which indicate if we use services from the api-platform/core package and
 inject extra data (json ld) in the mappers when we map a Resource class to or from an array.
+* `doctrine` (default: `false`): A boolean which indicate if we want to use service from doctrine to extract more 
+    information about the classes, and use doctrine to fetch existing objects. It will use by default the `doctrine.orm.entity_manager`
+    service if present, will then try to use the `doctrine_mongodb.odm.document_manager` service, or throw an exception if none of them
+    are present. You can specify your own manager by overriding the `automapper.doctrine.object_manager` service.
 * `name_converter` (default: `null`): A service id which implement the `AdvancedNameConverterInterface` or 
   `NameConverterInterface` (starting from 7.2) from the symfony/serializer, this name converter will be used when 
    mapping from an array to an object and vice versa;

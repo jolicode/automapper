@@ -68,6 +68,18 @@ use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter
 $autoMapper = AutoMapper::create(nameConverter: new CamelCaseToSnakeCaseNameConverter());
 ```
 
+It also supports the `Symfony\Component\Serializer\Attribute\SerializedName` attribute.
+
+```php
+use Symfony\Component\Serializer\Attribute\SerializedName;
+
+class Source
+{
+    #[SerializedName('nested')]
+    public $nestedProperty;
+}
+```
+
 [More information on the Name converters](https://symfony.com/doc/current/components/serializer.html#converting-property-names-when-serializing-and-deserializing)
 
 ### Normalizer Bridge

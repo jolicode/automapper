@@ -16,6 +16,10 @@ $configuration = new Configuration(
     autoRegister: true,
     mapPrivateProperties: true,
     allowReadonlyTargetToPopulate: false,
+    strictTypes: false,
+    reloadStrategy: \AutoMapper\Loader\FileReloadStrategy::ON_CHANGE,
+    allowExtraProperties: false,
+    extractTypesFromGetter: false,
 );
 $autoMapper = AutoMapper::create(configuration: $configuration);
 ```
@@ -58,7 +62,32 @@ Setting this to false will make the `AutoMapper` throw an exception if the mappe
 This can be useful if you want to pre generate all the mappers and have tests to ensure that all the mappers are
 generated.
 
+* `mapPrivateProperties` (default: `true`)
+
+When set to true, the generated mappers will map private and protected properties.
+
+* `strictTypes` (default: `false`)
+
+When set to true, the generated mappers will add `declare(strict_types=1);` at the top of the generated files.
+
+* `reloadStrategy` (default: `FileReloadStrategy::ON_CHANGE`)
+
+Allow specifying which strategy to use to reload the generated mappers. It can be one of the following:
+
+  * `FileReloadStrategy::NEVER`: never reload the mapper, even if the source code changes. This is useful in production
+    environments where you are sure that the source code will not change and avoid useless checks.
+  * `FileReloadStrategy::ON_CHANGE`: reload the mapper only if the source code changes. This is a good compromise between
+    performance and development convenience.
+  * `FileReloadStrategy::ALWAYS`: reload the mapper each time it is needed. This is useful when debugging automapper itself, but
+     it is not recommended for most cases as it will slow down the performance.
+
 * `allowExtraProperties` (default: `false`)
 
 Settings this to true will allow the mapper to map extra properties from the source object to the target object when
 the source or the target implements the `ArrayAccess` interface.
+
+* `extractTypesFromGetter` (default: `false`)
+
+When set to true, the generated mappers will used the return type of the getters to determine the type of the property
+even when writing to the property. This can be useful with covariance when the getter return a more specific type than the
+setter.
