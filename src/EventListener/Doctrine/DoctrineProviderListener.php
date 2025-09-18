@@ -11,7 +11,7 @@ use Doctrine\Persistence\ObjectManager;
 final readonly class DoctrineProviderListener
 {
     public function __construct(
-        private ObjectManager $objectManager
+        private ObjectManager $objectManager,
     ) {
     }
 
