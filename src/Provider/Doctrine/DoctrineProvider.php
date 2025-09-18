@@ -10,7 +10,7 @@ use Doctrine\Persistence\ObjectManager;
 final readonly class DoctrineProvider implements ProviderInterface
 {
     public function __construct(
-        private ObjectManager $objectManager
+        private ObjectManager $objectManager,
     ) {
     }
 
