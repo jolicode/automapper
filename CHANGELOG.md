@@ -5,13 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [9.4.2] - 2025-07-17
+## [9.5.0] - 2025-09-18
+### Added
+- [GH#260](https://github.com/jolicode/automapper/pull/260) Add support for identifiers detection and comparison of objects, this allow mappers to detect if objects are equals based on some properties, which allow better deep merge / update of collections. 
+- [GH#253](https://github.com/jolicode/automapper/pull/253) Add support for Doctrine provider, which allow to fetch entities from database instead of creating new ones, this is an experimental feature.
+
 ### Changed
 - [GH#286](https://github.com/jolicode/automapper/pull/286) Optimize condition order to avoid unnecessary method calls by prioritizing custom conditions
 
-## [Unreleased]
 ### Fixed
-- [GH#272](https://github.com/jolicode/automapper/pull/272) Fixed circular references with promoted properties 
+- [GH#280](https://github.com/jolicode/automapper/pull/280) Use correct property name to extract types from write mutator, which result in better extraction in some cases.
+- [GH#272](https://github.com/jolicode/automapper/pull/272) Fixed circular references with promoted properties.
+- [GH#285](https://github.com/jolicode/automapper/pull/285) Fix constructor not used when on a abstract class.
+
+### Miscellaneous
+- [GH#281](https://github.com/jolicode/automapper/pull/281) Generate expected data for test with new line to please IDE.
+- [GH#263](https://github.com/jolicode/automapper/pull/263) Add a regression test for nested array bug that occured and fixed between 9.2.1 and 9.4.1.
+- [GH#288](https://github.com/jolicode/automapper/pull/288) Update php cs fixer to support PHP 8.4.
 
 ## [9.4.1] - 2025-06-03
 ### Fixed
