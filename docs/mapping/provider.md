@@ -74,3 +74,39 @@ class MyProvider implements ProviderInterface
     }
 }
 ```
+
+## Third party providers
+
+We also provide some third party providers that allow you to use popular libraries to instantiate the `target` object : 
+
+### Doctrine 
+
+Automatically fetch the target from the database if it's an entity.
+
+This provider is automatically registered when : 
+
+ * an `Doctrine\Persistence\ObjectManager` is given when creating the `AutoMapper` object or is configured in the Symfony Bundle.
+ * The `target` class is managed by this `ObjectManager`.
+
+### Api Platform
+
+Use the Api Platform Provider to fetch the target object. It also converts IRIs to objects.
+
+This provider is automatically registered when : 
+
+ * The Api Platform library is installed and `api_platform` is enabled in the Symfony Bundle Configuration.
+ * The `target` class is a resource managed by Api Platform.
+
+### Disable auto registration
+
+If you want to disable the automatic registration of the Doctrine and Api Platform providers on a specific Mapping,
+you can use the `#[MapProvider]` attribute with `false`.
+
+```php
+use AutoMapper\Attribute\MapProvider;
+
+#[MapProvider(provider: false)]
+class Entity
+{
+}
+```
