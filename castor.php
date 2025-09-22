@@ -146,7 +146,6 @@ function doc_build_github_pages()
 
         if ($tag === $latestVersion) {
             run('poetry run mike deploy --push --remote gh-pages ' . $tag . ' latest');
-            run('poetry run mike set-default --ignore-remote-status --push latest');
         } else {
             run('poetry run mike deploy --push --remote gh-pages --update-aliases ' . $tag);
         }
