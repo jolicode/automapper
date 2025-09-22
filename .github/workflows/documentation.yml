@@ -41,12 +41,15 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
+      - name: setup
+        uses: castor-php/setup-castor@v0.1.0
+
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v4
 
       - name: Build documentation
-        run: ./.github/scripts/build-documentation.sh
+        run: castor doc:build-github-pages
 
       - name: Check
         run: ls ./.build
