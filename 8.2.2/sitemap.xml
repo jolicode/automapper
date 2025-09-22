@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://automapper.jolicode.com/8.2.2/</loc>
+         <lastmod>2025-09-22</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://automapper.jolicode.com/8.2.2/_nav/</loc>
+         <lastmod>2025-09-22</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://automapper.jolicode.com/8.2.2/contributing/</loc>
+         <lastmod>2025-09-22</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://automapper.jolicode.com/8.2.2/symfony/</loc>
+         <lastmod>2025-09-22</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+</urlset>
