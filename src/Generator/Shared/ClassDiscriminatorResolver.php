@@ -13,10 +13,14 @@ use Symfony\Component\Serializer\Mapping\ClassDiscriminatorResolverInterface;
 /**
  * @internal
  */
-final readonly class ClassDiscriminatorResolver
+final readonly class ClassDiscriminatorResolver implements ClassDiscriminatorResolverInterface
 {
+    /**
+     * @param array<class-string, ClassDiscriminatorMapping> $mappings
+     */
     public function __construct(
         private ?ClassDiscriminatorResolverInterface $classDiscriminator = null,
+        private array $mappings = [],
     ) {
     }
 
@@ -34,7 +38,7 @@ final readonly class ClassDiscriminatorResolver
 
     public function getDiscriminatorPropertyMetadata(GeneratorMetadata $metadata, bool $fromSource): ?PropertyMetadata
     {
-        $classDiscriminatorMapping = $this->classDiscriminator?->getMappingForClass($fromSource ? $metadata->mapperMetadata->source : $metadata->mapperMetadata->target);
+        $classDiscriminatorMapping = $this->getMappingForClass($fromSource ? $metadata->mapperMetadata->source : $metadata->mapperMetadata->target);
 
         if (!$classDiscriminatorMapping) {
             return null;
@@ -54,7 +58,7 @@ final readonly class ClassDiscriminatorResolver
      */
     public function discriminatorMapperNames(GeneratorMetadata $metadata, bool $fromSource): array
     {
-        $classDiscriminatorMapping = $this->classDiscriminator?->getMappingForClass($fromSource ? $metadata->mapperMetadata->source : $metadata->mapperMetadata->target);
+        $classDiscriminatorMapping = $this->getMappingForClass($fromSource ? $metadata->mapperMetadata->source : $metadata->mapperMetadata->target);
 
         if (!$classDiscriminatorMapping) {
             return [];
@@ -71,7 +75,7 @@ final readonly class ClassDiscriminatorResolver
      */
     public function discriminatorMapperNamesIndexedByTypeValue(GeneratorMetadata $metadata, bool $fromSource): array
     {
-        $classDiscriminatorMapping = $this->classDiscriminator?->getMappingForClass($fromSource ? $metadata->mapperMetadata->source : $metadata->mapperMetadata->target);
+        $classDiscriminatorMapping = $this->getMappingForClass($fromSource ? $metadata->mapperMetadata->source : $metadata->mapperMetadata->target);
 
         if (!$classDiscriminatorMapping) {
             return [];
@@ -92,5 +96,38 @@ final readonly class ClassDiscriminatorResolver
             static fn (string $typeTarget) => $fromSource ? "Discriminator_Mapper_{$typeTarget}_{$metadata->mapperMetadata->target}" : "Discriminator_Mapper_{$metadata->mapperMetadata->source}_{$typeTarget}",
             $classDiscriminatorMapping->getTypesMapping()
         );
+    }
+
+    public function getMappingForClass(string $class): null|ClassDiscriminatorMapping
+    {
+        if (\array_key_exists($class, $this->mappings)) {
+            return $this->mappings[$class];
+        }
+
+        return $this->classDiscriminator?->getMappingForClass($class);
+    }
+
+    public function getMappingForMappedObject(object|string $object): null|ClassDiscriminatorMapping
+    {
+        foreach ($this->mappings as $baseClass => $mapping) {
+            if ($object instanceof $baseClass) {
+                return $mapping;
+            }
+        }
+
+        return $this->classDiscriminator?->getMappingForMappedObject($object);
+    }
+
+    public function getTypeForMappedObject(object|string $object): ?string
+    {
+        foreach ($this->mappings as $mapping) {
+            foreach ($mapping->getTypesMapping() as $type => $className) {
+                if ($object instanceof $className) {
+                    return $type;
+                }
+            }
+        }
+
+        return $this->classDiscriminator?->getTypeForMappedObject($object);
     }
 }

@@ -53,7 +53,9 @@ final readonly class MapMethodStatementsGenerator
         $statements = [$this->ifSourceIsNullReturnNull($metadata)];
         $statements = [...$statements, ...$this->handleCircularReference($metadata)];
 
-        if ($this->createObjectStatementsGenerator->canUseTargetToPopulate($metadata)) {
+        $canUseTargetToPopulate = $this->createObjectStatementsGenerator->canUseTargetToPopulate($metadata);
+
+        if ($canUseTargetToPopulate) {
             $statements = [...$statements, ...$this->initializeTargetToPopulate($metadata)];
             $statements = [...$statements, ...$this->initializeTargetFromProvider($metadata)];
         }
@@ -98,7 +100,7 @@ final readonly class MapMethodStatementsGenerator
             }
         }
 
-        if (\count($duplicatedStatements) > 0 && \count($metadata->getPropertiesInConstructor())) {
+        if ($canUseTargetToPopulate && \count($duplicatedStatements) > 0 && \count($metadata->getPropertiesInConstructor())) {
             /**
              * We know that the last statement is an `if` statement (otherwise we can't add an `else` statement).
              * Without this logic, the addedDependencies would only be called when the target was set. If the target is

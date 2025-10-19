@@ -27,6 +27,8 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
+use Symfony\Component\Serializer\Mapping\ClassDiscriminatorMapping;
+use Symfony\Component\Serializer\Mapping\ClassDiscriminatorResolverInterface;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
@@ -49,6 +51,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         private readonly MetadataRegistry $metadataRegistry,
         private readonly ProviderRegistry $providerRegistry,
         private readonly ?ExpressionLanguageProvider $expressionLanguageProvider = null,
+        private readonly ?ClassDiscriminatorResolverInterface $classDiscriminatorResolver = null,
     ) {
     }
 
@@ -137,6 +140,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
      * @param TransformerFactoryInterface[]                  $transformerFactories
      * @param ProviderInterface[]                            $providers
      * @param iterable<string, PropertyTransformerInterface> $propertyTransformers
+     * @param iterable<string, ClassDiscriminatorMapping>    $discriminatorMappings
      *
      * @return self
      */
@@ -151,6 +155,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         iterable $providers = [],
         bool $removeDefaultProperties = false,
         ?ObjectManager $objectManager = null,
+        array $discriminatorMappings = [],
     ): AutoMapperInterface {
         if (\count($transformerFactories) > 0) {
             trigger_deprecation('jolicode/automapper', '9.0', 'The "$transformerFactories" property will be removed in version 10.0, AST transformer factories must be included within AutoMapper.', __METHOD__);
@@ -172,11 +177,14 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         }
 
         $classMetadataFactory = null;
-        $classDiscriminatorFromClassMetadata = null;
+        $classDiscriminatorResolver = null;
 
         if (class_exists(ClassMetadataFactory::class) && $loaderClass !== null) {
             $classMetadataFactory = new ClassMetadataFactory($loaderClass);
-            $classDiscriminatorFromClassMetadata = new ClassDiscriminatorFromClassMetadata($classMetadataFactory);
+            $classDiscriminatorResolver = new ClassDiscriminatorResolver(
+                classDiscriminator: new ClassDiscriminatorFromClassMetadata($classMetadataFactory),
+                mappings: $discriminatorMappings,
+            );
         }
 
         $providers = iterator_to_array($providers);
@@ -188,7 +196,6 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         $customTransformerRegistry = new PropertyTransformerRegistry($propertyTransformers);
         $metadataRegistry = new MetadataRegistry($configuration);
         $providerRegistry = new ProviderRegistry($providers);
-        $classDiscriminatorResolver = new ClassDiscriminatorResolver($classDiscriminatorFromClassMetadata);
 
         $metadataFactory = MetadataFactory::create(
             $configuration,

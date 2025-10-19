@@ -31,6 +31,7 @@ class AutoMapperBuilder
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
         bool $removeDefaultProperties = false,
         ?ObjectManager $objectManager = null,
+        array $discriminatorMappings = [],
     ): AutoMapper {
         $skipCacheRemove = $_SERVER['SKIP_CACHE_REMOVE'] ?? false;
 
@@ -57,6 +58,7 @@ class AutoMapperBuilder
             providers: $providers,
             removeDefaultProperties: $removeDefaultProperties,
             objectManager: $objectManager,
+            discriminatorMappings: $discriminatorMappings,
         );
     }
 }
