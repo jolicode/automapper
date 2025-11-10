@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 use Castor\Attribute\AsTask;
 
+use function Castor\context;
 use function Castor\PHPQa\php_cs_fixer;
 use function Castor\PHPQa\phpstan;
-use function Castor\context;
 use function Castor\run;
 
 #[AsTask('cs:check', namespace: 'qa', description: 'Check for coding standards without fixing them')]
@@ -77,7 +77,8 @@ function debug_mapper(string $source, string $target, string $load = '')
 }
 
 #[AsTask('install', namespace: 'doc', description: 'Install tool for documentation (need poetry)')]
-function doc_install() {
+function doc_install()
+{
     run('poetry install');
 }
 
