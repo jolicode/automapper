@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Normalizer\Features;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 /**
@@ -22,9 +23,7 @@ trait SkipUninitializedValuesTestTrait
 {
     abstract protected function getNormalizerForSkipUninitializedValues(): NormalizerInterface;
 
-    /**
-     * @dataProvider skipUninitializedValuesFlagProvider
-     */
+    #[DataProvider('skipUninitializedValuesFlagProvider')]
     public function testSkipUninitializedValues(array $context)
     {
         self::markTestSkipped('Uninitialized properties are not supported yet');
@@ -45,7 +44,7 @@ trait SkipUninitializedValuesTestTrait
         $this->assertSame('value', $objectToPopulate->getUninitialized());
     }
 
-    public function skipUninitializedValuesFlagProvider(): iterable
+    public static function skipUninitializedValuesFlagProvider(): iterable
     {
         yield 'passed manually' => [['skip_uninitialized_values' => true, 'groups' => ['foo']]];
         yield 'using default context value' => [['groups' => ['foo']]];

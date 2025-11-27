@@ -21,38 +21,8 @@ class ApiPlatformTest extends ApiTestCase
         self::bootKernel();
     }
 
-    public function testGetBookCollectionOnApip3(): void
+    public function testGetBookCollectionOnApip(): void
     {
-        if (version_compare(\Composer\InstalledVersions::getVersion('api-platform/core'), '4', '>=')) {
-            $this->markTestSkipped('This test requires api-platform/core 3');
-        }
-
-        $response = static::createClient()->request('GET', '/books.jsonld');
-
-        $this->assertResponseIsSuccessful();
-        $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
-
-        $this->assertJsonContains([
-            '@context' => '/contexts/Book',
-            '@id' => '/books',
-            '@type' => 'hydra:Collection',
-            'hydra:totalItems' => 1,
-        ]);
-
-        $this->assertCount(1, $response->toArray()['hydra:member']);
-        $this->assertArraySubset([
-            '@type' => 'Book',
-            '@id' => '/books/1',
-            'reviews' => [],
-        ], $response->toArray()['hydra:member'][0]);
-    }
-
-    public function testGetBookCollectionOnApip4(): void
-    {
-        if (version_compare(\Composer\InstalledVersions::getVersion('api-platform/core'), '4', '<')) {
-            $this->markTestSkipped('This test requires api-platform/core 4');
-        }
-
         $response = static::createClient()->request('GET', '/books.jsonld');
 
         $this->assertResponseIsSuccessful();
@@ -132,5 +102,11 @@ class ApiPlatformTest extends ApiTestCase
             '@id' => $iri,
             'title' => 'updated title',
         ]);
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        restore_exception_handler();
     }
 }

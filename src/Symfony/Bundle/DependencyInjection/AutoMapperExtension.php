@@ -74,14 +74,6 @@ class AutoMapperExtension extends Extension
             )))
         ;
 
-        if (!$config['remove_default_properties']) {
-            trigger_deprecation('jolicode/automapper', '9.4', 'Not removing default properties is deprecated and will be always true in future versions, set \'remove_default_properties\' config parameter to true, and check that your mapping is correct.', __CLASS__);
-        }
-
-        $container->getDefinition(MetadataFactory::class)
-            ->setArgument('$removeDefaultProperties', $config['remove_default_properties'])
-        ;
-
         if ($config['map_private_properties']) {
             $container->getDefinition('automapper.property_info.reflection_extractor')
                 ->replaceArgument('$accessFlags', ReflectionExtractor::ALLOW_PUBLIC | ReflectionExtractor::ALLOW_PRIVATE | ReflectionExtractor::ALLOW_PROTECTED);

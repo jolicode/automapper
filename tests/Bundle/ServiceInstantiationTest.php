@@ -20,6 +20,7 @@ use AutoMapper\Tests\Bundle\Resources\App\Entity\FooMapTo;
 use AutoMapper\Tests\Bundle\Resources\App\Entity\SomeEnum;
 use AutoMapper\Tests\Bundle\Resources\App\Entity\User;
 use AutoMapper\Tests\Bundle\Resources\App\Entity\UserDTO;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
@@ -135,11 +136,7 @@ class ServiceInstantiationTest extends WebTestCase
         );
     }
 
-    /**
-     * This test validates that PropertyInfoPass is correctly applied.
-     *
-     * @dataProvider mapFromClassWithPrivatePropertyProvider
-     */
+    #[DataProvider('mapFromClassWithPrivatePropertyProvider')]
     public function testMapFromClassWithPrivateProperty(array $kernelOptions, array $expected): void
     {
         static::bootKernel($kernelOptions);
@@ -194,7 +191,6 @@ class ServiceInstantiationTest extends WebTestCase
         $this->assertArrayNotHasKey('bar', $bar);
         $this->assertArrayNotHasKey('a', $bar);
         $this->assertSame('foo', $bar['baz']);
-        $this->assertSame('foo', $bar['foo']);
         $this->assertSame('transformFromIsCallable_foo', $bar['transformFromIsCallable']);
         $this->assertSame('transformFromStringInstance_foo', $bar['transformFromStringInstance']);
         $this->assertSame('transformFromStringStatic_foo', $bar['transformFromStringStatic']);
@@ -281,5 +277,11 @@ class ServiceInstantiationTest extends WebTestCase
     protected static function createKernel(array $options = []): KernelInterface
     {
         return new AppKernel('test', false, $options['additionalConfigFile'] ?? null);
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        restore_exception_handler();
     }
 }
