@@ -23,13 +23,11 @@ class AutoMapperBuilder
         bool $mapPrivatePropertiesAndMethod = false,
         ConstructorStrategy $constructorStrategy = ConstructorStrategy::AUTO,
         string $classPrefix = 'Mapper_',
-        array $transformerFactories = [],
         array $propertyTransformers = [],
         array $providers = [],
         string $dateTimeFormat = \DateTimeInterface::RFC3339,
         ?ExpressionLanguageProvider $expressionLanguageProvider = null,
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
-        bool $removeDefaultProperties = false,
         ?ObjectManager $objectManager = null,
     ): AutoMapper {
         $skipCacheRemove = $_SERVER['SKIP_CACHE_REMOVE'] ?? false;
@@ -50,12 +48,10 @@ class AutoMapperBuilder
         return AutoMapper::create(
             $configuration,
             cacheDirectory: __DIR__ . '/cache/',
-            transformerFactories: $transformerFactories,
             propertyTransformers: $propertyTransformers,
             expressionLanguageProvider: $expressionLanguageProvider,
             eventDispatcher: $eventDispatcher,
             providers: $providers,
-            removeDefaultProperties: $removeDefaultProperties,
             objectManager: $objectManager,
         );
     }

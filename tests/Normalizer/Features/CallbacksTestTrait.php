@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Normalizer\Features;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
@@ -28,9 +29,7 @@ trait CallbacksTestTrait
 
     abstract protected function getNormalizerForCallbacksWithPropertyTypeExtractor(): NormalizerInterface;
 
-    /**
-     * @dataProvider provideNormalizeCallbacks
-     */
+    #[DataProvider('provideNormalizeCallbacks')]
     public function testNormalizeCallbacks($callbacks, $valueBar, $result)
     {
         self::markTestSkipped('Callbacks not supported.');
@@ -43,9 +42,7 @@ trait CallbacksTestTrait
         $this->assertSame($result, $normalizer->normalize($obj, 'any', ['callbacks' => $callbacks]));
     }
 
-    /**
-     * @dataProvider provideNormalizeCallbacks
-     */
+    #[DataProvider('provideNormalizeCallbacks')]
     public function testNormalizeCallbacksWithTypedProperty($callbacks, $valueBar, $result)
     {
         self::markTestSkipped('Callbacks not supported.');
@@ -58,9 +55,7 @@ trait CallbacksTestTrait
         $this->assertSame($result, $normalizer->normalize($obj, 'any', ['callbacks' => $callbacks]));
     }
 
-    /**
-     * @dataProvider provideDenormalizeCallbacks
-     */
+    #[DataProvider('provideDenormalizeCallbacks')]
     public function testDenormalizeCallbacks($callbacks, $valueBar, $result)
     {
         self::markTestSkipped('Callbacks not supported.');
@@ -72,9 +67,7 @@ trait CallbacksTestTrait
         $this->assertEquals($result, $obj);
     }
 
-    /**
-     * @dataProvider providerDenormalizeCallbacksWithTypedProperty
-     */
+    #[DataProvider('providerDenormalizeCallbacksWithTypedProperty')]
     public function testDenormalizeCallbacksWithTypedProperty($callbacks, $valueBar, $result)
     {
         self::markTestSkipped('Callbacks not supported.');
@@ -86,9 +79,7 @@ trait CallbacksTestTrait
         $this->assertEquals($result, $obj);
     }
 
-    /**
-     * @dataProvider providerDenormalizeCallbacksWithTypedProperty
-     */
+    #[DataProvider('providerDenormalizeCallbacksWithTypedProperty')]
     public function testDenormalizeCallbacksWithNoConstructorArgument($callbacks, $valueBar, $result)
     {
         self::markTestSkipped('Callbacks not supported.');
@@ -106,9 +97,7 @@ trait CallbacksTestTrait
         $this->assertEquals($result->getBar(), $obj->getBar());
     }
 
-    /**
-     * @dataProvider provideInvalidCallbacks
-     */
+    #[DataProvider('provideInvalidCallbacks')]
     public function testUncallableCallbacks($callbacks)
     {
         self::markTestSkipped('Callbacks not supported.');
@@ -122,7 +111,7 @@ trait CallbacksTestTrait
         $normalizer->normalize($obj, null, ['callbacks' => $callbacks]);
     }
 
-    public function provideNormalizeCallbacks()
+    public static function provideNormalizeCallbacks()
     {
         return [
             'Change a string' => [
@@ -184,7 +173,7 @@ trait CallbacksTestTrait
         ];
     }
 
-    public function provideDenormalizeCallbacks(): array
+    public static function provideDenormalizeCallbacks(): array
     {
         return [
             'Change a string' => [
@@ -246,7 +235,7 @@ trait CallbacksTestTrait
         ];
     }
 
-    public function providerDenormalizeCallbacksWithTypedProperty(): array
+    public static function providerDenormalizeCallbacksWithTypedProperty(): array
     {
         return [
             'Change a typed string' => [
@@ -276,7 +265,7 @@ trait CallbacksTestTrait
         ];
     }
 
-    public function provideInvalidCallbacks()
+    public static function provideInvalidCallbacks(): array
     {
         return [
             [['bar' => null]],

@@ -77,11 +77,7 @@ final class MetadataFactory
         private readonly EventDispatcherInterface $eventDispatcher,
         public readonly MetadataRegistry $metadataRegistry,
         private readonly ClassDiscriminatorResolver $classDiscriminatorResolver,
-        private readonly bool $removeDefaultProperties = false,
     ) {
-        if (!$this->removeDefaultProperties) {
-            trigger_deprecation('jolicode/automapper', '9.4', 'Not removing default properties is deprecated, pass this parameter to true and add necessary attributes if needed', __CLASS__);
-        }
     }
 
     /**
@@ -221,12 +217,10 @@ final class MetadataFactory
         foreach ($mapperEvent->properties as $propertyEvent) {
             $this->eventDispatcher->dispatch($propertyEvent);
 
-            if ($this->removeDefaultProperties) {
-                foreach ($propertyEvents as $propertyEventExisting) {
-                    if ($propertyEventExisting->source->property === $propertyEvent->source->property && $propertyEventExisting->isFromDefaultExtractor && !$propertyEventExisting->ignored) {
-                        $propertyEventExisting->ignored = true;
-                        $propertyEventExisting->ignoreReason = 'Default property is ignored because a custom property is defined.';
-                    }
+            foreach ($propertyEvents as $propertyEventExisting) {
+                if ($propertyEventExisting->source->property === $propertyEvent->source->property && $propertyEventExisting->isFromDefaultExtractor && !$propertyEventExisting->ignored) {
+                    $propertyEventExisting->ignored = true;
+                    $propertyEventExisting->ignoreReason = 'Default property is ignored because a custom property is defined.';
                 }
             }
 
@@ -344,20 +338,15 @@ final class MetadataFactory
         );
     }
 
-    /**
-     * @param TransformerFactoryInterface[] $transformerFactories
-     */
     public static function create(
         Configuration $configuration,
         PropertyTransformerRegistry $customTransformerRegistry,
         MetadataRegistry $metadataRegistry,
         ClassDiscriminatorResolver $classDiscriminatorResolver,
-        array $transformerFactories = [],
         ?ClassMetadataFactory $classMetadataFactory = null,
         AdvancedNameConverterInterface|NameConverterInterface|null $nameConverter = null,
         ExpressionLanguage $expressionLanguage = new ExpressionLanguage(),
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
-        bool $removeDefaultProperties = false,
         ?ObjectManager $objectManager = null,
     ): self {
         // Create property info extractors
@@ -416,10 +405,6 @@ final class MetadataFactory
             $factories[] = new SymfonyUidTransformerFactory();
         }
 
-        foreach ($transformerFactories as $transformerFactory) {
-            $factories[] = $transformerFactory;
-        }
-
         $transformerFactory = new ChainTransformerFactory($factories);
 
         $sourceTargetMappingExtractor = new SourceTargetMappingExtractor(
@@ -452,7 +437,6 @@ final class MetadataFactory
             $eventDispatcher,
             $metadataRegistry,
             $classDiscriminatorResolver,
-            $removeDefaultProperties,
         );
     }
 }
