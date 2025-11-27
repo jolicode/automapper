@@ -7,11 +7,25 @@ namespace AutoMapper\Tests\Bundle;
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
+if (!class_exists(ApiTestCase::class)) {
+    class ApiPlatformTest extends \PHPUnit\Framework\TestCase
+    {
+        protected static function createClient(): void
+        {
+            self::markTestSkipped('API Platform is not installed.');
+        }
+    }
+
+    return;
+}
+
 class ApiPlatformTest extends ApiTestCase
 {
     protected function setUp(): void
     {
         static::$class = null;
+        static::$alwaysBootKernel = false;
+
         $_SERVER['KERNEL_DIR'] = __DIR__ . '/Resources/App';
         $_SERVER['KERNEL_CLASS'] = 'AutoMapper\Tests\Bundle\Resources\App\AppKernel';
         $_SERVER['APP_DEBUG'] = false;

@@ -21,7 +21,6 @@ final class PropertyMetadata
     public function __construct(
         public readonly SourcePropertyMetadata $source,
         public readonly TargetPropertyMetadata $target,
-        public readonly TypesMatching $types,
         public TransformerInterface $transformer,
         public bool $ignored = false,
         public string $ignoreReason = '',

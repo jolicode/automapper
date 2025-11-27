@@ -7,7 +7,6 @@ namespace AutoMapper\Transformer\PropertyTransformer;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
-use AutoMapper\Metadata\TypesMatching;
 
 /**
  * Allow to automatically register a transformer for a specific property.
@@ -21,10 +20,9 @@ interface PropertyTransformerSupportInterface
      *
      * This method is not need if the transformer is set in an #[MapTo] or #[MapFrom] attribute
      *
-     * @param TypesMatching          $types          The types of the source and target properties
      * @param SourcePropertyMetadata $source         The source property metadata
      * @param TargetPropertyMetadata $target         The target property metadata
      * @param MapperMetadata         $mapperMetadata The mapper metadata
      */
-    public function supports(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool;
+    public function supports(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool;
 }

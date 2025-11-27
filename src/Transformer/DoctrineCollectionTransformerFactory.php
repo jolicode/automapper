@@ -8,31 +8,46 @@ use AutoMapper\Extractor\WriteMutator;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
-use AutoMapper\Metadata\TypesMatching;
 use Doctrine\Common\Collections\Collection;
-use Symfony\Component\PropertyInfo\Type;
+use Symfony\Component\TypeInfo\Type;
 
 /**
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
  */
-final class DoctrineCollectionTransformerFactory extends AbstractUniqueTypeTransformerFactory implements ChainTransformerFactoryAwareInterface
+final class DoctrineCollectionTransformerFactory implements TransformerFactoryInterface, ChainTransformerFactoryAwareInterface
 {
     use ChainTransformerFactoryAwareTrait;
 
-    protected function createTransformer(Type $sourceType, Type $targetType, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
+    public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
         if (!interface_exists(Collection::class)) {
             return null;
         }
 
-        if (Type::BUILTIN_TYPE_OBJECT !== $targetType->getBuiltinType() || !\is_string($targetType->getClassName())) {
+        if (!$source->type instanceof Type\CollectionType || null === $target->type) {
             return null;
         }
 
-        if (Collection::class === $targetType->getClassName() || (false !== ($classImplements = class_implements($targetType->getClassName())) && \in_array(Collection::class, $classImplements))) {
-            $types = TypesMatching::fromSourceAndTargetTypes($sourceType->getCollectionValueTypes(), $targetType->getCollectionValueTypes());
+        $isDoctrineCollection = $target->type->isSatisfiedBy(function (Type $type) {
+            if (!$type instanceof Type\ObjectType) {
+                return false;
+            }
 
-            $subItemTransformer = $this->chainTransformerFactory->getTransformer($types, $source, $target, $mapperMetadata);
+            $className = $type->getClassName();
+            $implementedClasses = class_implements($className);
+
+            return $className === Collection::class || ($implementedClasses && \in_array(Collection::class, $implementedClasses, true));
+        });
+
+        if ($isDoctrineCollection) {
+            $sourceItemType = $source->type->getCollectionValueType();
+            $targetItemType = $target->type instanceof Type\CollectionType ? $target->type->getCollectionValueType() : Type::mixed();
+
+            $newSource = $source->withType($sourceItemType);
+            $newTarget = $target->withType($targetItemType);
+
+            $subItemTransformer = $this->chainTransformerFactory->getTransformer($newSource, $newTarget, $mapperMetadata);
+
             if (null === $subItemTransformer) {
                 return null;
             }

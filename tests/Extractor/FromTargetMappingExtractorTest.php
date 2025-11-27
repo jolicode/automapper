@@ -49,6 +49,8 @@ class FromTargetMappingExtractorTest extends AutoMapperTestCase
             $propertyInfoExtractor,
             $reflectionExtractor,
             $reflectionExtractor,
+            $propertyInfoExtractor,
+            $propertyInfoExtractor,
         );
     }
 

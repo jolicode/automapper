@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace AutoMapper\Event;
 
 use AutoMapper\Metadata\MapperMetadata;
-use AutoMapper\Metadata\TypesMatching;
 use AutoMapper\Transformer\TransformerInterface;
+use Symfony\Component\TypeInfo\Type;
 
 /**
  * @internal
@@ -20,7 +20,8 @@ final class PropertyMetadataEvent
         public readonly MapperMetadata $mapperMetadata,
         public readonly SourcePropertyMetadata $source,
         public readonly TargetPropertyMetadata $target,
-        public ?TypesMatching $types = null,
+        public ?Type $sourceType = null,
+        public ?Type $targetType = null,
         public ?int $maxDepth = null,
         public ?TransformerInterface $transformer = null,
         public ?string $dateTimeFormat = null,

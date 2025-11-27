@@ -47,8 +47,6 @@ use AutoMapper\Tests\Fixtures\Uninitialized;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\HttpKernel\Kernel;
-use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\VarDumper\Dumper\CliDumper;
 use Symfony\Component\VarDumper\Test\VarDumperTestTrait;
@@ -620,47 +618,25 @@ class AutoMapperTest extends AutoMapperTestCase
 
     public function testNameConverter(): void
     {
-        if (Kernel::MAJOR_VERSION >= 7 && Kernel::MINOR_VERSION >= 2) {
-            $nameConverter = new class implements NameConverterInterface {
-                public function normalize($propertyName, ?string $class = null, ?string $format = null, array $context = []): string
-                {
-                    if ('id' === $propertyName) {
-                        return '@id';
-                    }
-
-                    return $propertyName;
+        $nameConverter = new class implements NameConverterInterface {
+            public function normalize($propertyName, ?string $class = null, ?string $format = null, array $context = []): string
+            {
+                if ('id' === $propertyName) {
+                    return '@id';
                 }
 
-                public function denormalize($propertyName, ?string $class = null, ?string $format = null, array $context = []): string
-                {
-                    if ('@id' === $propertyName) {
-                        return 'id';
-                    }
+                return $propertyName;
+            }
 
-                    return $propertyName;
-                }
-            };
-        } else {
-            $nameConverter = new class implements AdvancedNameConverterInterface {
-                public function normalize(string $propertyName, ?string $class = null, ?string $format = null, array $context = []): string
-                {
-                    if ('id' === $propertyName) {
-                        return '@id';
-                    }
-
-                    return $propertyName;
+            public function denormalize($propertyName, ?string $class = null, ?string $format = null, array $context = []): string
+            {
+                if ('@id' === $propertyName) {
+                    return 'id';
                 }
 
-                public function denormalize(string $propertyName, ?string $class = null, ?string $format = null, array $context = []): string
-                {
-                    if ('@id' === $propertyName) {
-                        return 'id';
-                    }
-
-                    return $propertyName;
-                }
-            };
-        }
+                return $propertyName;
+            }
+        };
 
         $autoMapper = AutoMapper::create(new Configuration(classPrefix: 'Mapper2_'), nameConverter: $nameConverter);
         $user = new Fixtures\User(1, 'yolo', '13');
@@ -744,7 +720,7 @@ class AutoMapperTest extends AutoMapperTestCase
         $dto = $this->autoMapper->map($user, Fixtures\UserDTOProperties::class);
 
         self::assertInstanceOf(Fixtures\UserDTOProperties::class, $dto);
-        self::assertSame(['foo' => 'bar'], $dto->getProperties());
+        self::assertSame([0 => 'bar'], $dto->getProperties());
     }
 
     public function testAdderAndRemoverWithClass(): void

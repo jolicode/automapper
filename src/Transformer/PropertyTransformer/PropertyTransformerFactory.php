@@ -7,7 +7,6 @@ namespace AutoMapper\Transformer\PropertyTransformer;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
-use AutoMapper\Metadata\TypesMatching;
 use AutoMapper\Transformer\PrioritizedTransformerFactoryInterface;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use AutoMapper\Transformer\TransformerInterface;
@@ -27,9 +26,9 @@ final class PropertyTransformerFactory implements PrioritizedTransformerFactoryI
         return 256;
     }
 
-    public function getTransformer(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
+    public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
-        $id = $this->propertyTransformerRegistry->getPropertyTransformersForMapper($types, $source, $target, $mapperMetadata);
+        $id = $this->propertyTransformerRegistry->getPropertyTransformersForMapper($source, $target, $mapperMetadata);
 
         if (null === $id) {
             return null;

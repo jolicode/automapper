@@ -66,6 +66,8 @@ class MetadataFactoryTest extends AutoMapperTestCase
             $propertyInfoExtractor,
             $reflectionExtractor,
             $reflectionExtractor,
+            $propertyInfoExtractor,
+            $propertyInfoExtractor,
         );
 
         $fromTargetMappingExtractor = new FromTargetMappingExtractor(
@@ -73,6 +75,8 @@ class MetadataFactoryTest extends AutoMapperTestCase
             $propertyInfoExtractor,
             $reflectionExtractor,
             $reflectionExtractor,
+            $propertyInfoExtractor,
+            $propertyInfoExtractor,
         );
 
         $fromSourceMappingExtractor = new FromSourceMappingExtractor(
@@ -80,6 +84,8 @@ class MetadataFactoryTest extends AutoMapperTestCase
             $propertyInfoExtractor,
             $reflectionExtractor,
             $reflectionExtractor,
+            $propertyInfoExtractor,
+            $propertyInfoExtractor,
         );
 
         $this->factory = new MetadataFactory(

@@ -7,36 +7,37 @@ namespace AutoMapper\Transformer;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
-use Symfony\Component\PropertyInfo\Type;
+use Symfony\Component\TypeInfo\Type;
+use Symfony\Component\TypeInfo\TypeIdentifier;
 
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
  *
  * @internal
  */
-final class DateTimeTransformerFactory extends AbstractUniqueTypeTransformerFactory implements PrioritizedTransformerFactoryInterface
+final class DateTimeTransformerFactory implements TransformerFactoryInterface, PrioritizedTransformerFactoryInterface
 {
-    protected function createTransformer(Type $sourceType, Type $targetType, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
+    public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
-        $isSourceDate = $this->isDateTimeType($sourceType);
-        $isTargetDate = $this->isDateTimeType($targetType);
+        $isSourceDate = $this->isDateTimeType($source->type);
+        $isTargetDate = $this->isDateTimeType($target->type);
 
         if ($isSourceDate && $isTargetDate) {
-            return $this->createTransformerForSourceAndTarget($sourceType, $targetType);
+            return $this->createTransformerForSourceAndTarget($target->type);
         }
 
         if ($isSourceDate) {
-            return $this->createTransformerForSource($targetType, $source);
+            return $this->createTransformerForSource($target->type, $source);
         }
 
         if ($isTargetDate) {
-            return $this->createTransformerForTarget($sourceType, $targetType, $target);
+            return $this->createTransformerForTarget($source->type, $target->type, $target);
         }
 
         return null;
     }
 
-    protected function createTransformerForSourceAndTarget(Type $sourceType, Type $targetType): ?TransformerInterface
+    protected function createTransformerForSourceAndTarget(?Type $targetType): ?TransformerInterface
     {
         // if target is mutable
         if ($this->isDateTimeMutable($targetType)) {
@@ -47,31 +48,27 @@ final class DateTimeTransformerFactory extends AbstractUniqueTypeTransformerFact
         return new DateTimeInterfaceToImmutableTransformer();
     }
 
-    protected function createTransformerForSource(Type $targetType, SourcePropertyMetadata $metadata): ?TransformerInterface
+    protected function createTransformerForSource(?Type $targetType, SourcePropertyMetadata $metadata): ?TransformerInterface
     {
-        if (Type::BUILTIN_TYPE_STRING === $targetType->getBuiltinType()) {
+        if ($targetType !== null && $targetType->isIdentifiedBy(TypeIdentifier::STRING)) {
             return new DateTimeToStringTransformer($metadata->dateTimeFormat);
         }
 
         return null;
     }
 
-    protected function createTransformerForTarget(Type $sourceType, Type $targetType, TargetPropertyMetadata $metadata): ?TransformerInterface
+    protected function createTransformerForTarget(?Type $sourceType, ?Type $targetType, TargetPropertyMetadata $metadata): ?TransformerInterface
     {
-        if (Type::BUILTIN_TYPE_STRING === $sourceType->getBuiltinType()) {
+        if ($sourceType !== null && $sourceType->isIdentifiedBy(TypeIdentifier::STRING)) {
             return new StringToDateTimeTransformer($this->getClassName($targetType), $metadata->dateTimeFormat);
         }
 
         return null;
     }
 
-    private function isDateTimeType(Type $type): bool
+    private function isDateTimeType(?Type $type): bool
     {
-        if (Type::BUILTIN_TYPE_OBJECT !== $type->getBuiltinType()) {
-            return false;
-        }
-
-        if (null === $type->getClassName()) {
+        if (!$type instanceof Type\ObjectType) {
             return false;
         }
 
@@ -82,18 +79,22 @@ final class DateTimeTransformerFactory extends AbstractUniqueTypeTransformerFact
         return true;
     }
 
-    private function getClassName(Type $type): string
+    private function getClassName(?Type $type): string
     {
-        if (\DateTimeInterface::class === $type->getClassName() || $type->getClassName() === null) {
+        if (!$type instanceof Type\ObjectType) {
+            return \DateTimeImmutable::class;
+        }
+
+        if (\DateTimeInterface::class === $type->getClassName()) {
             return \DateTimeImmutable::class;
         }
 
         return $type->getClassName();
     }
 
-    private function isDateTimeMutable(Type $type): bool
+    private function isDateTimeMutable(?Type $type): bool
     {
-        if (null === $type->getClassName()) {
+        if (!$type instanceof Type\ObjectType) {
             return false;
         }
 
@@ -106,6 +107,6 @@ final class DateTimeTransformerFactory extends AbstractUniqueTypeTransformerFact
 
     public function getPriority(): int
     {
-        return 16;
+        return 32;
     }
 }

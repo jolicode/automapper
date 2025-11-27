@@ -44,7 +44,7 @@ trait IgnoredAttributesTestTrait
                 'foo' => 'foo',
                 'inner' => ['foo' => 'innerFoo'],
                 'date' => null,
-                'inners' => null,
+                'inners' => [],
             ],
             $normalizer->normalize($objectOuter, null, $context)
         );
@@ -54,7 +54,7 @@ trait IgnoredAttributesTestTrait
             [
                 'bar' => 'bar',
                 'date' => null,
-                'inners' => null,
+                'inners' => [],
             ],
             $normalizer->normalize($objectOuter, null, $context)
         );

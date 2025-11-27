@@ -15,10 +15,11 @@ use PhpParser\Node\Stmt;
 
 /**
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
+ *M
  *
  * @internal
  */
-abstract readonly class AbstractArrayTransformer implements TransformerInterface, DependentTransformerInterface
+abstract readonly class AbstractArrayTransformer implements \Stringable, TransformerInterface, DependentTransformerInterface
 {
     public function __construct(
         protected TransformerInterface $itemTransformer,
@@ -156,5 +157,10 @@ abstract readonly class AbstractArrayTransformer implements TransformerInterface
         }
 
         return $this->itemTransformer->getDependencies();
+    }
+
+    public function __toString(): string
+    {
+        return \sprintf('%s<%s>', static::class, $this->itemTransformer instanceof \Stringable ? (string) $this->itemTransformer : \get_class($this->itemTransformer));
     }
 }
