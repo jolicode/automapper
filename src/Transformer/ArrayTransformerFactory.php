@@ -7,8 +7,8 @@ namespace AutoMapper\Transformer;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
-use AutoMapper\Metadata\TypesMatching;
-use Symfony\Component\PropertyInfo\Type;
+use Symfony\Component\TypeInfo\Type;
+use Symfony\Component\TypeInfo\TypeIdentifier;
 
 /**
  * Create a decorated transformer to handle array type.
@@ -17,49 +17,39 @@ use Symfony\Component\PropertyInfo\Type;
  *
  * @internal
  */
-final class ArrayTransformerFactory extends AbstractUniqueTypeTransformerFactory implements PrioritizedTransformerFactoryInterface, ChainTransformerFactoryAwareInterface
+final class ArrayTransformerFactory implements TransformerFactoryInterface, PrioritizedTransformerFactoryInterface, ChainTransformerFactoryAwareInterface
 {
     use ChainTransformerFactoryAwareTrait;
 
-    protected function createTransformer(Type $sourceType, Type $targetType, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
+    public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
-        if (!($sourceType->isCollection() || ($sourceType->getBuiltinType() === Type::BUILTIN_TYPE_OBJECT && $sourceType->getClassName() === \Generator::class))) {
+        $sourceType = $source->type;
+        $targetType = $target->type;
+
+        if (null === $sourceType || null === $targetType) {
             return null;
         }
 
-        if (!$targetType->isCollection()) {
+        if (!$this->isCollectionType($sourceType) || !$this->isCollectionType($targetType)) {
             return null;
         }
 
-        $sourceCollections = $sourceType->getCollectionValueTypes();
-        $targetCollections = $targetType->getCollectionValueTypes();
+        $sourceCollectionType = $sourceType instanceof Type\CollectionType ? $sourceType->getCollectionValueType() : Type::mixed();
+        $targetCollectionType = $targetType instanceof Type\CollectionType ? $targetType->getCollectionValueType() : Type::mixed();
 
-        if ([] === $sourceCollections && [] !== $targetCollections) {
-            // consider array as a collection of array
-            $sourceCollections = [new Type(Type::BUILTIN_TYPE_ARRAY, false, null, false)];
-        }
+        $newSource = $source->withType($sourceCollectionType);
+        $newTarget = $target->withType($targetCollectionType);
 
-        if ([] !== $sourceCollections && [] === $targetCollections) {
-            // consider array as a collection of array
-            $targetCollections = [new Type(Type::BUILTIN_TYPE_ARRAY, false, null, false)];
-        }
-
-        if ([] === $sourceCollections || [] === $targetCollections) {
-            return new DictionaryTransformer(new CopyTransformer());
-        }
-
-        $types = TypesMatching::fromSourceAndTargetTypes($sourceCollections, $targetCollections);
-        $subItemTransformer = $this->chainTransformerFactory->getTransformer($types, $source, $target, $mapperMetadata);
+        $subItemTransformer = $this->chainTransformerFactory->getTransformer($newSource, $newTarget, $mapperMetadata);
 
         if (null !== $subItemTransformer) {
             if ($subItemTransformer instanceof ObjectTransformer) {
                 $subItemTransformer->deepTargetToPopulate = false;
             }
 
-            $sourceCollectionKeyTypes = $sourceType->getCollectionKeyTypes();
-            $sourceCollectionKeyType = $sourceCollectionKeyTypes[0] ?? null;
+            $sourceCollectionKeyType = $sourceType instanceof Type\CollectionType ? $sourceType->getCollectionKeyType() : Type::mixed();
 
-            if ($sourceCollectionKeyType instanceof Type && Type::BUILTIN_TYPE_INT !== $sourceCollectionKeyType->getBuiltinType()) {
+            if ($sourceCollectionKeyType instanceof Type\BuiltinType && $sourceCollectionKeyType->getTypeIdentifier() !== TypeIdentifier::INT) {
                 return new DictionaryTransformer($subItemTransformer);
             }
 
@@ -67,6 +57,19 @@ final class ArrayTransformerFactory extends AbstractUniqueTypeTransformerFactory
         }
 
         return null;
+    }
+
+    private function isCollectionType(Type $type): bool
+    {
+        if ($type instanceof Type\CollectionType) {
+            return true;
+        }
+
+        if ($type instanceof Type\ObjectType && is_a($type->getClassName(), \Traversable::class, true)) {
+            return true;
+        }
+
+        return false;
     }
 
     public function getPriority(): int

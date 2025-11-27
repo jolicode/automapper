@@ -23,7 +23,6 @@ use AutoMapper\EventListener\Symfony\SerializerIgnoreListener;
 use AutoMapper\EventListener\Symfony\SerializerMaxDepthListener;
 use AutoMapper\Extractor\FromSourceMappingExtractor;
 use AutoMapper\Extractor\FromTargetMappingExtractor;
-use AutoMapper\Extractor\ReadWriteTypeExtractor;
 use AutoMapper\Extractor\SourceTargetMappingExtractor;
 use AutoMapper\Extractor\WriteMutator;
 use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
@@ -37,7 +36,9 @@ use AutoMapper\Transformer\DependentTransformerInterface;
 use AutoMapper\Transformer\DoctrineCollectionTransformerFactory;
 use AutoMapper\Transformer\EnumTransformerFactory;
 use AutoMapper\Transformer\MapperDependency;
+use AutoMapper\Transformer\MixedTransformerFactory;
 use AutoMapper\Transformer\MultipleTransformerFactory;
+use AutoMapper\Transformer\NullableTargetTransformerFactory;
 use AutoMapper\Transformer\NullableTransformerFactory;
 use AutoMapper\Transformer\ObjectTransformerFactory;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerFactory;
@@ -282,12 +283,20 @@ final class MetadataFactory
             $sourcePropertyMetadata = SourcePropertyMetadata::fromEvent($propertyMappedEvent->source);
             $targetPropertyMetadata = TargetPropertyMetadata::fromEvent($propertyMappedEvent->target);
 
-            if (null === $propertyMappedEvent->types) {
-                $propertyMappedEvent->types = $extractor->getTypes($mapperMetadata->source, $sourcePropertyMetadata, $mapperMetadata->target, $targetPropertyMetadata, $propertyMappedEvent->extractTypesFromGetter ?? $this->configuration->extractTypesFromGetter);
+            if (null === $sourcePropertyMetadata->type || null === $targetPropertyMetadata->type) {
+                [$guessedSourceType, $guessedTargetType] = $extractor->getTypes($mapperMetadata->source, $sourcePropertyMetadata, $mapperMetadata->target, $targetPropertyMetadata, $propertyMappedEvent->extractTypesFromGetter ?? $this->configuration->extractTypesFromGetter);
+
+                if ($sourcePropertyMetadata->type === null) {
+                    $sourcePropertyMetadata = $sourcePropertyMetadata->withType($guessedSourceType);
+                }
+
+                if ($targetPropertyMetadata->type === null) {
+                    $targetPropertyMetadata = $targetPropertyMetadata->withType($guessedTargetType);
+                }
             }
 
             if (null === $propertyMappedEvent->transformer) {
-                $transformer = $this->transformerFactory->getTransformer($propertyMappedEvent->types, $sourcePropertyMetadata, $targetPropertyMetadata, $mapperMetadata);
+                $transformer = $this->transformerFactory->getTransformer($sourcePropertyMetadata, $targetPropertyMetadata, $mapperMetadata);
 
                 if (null === $transformer) {
                     $propertyMappedEvent->ignored = true;
@@ -315,7 +324,6 @@ final class MetadataFactory
             $propertiesMapping[] = new PropertyMetadata(
                 $sourcePropertyMetadata,
                 $targetPropertyMetadata,
-                $propertyMappedEvent->types,
                 $propertyMappedEvent->transformer ?? new VoidTransformer(),
                 $propertyMappedEvent->ignored ?? false,
                 $propertyMappedEvent->ignoreReason ?? '',
@@ -356,8 +364,15 @@ final class MetadataFactory
             $flags |= ReflectionExtractor::ALLOW_PRIVATE | ReflectionExtractor::ALLOW_PROTECTED;
         }
 
+        $reflectionSourceExtractor = new ReflectionExtractor(mutatorPrefixes: [], arrayMutatorPrefixes: [], enableConstructorExtraction: false, accessFlags: $flags);
+        $phpStanSourceExtractor = new PhpStanExtractor(mutatorPrefixes: [], arrayMutatorPrefixes: [], allowPrivateAccess: $configuration->mapPrivateProperties);
+        $reflectionTargetExtractor = new ReflectionExtractor(accessorPrefixes: [], accessFlags: $flags);
+        $phpStanTargetExtractor = new PhpStanExtractor(accessorPrefixes: [], allowPrivateAccess: $configuration->mapPrivateProperties);
+
+        $sourceTypeExtractor = new PropertyInfoExtractor(typeExtractors: [$phpStanSourceExtractor, $reflectionSourceExtractor]);
+        $targetTypeExtractor = new PropertyInfoExtractor(typeExtractors: [$phpStanTargetExtractor, $reflectionTargetExtractor]);
+
         $reflectionExtractor = new ReflectionExtractor(accessFlags: $flags);
-        $phpStanExtractor = new PhpStanExtractor();
 
         if (null !== $classMetadataFactory) {
             $eventDispatcher->addListener(PropertyMetadataEvent::class, new AdvancedNameConverterListener(new MetadataAwareNameConverter($classMetadataFactory, $nameConverter)));
@@ -380,24 +395,20 @@ final class MetadataFactory
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapperListener());
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapProviderListener());
 
-        $propertyInfoExtractor = new PropertyInfoExtractor(
-            listExtractors: [$reflectionExtractor],
-            typeExtractors: [new ReadWriteTypeExtractor(), $phpStanExtractor, $reflectionExtractor],
-            accessExtractors: [$reflectionExtractor]
-        );
-
         // Create transformer factories
         $factories = [
+            new DoctrineCollectionTransformerFactory(),
             new MultipleTransformerFactory(),
             new NullableTransformerFactory(),
+            new NullableTargetTransformerFactory(),
             new UniqueTypeTransformerFactory(),
             new DateTimeTransformerFactory(),
             new BuiltinTransformerFactory(),
-            new DoctrineCollectionTransformerFactory(),
             new ArrayTransformerFactory(),
             new ObjectTransformerFactory(),
             new EnumTransformerFactory(),
             new PropertyTransformerFactory($customTransformerRegistry),
+            new MixedTransformerFactory(),
             new CopyTransformerFactory(),
         ];
 
@@ -409,23 +420,29 @@ final class MetadataFactory
 
         $sourceTargetMappingExtractor = new SourceTargetMappingExtractor(
             $configuration,
-            $propertyInfoExtractor,
             $reflectionExtractor,
             $reflectionExtractor,
+            $reflectionExtractor,
+            $sourceTypeExtractor,
+            $targetTypeExtractor,
         );
 
         $fromTargetMappingExtractor = new FromTargetMappingExtractor(
             $configuration,
-            $propertyInfoExtractor,
             $reflectionExtractor,
             $reflectionExtractor,
+            $reflectionExtractor,
+            $sourceTypeExtractor,
+            $targetTypeExtractor,
         );
 
         $fromSourceMappingExtractor = new FromSourceMappingExtractor(
             $configuration,
-            $propertyInfoExtractor,
             $reflectionExtractor,
             $reflectionExtractor,
+            $reflectionExtractor,
+            $sourceTypeExtractor,
+            $targetTypeExtractor,
         );
 
         return new self(

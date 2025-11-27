@@ -14,7 +14,6 @@ use AutoMapper\Loader\ClassLoaderInterface;
 use AutoMapper\Loader\EvalLoader;
 use AutoMapper\Loader\FileLoader;
 use AutoMapper\Loader\FileReloadStrategy;
-use AutoMapper\Metadata\MetadataFactory;
 use AutoMapper\Normalizer\AutoMapperNormalizer;
 use AutoMapper\Provider\ProviderInterface;
 use AutoMapper\Symfony\Bundle\CacheWarmup\CacheWarmer;

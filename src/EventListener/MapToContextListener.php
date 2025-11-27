@@ -9,6 +9,7 @@ use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\Extractor\ReadAccessor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyReadInfo;
+use Symfony\Component\PropertyInfo\PropertyReadInfoExtractorInterface;
 
 /**
  * @internal
@@ -16,7 +17,7 @@ use Symfony\Component\PropertyInfo\PropertyReadInfo;
 final readonly class MapToContextListener
 {
     public function __construct(
-        private ReflectionExtractor $extractor,
+        private PropertyReadInfoExtractorInterface $extractor,
     ) {
     }
 

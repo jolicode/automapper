@@ -10,7 +10,8 @@ use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\Cast;
 use PhpParser\Node\Name;
-use Symfony\Component\PropertyInfo\Type;
+use Symfony\Component\TypeInfo\Type;
+use Symfony\Component\TypeInfo\TypeIdentifier;
 
 use function AutoMapper\PhpParser\create_expr_array_item;
 
@@ -24,73 +25,91 @@ use function AutoMapper\PhpParser\create_expr_array_item;
 final readonly class BuiltinTransformer implements TransformerInterface, CheckTypeInterface
 {
     private const CAST_MAPPING = [
-        Type::BUILTIN_TYPE_BOOL => [
-            Type::BUILTIN_TYPE_INT => Cast\Int_::class,
-            Type::BUILTIN_TYPE_STRING => Cast\String_::class,
-            Type::BUILTIN_TYPE_FLOAT => Cast\Double::class,
-            Type::BUILTIN_TYPE_ARRAY => 'toArray',
-            Type::BUILTIN_TYPE_ITERABLE => 'toArray',
+        TypeIdentifier::BOOL->value => [
+            TypeIdentifier::INT->value => Cast\Int_::class,
+            TypeIdentifier::STRING->value => Cast\String_::class,
+            TypeIdentifier::FLOAT->value => Cast\Double::class,
+            TypeIdentifier::ARRAY->value => 'toArray',
+            TypeIdentifier::ITERABLE->value => 'toArray',
         ],
-        Type::BUILTIN_TYPE_FLOAT => [
-            Type::BUILTIN_TYPE_STRING => Cast\String_::class,
-            Type::BUILTIN_TYPE_INT => Cast\Int_::class,
-            Type::BUILTIN_TYPE_BOOL => Cast\Bool_::class,
-            Type::BUILTIN_TYPE_ARRAY => 'toArray',
-            Type::BUILTIN_TYPE_ITERABLE => 'toArray',
+        TypeIdentifier::MIXED->value => [
+            TypeIdentifier::INT->value => Cast\Int_::class,
+            TypeIdentifier::STRING->value => Cast\String_::class,
+            TypeIdentifier::FLOAT->value => Cast\Double::class,
+            TypeIdentifier::ARRAY->value => 'toArray',
+            TypeIdentifier::ITERABLE->value => 'toArray',
         ],
-        Type::BUILTIN_TYPE_INT => [
-            Type::BUILTIN_TYPE_FLOAT => Cast\Double::class,
-            Type::BUILTIN_TYPE_STRING => Cast\String_::class,
-            Type::BUILTIN_TYPE_BOOL => Cast\Bool_::class,
-            Type::BUILTIN_TYPE_ARRAY => 'toArray',
-            Type::BUILTIN_TYPE_ITERABLE => 'toArray',
+        TypeIdentifier::FLOAT->value => [
+            TypeIdentifier::STRING->value => Cast\String_::class,
+            TypeIdentifier::INT->value => Cast\Int_::class,
+            TypeIdentifier::BOOL->value => Cast\Bool_::class,
+            TypeIdentifier::ARRAY->value => 'toArray',
+            TypeIdentifier::ITERABLE->value => 'toArray',
         ],
-        Type::BUILTIN_TYPE_ITERABLE => [
-            Type::BUILTIN_TYPE_ARRAY => 'fromIteratorToArray',
+        TypeIdentifier::INT->value => [
+            TypeIdentifier::FLOAT->value => Cast\Double::class,
+            TypeIdentifier::STRING->value => Cast\String_::class,
+            TypeIdentifier::BOOL->value => Cast\Bool_::class,
+            TypeIdentifier::ARRAY->value => 'toArray',
+            TypeIdentifier::ITERABLE->value => 'toArray',
         ],
-        Type::BUILTIN_TYPE_ARRAY => [],
-        Type::BUILTIN_TYPE_STRING => [
-            Type::BUILTIN_TYPE_ARRAY => 'toArray',
-            Type::BUILTIN_TYPE_ITERABLE => 'toArray',
-            Type::BUILTIN_TYPE_FLOAT => Cast\Double::class,
-            Type::BUILTIN_TYPE_INT => Cast\Int_::class,
-            Type::BUILTIN_TYPE_BOOL => Cast\Bool_::class,
+        TypeIdentifier::ITERABLE->value => [
+            TypeIdentifier::ARRAY->value => 'fromIteratorToArray',
         ],
-        Type::BUILTIN_TYPE_CALLABLE => [],
-        Type::BUILTIN_TYPE_RESOURCE => [],
+        TypeIdentifier::ARRAY->value => [],
+        TypeIdentifier::STRING->value => [
+            TypeIdentifier::ARRAY->value => 'toArray',
+            TypeIdentifier::ITERABLE->value => 'toArray',
+            TypeIdentifier::FLOAT->value => Cast\Double::class,
+            TypeIdentifier::INT->value => Cast\Int_::class,
+            TypeIdentifier::BOOL->value => Cast\Bool_::class,
+        ],
+        TypeIdentifier::CALLABLE->value => [],
+        TypeIdentifier::RESOURCE->value => [],
     ];
 
     private const CONDITION_MAPPING = [
-        Type::BUILTIN_TYPE_BOOL => 'is_bool',
-        Type::BUILTIN_TYPE_INT => 'is_int',
-        Type::BUILTIN_TYPE_FLOAT => 'is_float',
-        Type::BUILTIN_TYPE_STRING => 'is_string',
-        Type::BUILTIN_TYPE_ARRAY => 'is_array',
-        Type::BUILTIN_TYPE_OBJECT => 'is_object',
-        Type::BUILTIN_TYPE_RESOURCE => 'is_resource',
-        Type::BUILTIN_TYPE_CALLABLE => 'is_callable',
-        Type::BUILTIN_TYPE_ITERABLE => 'is_iterable',
+        TypeIdentifier::BOOL->value => 'is_bool',
+        TypeIdentifier::INT->value => 'is_int',
+        TypeIdentifier::FLOAT->value => 'is_float',
+        TypeIdentifier::STRING->value => 'is_string',
+        TypeIdentifier::ARRAY->value => 'is_array',
+        TypeIdentifier::OBJECT->value => 'is_object',
+        TypeIdentifier::RESOURCE->value => 'is_resource',
+        TypeIdentifier::CALLABLE->value => 'is_callable',
+        TypeIdentifier::ITERABLE->value => 'is_iterable',
     ];
 
+    /**
+     * @param Type\BuiltinType<TypeIdentifier> $sourceType
+     */
     public function __construct(
-        private Type $sourceType,
-        /** @var Type[] $targetTypes */
-        private array $targetTypes,
+        private Type\BuiltinType $sourceType,
+        private Type $targetType,
     ) {
     }
 
     public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr $existingValue = null): array
     {
-        $targetTypes = array_map(function (Type $type) {
-            return $type->getBuiltinType();
-        }, $this->targetTypes);
+        $targetTypes = [];
 
-        if (\in_array($this->sourceType->getBuiltinType(), $targetTypes, true)) {
-            /* Output type is the same as input type so we simply return the same expression */
+        foreach ($this->targetType->traverse() as $type) {
+            if ($type instanceof Type\BuiltinType) {
+                $targetTypes[] = $type->getTypeIdentifier()->value;
+
+                if ($type->getTypeIdentifier() === $this->sourceType->getTypeIdentifier()) {
+                    /* Output type can be the same as input type so we simply return the same expression */
+                    return [$input, []];
+                }
+            }
+        }
+
+        if (!$targetTypes) {
+            /* When there is no possibility to cast we assume that the mutator will be able to handle the value */
             return [$input, []];
         }
 
-        foreach (self::CAST_MAPPING[$this->sourceType->getBuiltinType()] as $castType => $castMethod) {
+        foreach (self::CAST_MAPPING[$this->sourceType->getTypeIdentifier()->value] as $castType => $castMethod) {
             if (\in_array($castType, $targetTypes, true)) {
                 if (method_exists($this, $castMethod)) {
                     /*
@@ -116,25 +135,20 @@ final readonly class BuiltinTransformer implements TransformerInterface, CheckTy
 
     public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): ?Expr
     {
-        if ($this->sourceType->getBuiltinType() === Type::BUILTIN_TYPE_NULL) {
+        if ($this->sourceType->getTypeIdentifier() === TypeIdentifier::NULL) {
             return null;
         }
 
-        $condition = new Expr\FuncCall(
-            new Name(self::CONDITION_MAPPING[$this->sourceType->getBuiltinType()]),
+        if (!isset(self::CONDITION_MAPPING[$this->sourceType->getTypeIdentifier()->value])) {
+            return null;
+        }
+
+        return new Expr\FuncCall(
+            new Name(self::CONDITION_MAPPING[$this->sourceType->getTypeIdentifier()->value]),
             [
                 new Arg($input),
             ]
         );
-
-        if ($this->sourceType->getBuiltinType() === Type::BUILTIN_TYPE_OBJECT && \is_string($this->sourceType->getClassName())) {
-            $condition = new Expr\BinaryOp\BooleanAnd(
-                $condition,
-                new Expr\Instanceof_($input, new Name\FullyQualified($this->sourceType->getClassName()))
-            );
-        }
-
-        return $condition;
     }
 
     private function toArray(Expr $input): Expr

@@ -7,7 +7,6 @@ namespace AutoMapper\Transformer\PropertyTransformer;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
-use AutoMapper\Metadata\TypesMatching;
 
 /**
  * @internal
@@ -51,10 +50,10 @@ final class PropertyTransformerRegistry
         return $this->propertyTransformers[$id] ?? null;
     }
 
-    public function getPropertyTransformersForMapper(TypesMatching $types, SourcePropertyMetadata $sourceProperty, TargetPropertyMetadata $targetProperty, MapperMetadata $mapperMetadata): ?string
+    public function getPropertyTransformersForMapper(SourcePropertyMetadata $sourceProperty, TargetPropertyMetadata $targetProperty, MapperMetadata $mapperMetadata): ?string
     {
         foreach ($this->prioritizedPropertyTransformers() as $id => $propertyTransformer) {
-            if ($propertyTransformer instanceof PropertyTransformerSupportInterface && $propertyTransformer->supports($types, $sourceProperty, $targetProperty, $mapperMetadata)) {
+            if ($propertyTransformer instanceof PropertyTransformerSupportInterface && $propertyTransformer->supports($sourceProperty, $targetProperty, $mapperMetadata)) {
                 return $id;
             }
         }

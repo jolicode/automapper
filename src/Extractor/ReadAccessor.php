@@ -13,7 +13,6 @@ use PhpParser\Node\Name;
 use PhpParser\Node\Param;
 use PhpParser\Node\Scalar;
 use PhpParser\Node\Stmt;
-use Symfony\Component\PropertyInfo\Type;
 
 /**
  * Read accessor tell how to read from a property.
@@ -24,8 +23,6 @@ use Symfony\Component\PropertyInfo\Type;
  */
 final class ReadAccessor
 {
-    use GetTypeTrait;
-
     public const TYPE_METHOD = 1;
     public const TYPE_PROPERTY = 2;
     public const TYPE_ARRAY_DIMENSION = 3;
@@ -429,77 +426,5 @@ final class ReadAccessor
             new Arg(new Expr\ConstFetch(new Name('null'))),
             new Arg(new Scalar\String_($className)),
         ]);
-    }
-
-    /**
-     * @return Type[]|null
-     */
-    public function getTypes(string $class): ?array
-    {
-        if (self::TYPE_METHOD === $this->type && (class_exists($class) || interface_exists($class))) {
-            try {
-                $reflectionMethod = new \ReflectionMethod($class, $this->accessor);
-
-                if ($types = $this->extractFromDocBlock(
-                    $reflectionMethod->getDocComment(),
-                    $class,
-                    $reflectionMethod->getDeclaringClass()->getName(),
-                    $this->accessor,
-                    '@return'
-                )) {
-                    return $types;
-                }
-
-                $reflectionReturnType = $reflectionMethod->getReturnType();
-
-                if ($reflectionReturnType === null) {
-                    return null;
-                }
-
-                return $this->extractFromReflectionType($reflectionReturnType, $reflectionMethod->getDeclaringClass());
-            } catch (\ReflectionException $e) {
-                return null;
-            }
-        }
-
-        if (self::TYPE_PROPERTY === $this->type && (class_exists($class) || interface_exists($class))) {
-            try {
-                $reflectionProperty = new \ReflectionProperty($class, $this->accessor);
-
-                if ($reflectionProperty->isPromoted()) {
-                    if ($types = $this->extractFromDocBlock(
-                        $reflectionProperty->getDeclaringClass()->getConstructor()?->getDocComment(),
-                        $class,
-                        $reflectionProperty->getDeclaringClass()->getName(),
-                        $this->accessor,
-                        '@param'
-                    )) {
-                        return $types;
-                    }
-                }
-
-                if ($types = $this->extractFromDocBlock(
-                    $reflectionProperty->getDocComment(),
-                    $class,
-                    $reflectionProperty->getDeclaringClass()->getName(),
-                    $this->accessor,
-                    '@var'
-                )) {
-                    return $types;
-                }
-
-                $reflectionType = $reflectionProperty->getType();
-
-                if ($reflectionType === null) {
-                    return null;
-                }
-
-                return $this->extractFromReflectionType($reflectionType, $reflectionProperty->getDeclaringClass());
-            } catch (\ReflectionException $e) {
-                return null;
-            }
-        }
-
-        return null;
     }
 }

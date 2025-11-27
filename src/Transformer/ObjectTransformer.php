@@ -11,7 +11,8 @@ use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
 use PhpParser\Node\Scalar;
-use Symfony\Component\PropertyInfo\Type;
+use Symfony\Component\TypeInfo\Type;
+use Symfony\Component\TypeInfo\TypeIdentifier;
 
 /**
  * Transform to an object which can be mapped by AutoMapper (sub mapping).
@@ -81,24 +82,27 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
 
     public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): ?Expr
     {
-        if ($this->sourceType->getBuiltinType() === Type::BUILTIN_TYPE_ARRAY) {
-            $condition = new Expr\FuncCall(
-                new Name('is_array'),
-                [
-                    new Arg($input),
-                ]
-            );
-        } else {
-            if ($this->sourceType->getClassName() !== null) {
-                $condition = new Expr\Instanceof_($input, new Name\FullyQualified($this->sourceType->getClassName()));
-            } else {
+        if ($this->sourceType instanceof Type\ObjectType) {
+            $condition = new Expr\Instanceof_($input, new Name\FullyQualified($this->sourceType->getClassName()));
+        } elseif ($this->sourceType instanceof Type\BuiltinType) {
+            if ($this->sourceType->getTypeIdentifier() === TypeIdentifier::OBJECT) {
                 $condition = new Expr\FuncCall(
                     new Name('is_object'),
                     [
                         new Arg($input),
                     ]
                 );
+            } else {
+                $condition = new Expr\FuncCall(
+                    new Name('is_array'),
+                    [
+                        new Arg($input),
+                    ]
+                );
             }
+        } else {
+            // Other types are not supported for object mapping
+            return null;
         }
 
         return new Expr\BinaryOp\BooleanOr(
@@ -129,7 +133,7 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
     {
         $sourceTypeName = 'array';
 
-        if (Type::BUILTIN_TYPE_OBJECT === $this->sourceType->getBuiltinType()) {
+        if ($this->sourceType instanceof Type\ObjectType) {
             /**
              * Cannot be null since we check the source type is an Object.
              *
@@ -148,7 +152,7 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
     {
         $targetTypeName = 'array';
 
-        if (Type::BUILTIN_TYPE_OBJECT === $this->targetType->getBuiltinType()) {
+        if ($this->targetType instanceof Type\ObjectType) {
             /**
              * Cannot be null since we check the target type is an Object.
              *
@@ -194,5 +198,10 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
         ), 'getTargetIdentifiers', [
             new Arg($input),
         ]);
+    }
+
+    public function __toString(): string
+    {
+        return \sprintf('%s<%s, %s>', static::class, $this->sourceType, $this->targetType);
     }
 }

@@ -7,7 +7,6 @@ namespace AutoMapper\Tests\Fixtures\Transformer\CustomTransformer;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
-use AutoMapper\Metadata\TypesMatching;
 use AutoMapper\Tests\Fixtures\CityFoo;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerSupportInterface;
@@ -19,7 +18,7 @@ final readonly class TransformerWithDependency implements PropertyTransformerInt
     ) {
     }
 
-    public function supports(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool
+    public function supports(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool
     {
         return $mapperMetadata->source === CityFoo::class && $mapperMetadata->target === 'array' && $source->property === 'name';
     }

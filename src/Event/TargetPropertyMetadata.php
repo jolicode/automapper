@@ -6,7 +6,7 @@ namespace AutoMapper\Event;
 
 use AutoMapper\Extractor\ReadAccessor;
 use AutoMapper\Extractor\WriteMutator;
-use Symfony\Component\PropertyInfo\Type;
+use Symfony\Component\TypeInfo\Type;
 
 /**
  * Target Property metadata for event.
@@ -30,6 +30,7 @@ final class TargetPropertyMetadata
         public bool $extractGroupsIfNull = true,
         public ?array $groups = null,
         public ?string $dateTimeFormat = null,
+        public ?Type $type = null,
     ) {
     }
 }
