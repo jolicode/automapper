@@ -28,14 +28,14 @@ final readonly class BuiltinTransformer implements TransformerInterface, CheckTy
         TypeIdentifier::BOOL->value => [
             TypeIdentifier::INT->value => Cast\Int_::class,
             TypeIdentifier::STRING->value => Cast\String_::class,
-            TypeIdentifier::FLOAT->value => Cast\Double::class,
+            TypeIdentifier::FLOAT->value => 'toFloat',
             TypeIdentifier::ARRAY->value => 'toArray',
             TypeIdentifier::ITERABLE->value => 'toArray',
         ],
         TypeIdentifier::MIXED->value => [
             TypeIdentifier::INT->value => Cast\Int_::class,
             TypeIdentifier::STRING->value => Cast\String_::class,
-            TypeIdentifier::FLOAT->value => Cast\Double::class,
+            TypeIdentifier::FLOAT->value => 'toFloat',
             TypeIdentifier::ARRAY->value => 'toArray',
             TypeIdentifier::ITERABLE->value => 'toArray',
         ],
@@ -47,7 +47,7 @@ final readonly class BuiltinTransformer implements TransformerInterface, CheckTy
             TypeIdentifier::ITERABLE->value => 'toArray',
         ],
         TypeIdentifier::INT->value => [
-            TypeIdentifier::FLOAT->value => Cast\Double::class,
+            TypeIdentifier::FLOAT->value => 'toFloat',
             TypeIdentifier::STRING->value => Cast\String_::class,
             TypeIdentifier::BOOL->value => Cast\Bool_::class,
             TypeIdentifier::ARRAY->value => 'toArray',
@@ -60,7 +60,7 @@ final readonly class BuiltinTransformer implements TransformerInterface, CheckTy
         TypeIdentifier::STRING->value => [
             TypeIdentifier::ARRAY->value => 'toArray',
             TypeIdentifier::ITERABLE->value => 'toArray',
-            TypeIdentifier::FLOAT->value => Cast\Double::class,
+            TypeIdentifier::FLOAT->value => 'toFloat',
             TypeIdentifier::INT->value => Cast\Int_::class,
             TypeIdentifier::BOOL->value => Cast\Bool_::class,
         ],
@@ -120,6 +120,10 @@ final readonly class BuiltinTransformer implements TransformerInterface, CheckTy
                     return [$this->$castMethod($input), []];
                 }
 
+                if (!class_exists($castMethod)) {
+                    continue;
+                }
+
                 /*
                  * Use the cast expression find in the cast matrix
                  *
@@ -154,6 +158,11 @@ final readonly class BuiltinTransformer implements TransformerInterface, CheckTy
     private function toArray(Expr $input): Expr
     {
         return new Expr\Array_([create_expr_array_item($input)]);
+    }
+
+    private function toFloat(Expr $input): Expr
+    {
+        return new Cast\Double($input, ['kind' => Cast\Double::KIND_FLOAT]);
     }
 
     private function fromIteratorToArray(Expr $input): Expr

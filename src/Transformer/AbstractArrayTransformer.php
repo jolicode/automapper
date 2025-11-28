@@ -75,7 +75,7 @@ abstract readonly class AbstractArrayTransformer implements \Stringable, Transfo
                     $loopExistingStatements[] = new Stmt\If_($isDeepPopulateExpr, [
                         'stmts' => [
                             new Stmt\Expression(new Expr\Assign($targetHashVar, $this->itemTransformer->getTargetHashExpression($loopRemoveValueVar))),
-                            new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name('null')), $targetHashVar), [
+                            new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name("''")), $targetHashVar), [
                                 'stmts' => [new Stmt\Expression(new Expr\Assign(new Expr\ArrayDimFetch($exisingValuesIndexed, $targetHashVar), $loopRemoveValueVar))],
                             ]),
                         ],
@@ -124,7 +124,7 @@ abstract readonly class AbstractArrayTransformer implements \Stringable, Transfo
                         new Stmt\Foreach_($propertyMapping->target->readAccessor->getExpression($target), $loopExistingValueVar, [
                             'stmts' => [
                                 new Stmt\Expression(new Expr\Assign($hashValueVariable, $this->itemTransformer->getTargetHashExpression($loopExistingValueVar))),
-                                new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name('null')), $hashValueVariable), [
+                                new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name("''")), $hashValueVariable), [
                                     'stmts' => [
                                         new Stmt\Expression(new Expr\Assign(new Expr\ArrayDimFetch($exisingValuesIndexed, $hashValueVariable), $loopExistingValueVar)),
                                     ],

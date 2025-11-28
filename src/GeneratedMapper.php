@@ -41,14 +41,14 @@ abstract class GeneratedMapper implements MapperInterface
         return null;
     }
 
-    public function getSourceHash(mixed $value): ?string
+    public function getSourceHash(mixed $value): string
     {
-        return null;
+        return '';
     }
 
-    public function getTargetHash(mixed $value): ?string
+    public function getTargetHash(mixed $value): string
     {
-        return null;
+        return '';
     }
 
     /** @var array<string, MapperInterface<object, object>|MapperInterface<object, array<mixed>>|MapperInterface<array<mixed>, object>> */
