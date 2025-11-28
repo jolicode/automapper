@@ -6,6 +6,8 @@ namespace AutoMapper\Tests\Fixtures\MapTo;
 
 use AutoMapper\Attribute\MapTo;
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\TransformerWithDependency;
+use Symfony\Component\TypeInfo\Type;
+use Symfony\Component\TypeInfo\TypeIdentifier;
 
 #[MapTo('array', property: 'externalProperty', transformer: 'transformExternalProperty', groups: ['group1'])]
 #[MapTo('array', property: 'transformWithExpressionFunction', transformer: "transformerWithDependency().transform('foo', source, context)")]
@@ -20,6 +22,7 @@ class FooMapTo
         #[MapTo('array', property: 'transformFromCustomTransformerService', transformer: TransformerWithDependency::class)]
         #[MapTo('array', property: 'transformFromExpressionLanguage', transformer: "source.foo === 'foo' ? 'transformed' : 'not transformed'")]
         #[MapTo('array', property: 'foo')]
+        #[MapTo('array', property: 'fooInt', targetType: new Type\BuiltinType(TypeIdentifier::INT))]
         public string $foo,
     ) {
     }

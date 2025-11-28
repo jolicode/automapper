@@ -68,8 +68,8 @@ final readonly class MapFromListener extends MapListener
             return;
         }
 
-        $sourceProperty = new SourcePropertyMetadata($mapFrom->property ?? $property);
-        $targetProperty = new TargetPropertyMetadata($property);
+        $sourceProperty = new SourcePropertyMetadata($mapFrom->property ?? $property, type: $mapFrom->sourceType);
+        $targetProperty = new TargetPropertyMetadata($property, type: $mapFrom->targetType);
 
         $propertyMetadata = new PropertyMetadataEvent(
             mapperMetadata: $event->mapperMetadata,
