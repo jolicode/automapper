@@ -65,7 +65,7 @@ final readonly class IdentifierHashGenerator
                 if ($property->source->checkExists) {
                     $statements[] = new Stmt\If_($property->source->accessor->getIsUndefinedExpression($valueVariable), [
                         'stmts' => [
-                            new Stmt\Return_(new Expr\ConstFetch(new Name('null'))),
+                            new Stmt\Return_(new Expr\ConstFetch(new Name("''"))),
                         ],
                     ]);
                 }
@@ -78,7 +78,7 @@ final readonly class IdentifierHashGenerator
             } else {
                 $statements[] = new Stmt\If_($property->target->readAccessor->getIsUndefinedExpression($valueVariable, true), [
                     'stmts' => [
-                        new Stmt\Return_(new Expr\ConstFetch(new Name('null'))),
+                        new Stmt\Return_(new Expr\ConstFetch(new Name("''"))),
                     ],
                 ]);
 
@@ -121,7 +121,7 @@ final readonly class IdentifierHashGenerator
 
         return (new Builder\Method('getSourceHash'))
             ->makePublic()
-            ->setReturnType('?string')
+            ->setReturnType('string')
             ->addParam(new Param(
                 var: new Expr\Variable('value'),
                 type: new Name('mixed'))
@@ -149,7 +149,7 @@ final readonly class IdentifierHashGenerator
 
         return (new Builder\Method('getTargetHash'))
             ->makePublic()
-            ->setReturnType('?string')
+            ->setReturnType('string')
             ->addParam(new Param(
                 var: new Expr\Variable('value'),
                 type: new Name('mixed'))

@@ -56,7 +56,7 @@ final class ArrayToDoctrineCollectionTransformer implements \Stringable, Transfo
                     new Stmt\Foreach_($propertyMapping->target->readAccessor->getExpression($target), $loopExistingValueVar, [
                         'stmts' => [
                             new Stmt\Expression(new Expr\Assign($hashValueVariable, $this->itemTransformer->getTargetHashExpression($loopExistingValueVar))),
-                            new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name('null')), $hashValueVariable), [
+                            new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name("''")), $hashValueVariable), [
                                 'stmts' => [
                                     new Stmt\Expression(new Expr\Assign(new Expr\ArrayDimFetch($exisingValuesIndexed, $hashValueVariable), $loopExistingValueVar)),
                                 ],

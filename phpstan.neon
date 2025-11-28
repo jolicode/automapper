@@ -9,9 +9,6 @@ parameters:
 	tmpDir: cache
 
 	ignoreErrors:
-		- "#Instantiated class fromIteratorToArray not found#"
-		- "#Instantiated class toArray not found#"
-
 		-
 			message: "#^Method Symfony\\\\Component\\\\Serializer\\\\NameConverter\\\\NameConverterInterface\\:\\:normalize\\(\\) invoked with 2 parameters, 1 required\\.$#"
 			count: 2

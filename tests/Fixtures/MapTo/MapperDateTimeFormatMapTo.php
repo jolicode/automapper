@@ -13,7 +13,7 @@ class MapperDateTimeFormatMapTo
     public function __construct(
         public \DateTime $normal,
         public \DateTimeImmutable $immutable,
-        #[MapTo('array', dateTimeFormat: \DateTimeInterface::RFC7231)]
+        #[MapTo('array', dateTimeFormat: \DateTimeInterface::RFC3339_EXTENDED)]
         public \DateTimeInterface $interface,
     ) {
     }

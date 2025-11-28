@@ -216,7 +216,6 @@ class AutoMapperTest extends AutoMapperTestCase
         self::assertInstanceOf(Address::class, $addressMapped);
 
         $property = (new \ReflectionClass($addressMapped))->getProperty('city');
-        $property->setAccessible(true);
 
         $city = $property->getValue($addressMapped);
 
