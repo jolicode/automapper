@@ -60,6 +60,7 @@ class AutoMapperMapToTest extends AutoMapperTestCase
         $this->assertSame('if', $bar['ifCallableOther']);
         $this->assertSame('transformed', $bar['transformFromExpressionLanguage']);
         $this->assertSame('bar', $bar['transformWithExpressionFunction']);
+        $this->assertSame(0, $bar['fooInt']);
 
         $foo = new FooMapTo('bar');
         $bar = $this->autoMapper->map($foo, 'array');
@@ -78,6 +79,7 @@ class AutoMapperMapToTest extends AutoMapperTestCase
         $this->assertSame('transformFromStringStatic_bar', $bar['transformFromStringStatic']);
         $this->assertSame('bar', $bar['transformFromCustomTransformerService']);
         $this->assertSame('not transformed', $bar['transformFromExpressionLanguage']);
+        $this->assertSame(0, $bar['fooInt']);
     }
 
     public function testMapToArrayGroups()

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper\Attribute;
 
+use Symfony\Component\TypeInfo\Type;
+
 /**
  * Configures a property to map from.
  */
@@ -34,6 +36,8 @@ final readonly class MapFrom
         public ?string $dateTimeFormat = null,
         public ?bool $extractTypesFromGetter = null,
         public ?bool $identifier = null,
+        public ?Type $sourceType = null,
+        public ?Type $targetType = null,
     ) {
     }
 }
