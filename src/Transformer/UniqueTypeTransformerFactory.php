@@ -7,7 +7,7 @@ namespace AutoMapper\Transformer;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
-use AutoMapper\Metadata\TypesMatching;
+use Symfony\Component\TypeInfo\Type;
 
 /**
  * Reduce array of type to only one type on source and target.
@@ -20,22 +20,19 @@ final class UniqueTypeTransformerFactory implements TransformerFactoryInterface,
 {
     use ChainTransformerFactoryAwareTrait;
 
-    public function getTransformer(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
+    public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
-        $sourceType = $types->getSourceUniqueType();
-
-        if (null === $sourceType) {
+        if (null === $source->type) {
             return null;
         }
 
-        $targetTypes = $types[$sourceType] ?? [];
-
-        if (\count($targetTypes) <= 1) {
+        if (!$target->type instanceof Type\UnionType) {
             return null;
         }
 
-        foreach ($targetTypes as $targetType) {
-            $transformer = $this->chainTransformerFactory->getTransformer(TypesMatching::fromSourceAndTargetTypes([$sourceType], [$targetType]), $source, $target, $mapperMetadata);
+        foreach ($target->type->getTypes() as $targetType) {
+            $newTarget = $target->withType($targetType);
+            $transformer = $this->chainTransformerFactory->getTransformer($source, $newTarget, $mapperMetadata);
 
             if (null !== $transformer) {
                 return $transformer;
@@ -47,6 +44,6 @@ final class UniqueTypeTransformerFactory implements TransformerFactoryInterface,
 
     public function getPriority(): int
     {
-        return 32;
+        return 8;
     }
 }

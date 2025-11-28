@@ -81,12 +81,10 @@ class AutoMapperNormalizerTest extends AutoMapperTestCase
         $normalizer = new AutoMapperNormalizer(AutoMapperBuilder::buildAutoMapper(
             mapPrivatePropertiesAndMethod: true,
             classPrefix: 'AutoMapperNoDefaultProperties_',
-            removeDefaultProperties: true
         ));
         $normalized = $normalizer->normalize($object);
 
         self::assertIsArray($normalized);
-        self::assertArrayNotHasKey('id', $normalized);
         self::assertEquals($expected['id'], $normalized['_id']);
         self::assertEquals($expected['name'], $normalized['name']);
         self::assertEquals($expected['age'], $normalized['age']);

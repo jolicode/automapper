@@ -26,7 +26,7 @@ jobs:
       - name: setup
         uses: shivammathur/setup-php@2.32.0
         with:
-          php-version: 8.3
+          php-version: 8.4
           coverage: none
       - name: composer install
         run: composer update --prefer-stable
@@ -41,9 +41,8 @@ jobs:
       fail-fast: false
       matrix:
         php-versions:
-          - 8.2
-          - 8.3
           - 8.4
+          - 8.5
     steps:
       - name: checkout
         uses: actions/checkout@master
@@ -76,7 +75,7 @@ jobs:
       - name: setup
         uses: shivammathur/setup-php@2.32.0
         with:
-          php-version: 8.2
+          php-version: 8.4
           coverage: none
           extensions: mbstring, fileinfo, json, intl, dom
       - name: composer install

@@ -7,7 +7,7 @@ namespace AutoMapper\Transformer;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
-use Symfony\Component\PropertyInfo\Type;
+use Symfony\Component\TypeInfo\Type;
 use Symfony\Component\Uid\AbstractUid;
 use Symfony\Component\Uid\Ulid;
 
@@ -16,15 +16,15 @@ use Symfony\Component\Uid\Ulid;
  *
  * @internal
  */
-final class SymfonyUidTransformerFactory extends AbstractUniqueTypeTransformerFactory implements PrioritizedTransformerFactoryInterface
+final class SymfonyUidTransformerFactory implements TransformerFactoryInterface, PrioritizedTransformerFactoryInterface
 {
     /** @var array<string, array{0: bool, 1: bool}> */
     private array $reflectionCache = [];
 
-    protected function createTransformer(Type $sourceType, Type $targetType, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
+    public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
-        $sourceUid = $this->getUid($sourceType);
-        $targetUid = $this->getUid($targetType);
+        $sourceUid = $this->getUid($source->type);
+        $targetUid = $this->getUid($target->type);
 
         if ($sourceUid[0] && $targetUid[0]) {
             return new SymfonyUidCopyTransformer();
@@ -44,9 +44,9 @@ final class SymfonyUidTransformerFactory extends AbstractUniqueTypeTransformerFa
     /**
      * @return array{false, false, null}|array{true, bool, class-string}
      */
-    private function getUid(Type $type): array
+    private function getUid(?Type $type): array
     {
-        if (Type::BUILTIN_TYPE_OBJECT !== $type->getBuiltinType()) {
+        if (!$type instanceof Type\ObjectType) {
             return [false, false, null];
         }
 

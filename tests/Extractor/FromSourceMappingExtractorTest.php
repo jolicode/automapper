@@ -49,6 +49,8 @@ class FromSourceMappingExtractorTest extends AutoMapperTestCase
             $propertyInfoExtractor,
             $reflectionExtractor,
             $reflectionExtractor,
+            $propertyInfoExtractor,
+            $propertyInfoExtractor,
         );
     }
 

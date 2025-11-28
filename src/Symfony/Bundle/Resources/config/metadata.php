@@ -18,25 +18,31 @@ return static function (ContainerConfigurator $container) {
         ->set(SourceTargetMappingExtractor::class)
             ->args([
                 service(Configuration::class),
-                service('automapper.property_info'),
                 service('automapper.property_info.reflection_extractor'),
                 service('automapper.property_info.reflection_extractor'),
+                service('automapper.property_info.reflection_extractor'),
+                service('automapper.property_info.source_type_extractor'),
+                service('automapper.property_info.target_type_extractor'),
             ])
 
         ->set(FromSourceMappingExtractor::class)
             ->args([
                 service(Configuration::class),
-                service('automapper.property_info'),
                 service('automapper.property_info.reflection_extractor'),
                 service('automapper.property_info.reflection_extractor'),
+                service('automapper.property_info.reflection_extractor'),
+                service('automapper.property_info.source_type_extractor'),
+                service('automapper.property_info.target_type_extractor'),
             ])
 
         ->set(FromTargetMappingExtractor::class)
             ->args([
                 service(Configuration::class),
-                service('automapper.property_info'),
                 service('automapper.property_info.reflection_extractor'),
                 service('automapper.property_info.reflection_extractor'),
+                service('automapper.property_info.reflection_extractor'),
+                service('automapper.property_info.source_type_extractor'),
+                service('automapper.property_info.target_type_extractor'),
             ])
 
         ->set(MetadataFactory::class)

@@ -6,20 +6,20 @@ namespace AutoMapper\Symfony\Bundle\DependencyInjection;
 
 use AutoMapper\ConstructorStrategy;
 use AutoMapper\Loader\FileReloadStrategy;
-use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 readonly class Configuration implements ConfigurationInterface
 {
+    /**
+     * @return TreeBuilder<'array'>
+     */
     public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('automapper');
-        /** @var ArrayNodeDefinition $rootNode */
         $rootNode = $treeBuilder->getRootNode();
 
-        /* @phpstan-ignore-next-line */
         $rootNode
             ->children()
                 ->scalarNode('class_prefix')->defaultValue('Symfony_Mapper_')->end()
@@ -32,7 +32,6 @@ readonly class Configuration implements ConfigurationInterface
                 ->booleanNode('auto_register')->defaultTrue()->end()
                 ->booleanNode('map_private_properties')->defaultTrue()->end()
                 ->booleanNode('allow_readonly_target_to_populate')->defaultFalse()->end()
-                ->booleanNode('remove_default_properties')->defaultFalse()->end()
                 ->arrayNode('normalizer')
                     ->children()
                         ->booleanNode('enabled')->defaultFalse()->end()

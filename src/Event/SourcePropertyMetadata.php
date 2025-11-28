@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Event;
 
 use AutoMapper\Extractor\ReadAccessor;
-use Symfony\Component\PropertyInfo\Type;
+use Symfony\Component\TypeInfo\Type;
 
 /**
  * Source Property metadata for event.
@@ -17,17 +17,16 @@ use Symfony\Component\PropertyInfo\Type;
 final class SourcePropertyMetadata
 {
     /**
-     * @param Type[]|null   $types
      * @param string[]|null $groups
      */
     public function __construct(
         public string $property,
-        public ?array $types = null,
         public ?ReadAccessor $accessor = null,
         public ?bool $checkExists = null,
         public bool $extractGroupsIfNull = true,
         public ?array $groups = null,
         public ?string $dateTimeFormat = null,
+        public ?Type $type = null,
     ) {
     }
 }

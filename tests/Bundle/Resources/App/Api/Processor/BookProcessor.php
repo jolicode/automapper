@@ -11,7 +11,7 @@ use AutoMapper\Tests\Bundle\Resources\App\Api\Entity\Book;
 
 final readonly class BookProcessor implements ProcessorInterface
 {
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = [])
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?Book
     {
         if (!$data instanceof Book) {
             return null;

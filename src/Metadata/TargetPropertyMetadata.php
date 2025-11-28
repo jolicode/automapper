@@ -7,6 +7,7 @@ namespace AutoMapper\Metadata;
 use AutoMapper\Event\TargetPropertyMetadata as EventTargetPropertyMetadata;
 use AutoMapper\Extractor\ReadAccessor;
 use AutoMapper\Extractor\WriteMutator;
+use Symfony\Component\TypeInfo\Type;
 
 /**
  * Target Property metadata.
@@ -27,6 +28,7 @@ final readonly class TargetPropertyMetadata
         public ?string $parameterInConstructor = null,
         public ?array $groups = null,
         public string $dateTimeFormat = \DateTimeInterface::RFC3339,
+        public ?Type $type = null,
     ) {
     }
 
@@ -39,6 +41,20 @@ final readonly class TargetPropertyMetadata
             $metadata->parameterInConstructor,
             $metadata->groups,
             $metadata->dateTimeFormat ?? \DateTimeInterface::RFC3339,
+            $metadata->type,
+        );
+    }
+
+    public function withType(?Type $type): self
+    {
+        return new self(
+            $this->property,
+            $this->readAccessor,
+            $this->writeMutator,
+            $this->parameterInConstructor,
+            $this->groups,
+            $this->dateTimeFormat,
+            $type,
         );
     }
 }

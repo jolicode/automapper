@@ -75,9 +75,9 @@ final class DebugMapperCommand extends Command
             [\sprintf('%s -> %s', $source, $target), 'If', 'Transformer', 'Groups', 'MaxDepth'],
             array_map(
                 fn (PropertyMetadata $property) => [
-                    $property->source->property . ' -> ' . $property->target->property,
+                    $property->source->property . ' (' . $property->source->type . ') -> ' . $property->target->property . ' (' . $property->target->type . ') ',
                     $property->if,
-                    \get_class($property->transformer),
+                    $property->transformer instanceof \Stringable ? (string) $property->transformer : \get_class($property->transformer),
                     $property->disableGroupsCheck ? 'Disabled' : implode(', ', $property->groups ?? []),
                     $property->maxDepth,
                 ],
@@ -91,7 +91,7 @@ final class DebugMapperCommand extends Command
             [\sprintf('%s -> %s', $source, $target), 'Not used reason'],
             array_map(
                 fn (PropertyMetadata $property) => [
-                    $property->source->property . ' -> ' . $property->target->property,
+                    $property->source->property . ' (' . $property->source->type . ') -> ' . $property->target->property . ' (' . $property->target->type . ') ',
                     $property->ignoreReason,
                 ],
                 array_filter($metadata->propertiesMetadata, fn (PropertyMetadata $property) => $property->ignored)

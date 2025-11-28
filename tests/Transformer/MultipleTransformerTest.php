@@ -7,7 +7,7 @@ namespace AutoMapper\Tests\Transformer;
 use AutoMapper\Transformer\BuiltinTransformer;
 use AutoMapper\Transformer\MultipleTransformer;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\PropertyInfo\Type;
+use Symfony\Component\TypeInfo\Type;
 
 class MultipleTransformerTest extends TestCase
 {
@@ -17,12 +17,12 @@ class MultipleTransformerTest extends TestCase
     {
         $transformer = new MultipleTransformer([
             [
-                'transformer' => new BuiltinTransformer(new Type('string'), [new Type('int')]),
-                'type' => new Type('string'),
+                'transformer' => new BuiltinTransformer(Type::string(), Type::int()),
+                'type' => Type::string(),
             ],
             [
-                'transformer' => new BuiltinTransformer(new Type('int'), [new Type('string')]),
-                'type' => new Type('int'),
+                'transformer' => new BuiltinTransformer(Type::int(), Type::string()),
+                'type' => Type::int(),
             ],
         ]);
 

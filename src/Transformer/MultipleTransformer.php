@@ -8,7 +8,7 @@ use AutoMapper\Generator\UniqueVariableScope;
 use AutoMapper\Metadata\PropertyMetadata;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Stmt;
-use Symfony\Component\PropertyInfo\Type;
+use Symfony\Component\TypeInfo\Type;
 
 /**
  * Multiple transformer decorator.
@@ -20,13 +20,13 @@ use Symfony\Component\PropertyInfo\Type;
  *
  * @internal
  */
-final class MultipleTransformer implements TransformerInterface, DependentTransformerInterface
+final readonly class MultipleTransformer implements \Stringable, TransformerInterface, DependentTransformerInterface
 {
     /**
      * @param array<array{transformer: TransformerInterface, type: Type}> $transformers
      */
     public function __construct(
-        private readonly array $transformers,
+        private array $transformers,
     ) {
     }
 
@@ -93,5 +93,21 @@ final class MultipleTransformer implements TransformerInterface, DependentTransf
         }
 
         return $dependencies;
+    }
+
+    public function __toString(): string
+    {
+        $transformerStrings = array_map(
+            function ($transformerData) {
+                if ($transformerData['transformer'] instanceof \Stringable) {
+                    return (string) $transformerData['transformer'];
+                }
+
+                return \get_class($transformerData['transformer']);
+            },
+            $this->transformers
+        );
+
+        return self::class . "<\n    " . implode(",\n    ", $transformerStrings) . "\n>";
     }
 }

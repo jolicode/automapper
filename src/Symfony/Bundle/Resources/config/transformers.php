@@ -9,8 +9,11 @@ use AutoMapper\Transformer\BuiltinTransformerFactory;
 use AutoMapper\Transformer\ChainTransformerFactory;
 use AutoMapper\Transformer\CopyTransformerFactory;
 use AutoMapper\Transformer\DateTimeTransformerFactory;
+use AutoMapper\Transformer\DoctrineCollectionTransformerFactory;
 use AutoMapper\Transformer\EnumTransformerFactory;
+use AutoMapper\Transformer\MixedTransformerFactory;
 use AutoMapper\Transformer\MultipleTransformerFactory;
+use AutoMapper\Transformer\NullableTargetTransformerFactory;
 use AutoMapper\Transformer\NullableTransformerFactory;
 use AutoMapper\Transformer\ObjectTransformerFactory;
 use AutoMapper\Transformer\SymfonyUidTransformerFactory;
@@ -26,15 +29,21 @@ return static function (ContainerConfigurator $container) {
             ->alias(TransformerFactoryInterface::class, ChainTransformerFactory::class)
 
         ->set(MultipleTransformerFactory::class)
-            ->tag('automapper.transformer_factory', ['priority' => 1002])
+            ->tag('automapper.transformer_factory', ['priority' => 1003])
 
         ->set(NullableTransformerFactory::class)
+            ->tag('automapper.transformer_factory', ['priority' => 1002])
+
+        ->set(NullableTargetTransformerFactory::class)
             ->tag('automapper.transformer_factory', ['priority' => 1001])
 
         ->set(UniqueTypeTransformerFactory::class)
             ->tag('automapper.transformer_factory', ['priority' => 1000])
 
         ->set(DateTimeTransformerFactory::class)
+            ->tag('automapper.transformer_factory', ['priority' => -1000])
+
+        ->set(DoctrineCollectionTransformerFactory::class)
             ->tag('automapper.transformer_factory', ['priority' => -1000])
 
         ->set(BuiltinTransformerFactory::class)
@@ -49,8 +58,11 @@ return static function (ContainerConfigurator $container) {
         ->set(EnumTransformerFactory::class)
             ->tag('automapper.transformer_factory', ['priority' => -1004])
 
-        ->set(CopyTransformerFactory::class)
+        ->set(MixedTransformerFactory::class)
             ->tag('automapper.transformer_factory', ['priority' => -1005])
+
+        ->set(CopyTransformerFactory::class)
+            ->tag('automapper.transformer_factory', ['priority' => -1006])
 
         ->set(SymfonyUidTransformerFactory::class)
     ;

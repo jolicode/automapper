@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Normalizer\Features;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Serializer\Exception\CircularReferenceException;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
@@ -25,7 +26,7 @@ trait CircularReferenceTestTrait
 
     abstract protected function getSelfReferencingModel();
 
-    public function provideUnableToNormalizeCircularReference(): array
+    public static function provideUnableToNormalizeCircularReference(): array
     {
         return [
             [[], 1],
@@ -33,9 +34,7 @@ trait CircularReferenceTestTrait
         ];
     }
 
-    /**
-     * @dataProvider provideUnableToNormalizeCircularReference
-     */
+    #[DataProvider('provideUnableToNormalizeCircularReference')]
     public function testUnableToNormalizeCircularReference(array $context, int $expectedLimit)
     {
         $normalizer = $this->getNormalizerForCircularReference();

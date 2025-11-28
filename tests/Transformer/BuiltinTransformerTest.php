@@ -6,7 +6,7 @@ namespace AutoMapper\Tests\Transformer;
 
 use AutoMapper\Transformer\BuiltinTransformer;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\PropertyInfo\Type;
+use Symfony\Component\TypeInfo\Type;
 
 class BuiltinTransformerTest extends TestCase
 {
@@ -14,7 +14,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testStringToString(): void
     {
-        $transformer = new BuiltinTransformer(new Type('string'), [new Type('string')]);
+        $transformer = new BuiltinTransformer(Type::string(), Type::string());
         $output = $this->evalTransformer($transformer, 'foo');
 
         self::assertSame('foo', $output);
@@ -22,7 +22,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testStringToArray(): void
     {
-        $transformer = new BuiltinTransformer(new Type('string'), [new Type('array')]);
+        $transformer = new BuiltinTransformer(Type::string(), Type::builtin('array'));
         $output = $this->evalTransformer($transformer, 'foo');
 
         self::assertSame(['foo'], $output);
@@ -30,7 +30,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testStringToIterable(): void
     {
-        $transformer = new BuiltinTransformer(new Type('string'), [new Type('iterable')]);
+        $transformer = new BuiltinTransformer(Type::string(), Type::iterable());
         $output = $this->evalTransformer($transformer, 'foo');
 
         self::assertSame(['foo'], $output);
@@ -38,7 +38,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testStringToFloat(): void
     {
-        $transformer = new BuiltinTransformer(new Type('string'), [new Type('float')]);
+        $transformer = new BuiltinTransformer(Type::string(), Type::float());
         $output = $this->evalTransformer($transformer, '12.2');
 
         self::assertSame(12.2, $output);
@@ -46,7 +46,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testStringToInt(): void
     {
-        $transformer = new BuiltinTransformer(new Type('string'), [new Type('int')]);
+        $transformer = new BuiltinTransformer(Type::string(), Type::int());
         $output = $this->evalTransformer($transformer, '12');
 
         self::assertSame(12, $output);
@@ -54,7 +54,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testStringToBool(): void
     {
-        $transformer = new BuiltinTransformer(new Type('string'), [new Type('bool')]);
+        $transformer = new BuiltinTransformer(Type::string(), Type::bool());
         $output = $this->evalTransformer($transformer, 'foo');
 
         self::assertTrue($output);
@@ -66,7 +66,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testBoolToInt(): void
     {
-        $transformer = new BuiltinTransformer(new Type('bool'), [new Type('int')]);
+        $transformer = new BuiltinTransformer(Type::bool(), Type::int());
         $output = $this->evalTransformer($transformer, true);
 
         self::assertSame(1, $output);
@@ -78,7 +78,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testBoolToString(): void
     {
-        $transformer = new BuiltinTransformer(new Type('bool'), [new Type('string')]);
+        $transformer = new BuiltinTransformer(Type::bool(), Type::string());
 
         $output = $this->evalTransformer($transformer, true);
 
@@ -91,7 +91,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testBoolToFloat(): void
     {
-        $transformer = new BuiltinTransformer(new Type('bool'), [new Type('float')]);
+        $transformer = new BuiltinTransformer(Type::bool(), Type::float());
 
         $output = $this->evalTransformer($transformer, true);
 
@@ -104,7 +104,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testBoolToArray(): void
     {
-        $transformer = new BuiltinTransformer(new Type('bool'), [new Type('array')]);
+        $transformer = new BuiltinTransformer(Type::bool(), Type::builtin('array'));
 
         $output = $this->evalTransformer($transformer, true);
 
@@ -117,7 +117,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testBoolToIterable(): void
     {
-        $transformer = new BuiltinTransformer(new Type('bool'), [new Type('iterable')]);
+        $transformer = new BuiltinTransformer(Type::bool(), Type::iterable());
 
         $output = $this->evalTransformer($transformer, true);
 
@@ -130,7 +130,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testBoolToBool(): void
     {
-        $transformer = new BuiltinTransformer(new Type('bool'), [new Type('bool')]);
+        $transformer = new BuiltinTransformer(Type::bool(), Type::bool());
 
         $output = $this->evalTransformer($transformer, true);
 
@@ -143,7 +143,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testFloatToString(): void
     {
-        $transformer = new BuiltinTransformer(new Type('float'), [new Type('string')]);
+        $transformer = new BuiltinTransformer(Type::float(), Type::string());
 
         $output = $this->evalTransformer($transformer, 12.23);
 
@@ -152,7 +152,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testFloatToInt(): void
     {
-        $transformer = new BuiltinTransformer(new Type('float'), [new Type('int')]);
+        $transformer = new BuiltinTransformer(Type::float(), Type::int());
 
         $output = $this->evalTransformer($transformer, 12.23);
 
@@ -161,7 +161,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testFloatToBool(): void
     {
-        $transformer = new BuiltinTransformer(new Type('float'), [new Type('bool')]);
+        $transformer = new BuiltinTransformer(Type::float(), Type::bool());
 
         $output = $this->evalTransformer($transformer, 12.23);
 
@@ -174,7 +174,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testFloatToArray(): void
     {
-        $transformer = new BuiltinTransformer(new Type('float'), [new Type('array')]);
+        $transformer = new BuiltinTransformer(Type::float(), Type::builtin('array'));
 
         $output = $this->evalTransformer($transformer, 12.23);
 
@@ -183,7 +183,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testFloatToIterable(): void
     {
-        $transformer = new BuiltinTransformer(new Type('float'), [new Type('iterable')]);
+        $transformer = new BuiltinTransformer(Type::float(), Type::iterable());
 
         $output = $this->evalTransformer($transformer, 12.23);
 
@@ -192,7 +192,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testFloatToFloat(): void
     {
-        $transformer = new BuiltinTransformer(new Type('float'), [new Type('float')]);
+        $transformer = new BuiltinTransformer(Type::float(), Type::float());
 
         $output = $this->evalTransformer($transformer, 12.23);
 
@@ -201,7 +201,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testIntToInt(): void
     {
-        $transformer = new BuiltinTransformer(new Type('int'), [new Type('int')]);
+        $transformer = new BuiltinTransformer(Type::int(), Type::int());
 
         $output = $this->evalTransformer($transformer, 12);
 
@@ -210,7 +210,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testIntToFloat(): void
     {
-        $transformer = new BuiltinTransformer(new Type('int'), [new Type('float')]);
+        $transformer = new BuiltinTransformer(Type::int(), Type::float());
 
         $output = $this->evalTransformer($transformer, 12);
 
@@ -219,7 +219,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testIntToString(): void
     {
-        $transformer = new BuiltinTransformer(new Type('int'), [new Type('string')]);
+        $transformer = new BuiltinTransformer(Type::int(), Type::string());
 
         $output = $this->evalTransformer($transformer, 12);
 
@@ -228,7 +228,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testIntToBool(): void
     {
-        $transformer = new BuiltinTransformer(new Type('int'), [new Type('bool')]);
+        $transformer = new BuiltinTransformer(Type::int(), Type::bool());
 
         $output = $this->evalTransformer($transformer, 12);
 
@@ -241,7 +241,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testIntToArray(): void
     {
-        $transformer = new BuiltinTransformer(new Type('int'), [new Type('array')]);
+        $transformer = new BuiltinTransformer(Type::int(), Type::builtin('array'));
 
         $output = $this->evalTransformer($transformer, 12);
 
@@ -250,7 +250,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testIntToIterable(): void
     {
-        $transformer = new BuiltinTransformer(new Type('int'), [new Type('iterable')]);
+        $transformer = new BuiltinTransformer(Type::int(), Type::iterable());
 
         $output = $this->evalTransformer($transformer, 12);
 
@@ -259,7 +259,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testIterableToArray(): void
     {
-        $transformer = new BuiltinTransformer(new Type('iterable'), [new Type('array')]);
+        $transformer = new BuiltinTransformer(Type::builtin('iterable'), Type::builtin('array'));
 
         $closure = function () {
             yield 1;
@@ -273,7 +273,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testArrayToIterable(): void
     {
-        $transformer = new BuiltinTransformer(new Type('array'), [new Type('iterable')]);
+        $transformer = new BuiltinTransformer(Type::builtin('array'), Type::iterable());
         $output = $this->evalTransformer($transformer, [1, 2]);
 
         self::assertSame([1, 2], $output);
@@ -281,7 +281,7 @@ class BuiltinTransformerTest extends TestCase
 
     public function testToUnknowCast(): void
     {
-        $transformer = new BuiltinTransformer(new Type('callable'), [new Type('string')]);
+        $transformer = new BuiltinTransformer(Type::callable(), Type::string());
 
         $output = $this->evalTransformer($transformer, function ($test) {
             return $test;

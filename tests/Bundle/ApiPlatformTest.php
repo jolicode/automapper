@@ -7,11 +7,25 @@ namespace AutoMapper\Tests\Bundle;
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
+if (!class_exists(ApiTestCase::class)) {
+    class ApiPlatformTest extends \PHPUnit\Framework\TestCase
+    {
+        protected static function createClient(): void
+        {
+            self::markTestSkipped('API Platform is not installed.');
+        }
+    }
+
+    return;
+}
+
 class ApiPlatformTest extends ApiTestCase
 {
     protected function setUp(): void
     {
         static::$class = null;
+        static::$alwaysBootKernel = false;
+
         $_SERVER['KERNEL_DIR'] = __DIR__ . '/Resources/App';
         $_SERVER['KERNEL_CLASS'] = 'AutoMapper\Tests\Bundle\Resources\App\AppKernel';
         $_SERVER['APP_DEBUG'] = false;
@@ -21,38 +35,8 @@ class ApiPlatformTest extends ApiTestCase
         self::bootKernel();
     }
 
-    public function testGetBookCollectionOnApip3(): void
+    public function testGetBookCollectionOnApip(): void
     {
-        if (version_compare(\Composer\InstalledVersions::getVersion('api-platform/core'), '4', '>=')) {
-            $this->markTestSkipped('This test requires api-platform/core 3');
-        }
-
-        $response = static::createClient()->request('GET', '/books.jsonld');
-
-        $this->assertResponseIsSuccessful();
-        $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
-
-        $this->assertJsonContains([
-            '@context' => '/contexts/Book',
-            '@id' => '/books',
-            '@type' => 'hydra:Collection',
-            'hydra:totalItems' => 1,
-        ]);
-
-        $this->assertCount(1, $response->toArray()['hydra:member']);
-        $this->assertArraySubset([
-            '@type' => 'Book',
-            '@id' => '/books/1',
-            'reviews' => [],
-        ], $response->toArray()['hydra:member'][0]);
-    }
-
-    public function testGetBookCollectionOnApip4(): void
-    {
-        if (version_compare(\Composer\InstalledVersions::getVersion('api-platform/core'), '4', '<')) {
-            $this->markTestSkipped('This test requires api-platform/core 4');
-        }
-
         $response = static::createClient()->request('GET', '/books.jsonld');
 
         $this->assertResponseIsSuccessful();
@@ -132,5 +116,11 @@ class ApiPlatformTest extends ApiTestCase
             '@id' => $iri,
             'title' => 'updated title',
         ]);
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        restore_exception_handler();
     }
 }

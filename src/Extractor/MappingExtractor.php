@@ -6,9 +6,10 @@ namespace AutoMapper\Extractor;
 
 use AutoMapper\Configuration;
 use AutoMapper\Event\PropertyMetadataEvent;
-use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
+use Symfony\Component\PropertyInfo\PropertyListExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyReadInfo;
 use Symfony\Component\PropertyInfo\PropertyReadInfoExtractorInterface;
+use Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyWriteInfo;
 use Symfony\Component\PropertyInfo\PropertyWriteInfoExtractorInterface;
 
@@ -21,9 +22,11 @@ abstract class MappingExtractor implements MappingExtractorInterface
 {
     public function __construct(
         protected readonly Configuration $configuration,
-        protected readonly PropertyInfoExtractorInterface $propertyInfoExtractor,
+        protected readonly PropertyListExtractorInterface $propertyInfoExtractor,
         protected readonly PropertyReadInfoExtractorInterface $readInfoExtractor,
         protected readonly PropertyWriteInfoExtractorInterface $writeInfoExtractor,
+        protected readonly PropertyTypeExtractorInterface $sourceTypeExtractor,
+        protected readonly PropertyTypeExtractorInterface $targetTypeExtractor,
     ) {
     }
 

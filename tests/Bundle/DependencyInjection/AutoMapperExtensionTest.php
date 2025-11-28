@@ -8,6 +8,7 @@ use AutoMapper\Loader\FileLoader;
 use AutoMapper\Loader\FileReloadStrategy;
 use AutoMapper\Symfony\Bundle\DependencyInjection\AutoMapperExtension;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * @author Nicolas PHILIPPE <nikophil@gmail.com>
@@ -21,9 +22,7 @@ final class AutoMapperExtensionTest extends AbstractExtensionTestCase
         $this->container->setParameter('kernel.environment', 'prod');
     }
 
-    /**
-     * @dataProvider provideReloadStrategyConfiguration
-     */
+    #[DataProvider('provideReloadStrategyConfiguration')]
     public function testItCorrectlyConfiguresReloadStrategy(array $config, bool $debug, FileReloadStrategy $expectedValue): void
     {
         $this->container->setParameter('kernel.debug', $debug);

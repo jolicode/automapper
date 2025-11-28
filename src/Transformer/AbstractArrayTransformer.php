@@ -15,10 +15,11 @@ use PhpParser\Node\Stmt;
 
 /**
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
+ *M
  *
  * @internal
  */
-abstract readonly class AbstractArrayTransformer implements TransformerInterface, DependentTransformerInterface
+abstract readonly class AbstractArrayTransformer implements \Stringable, TransformerInterface, DependentTransformerInterface
 {
     public function __construct(
         protected TransformerInterface $itemTransformer,
@@ -74,7 +75,7 @@ abstract readonly class AbstractArrayTransformer implements TransformerInterface
                     $loopExistingStatements[] = new Stmt\If_($isDeepPopulateExpr, [
                         'stmts' => [
                             new Stmt\Expression(new Expr\Assign($targetHashVar, $this->itemTransformer->getTargetHashExpression($loopRemoveValueVar))),
-                            new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name('null')), $targetHashVar), [
+                            new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name("''")), $targetHashVar), [
                                 'stmts' => [new Stmt\Expression(new Expr\Assign(new Expr\ArrayDimFetch($exisingValuesIndexed, $targetHashVar), $loopRemoveValueVar))],
                             ]),
                         ],
@@ -123,7 +124,7 @@ abstract readonly class AbstractArrayTransformer implements TransformerInterface
                         new Stmt\Foreach_($propertyMapping->target->readAccessor->getExpression($target), $loopExistingValueVar, [
                             'stmts' => [
                                 new Stmt\Expression(new Expr\Assign($hashValueVariable, $this->itemTransformer->getTargetHashExpression($loopExistingValueVar))),
-                                new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name('null')), $hashValueVariable), [
+                                new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name("''")), $hashValueVariable), [
                                     'stmts' => [
                                         new Stmt\Expression(new Expr\Assign(new Expr\ArrayDimFetch($exisingValuesIndexed, $hashValueVariable), $loopExistingValueVar)),
                                     ],
@@ -156,5 +157,10 @@ abstract readonly class AbstractArrayTransformer implements TransformerInterface
         }
 
         return $this->itemTransformer->getDependencies();
+    }
+
+    public function __toString(): string
+    {
+        return \sprintf('%s<%s>', static::class, $this->itemTransformer instanceof \Stringable ? (string) $this->itemTransformer : \get_class($this->itemTransformer));
     }
 }

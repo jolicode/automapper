@@ -8,6 +8,7 @@ use AutoMapper\Exception\CircularReferenceException;
 use AutoMapper\Exception\InvalidArgumentException;
 use AutoMapper\MapperContext;
 use AutoMapper\Tests\Fixtures\UserDTO;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -150,9 +151,7 @@ class MapperContextTest extends TestCase
         self::assertFalse(MapperContext::isAllowedAttribute($context, 'id', function () use ($data) { return !isset($data->id) && null === $data->id; }, false));
     }
 
-    /**
-     * @dataProvider forcedTimeZoneProvider
-     */
+    #[DataProvider('forcedTimeZoneProvider')]
     public function testItCanGetTimeZone(array $context, ?\DateTimeZone $expectedTimeZone): void
     {
         self::assertEquals(

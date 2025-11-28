@@ -21,6 +21,7 @@ use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\SourceTargetMultiFie
 use AutoMapper\Tests\Fixtures\Transformer\CustomTransformer\TransformerWithDependency;
 use AutoMapper\Tests\Fixtures\User;
 use AutoMapper\Tests\Fixtures\UserDTO;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class AutoMapperWithCustomTransformerTest extends AutoMapperTestCase
 {
@@ -80,9 +81,7 @@ class AutoMapperWithCustomTransformerTest extends AutoMapperTestCase
         );
     }
 
-    /**
-     * @dataProvider providerFromSourceToTargetCanUseCustomTransformer
-     */
+    #[DataProvider('providerFromSourceToTargetCanUseCustomTransformer')]
     public function testFromSourceToTargetCanUseCustomTransformer(string|object $target): void
     {
         $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true, classPrefix: 'SourceTargetCustomTransformer_', propertyTransformers: [
@@ -98,7 +97,7 @@ class AutoMapperWithCustomTransformerTest extends AutoMapperTestCase
         self::assertEquals('name DTO from custom property transformer', $mappedUser->name);
     }
 
-    public function providerFromSourceToTargetCanUseCustomTransformer(): iterable
+    public static function providerFromSourceToTargetCanUseCustomTransformer(): iterable
     {
         yield 'class name' => [User::class];
         yield 'object' => [self::createUser()];
