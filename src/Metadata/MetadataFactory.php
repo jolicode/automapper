@@ -375,7 +375,7 @@ final class MetadataFactory
             $eventDispatcher->addListener(PropertyMetadataEvent::class, new SerializerMaxDepthListener($classMetadataFactory));
             $eventDispatcher->addListener(PropertyMetadataEvent::class, new SerializerGroupListener($classMetadataFactory));
             $eventDispatcher->addListener(PropertyMetadataEvent::class, new SerializerIgnoreListener($classMetadataFactory));
-            $eventDispatcher->addListener(GenerateMapperEvent::class, new ClassDiscriminatorListener(new ClassDiscriminatorFromClassMetadata($classMetadataFactory)));
+            $eventDispatcher->addListener(GenerateMapperEvent::class, new ClassDiscriminatorListener($classDiscriminatorResolver));
         } elseif (null !== $nameConverter) {
             $eventDispatcher->addListener(PropertyMetadataEvent::class, new AdvancedNameConverterListener($nameConverter));
         }
