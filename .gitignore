@@ -4,6 +4,7 @@ vendor/
 .phpunit.result.cache
 tests/cache/
 tests/Bundle/Resources/var
+tests/Bundle/Resources/config/reference.php
 tools/phpstan/cache/
 cache/
 site/

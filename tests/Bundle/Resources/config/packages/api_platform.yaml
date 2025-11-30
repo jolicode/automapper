@@ -2,6 +2,7 @@ api_platform:
   title: automapper
   description: 'Automapper API'
   version: 1.0.0
+  defaults: []
   mapping:
     paths:
         - '%kernel.project_dir%/App/Api/Entity'
