@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+- [GH#297](https://github.com/jolicode/automapper/pull/297) : Support PHP 8.5 and Symfony 8, this library now use the `TypeInfo` Component for types instead of PropertyInfo directly.
+- [BC Break] `PropertyTransformerSupportInterface` does not use a `TypesMatching` anymore, you can get the type directly from `SourcePropertyMetadata` or `TargetPropertyMetadata`.
+- Debug command now show the type of each property mapped, transformers will also display more information.
+- Profiler now show the type of each property mapped, transformers will also display more information.
+- Add a castor task to serve the symfony app in tests for debugging purpose.
+
 ## [9.5.0] - 2025-09-18
 ### Added
 - [GH#260](https://github.com/jolicode/automapper/pull/260) Add support for identifiers detection and comparison of objects, this allow mappers to detect if objects are equals based on some properties, which allow better deep merge / update of collections. 
