@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Tests\AutoMapperTest\MaxDepth;
 
 use AutoMapper\Tests\AutoMapperBuilder;
-use Symfony\Component\Serializer\Annotation\MaxDepth;
+use Symfony\Component\Serializer\Attribute\MaxDepth;
 
 class FooMaxDepth
 {

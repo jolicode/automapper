@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use AutoMapper\Event\PropertyMetadataEvent;
-use AutoMapper\EventListener\Symfony\AdvancedNameConverterListener;
+use AutoMapper\EventListener\Symfony\NameConverterListener;
 use AutoMapper\EventListener\Symfony\SerializerGroupListener;
 use AutoMapper\EventListener\Symfony\SerializerIgnoreListener;
 use AutoMapper\EventListener\Symfony\SerializerMaxDepthListener;
@@ -36,7 +36,7 @@ return static function (ContainerConfigurator $container) {
         ->set('automapper.mapping.metadata_aware_name_converter', MetadataAwareNameConverter::class)
             ->args([service('serializer.mapping.class_metadata_factory')])
 
-        ->set(AdvancedNameConverterListener::class)
+        ->set(NameConverterListener::class)
             ->args([service('automapper.mapping.metadata_aware_name_converter')])
             ->tag('kernel.event_listener', ['event' => PropertyMetadataEvent::class, 'priority' => -64])
     ;

@@ -16,8 +16,8 @@ use AutoMapper\EventListener\MapperListener;
 use AutoMapper\EventListener\MapProviderListener;
 use AutoMapper\EventListener\MapToContextListener;
 use AutoMapper\EventListener\MapToListener;
-use AutoMapper\EventListener\Symfony\AdvancedNameConverterListener;
 use AutoMapper\EventListener\Symfony\ClassDiscriminatorListener;
+use AutoMapper\EventListener\Symfony\NameConverterListener;
 use AutoMapper\EventListener\Symfony\SerializerGroupListener;
 use AutoMapper\EventListener\Symfony\SerializerIgnoreListener;
 use AutoMapper\EventListener\Symfony\SerializerMaxDepthListener;
@@ -56,7 +56,6 @@ use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
-use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
 use Symfony\Component\Serializer\NameConverter\MetadataAwareNameConverter;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\Uid\AbstractUid;
@@ -352,7 +351,7 @@ final class MetadataFactory
         MetadataRegistry $metadataRegistry,
         ClassDiscriminatorResolver $classDiscriminatorResolver,
         ?ClassMetadataFactory $classMetadataFactory = null,
-        AdvancedNameConverterInterface|NameConverterInterface|null $nameConverter = null,
+        ?NameConverterInterface $nameConverter = null,
         ExpressionLanguage $expressionLanguage = new ExpressionLanguage(),
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
         ?ObjectManager $objectManager = null,
@@ -375,13 +374,13 @@ final class MetadataFactory
         $reflectionExtractor = new ReflectionExtractor(accessFlags: $flags);
 
         if (null !== $classMetadataFactory) {
-            $eventDispatcher->addListener(PropertyMetadataEvent::class, new AdvancedNameConverterListener(new MetadataAwareNameConverter($classMetadataFactory, $nameConverter)));
+            $eventDispatcher->addListener(PropertyMetadataEvent::class, new NameConverterListener(new MetadataAwareNameConverter($classMetadataFactory, $nameConverter)));
             $eventDispatcher->addListener(PropertyMetadataEvent::class, new SerializerMaxDepthListener($classMetadataFactory));
             $eventDispatcher->addListener(PropertyMetadataEvent::class, new SerializerGroupListener($classMetadataFactory));
             $eventDispatcher->addListener(PropertyMetadataEvent::class, new SerializerIgnoreListener($classMetadataFactory));
             $eventDispatcher->addListener(GenerateMapperEvent::class, new ClassDiscriminatorListener(new ClassDiscriminatorFromClassMetadata($classMetadataFactory)));
         } elseif (null !== $nameConverter) {
-            $eventDispatcher->addListener(PropertyMetadataEvent::class, new AdvancedNameConverterListener($nameConverter));
+            $eventDispatcher->addListener(PropertyMetadataEvent::class, new NameConverterListener($nameConverter));
         }
 
         if (null !== $objectManager) {

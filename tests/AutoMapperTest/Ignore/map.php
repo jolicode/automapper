@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Tests\AutoMapperTest\Ignore;
 
 use AutoMapper\Tests\AutoMapperBuilder;
-use Symfony\Component\Serializer\Annotation\Ignore;
+use Symfony\Component\Serializer\Attribute\Ignore;
 
 class FooIgnore
 {

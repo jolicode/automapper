@@ -19,6 +19,10 @@ use Symfony\Component\TypeInfo\Type;
  */
 final class FromTargetMappingExtractor extends MappingExtractor
 {
+    /**
+     * @param 'array'      $source
+     * @param class-string $target
+     */
     public function getTypes(string $source, SourcePropertyMetadata $sourceProperty, string $target, TargetPropertyMetadata $targetProperty, bool $extractTypesFromGetter): array
     {
         $targetType = $this->targetTypeExtractor->getType($target, $targetProperty->property) ?? Type::mixed();

@@ -7,9 +7,3 @@ parameters:
 		- src/
 
 	tmpDir: cache
-
-	ignoreErrors:
-		-
-			message: "#^Method Symfony\\\\Component\\\\Serializer\\\\NameConverter\\\\NameConverterInterface\\:\\:normalize\\(\\) invoked with 2 parameters, 1 required\\.$#"
-			count: 2
-			path: src/EventListener/Symfony/AdvancedNameConverterListener.php

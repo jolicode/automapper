@@ -19,7 +19,6 @@ use AutoMapper\Symfony\ExpressionLanguageProvider;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
 use AutoMapper\Transformer\TransformerFactoryInterface;
-use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -28,9 +27,7 @@ use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
-use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
-use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 
 /**
@@ -143,7 +140,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
     public static function create(
         Configuration $configuration = new Configuration(),
         ?string $cacheDirectory = null,
-        AdvancedNameConverterInterface|NameConverterInterface|null $nameConverter = null,
+        ?NameConverterInterface $nameConverter = null,
         array $transformerFactories = [],
         iterable $propertyTransformers = [],
         ?ExpressionLanguageProvider $expressionLanguageProvider = null,
@@ -153,9 +150,6 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
     ): AutoMapperInterface {
         if (class_exists(AttributeLoader::class)) {
             $loaderClass = new AttributeLoader();
-        } elseif (class_exists(AnnotationReader::class) && class_exists(AnnotationLoader::class)) {
-            /** @var AttributeLoader $loaderClass */
-            $loaderClass = new AnnotationLoader(new AnnotationReader());
         } else {
             $loaderClass = null;
         }

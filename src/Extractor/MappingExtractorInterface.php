@@ -28,6 +28,9 @@ interface MappingExtractorInterface
     public function getProperties(string $class): iterable;
 
     /**
+     * @param class-string|'array' $source
+     * @param class-string|'array' $target
+     *
      * @return array{Type, Type}
      */
     public function getTypes(string $source, SourcePropertyMetadata $sourceProperty, string $target, TargetPropertyMetadata $targetProperty, bool $extractTypesFromGetter): array;

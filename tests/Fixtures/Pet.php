@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Fixtures;
 
-use Symfony\Component\Serializer\Annotation\DiscriminatorMap;
+use Symfony\Component\Serializer\Attribute\DiscriminatorMap;
 
 #[DiscriminatorMap(typeProperty: 'type', mapping: [
     'cat' => Cat::class,

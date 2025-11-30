@@ -8,7 +8,7 @@ use AutoMapper\Attribute\Mapper;
 use AutoMapper\Configuration as AutoMapperConfiguration;
 use AutoMapper\ConstructorStrategy;
 use AutoMapper\Event\PropertyMetadataEvent;
-use AutoMapper\EventListener\Symfony\AdvancedNameConverterListener;
+use AutoMapper\EventListener\Symfony\NameConverterListener;
 use AutoMapper\Exception\LogicException;
 use AutoMapper\Loader\ClassLoaderInterface;
 use AutoMapper\Loader\EvalLoader;
@@ -145,7 +145,7 @@ class AutoMapperExtension extends Extension
                     ->setArgument(1, new Reference($config['name_converter']));
             } else {
                 $container
-                    ->getDefinition(AdvancedNameConverterListener::class)
+                    ->getDefinition(NameConverterListener::class)
                     ->replaceArgument(0, new Reference($config['name_converter']))
                     ->addTag('kernel.event_listener', ['event' => PropertyMetadataEvent::class, 'priority' => -64]);
             }
