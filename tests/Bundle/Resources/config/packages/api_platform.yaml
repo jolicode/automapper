@@ -9,4 +9,3 @@ api_platform:
   formats:
     jsonld: [ 'application/ld+json' ]
     json: [ 'application/json' ]
-    html: [ 'text/html' ]
