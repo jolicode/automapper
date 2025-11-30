@@ -21,6 +21,20 @@ class ApiPlatformTest extends ApiTestCase
         self::bootKernel();
     }
 
+    public function testGetShelf(): void
+    {
+        $response = static::createClient()->request('GET', '/shelf');
+
+        $this->assertResponseIsSuccessful();
+
+        $this->assertJsonContains([
+            '@context' => '/contexts/Shelf',
+            '@id' => '/shelf',
+            '@type' => 'Shelf',
+            'books' => ["/books/1", "/books/2"],
+        ]);
+    }
+
     public function testGetBookCollectionOnApip3(): void
     {
         if (version_compare(\Composer\InstalledVersions::getVersion('api-platform/core'), '4', '>=')) {
