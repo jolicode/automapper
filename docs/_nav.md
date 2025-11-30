@@ -25,5 +25,6 @@
     - [Api Platform](bundle/api-platform.md)
     - [Migrate existing application](bundle/migrate.md)
     - [Debugging](bundle/debugging.md)
-- [Upgrading to 9.0](upgrading-9.0.md)
+- [Upgrading](upgrading/upgrading-10.0.md)
+    - [Upgrading to 9.0](upgrading/upgrading-9.0.md)
 - [Contributing](contributing.md)

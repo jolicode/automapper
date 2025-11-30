@@ -135,7 +135,7 @@ class UrlTransformer implements PropertyTransformerInterface, PropertyTransforme
     {
     }
     
-    public function supports(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool
+    public function supports(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool
     {
         return $source->type->isIdentifiedBy(TypeIdentifier::INT && $source->property === 'id' && $target->property === 'url';
     }
