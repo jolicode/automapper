@@ -5,6 +5,8 @@ declare(strict_types=1);
 use Castor\Attribute\AsTask;
 
 use function Castor\context;
+use function Castor\http_download;
+use function Castor\io;
 use function Castor\PHPQa\php_cs_fixer;
 use function Castor\PHPQa\phpstan;
 use function Castor\run;
@@ -86,6 +88,28 @@ function doc_install()
 function doc_serve()
 {
     run('poetry run mkdocs serve -a localhost:8000');
+}
+
+#[AsTask(description: 'Fetch external assets and customize theme', namespace: 'doc')]
+function build_assets(): void
+{
+    io()->title('Fetching external assets for MkDocs documentation');
+
+    http_download('https://raw.githubusercontent.com/jolicode/oss-theme/refs/heads/main/MkDocs/extra.css', __DIR__ . '/docs/assets/stylesheets/jolicode.css');
+    http_download('https://raw.githubusercontent.com/jolicode/oss-theme/refs/heads/main/snippet-joli-footer.html', __DIR__ . '/docs/overrides/jolicode-footer.html');
+
+    $html = <<<'HTML'
+    AutoMapper is licensed under
+    <a href="https://github.com/jolicode/automapper/blob/main/LICENSE" target="_blank" rel="noreferrer noopener" class="jf-link">
+      MIT license
+    </a>
+    HTML;
+
+    $footer = file_get_contents(__DIR__ . '/docs/overrides/jolicode-footer.html');
+    $footer = str_replace('#GITHUB_REPO', 'jolicode/automapper', $footer);
+    $footer = str_replace('<!-- #SUBTITLE -->', $html, $footer);
+
+    file_put_contents(__DIR__ . '/docs/overrides/jolicode-footer.html', $footer);
 }
 
 #[AsTask('build-github-pages', namespace: 'doc', description: 'Serve documentation')]
