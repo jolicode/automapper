@@ -18,6 +18,7 @@ use Symfony\Component\ExpressionLanguage\SyntaxError;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\String\Inflector\EnglishInflector;
 use Symfony\Component\String\Inflector\InflectorInterface;
+use Symfony\Component\TypeInfo\TypeResolver\StringTypeResolver;
 
 /**
  * @internal
@@ -28,6 +29,7 @@ abstract readonly class MapListener
         private PropertyTransformerRegistry $propertyTransformerRegistry,
         private ExpressionLanguage $expressionLanguage,
         private InflectorInterface $inflector = new EnglishInflector(),
+        protected StringTypeResolver $stringTypeResolver = new StringTypeResolver(),
     ) {
     }
 

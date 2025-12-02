@@ -22,7 +22,8 @@ class FooMapTo
         #[MapTo('array', property: 'transformFromCustomTransformerService', transformer: TransformerWithDependency::class)]
         #[MapTo('array', property: 'transformFromExpressionLanguage', transformer: "source.foo === 'foo' ? 'transformed' : 'not transformed'")]
         #[MapTo('array', property: 'foo')]
-        #[MapTo('array', property: 'fooInt', targetType: new Type\BuiltinType(TypeIdentifier::INT))]
+        #[MapTo('array', property: 'fooInt', targetPropertyType: new Type\BuiltinType(TypeIdentifier::INT))]
+        #[MapTo('array', property: 'fooFloat', targetPropertyType: 'float')]
         public string $foo,
     ) {
     }
