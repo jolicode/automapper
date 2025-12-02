@@ -80,7 +80,7 @@ For example, if you have a custom normalizer that add a `virtualProperty` the no
 to do the same thing.
 
 ```php
-#[MapTo('array', property: 'virtualProperty', transformer: MyTransformer::class)]
+#[MapTo(target: 'array', property: 'virtualProperty', transformer: MyTransformer::class)]
 class App\Entity\MyEntity
 {
     // ...

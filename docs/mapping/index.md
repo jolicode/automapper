@@ -12,6 +12,7 @@ a `source` and a `target`.
 - [Groups](groups.md)
 - [Transformer](transformer.md)
 - [Provider](provider.md)
+- [Type](type.md)
 - [Mapping inheritance](inheritance.md)
 - [Identifier: mapping existing objects](identifier.md)
 - [DateTime format](date-time.md)
