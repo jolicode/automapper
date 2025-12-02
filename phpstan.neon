@@ -4,3 +4,9 @@ parameters:
 		- src/
 
 	tmpDir: cache
+
+	ignoreErrors:
+		-
+			message: "#^Method AutoMapper\\\\ObjectMapper\\\\ObjectMapper\\:\\:map\\(\\) should return T of object but returns object\\|null\\.$#"
+			count: 1
+			path: src/ObjectMapper/ObjectMapper.php

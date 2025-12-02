@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Metadata;
 
+use AutoMapper\AttributeReference\Reference;
 use AutoMapper\Transformer\TransformerInterface;
 
 /**
@@ -25,7 +26,7 @@ final class PropertyMetadata
         public bool $ignored = false,
         public string $ignoreReason = '',
         public ?int $maxDepth = null,
-        public ?string $if = null,
+        public string|Reference|null $if = null,
         public ?array $groups = null,
         public ?bool $disableGroupsCheck = null,
         public bool $identifier = false,

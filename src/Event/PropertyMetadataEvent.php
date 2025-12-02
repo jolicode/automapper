@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Event;
 
+use AutoMapper\AttributeReference\Reference;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Transformer\TransformerInterface;
 
@@ -24,7 +25,7 @@ final class PropertyMetadataEvent
         public ?string $dateTimeFormat = null,
         public ?bool $ignored = null,
         public ?string $ignoreReason = null,
-        public ?string $if = null,
+        public string|Reference|null $if = null,
         public ?array $groups = null,
         public ?bool $disableGroupsCheck = null,
         public int $priority = 0,

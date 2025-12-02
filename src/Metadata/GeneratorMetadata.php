@@ -29,6 +29,7 @@ final class GeneratorMetadata
         public readonly ?string $provider = null,
         public readonly ?Discriminator $sourceDiscriminator = null,
         public readonly ?Discriminator $targetDiscriminator = null,
+        public readonly bool $isProviderFromObjectMapper = false,
     ) {
         $this->variableRegistry = new VariableRegistry();
     }

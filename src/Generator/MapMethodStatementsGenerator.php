@@ -15,8 +15,10 @@ use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
 use PhpParser\Node\Scalar;
+use PhpParser\Node\StaticVar;
 use PhpParser\Node\Stmt;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use Symfony\Component\VarExporter\LazyObjectInterface;
 
 /**
  * @internal
@@ -102,6 +104,7 @@ final readonly class MapMethodStatementsGenerator
         $variableRegistry = $metadata->variableRegistry;
 
         $statements = [$this->ifSourceIsNullReturnNull($metadata)];
+        $statements = [...$statements, ...$this->isSourceIsLazyProxy($metadata)];
         $statements = [...$statements, ...$this->handleCircularReference($metadata)];
 
         if ($this->createObjectStatementsGenerator->canUseTargetToPopulate($metadata)) {
@@ -196,6 +199,77 @@ final readonly class MapMethodStatementsGenerator
                 'stmts' => [new Stmt\Return_($metadata->variableRegistry->getSourceInput())],
             ]
         );
+    }
+
+    /**
+     * Return a list of statement to handle lazy ghost objects.
+     *
+     * @return Stmt[]
+     */
+    private function isSourceIsLazyProxy(GeneratorMetadata $metadata): array
+    {
+        // If there is no source reflection class, we can't handle lazy proxy
+        if ($metadata->mapperMetadata->sourceReflectionClass === null) {
+            return [];
+        }
+
+        /**
+         * Statements for handling lazy proxy initialization.
+         *
+         * ```php
+         * static $reflectionClass = new \ReflectionClass($source);
+         *
+         * if ($reflectionClass->isUninitializedLazyObject($source)) {
+         *     $refl->initializeLazyObject($source);
+         * }
+         */
+        $reflectionClassVar = new Expr\Variable('reflectionClass');
+
+        $statements = [
+            new Stmt\Static_([new StaticVar(
+                $reflectionClassVar,
+                new Expr\New_(new Name\FullyQualified(\ReflectionClass::class), [
+                    new Arg(new Scalar\String_(
+                        $metadata->mapperMetadata->sourceReflectionClass->getName()
+                    )),
+                ]
+                ))]),
+            new Stmt\If_(new Expr\MethodCall($reflectionClassVar, 'isUninitializedLazyObject', [
+                new Arg($metadata->variableRegistry->getSourceInput()),
+            ]), [
+                'stmts' => [
+                    new Stmt\Expression(
+                        new Expr\MethodCall($reflectionClassVar, 'initializeLazyObject', [
+                            new Arg($metadata->variableRegistry->getSourceInput()),
+                        ])
+                    ),
+                ],
+            ]),
+        ];
+
+        if (!interface_exists(LazyObjectInterface::class)) {
+            return $statements;
+        }
+
+        /**
+         *  ```php
+         *  if ($source instanceof LazyObjectInterface) {
+         *     $source->initializeLazyObject();
+         *  } else {
+         *      ...
+         *  }
+         *  ```.
+         */
+        return [
+            new Stmt\If_(new Expr\Instanceof_($metadata->variableRegistry->getSourceInput(), new Name\FullyQualified(LazyObjectInterface::class)), [
+                'stmts' => [
+                    new Stmt\Expression(
+                        new Expr\MethodCall($metadata->variableRegistry->getSourceInput(), 'initializeLazyObject')
+                    ),
+                ],
+                'else' => new Stmt\Else_($statements),
+            ]),
+        ];
     }
 
     /**
@@ -325,35 +399,75 @@ final readonly class MapMethodStatementsGenerator
         }
 
         $variableRegistry = $metadata->variableRegistry;
+        $statements = [];
+        $callableName = null;
+
+        if ($metadata->isProviderFromObjectMapper) {
+            // When the provider is from the ObjectMapper, we call it with 3 arguments
+            /*
+             * $result ?? (new ReflectionClass($metadata->mapperMetadata->target))->newInstanceWithoutConstructor();
+             */
+            $args = [
+                new Arg(new Expr\BinaryOp\Coalesce($variableRegistry->getResult(), new Expr\MethodCall(
+                    new Expr\New_(new Name\FullyQualified(\ReflectionClass::class), [
+                        new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
+                    ]),
+                    'newInstanceWithoutConstructor'
+                ))),
+                new Arg($variableRegistry->getSourceInput()),
+                new Arg(new Expr\ConstFetch(new Name('null'))),
+            ];
+        } else {
+            $args = [
+                new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
+                new Arg($variableRegistry->getSourceInput()),
+                new Arg($variableRegistry->getContext()),
+                new Arg(new Expr\MethodCall(new Expr\Variable('this'), 'getTargetIdentifiers', [
+                    new Arg(new Expr\Variable('value')),
+                ])),
+            ];
+        }
+
+        if (\is_callable($metadata->provider, false, $callableName)) {
+            /*
+             * Get result from callable if available
+             *
+             * ```php
+             * $result ??= callable(Target::class, $value, $context, $this->getTargetIdentifiers($value));
+             * ```
+             */
+            $statements[] = new Stmt\Expression(
+                new Expr\AssignOp\Coalesce(
+                    $variableRegistry->getResult(),
+                    new Expr\FuncCall(new Name($callableName), $args),
+                )
+            );
+        } else {
+            /*
+             * Get result from provider if available
+             *
+             * ```php
+             * $result ??= $this->providerRegistry->getProvider($metadata->provider)->provide($source, $context);
+             * ```
+             */
+            $statements[] = new Stmt\Expression(
+                new Expr\AssignOp\Coalesce(
+                    $variableRegistry->getResult(),
+                    new Expr\MethodCall(new Expr\MethodCall(new Expr\PropertyFetch(new Expr\Variable('this'), 'serviceLocator'), 'get', [
+                        new Arg(new Scalar\String_($metadata->provider)),
+                    ]), 'provide', $args),
+                )
+            );
+        }
 
         /*
-         * Get result from provider if available
-         *
-         * ```php
-         * $result ??= $this->providerRegistry->getProvider($metadata->provider)->provide($source, $context);
+         * Return early if the result is an EarlyReturn instance
          *
          * if ($result instanceof EarlyReturn) {
          *     return $result->value;
          * }
          * ```
          */
-        $statements = [];
-        $statements[] = new Stmt\Expression(
-            new Expr\AssignOp\Coalesce(
-                $variableRegistry->getResult(),
-                new Expr\MethodCall(new Expr\MethodCall(new Expr\PropertyFetch(new Expr\Variable('this'), 'serviceLocator'), 'get', [
-                    new Arg(new Scalar\String_($metadata->provider)),
-                ]), 'provide', [
-                    new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
-                    new Arg($variableRegistry->getSourceInput()),
-                    new Arg($variableRegistry->getContext()),
-                    new Arg(new Expr\MethodCall(new Expr\Variable('this'), 'getTargetIdentifiers', [
-                        new Arg(new Expr\Variable('value')),
-                    ])),
-                ]),
-            )
-        );
-
         $statements[] = new Stmt\If_(
             new Expr\Instanceof_($variableRegistry->getResult(), new Name(EarlyReturn::class)),
             [
