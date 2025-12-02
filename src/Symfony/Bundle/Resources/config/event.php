@@ -11,9 +11,9 @@ use AutoMapper\EventListener\MapperListener;
 use AutoMapper\EventListener\MapProviderListener;
 use AutoMapper\EventListener\MapToContextListener;
 use AutoMapper\EventListener\MapToListener;
-use AutoMapper\EventListener\Symfony\AdvancedNameConverterListener;
+use AutoMapper\EventListener\Symfony\NameConverterListener;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
-use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
+use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 
 return static function (ContainerConfigurator $container) {
     $container->services()
@@ -31,7 +31,7 @@ return static function (ContainerConfigurator $container) {
         ->set(MapperListener::class)
             ->tag('kernel.event_listener', ['event' => GenerateMapperEvent::class, 'priority' => 256])
 
-        ->set(AdvancedNameConverterListener::class)
-            ->args([service(AdvancedNameConverterInterface::class)])
+        ->set(NameConverterListener::class)
+            ->args([service(NameConverterInterface::class)])
     ;
 };

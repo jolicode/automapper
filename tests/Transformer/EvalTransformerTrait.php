@@ -9,13 +9,11 @@ use AutoMapper\Generator\UniqueVariableScope;
 use AutoMapper\Metadata\PropertyMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
-use AutoMapper\Metadata\TypesMatching;
 use AutoMapper\Transformer\TransformerInterface;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Param;
 use PhpParser\Node\Stmt;
 use PhpParser\PrettyPrinter\Standard;
-use Symfony\Component\PropertyInfo\Type;
 
 trait EvalTransformerTrait
 {
@@ -30,7 +28,6 @@ trait EvalTransformerTrait
                 new TargetPropertyMetadata(
                     'dummy',
                 ),
-                TypesMatching::fromSourceAndTargetTypes([new Type('string')], [new Type('string')]),
                 $transformer,
             );
         }

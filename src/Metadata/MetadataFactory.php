@@ -16,14 +16,13 @@ use AutoMapper\EventListener\MapperListener;
 use AutoMapper\EventListener\MapProviderListener;
 use AutoMapper\EventListener\MapToContextListener;
 use AutoMapper\EventListener\MapToListener;
-use AutoMapper\EventListener\Symfony\AdvancedNameConverterListener;
 use AutoMapper\EventListener\Symfony\ClassDiscriminatorListener;
+use AutoMapper\EventListener\Symfony\NameConverterListener;
 use AutoMapper\EventListener\Symfony\SerializerGroupListener;
 use AutoMapper\EventListener\Symfony\SerializerIgnoreListener;
 use AutoMapper\EventListener\Symfony\SerializerMaxDepthListener;
 use AutoMapper\Extractor\FromSourceMappingExtractor;
 use AutoMapper\Extractor\FromTargetMappingExtractor;
-use AutoMapper\Extractor\ReadWriteTypeExtractor;
 use AutoMapper\Extractor\SourceTargetMappingExtractor;
 use AutoMapper\Extractor\WriteMutator;
 use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
@@ -37,7 +36,9 @@ use AutoMapper\Transformer\DependentTransformerInterface;
 use AutoMapper\Transformer\DoctrineCollectionTransformerFactory;
 use AutoMapper\Transformer\EnumTransformerFactory;
 use AutoMapper\Transformer\MapperDependency;
+use AutoMapper\Transformer\MixedTransformerFactory;
 use AutoMapper\Transformer\MultipleTransformerFactory;
+use AutoMapper\Transformer\NullableTargetTransformerFactory;
 use AutoMapper\Transformer\NullableTransformerFactory;
 use AutoMapper\Transformer\ObjectTransformerFactory;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerFactory;
@@ -55,7 +56,6 @@ use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
-use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
 use Symfony\Component\Serializer\NameConverter\MetadataAwareNameConverter;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\Uid\AbstractUid;
@@ -77,11 +77,7 @@ final class MetadataFactory
         private readonly EventDispatcherInterface $eventDispatcher,
         public readonly MetadataRegistry $metadataRegistry,
         private readonly ClassDiscriminatorResolver $classDiscriminatorResolver,
-        private readonly bool $removeDefaultProperties = false,
     ) {
-        if (!$this->removeDefaultProperties) {
-            trigger_deprecation('jolicode/automapper', '9.4', 'Not removing default properties is deprecated, pass this parameter to true and add necessary attributes if needed', __CLASS__);
-        }
     }
 
     /**
@@ -221,12 +217,10 @@ final class MetadataFactory
         foreach ($mapperEvent->properties as $propertyEvent) {
             $this->eventDispatcher->dispatch($propertyEvent);
 
-            if ($this->removeDefaultProperties) {
-                foreach ($propertyEvents as $propertyEventExisting) {
-                    if ($propertyEventExisting->source->property === $propertyEvent->source->property && $propertyEventExisting->isFromDefaultExtractor && !$propertyEventExisting->ignored) {
-                        $propertyEventExisting->ignored = true;
-                        $propertyEventExisting->ignoreReason = 'Default property is ignored because a custom property is defined.';
-                    }
+            foreach ($propertyEvents as $propertyEventExisting) {
+                if ($propertyEventExisting->source->property === $propertyEvent->source->property && $propertyEventExisting->isFromDefaultExtractor && !$propertyEventExisting->ignored) {
+                    $propertyEventExisting->ignored = true;
+                    $propertyEventExisting->ignoreReason = 'Default property is ignored because a custom property is defined.';
                 }
             }
 
@@ -288,12 +282,20 @@ final class MetadataFactory
             $sourcePropertyMetadata = SourcePropertyMetadata::fromEvent($propertyMappedEvent->source);
             $targetPropertyMetadata = TargetPropertyMetadata::fromEvent($propertyMappedEvent->target);
 
-            if (null === $propertyMappedEvent->types) {
-                $propertyMappedEvent->types = $extractor->getTypes($mapperMetadata->source, $sourcePropertyMetadata, $mapperMetadata->target, $targetPropertyMetadata, $propertyMappedEvent->extractTypesFromGetter ?? $this->configuration->extractTypesFromGetter);
+            if (null === $sourcePropertyMetadata->type || null === $targetPropertyMetadata->type) {
+                [$guessedSourceType, $guessedTargetType] = $extractor->getTypes($mapperMetadata->source, $sourcePropertyMetadata, $mapperMetadata->target, $targetPropertyMetadata, $propertyMappedEvent->extractTypesFromGetter ?? $this->configuration->extractTypesFromGetter);
+
+                if ($sourcePropertyMetadata->type === null) {
+                    $sourcePropertyMetadata = $sourcePropertyMetadata->withType($guessedSourceType);
+                }
+
+                if ($targetPropertyMetadata->type === null) {
+                    $targetPropertyMetadata = $targetPropertyMetadata->withType($guessedTargetType);
+                }
             }
 
             if (null === $propertyMappedEvent->transformer) {
-                $transformer = $this->transformerFactory->getTransformer($propertyMappedEvent->types, $sourcePropertyMetadata, $targetPropertyMetadata, $mapperMetadata);
+                $transformer = $this->transformerFactory->getTransformer($sourcePropertyMetadata, $targetPropertyMetadata, $mapperMetadata);
 
                 if (null === $transformer) {
                     $propertyMappedEvent->ignored = true;
@@ -321,7 +323,6 @@ final class MetadataFactory
             $propertiesMapping[] = new PropertyMetadata(
                 $sourcePropertyMetadata,
                 $targetPropertyMetadata,
-                $propertyMappedEvent->types,
                 $propertyMappedEvent->transformer ?? new VoidTransformer(),
                 $propertyMappedEvent->ignored ?? false,
                 $propertyMappedEvent->ignoreReason ?? '',
@@ -344,20 +345,15 @@ final class MetadataFactory
         );
     }
 
-    /**
-     * @param TransformerFactoryInterface[] $transformerFactories
-     */
     public static function create(
         Configuration $configuration,
         PropertyTransformerRegistry $customTransformerRegistry,
         MetadataRegistry $metadataRegistry,
         ClassDiscriminatorResolver $classDiscriminatorResolver,
-        array $transformerFactories = [],
         ?ClassMetadataFactory $classMetadataFactory = null,
-        AdvancedNameConverterInterface|NameConverterInterface|null $nameConverter = null,
+        ?NameConverterInterface $nameConverter = null,
         ExpressionLanguage $expressionLanguage = new ExpressionLanguage(),
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
-        bool $removeDefaultProperties = false,
         ?ObjectManager $objectManager = null,
     ): self {
         // Create property info extractors
@@ -367,17 +363,24 @@ final class MetadataFactory
             $flags |= ReflectionExtractor::ALLOW_PRIVATE | ReflectionExtractor::ALLOW_PROTECTED;
         }
 
+        $reflectionSourceExtractor = new ReflectionExtractor(mutatorPrefixes: [], arrayMutatorPrefixes: [], enableConstructorExtraction: false, accessFlags: $flags);
+        $phpStanSourceExtractor = new PhpStanExtractor(mutatorPrefixes: [], arrayMutatorPrefixes: [], allowPrivateAccess: $configuration->mapPrivateProperties);
+        $reflectionTargetExtractor = new ReflectionExtractor(accessorPrefixes: [], accessFlags: $flags);
+        $phpStanTargetExtractor = new PhpStanExtractor(accessorPrefixes: [], allowPrivateAccess: $configuration->mapPrivateProperties);
+
+        $sourceTypeExtractor = new PropertyInfoExtractor(typeExtractors: [$phpStanSourceExtractor, $reflectionSourceExtractor]);
+        $targetTypeExtractor = new PropertyInfoExtractor(typeExtractors: [$phpStanTargetExtractor, $reflectionTargetExtractor]);
+
         $reflectionExtractor = new ReflectionExtractor(accessFlags: $flags);
-        $phpStanExtractor = new PhpStanExtractor();
 
         if (null !== $classMetadataFactory) {
-            $eventDispatcher->addListener(PropertyMetadataEvent::class, new AdvancedNameConverterListener(new MetadataAwareNameConverter($classMetadataFactory, $nameConverter)));
+            $eventDispatcher->addListener(PropertyMetadataEvent::class, new NameConverterListener(new MetadataAwareNameConverter($classMetadataFactory, $nameConverter)));
             $eventDispatcher->addListener(PropertyMetadataEvent::class, new SerializerMaxDepthListener($classMetadataFactory));
             $eventDispatcher->addListener(PropertyMetadataEvent::class, new SerializerGroupListener($classMetadataFactory));
             $eventDispatcher->addListener(PropertyMetadataEvent::class, new SerializerIgnoreListener($classMetadataFactory));
             $eventDispatcher->addListener(GenerateMapperEvent::class, new ClassDiscriminatorListener(new ClassDiscriminatorFromClassMetadata($classMetadataFactory)));
         } elseif (null !== $nameConverter) {
-            $eventDispatcher->addListener(PropertyMetadataEvent::class, new AdvancedNameConverterListener($nameConverter));
+            $eventDispatcher->addListener(PropertyMetadataEvent::class, new NameConverterListener($nameConverter));
         }
 
         if (null !== $objectManager) {
@@ -391,24 +394,20 @@ final class MetadataFactory
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapperListener());
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapProviderListener());
 
-        $propertyInfoExtractor = new PropertyInfoExtractor(
-            listExtractors: [$reflectionExtractor],
-            typeExtractors: [new ReadWriteTypeExtractor(), $phpStanExtractor, $reflectionExtractor],
-            accessExtractors: [$reflectionExtractor]
-        );
-
         // Create transformer factories
         $factories = [
+            new DoctrineCollectionTransformerFactory(),
             new MultipleTransformerFactory(),
             new NullableTransformerFactory(),
+            new NullableTargetTransformerFactory(),
             new UniqueTypeTransformerFactory(),
             new DateTimeTransformerFactory(),
             new BuiltinTransformerFactory(),
-            new DoctrineCollectionTransformerFactory(),
             new ArrayTransformerFactory(),
             new ObjectTransformerFactory(),
             new EnumTransformerFactory(),
             new PropertyTransformerFactory($customTransformerRegistry),
+            new MixedTransformerFactory(),
             new CopyTransformerFactory(),
         ];
 
@@ -416,31 +415,33 @@ final class MetadataFactory
             $factories[] = new SymfonyUidTransformerFactory();
         }
 
-        foreach ($transformerFactories as $transformerFactory) {
-            $factories[] = $transformerFactory;
-        }
-
         $transformerFactory = new ChainTransformerFactory($factories);
 
         $sourceTargetMappingExtractor = new SourceTargetMappingExtractor(
             $configuration,
-            $propertyInfoExtractor,
             $reflectionExtractor,
             $reflectionExtractor,
+            $reflectionExtractor,
+            $sourceTypeExtractor,
+            $targetTypeExtractor,
         );
 
         $fromTargetMappingExtractor = new FromTargetMappingExtractor(
             $configuration,
-            $propertyInfoExtractor,
             $reflectionExtractor,
             $reflectionExtractor,
+            $reflectionExtractor,
+            $sourceTypeExtractor,
+            $targetTypeExtractor,
         );
 
         $fromSourceMappingExtractor = new FromSourceMappingExtractor(
             $configuration,
-            $propertyInfoExtractor,
             $reflectionExtractor,
             $reflectionExtractor,
+            $reflectionExtractor,
+            $sourceTypeExtractor,
+            $targetTypeExtractor,
         );
 
         return new self(
@@ -452,7 +453,6 @@ final class MetadataFactory
             $eventDispatcher,
             $metadataRegistry,
             $classDiscriminatorResolver,
-            $removeDefaultProperties,
         );
     }
 }

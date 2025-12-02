@@ -84,7 +84,7 @@ class MetadataCollector extends AbstractDataCollector
                         return [
                             'source' => $property->source,
                             'target' => $property->target,
-                            'transformer' => \get_class($property->transformer),
+                            'transformer' => $property->transformer instanceof \Stringable ? (string) $property->transformer : \get_class($property->transformer),
                             'maxDepth' => $property->maxDepth,
                             'if' => $property->if,
                             'groups' => $property->groups,

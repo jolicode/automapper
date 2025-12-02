@@ -14,24 +14,23 @@ use Symfony\Component\TypeInfo\Type;
  *
  * @internal
  */
-final class NullableTransformerFactory implements TransformerFactoryInterface, PrioritizedTransformerFactoryInterface, ChainTransformerFactoryAwareInterface
+final class NullableTargetTransformerFactory implements TransformerFactoryInterface, PrioritizedTransformerFactoryInterface, ChainTransformerFactoryAwareInterface
 {
     use ChainTransformerFactoryAwareTrait;
 
     public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
-        if (!$source->type instanceof Type\NullableType) {
+        if (null === $target->type) {
             return null;
         }
 
-        $newSource = $source->withType($source->type->getWrappedType());
-        $subTransformer = $this->chainTransformerFactory->getTransformer($newSource, $target, $mapperMetadata);
-
-        if (null === $subTransformer) {
+        if (!$target->type instanceof Type\NullableType) {
             return null;
         }
 
-        return new NullableTransformer($subTransformer, $target->type?->isNullable() ?? true);
+        $newTarget = $target->withType($target->type->getWrappedType());
+
+        return $this->chainTransformerFactory->getTransformer($source, $newTarget, $mapperMetadata);
     }
 
     public function getPriority(): int

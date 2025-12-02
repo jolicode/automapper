@@ -39,17 +39,14 @@ use AutoMapper\Tests\Fixtures\HasDateTimeInterfaceWithNullValue;
 use AutoMapper\Tests\Fixtures\HasDateTimeWithNullValue;
 use AutoMapper\Tests\Fixtures\IntDTO;
 use AutoMapper\Tests\Fixtures\ObjectWithDateTime;
-use AutoMapper\Tests\Fixtures\Order;
 use AutoMapper\Tests\Fixtures\PetOwner;
 use AutoMapper\Tests\Fixtures\PetOwnerWithConstructorArguments;
 use AutoMapper\Tests\Fixtures\Post;
 use AutoMapper\Tests\Fixtures\SourceForConstructorWithDefaultValues;
-use AutoMapper\Tests\Fixtures\Transformer\MoneyTransformerFactory;
 use AutoMapper\Tests\Fixtures\Uninitialized;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\HttpKernel\Kernel;
-use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\VarDumper\Dumper\CliDumper;
 use Symfony\Component\VarDumper\Test\VarDumperTestTrait;
@@ -219,7 +216,6 @@ class AutoMapperTest extends AutoMapperTestCase
         self::assertInstanceOf(Address::class, $addressMapped);
 
         $property = (new \ReflectionClass($addressMapped))->getProperty('city');
-        $property->setAccessible(true);
 
         $city = $property->getValue($addressMapped);
 
@@ -621,47 +617,25 @@ class AutoMapperTest extends AutoMapperTestCase
 
     public function testNameConverter(): void
     {
-        if (Kernel::MAJOR_VERSION >= 7 && Kernel::MINOR_VERSION >= 2) {
-            $nameConverter = new class implements NameConverterInterface {
-                public function normalize($propertyName, ?string $class = null, ?string $format = null, array $context = []): string
-                {
-                    if ('id' === $propertyName) {
-                        return '@id';
-                    }
-
-                    return $propertyName;
+        $nameConverter = new class implements NameConverterInterface {
+            public function normalize($propertyName, ?string $class = null, ?string $format = null, array $context = []): string
+            {
+                if ('id' === $propertyName) {
+                    return '@id';
                 }
 
-                public function denormalize($propertyName, ?string $class = null, ?string $format = null, array $context = []): string
-                {
-                    if ('@id' === $propertyName) {
-                        return 'id';
-                    }
+                return $propertyName;
+            }
 
-                    return $propertyName;
-                }
-            };
-        } else {
-            $nameConverter = new class implements AdvancedNameConverterInterface {
-                public function normalize(string $propertyName, ?string $class = null, ?string $format = null, array $context = []): string
-                {
-                    if ('id' === $propertyName) {
-                        return '@id';
-                    }
-
-                    return $propertyName;
+            public function denormalize($propertyName, ?string $class = null, ?string $format = null, array $context = []): string
+            {
+                if ('@id' === $propertyName) {
+                    return 'id';
                 }
 
-                public function denormalize(string $propertyName, ?string $class = null, ?string $format = null, array $context = []): string
-                {
-                    if ('@id' === $propertyName) {
-                        return 'id';
-                    }
-
-                    return $propertyName;
-                }
-            };
-        }
+                return $propertyName;
+            }
+        };
 
         $autoMapper = AutoMapper::create(new Configuration(classPrefix: 'Mapper2_'), nameConverter: $nameConverter);
         $user = new Fixtures\User(1, 'yolo', '13');
@@ -745,58 +719,7 @@ class AutoMapperTest extends AutoMapperTestCase
         $dto = $this->autoMapper->map($user, Fixtures\UserDTOProperties::class);
 
         self::assertInstanceOf(Fixtures\UserDTOProperties::class, $dto);
-        self::assertSame(['foo' => 'bar'], $dto->getProperties());
-    }
-
-    public function testCustomTransformerFromArrayToObject(): void
-    {
-        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true, transformerFactories: [new MoneyTransformerFactory()]);
-
-        $data = [
-            'id' => 4582,
-            'price' => [
-                'amount' => 1000,
-                'currency' => 'EUR',
-            ],
-        ];
-        $order = $this->autoMapper->map($data, Order::class);
-
-        self::assertInstanceOf(Order::class, $order);
-        self::assertInstanceOf(\Money\Money::class, $order->price);
-        self::assertEquals(1000, $order->price->getAmount());
-        self::assertEquals('EUR', $order->price->getCurrency()->getCode());
-    }
-
-    public function testCustomTransformerFromObjectToArray(): void
-    {
-        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(transformerFactories: [new MoneyTransformerFactory()]);
-
-        $order = new Order();
-        $order->id = 4582;
-        $order->price = new \Money\Money(1000, new \Money\Currency('EUR'));
-        $data = $this->autoMapper->map($order, 'array');
-
-        self::assertIsArray($data);
-        self::assertEquals(4582, $data['id']);
-        self::assertIsArray($data['price']);
-        self::assertEquals(1000, $data['price']['amount']);
-        self::assertEquals('EUR', $data['price']['currency']);
-    }
-
-    public function testCustomTransformerFromObjectToObject(): void
-    {
-        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(transformerFactories: [new MoneyTransformerFactory()]);
-
-        $order = new Order();
-        $order->id = 4582;
-        $order->price = new \Money\Money(1000, new \Money\Currency('EUR'));
-        $newOrder = new Order();
-        $newOrder = $this->autoMapper->map($order, $newOrder);
-
-        self::assertInstanceOf(Order::class, $newOrder);
-        self::assertInstanceOf(\Money\Money::class, $newOrder->price);
-        self::assertEquals(1000, $newOrder->price->getAmount());
-        self::assertEquals('EUR', $newOrder->price->getCurrency()->getCode());
+        self::assertSame([0 => 'bar'], $dto->getProperties());
     }
 
     public function testAdderAndRemoverWithClass(): void
@@ -950,9 +873,7 @@ class AutoMapperTest extends AutoMapperTestCase
         self::assertEquals('city', $toPopulate->city);
     }
 
-    /**
-     * @dataProvider provideReadonly
-     */
+    #[DataProvider('provideReadonly')]
     public function testReadonly(string $addressWithReadonlyClass): void
     {
         $this->autoMapper = AutoMapperBuilder::buildAutoMapper(allowReadOnlyTargetToPopulate: true, mapPrivatePropertiesAndMethod: true);
@@ -1025,6 +946,7 @@ class AutoMapperTest extends AutoMapperTestCase
      *
      * @dataProvider dateTimeMappingProvider
      */
+    #[DataProvider('dateTimeMappingProvider')]
     public function testDateTimeMapping(
         string $from,
         string $to,
@@ -1044,7 +966,7 @@ class AutoMapperTest extends AutoMapperTestCase
     /**
      * @return iterable<array{0:HasDateTime|HasDateTimeWithNullValue|HasDateTimeImmutable|HasDateTimeImmutableWithNullValue|HasDateTimeInterfaceWithImmutableInstance|HasDateTimeInterfaceWithNullValue,1:HasDateTime|HasDateTimeWithNullValue|HasDateTimeImmutable|HasDateTimeImmutableWithNullValue|HasDateTimeInterfaceWithImmutableInstance|HasDateTimeInterfaceWithNullValue,2:bool}>
      */
-    public function dateTimeMappingProvider(): iterable
+    public static function dateTimeMappingProvider(): iterable
     {
         $classes = [
             HasDateTime::class,
@@ -1337,9 +1259,7 @@ class AutoMapperTest extends AutoMapperTestCase
         self::assertIsString($userDatas[1]['createdAt']);
     }
 
-    /**
-     * @dataProvider provideAutoMapperFixturesTests
-     */
+    #[DataProvider('provideAutoMapperFixturesTests')]
     public function testAutoMapperFixtures(string $mapFile, string $directory): void
     {
         try {

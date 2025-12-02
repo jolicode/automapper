@@ -6,8 +6,8 @@ namespace AutoMapper\Tests\AutoMapperTest\GroupOverride;
 
 use AutoMapper\Attribute\MapTo;
 use AutoMapper\Tests\AutoMapperBuilder;
-use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Serializer\Annotation\Ignore;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\Ignore;
 
 class GroupOverride
 {

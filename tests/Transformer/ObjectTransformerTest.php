@@ -6,7 +6,7 @@ namespace AutoMapper\Tests\Transformer;
 
 use AutoMapper\Transformer\ObjectTransformer;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\PropertyInfo\Type;
+use Symfony\Component\TypeInfo\Type;
 
 class ObjectTransformerTest extends TestCase
 {
@@ -14,7 +14,7 @@ class ObjectTransformerTest extends TestCase
 
     public function testObjectTransformer(): void
     {
-        $transformer = new ObjectTransformer(new Type('object', false, Foo::class), new Type('object', false, Foo::class));
+        $transformer = new ObjectTransformer(Type::object(Foo::class), Type::object(Foo::class));
 
         $function = $this->createTransformerFunction($transformer);
         $class = new class {

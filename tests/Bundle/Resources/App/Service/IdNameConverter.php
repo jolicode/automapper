@@ -5,49 +5,25 @@ declare(strict_types=1);
 namespace AutoMapper\Tests\Bundle\Resources\App\Service;
 
 use AutoMapper\Tests\Bundle\Resources\App\Entity\User;
-use Symfony\Component\HttpKernel\Kernel;
-use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
+use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 
-if (Kernel::MAJOR_VERSION < 6) {
-    class IdNameConverter implements AdvancedNameConverterInterface
+class IdNameConverter implements NameConverterInterface
+{
+    public function normalize(string $propertyName, ?string $class = null, ?string $format = null, array $context = []): string
     {
-        public function normalize($propertyName, ?string $class = null, ?string $format = null, array $context = []): string
-        {
-            if ($class === User::class && 'id' === $propertyName) {
-                return '@id';
-            }
-
-            return $propertyName;
+        if ($class === User::class && 'id' === $propertyName) {
+            return '@id';
         }
 
-        public function denormalize($propertyName, ?string $class = null, ?string $format = null, array $context = []): string
-        {
-            if ($class === User::class && '@id' === $propertyName) {
-                return 'id';
-            }
-
-            return $propertyName;
-        }
+        return $propertyName;
     }
-} else {
-    class IdNameConverter implements AdvancedNameConverterInterface
+
+    public function denormalize(string $propertyName, ?string $class = null, ?string $format = null, array $context = []): string
     {
-        public function normalize(string $propertyName, ?string $class = null, ?string $format = null, array $context = []): string
-        {
-            if ($class === User::class && 'id' === $propertyName) {
-                return '@id';
-            }
-
-            return $propertyName;
+        if ($class === User::class && '@id' === $propertyName) {
+            return 'id';
         }
 
-        public function denormalize(string $propertyName, ?string $class = null, ?string $format = null, array $context = []): string
-        {
-            if ($class === User::class && '@id' === $propertyName) {
-                return 'id';
-            }
-
-            return $propertyName;
-        }
+        return $propertyName;
     }
 }

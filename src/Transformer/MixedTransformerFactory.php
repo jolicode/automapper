@@ -15,7 +15,7 @@ use Symfony\Component\TypeInfo\TypeIdentifier;
  *
  * @internal
  */
-final class BuiltinTransformerFactory implements TransformerFactoryInterface, PrioritizedTransformerFactoryInterface
+final class MixedTransformerFactory implements TransformerFactoryInterface, PrioritizedTransformerFactoryInterface
 {
     public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
@@ -23,8 +23,7 @@ final class BuiltinTransformerFactory implements TransformerFactoryInterface, Pr
             return null;
         }
 
-        // We don't want to handle mixed here as we can better guess the type with other transformers
-        if ($source->type instanceof Type\BuiltinType && $source->type->getTypeIdentifier() !== TypeIdentifier::MIXED && $source->type->getTypeIdentifier() !== TypeIdentifier::NULL) {
+        if ($source->type instanceof Type\BuiltinType && $source->type->getTypeIdentifier() === TypeIdentifier::MIXED) {
             return new BuiltinTransformer($source->type, $target->type ?? Type::mixed());
         }
 
@@ -33,6 +32,6 @@ final class BuiltinTransformerFactory implements TransformerFactoryInterface, Pr
 
     public function getPriority(): int
     {
-        return 16;
+        return -32;
     }
 }

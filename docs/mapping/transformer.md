@@ -126,7 +126,6 @@ namespace App\Transformer;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
-use AutoMapper\Metadata\TypesMatching;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerSupportInterface;
 
@@ -136,15 +135,9 @@ class UrlTransformer implements PropertyTransformerInterface, PropertyTransforme
     {
     }
     
-    public function supports(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool
+    public function supports(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool
     {
-        $sourceUniqueType = $types->getSourceUniqueType();
-
-        if (null === $sourceUniqueType) {
-            return false;
-        }
-
-        return $sourceUniqueType->getBuiltinType() === 'int' && $source->property === 'id' && $target->property === 'url';
+        return $source->type->isIdentifiedBy(TypeIdentifier::INT && $source->property === 'id' && $target->property === 'url';
     }
     
     public function transform(mixed $value, object|array $source, array $context): mixed

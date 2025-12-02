@@ -7,14 +7,13 @@ namespace AutoMapper\Transformer;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
-use AutoMapper\Metadata\TypesMatching;
 
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
  *
  * @internal
  */
-final class ChainTransformerFactory implements TransformerFactoryInterface
+class ChainTransformerFactory implements TransformerFactoryInterface
 {
     /**
      * @param array<TransformerFactoryInterface> $factories
@@ -31,11 +30,11 @@ final class ChainTransformerFactory implements TransformerFactoryInterface
         $this->sortFactories();
     }
 
-    public function getTransformer(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
+    public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
         foreach ($this->factories as $factory) {
             if ($factory instanceof TransformerFactoryInterface) {
-                $transformer = $factory->getTransformer($types, $source, $target, $mapperMetadata);
+                $transformer = $factory->getTransformer($source, $target, $mapperMetadata);
 
                 if (null !== $transformer) {
                     return $transformer;

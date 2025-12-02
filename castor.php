@@ -154,3 +154,11 @@ function doc_build_github_pages()
 
     run('git reset --hard gh-pages', context: $context);
 }
+
+#[AsTask('serve', namespace: 'test', description: 'Serve the symfony app in tests')]
+function test_serve($prod = false): void
+{
+    $file = $prod ? 'index.php' : 'dev.php';
+
+    run('php -S localhost:8000 tests/Bundle/Resources/public/' . $file, context: context()->withAllowFailure());
+}

@@ -38,6 +38,11 @@ class DifferentSetterGetterType
     }
 }
 
-$object = new DifferentSetterGetterType(AddressType::FLAT);
+function run()
+{
+    $object = new DifferentSetterGetterType(AddressType::FLAT);
 
-return AutoMapperBuilder::buildAutoMapper()->map($object, 'array');
+    yield AutoMapperBuilder::buildAutoMapper()->map($object, 'array');
+}
+
+return run();

@@ -6,8 +6,7 @@ namespace AutoMapper\Extractor;
 
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
-use AutoMapper\Metadata\TypesMatching;
-use Symfony\Component\PropertyInfo\Type;
+use Symfony\Component\TypeInfo\Type;
 
 /**
  * Mapping extracted only from target, useful when not having metadata on the source for dynamic data like array, \stdClass, ...
@@ -20,53 +19,79 @@ use Symfony\Component\PropertyInfo\Type;
  */
 final class FromTargetMappingExtractor extends MappingExtractor
 {
-    public function getTypes(string $source, SourcePropertyMetadata $sourceProperty, string $target, TargetPropertyMetadata $targetProperty, bool $extractTypesFromGetter): TypesMatching
+    /**
+     * @param 'array'      $source
+     * @param class-string $target
+     */
+    public function getTypes(string $source, SourcePropertyMetadata $sourceProperty, string $target, TargetPropertyMetadata $targetProperty, bool $extractTypesFromGetter): array
     {
-        $types = new TypesMatching();
-        $targetTypes = $this->propertyInfoExtractor->getTypes($target, $targetProperty->property, [
-            ReadWriteTypeExtractor::WRITE_MUTATOR => $targetProperty->writeMutator,
-            ReadWriteTypeExtractor::EXTRACT_TYPE_FROM_GETTER => $extractTypesFromGetter,
-        ]) ?? [];
+        $targetType = $this->targetTypeExtractor->getType($target, $targetProperty->property) ?? Type::mixed();
+        $sourceType = $this->transformTargetType($source, $targetType);
 
-        foreach ($targetTypes as $type) {
-            $sourceType = $this->transformType($source, $type);
-
-            if ($sourceType) {
-                $types[$sourceType] = [$type];
-            }
-        }
-
-        return $types;
+        return [$sourceType ?? Type::mixed(), $targetType];
     }
 
-    private function transformType(string $source, ?Type $type = null): ?Type
+    private function transformTargetType(string $source, ?Type $type = null): ?Type
     {
         if (null === $type) {
             return null;
         }
 
-        $builtinType = $type->getBuiltinType();
-        $className = $type->getClassName();
+        if ($type instanceof Type\NullableType) {
+            $wrappedType = $this->transformTargetType($source, $type->getWrappedType());
 
-        if (Type::BUILTIN_TYPE_OBJECT === $type->getBuiltinType() && \stdClass::class !== $type->getClassName()) {
-            $builtinType = 'array' === $source ? Type::BUILTIN_TYPE_ARRAY : Type::BUILTIN_TYPE_OBJECT;
-            $className = 'array' === $source ? null : \stdClass::class;
+            if (null === $wrappedType) {
+                return null;
+            }
+
+            return new Type\NullableType($wrappedType);
         }
 
-        if (Type::BUILTIN_TYPE_OBJECT === $type->getBuiltinType() && $type->getClassName() !== null && (\DateTimeInterface::class === $type->getClassName() || is_subclass_of($type->getClassName(), \DateTimeInterface::class))) {
-            $builtinType = 'string';
+        if ($type instanceof Type\UnionType) {
+            $types = [];
+
+            foreach ($type->getTypes() as $subType) {
+                $transformedType = $this->transformTargetType($source, $subType);
+
+                if ($transformedType) {
+                    $types[] = $transformedType;
+                }
+            }
+
+            return new Type\UnionType(...$types);
         }
 
-        $collectionKeyTypes = $type->getCollectionKeyTypes();
-        $collectionValueTypes = $type->getCollectionValueTypes();
+        if ($type instanceof Type\IntersectionType) {
+            $types = [];
 
-        return new Type(
-            $builtinType,
-            $type->isNullable(),
-            $className,
-            $type->isCollection(),
-            $this->transformType($source, $collectionKeyTypes[0] ?? null),
-            $this->transformType($source, $collectionValueTypes[0] ?? null)
-        );
+            foreach ($type->getTypes() as $subType) {
+                $transformedType = $this->transformTargetType($source, $subType);
+
+                if ($transformedType) {
+                    $types[] = $transformedType;
+                }
+            }
+
+            return new Type\IntersectionType(...$types);
+        }
+
+        if ($type instanceof Type\CollectionType) {
+            $keyType = $this->transformTargetType($source, $type->getCollectionKeyType());
+            $valueType = $this->transformTargetType($source, $type->getCollectionValueType());
+
+            return Type::array($valueType, $keyType, $type->isList());
+        }
+
+        // Transform datetime to string
+        if ($type instanceof Type\ObjectType && $type->getClassName() !== null && (\DateTimeInterface::class === $type->getClassName() || is_subclass_of($type->getClassName(), \DateTimeInterface::class))) {
+            return Type::string();
+        }
+
+        // Transform objects to array or \stdClass given the target
+        if ($type instanceof Type\ObjectType && \stdClass::class !== $type->getClassName()) {
+            return $source === 'array' ? Type::arrayShape([]) : Type::object(\stdClass::class);
+        }
+
+        return $type;
     }
 }

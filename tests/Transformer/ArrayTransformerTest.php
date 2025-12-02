@@ -7,7 +7,7 @@ namespace AutoMapper\Tests\Transformer;
 use AutoMapper\Transformer\ArrayTransformer;
 use AutoMapper\Transformer\BuiltinTransformer;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\PropertyInfo\Type;
+use Symfony\Component\TypeInfo\Type;
 
 class ArrayTransformerTest extends TestCase
 {
@@ -15,7 +15,7 @@ class ArrayTransformerTest extends TestCase
 
     public function testArrayToArray(): void
     {
-        $transformer = new ArrayTransformer(new BuiltinTransformer(new Type('string'), [new Type('string')]));
+        $transformer = new ArrayTransformer(new BuiltinTransformer(Type::string(), Type::string()));
         $output = $this->evalTransformer($transformer, ['test']);
 
         self::assertEquals(['test'], $output);

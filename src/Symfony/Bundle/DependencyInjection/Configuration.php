@@ -32,7 +32,6 @@ readonly class Configuration implements ConfigurationInterface
                 ->booleanNode('auto_register')->defaultTrue()->end()
                 ->booleanNode('map_private_properties')->defaultTrue()->end()
                 ->booleanNode('allow_readonly_target_to_populate')->defaultFalse()->end()
-                ->booleanNode('remove_default_properties')->defaultFalse()->end()
                 ->arrayNode('normalizer')
                     ->children()
                         ->booleanNode('enabled')->defaultFalse()->end()

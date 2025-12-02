@@ -8,13 +8,12 @@ use AutoMapper\Attribute\Mapper;
 use AutoMapper\Configuration as AutoMapperConfiguration;
 use AutoMapper\ConstructorStrategy;
 use AutoMapper\Event\PropertyMetadataEvent;
-use AutoMapper\EventListener\Symfony\AdvancedNameConverterListener;
+use AutoMapper\EventListener\Symfony\NameConverterListener;
 use AutoMapper\Exception\LogicException;
 use AutoMapper\Loader\ClassLoaderInterface;
 use AutoMapper\Loader\EvalLoader;
 use AutoMapper\Loader\FileLoader;
 use AutoMapper\Loader\FileReloadStrategy;
-use AutoMapper\Metadata\MetadataFactory;
 use AutoMapper\Normalizer\AutoMapperNormalizer;
 use AutoMapper\Provider\ProviderInterface;
 use AutoMapper\Symfony\Bundle\CacheWarmup\CacheWarmer;
@@ -72,14 +71,6 @@ class AutoMapperExtension extends Extension
             ->setArgument('$reloadStrategy', $reloadStrategy = FileReloadStrategy::from($config['loader']['reload_strategy'] ?? (
                 $container->getParameter('kernel.debug') ? FileReloadStrategy::ALWAYS->value : FileReloadStrategy::NEVER->value
             )))
-        ;
-
-        if (!$config['remove_default_properties']) {
-            trigger_deprecation('jolicode/automapper', '9.4', 'Not removing default properties is deprecated and will be always true in future versions, set \'remove_default_properties\' config parameter to true, and check that your mapping is correct.', __CLASS__);
-        }
-
-        $container->getDefinition(MetadataFactory::class)
-            ->setArgument('$removeDefaultProperties', $config['remove_default_properties'])
         ;
 
         if ($config['map_private_properties']) {
@@ -154,7 +145,7 @@ class AutoMapperExtension extends Extension
                     ->setArgument(1, new Reference($config['name_converter']));
             } else {
                 $container
-                    ->getDefinition(AdvancedNameConverterListener::class)
+                    ->getDefinition(NameConverterListener::class)
                     ->replaceArgument(0, new Reference($config['name_converter']))
                     ->addTag('kernel.event_listener', ['event' => PropertyMetadataEvent::class, 'priority' => -64]);
             }

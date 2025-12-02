@@ -19,7 +19,7 @@ use PhpParser\Node\Stmt;
  *
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
  */
-final class ArrayToDoctrineCollectionTransformer implements TransformerInterface, DependentTransformerInterface, PrioritizedTransformerFactoryInterface
+final class ArrayToDoctrineCollectionTransformer implements \Stringable, TransformerInterface, DependentTransformerInterface
 {
     public function __construct(
         protected TransformerInterface $itemTransformer,
@@ -56,7 +56,7 @@ final class ArrayToDoctrineCollectionTransformer implements TransformerInterface
                     new Stmt\Foreach_($propertyMapping->target->readAccessor->getExpression($target), $loopExistingValueVar, [
                         'stmts' => [
                             new Stmt\Expression(new Expr\Assign($hashValueVariable, $this->itemTransformer->getTargetHashExpression($loopExistingValueVar))),
-                            new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name('null')), $hashValueVariable), [
+                            new Stmt\If_(new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name("''")), $hashValueVariable), [
                                 'stmts' => [
                                     new Stmt\Expression(new Expr\Assign(new Expr\ArrayDimFetch($exisingValuesIndexed, $hashValueVariable), $loopExistingValueVar)),
                                 ],
@@ -89,8 +89,8 @@ final class ArrayToDoctrineCollectionTransformer implements TransformerInterface
         return $this->itemTransformer->getDependencies();
     }
 
-    public function getPriority(): int
+    public function __toString(): string
     {
-        return 0;
+        return \sprintf('%s<%s>', static::class, $this->itemTransformer instanceof \Stringable ? (string) $this->itemTransformer : \get_class($this->itemTransformer));
     }
 }

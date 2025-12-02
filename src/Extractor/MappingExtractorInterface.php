@@ -7,7 +7,7 @@ namespace AutoMapper\Extractor;
 use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
-use AutoMapper\Metadata\TypesMatching;
+use Symfony\Component\TypeInfo\Type;
 
 /**
  * Extracts mapping.
@@ -27,7 +27,13 @@ interface MappingExtractorInterface
      */
     public function getProperties(string $class): iterable;
 
-    public function getTypes(string $source, SourcePropertyMetadata $sourceProperty, string $target, TargetPropertyMetadata $targetProperty, bool $extractTypesFromGetter): TypesMatching;
+    /**
+     * @param class-string|'array' $source
+     * @param class-string|'array' $target
+     *
+     * @return array{Type, Type}
+     */
+    public function getTypes(string $source, SourcePropertyMetadata $sourceProperty, string $target, TargetPropertyMetadata $targetProperty, bool $extractTypesFromGetter): array;
 
     public function getDateTimeFormat(PropertyMetadataEvent $propertyMetadataEvent): string;
 

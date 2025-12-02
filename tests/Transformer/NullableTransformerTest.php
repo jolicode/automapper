@@ -7,7 +7,7 @@ namespace AutoMapper\Tests\Transformer;
 use AutoMapper\Transformer\BuiltinTransformer;
 use AutoMapper\Transformer\NullableTransformer;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\PropertyInfo\Type;
+use Symfony\Component\TypeInfo\Type;
 
 class NullableTransformerTest extends TestCase
 {
@@ -15,7 +15,7 @@ class NullableTransformerTest extends TestCase
 
     public function testNullTransformerTargetNullable(): void
     {
-        $transformer = new NullableTransformer(new BuiltinTransformer(new Type('string'), [new Type('string', true)]), true);
+        $transformer = new NullableTransformer(new BuiltinTransformer(Type::string(), Type::nullable(Type::string())), true);
 
         $output = $this->evalTransformer($transformer, 'foo');
 
@@ -28,7 +28,7 @@ class NullableTransformerTest extends TestCase
 
     public function testNullTransformerTargetNotNullable(): void
     {
-        $transformer = new NullableTransformer(new BuiltinTransformer(new Type('string'), [new Type('string')]), false);
+        $transformer = new NullableTransformer(new BuiltinTransformer(Type::string(), Type::string()), false);
 
         $output = $this->evalTransformer($transformer, 'foo');
 

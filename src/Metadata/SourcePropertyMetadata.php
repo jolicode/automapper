@@ -6,6 +6,7 @@ namespace AutoMapper\Metadata;
 
 use AutoMapper\Event\SourcePropertyMetadata as SourcePropertyMetadataEvent;
 use AutoMapper\Extractor\ReadAccessor;
+use Symfony\Component\TypeInfo\Type;
 
 /**
  * Source Property metadata.
@@ -25,6 +26,7 @@ final readonly class SourcePropertyMetadata
         public bool $checkExists = false,
         public ?array $groups = null,
         public string $dateTimeFormat = \DateTimeInterface::RFC3339,
+        public ?Type $type = null,
     ) {
     }
 
@@ -36,6 +38,18 @@ final readonly class SourcePropertyMetadata
             $metadata->checkExists ?? false,
             $metadata->groups,
             $metadata->dateTimeFormat ?? \DateTimeInterface::RFC3339,
+        );
+    }
+
+    public function withType(?Type $type): self
+    {
+        return new self(
+            $this->property,
+            $this->accessor,
+            $this->checkExists,
+            $this->groups,
+            $this->dateTimeFormat,
+            $type,
         );
     }
 }

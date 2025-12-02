@@ -123,8 +123,8 @@
                                         <tr>
                                             <td rowspan="2" style="vertical-align: middle">
                                                 {% if property.source.accessor %}
-                                                    <span class="badge">{{ property.source.property }}</span> ->
-                                                    <span class="badge">{{ property.target.property }}</span>
+                                                    <span class="badge">{{ property.source.property }} ({{ property.source.type }})</span> ->
+                                                    <span class="badge">{{ property.target.property }} ({{ property.target.type }})</span>
                                                 {% else %}
                                                     <span class="badge">{{ property.target.property }}</span>
                                                 {% endif %}

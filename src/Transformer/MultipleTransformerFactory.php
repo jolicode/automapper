@@ -7,7 +7,7 @@ namespace AutoMapper\Transformer;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
-use AutoMapper\Metadata\TypesMatching;
+use Symfony\Component\TypeInfo\Type\UnionType;
 
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
@@ -18,17 +18,17 @@ final class MultipleTransformerFactory implements TransformerFactoryInterface, P
 {
     use ChainTransformerFactoryAwareTrait;
 
-    public function getTransformer(TypesMatching $types, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
+    public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
-        if (\count($types) <= 1) {
+        if (!$source->type instanceof UnionType) {
             return null;
         }
 
         $transformers = [];
 
-        foreach ($types as $sourceType) {
-            $targetTypes = $types[$sourceType] ?? [];
-            $transformer = $this->chainTransformerFactory->getTransformer(TypesMatching::fromSourceAndTargetTypes([$sourceType], $targetTypes), $source, $target, $mapperMetadata);
+        foreach ($source->type->getTypes() as $sourceType) {
+            $newSource = $source->withType($sourceType);
+            $transformer = $this->chainTransformerFactory->getTransformer($newSource, $target, $mapperMetadata);
 
             if (null !== $transformer) {
                 $transformers[] = [
@@ -51,6 +51,6 @@ final class MultipleTransformerFactory implements TransformerFactoryInterface, P
 
     public function getPriority(): int
     {
-        return 128;
+        return 64;
     }
 }

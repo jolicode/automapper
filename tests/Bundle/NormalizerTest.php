@@ -84,4 +84,10 @@ class NormalizerTest extends WebTestCase
 
         self::assertEquals($address, $denormalized);
     }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        restore_exception_handler();
+    }
 }

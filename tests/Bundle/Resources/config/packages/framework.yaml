@@ -1,6 +1,7 @@
 framework:
   secret: automapper
-  property_info: ~
+  property_info:
+    with_constructor_extractor: true
   test: ~
   serializer:
     enabled: true

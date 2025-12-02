@@ -39,10 +39,12 @@ class DoctrineTest extends AutoMapperTestCase
             unlink(__DIR__ . '/db.sqlite');
         }
 
-        $config = ORMSetup::createAttributeMetadataConfiguration(
+        $config = ORMSetup::createAttributeMetadataConfig(
             paths: [__DIR__ . '/Entity'],
             isDevMode: true,
         );
+
+        $config->enableNativeLazyObjects(true);
 
         $connection = DriverManager::getConnection([
             'driver' => 'pdo_sqlite',

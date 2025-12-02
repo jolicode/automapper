@@ -12,6 +12,7 @@ class User
      * @var int
      */
     #[MapTo(target: 'array', property: '_id')]
+    #[MapTo(target: 'array', property: 'id')]
     private $id;
 
     /**

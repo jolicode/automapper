@@ -17,7 +17,7 @@ use PhpParser\Node\Stmt;
  *
  * @internal
  */
-final readonly class NullableTransformer implements TransformerInterface, DependentTransformerInterface
+final readonly class NullableTransformer implements \Stringable, TransformerInterface, DependentTransformerInterface
 {
     public function __construct(
         private TransformerInterface $itemTransformer,
@@ -77,5 +77,10 @@ final readonly class NullableTransformer implements TransformerInterface, Depend
         }
 
         return $this->itemTransformer->getDependencies();
+    }
+
+    public function __toString(): string
+    {
+        return static::class . '<' . \get_class($this->itemTransformer) . '>';
     }
 }

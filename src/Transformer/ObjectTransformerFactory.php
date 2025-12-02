@@ -7,69 +7,59 @@ namespace AutoMapper\Transformer;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
-use Symfony\Component\PropertyInfo\Type;
+use Symfony\Component\TypeInfo\Type;
+use Symfony\Component\TypeInfo\TypeIdentifier;
 
 /**
  * @author Joel Wurtz <jwurtz@jolicode.com>
  *
  * @internal
  */
-final class ObjectTransformerFactory extends AbstractUniqueTypeTransformerFactory implements PrioritizedTransformerFactoryInterface
+final class ObjectTransformerFactory implements TransformerFactoryInterface, PrioritizedTransformerFactoryInterface
 {
-    protected function createTransformer(Type $sourceType, Type $targetType, SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
+    public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
-        // Only deal with source type being an object or an array that is not a collection
-        if (!$this->isObjectType($sourceType) || !$this->isObjectType($targetType)) {
+        if ($source->type === null || $target->type === null) {
             return null;
         }
 
-        $sourceTypeName = 'array';
-        $targetTypeName = 'array';
-
-        if (Type::BUILTIN_TYPE_OBJECT === $sourceType->getBuiltinType()) {
-            $sourceTypeName = $sourceType->getClassName();
+        // Only deal with source type being an object or an array that is not a collection
+        if (!$this->isObjectType($source->type) || !$this->isObjectType($target->type)) {
+            return null;
         }
 
-        if (Type::BUILTIN_TYPE_OBJECT === $targetType->getBuiltinType()) {
-            $targetTypeName = $targetType->getClassName();
+        // Check that we have at least one object correctly defined
+        if (!$source->type->isIdentifiedBy(TypeIdentifier::OBJECT) && !$target->type->isIdentifiedBy(TypeIdentifier::OBJECT)) {
+            return null;
         }
 
-        if (null !== $sourceTypeName && null !== $targetTypeName) {
-            return new ObjectTransformer($sourceType, $targetType);
-        }
-
-        return null;
+        return new ObjectTransformer($source->type, $target->type);
     }
 
     private function isObjectType(Type $type): bool
     {
-        if (!\in_array($type->getBuiltinType(), [Type::BUILTIN_TYPE_OBJECT, Type::BUILTIN_TYPE_ARRAY])) {
+        if (!$type->isIdentifiedBy(TypeIdentifier::OBJECT) && !$type->isIdentifiedBy(TypeIdentifier::ARRAY) && !$type->isIdentifiedBy(TypeIdentifier::MIXED)) {
             return false;
         }
 
-        if (Type::BUILTIN_TYPE_ARRAY === $type->getBuiltinType() && $type->isCollection() && $type->getCollectionValueTypes()) {
-            return false;
-        }
+        if ($type instanceof Type\ObjectType) {
+            $className = $type->getClassName();
 
-        if ($type->getClassName() !== null && is_subclass_of($type->getClassName(), \UnitEnum::class)) {
-            return false;
-        }
+            if (is_subclass_of($className, \UnitEnum::class)) {
+                return false;
+            }
 
-        /** @var class-string|null $class */
-        $class = $type->getClassName();
+            if (!class_exists($className) && !interface_exists($className)) {
+                return false;
+            }
 
-        if ($class === null || $class === \stdClass::class) {
-            return true;
-        }
+            if ($className !== \stdClass::class) {
+                $reflectionClass = new \ReflectionClass($className);
 
-        if (!class_exists($class) && !interface_exists($class)) {
-            return false;
-        }
-
-        $reflectionClass = new \ReflectionClass($class);
-
-        if ($reflectionClass->isInternal()) {
-            return false;
+                if ($reflectionClass->isInternal()) {
+                    return false;
+                }
+            }
         }
 
         return true;

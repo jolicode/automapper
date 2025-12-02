@@ -4,7 +4,7 @@ $finder = (new PhpCsFixer\Finder())
     ->in(__DIR__ . '/src')
     ->in(__DIR__ . '/tests')
     ->append([__DIR__ . '/castor.php'])
-    ->exclude(['cache', 'Bundle/Resources/var', 'Bundles/Resources/config'])
+    ->exclude(['cache', 'Bundle/Resources/var', 'Bundle/Resources/config'])
 ;
 
 return (new PhpCsFixer\Config())

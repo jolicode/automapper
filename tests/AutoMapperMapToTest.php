@@ -60,6 +60,7 @@ class AutoMapperMapToTest extends AutoMapperTestCase
         $this->assertSame('if', $bar['ifCallableOther']);
         $this->assertSame('transformed', $bar['transformFromExpressionLanguage']);
         $this->assertSame('bar', $bar['transformWithExpressionFunction']);
+        $this->assertSame(0, $bar['fooInt']);
 
         $foo = new FooMapTo('bar');
         $bar = $this->autoMapper->map($foo, 'array');
@@ -78,6 +79,7 @@ class AutoMapperMapToTest extends AutoMapperTestCase
         $this->assertSame('transformFromStringStatic_bar', $bar['transformFromStringStatic']);
         $this->assertSame('bar', $bar['transformFromCustomTransformerService']);
         $this->assertSame('not transformed', $bar['transformFromExpressionLanguage']);
+        $this->assertSame(0, $bar['fooInt']);
     }
 
     public function testMapToArrayGroups()
@@ -147,7 +149,7 @@ class AutoMapperMapToTest extends AutoMapperTestCase
         self::assertArrayHasKey('immutable', $result);
         self::assertSame($immutable->format(\DateTimeInterface::RFC822), $result['immutable']);
         self::assertArrayHasKey('interface', $result);
-        self::assertSame($normal->format(\DateTimeInterface::RFC7231), $result['interface']);
+        self::assertSame($normal->format(\DateTimeInterface::RFC3339_EXTENDED), $result['interface']);
 
         $bar = new MapperDateTimeFormatMapTo($normal, $immutable, $normal);
         $result = $this->autoMapper->map($bar, 'array');
@@ -157,7 +159,7 @@ class AutoMapperMapToTest extends AutoMapperTestCase
         self::assertArrayHasKey('immutable', $result);
         self::assertSame($immutable->format(\DateTimeInterface::ATOM), $result['immutable']);
         self::assertArrayHasKey('interface', $result);
-        self::assertSame($normal->format(\DateTimeInterface::RFC7231), $result['interface']);
+        self::assertSame($normal->format(\DateTimeInterface::RFC3339_EXTENDED), $result['interface']);
 
         $baz = new MapperDateTimeFormatMapTo($normal, $immutable, $normal);
         $result = $this->autoMapper->map($baz, 'array', [MapperContext::DATETIME_FORMAT => \DateTimeInterface::RFC822]);
