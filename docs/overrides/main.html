@@ -9,3 +9,8 @@
         <title>{{ config.site_name }}</title>
     {% endif %}
 {% endblock %}
+
+{% block footer %}
+{{ super() }}
+{% include "jolicode-footer.html" %}
+{% endblock %}
