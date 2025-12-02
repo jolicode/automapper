@@ -18,7 +18,6 @@ use AutoMapper\Provider\ProviderRegistry;
 use AutoMapper\Symfony\ExpressionLanguageProvider;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
-use AutoMapper\Transformer\TransformerFactoryInterface;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -131,7 +130,6 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
     }
 
     /**
-     * @param TransformerFactoryInterface[]                  $transformerFactories
      * @param ProviderInterface[]                            $providers
      * @param iterable<string, PropertyTransformerInterface> $propertyTransformers
      *
@@ -141,7 +139,6 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         Configuration $configuration = new Configuration(),
         ?string $cacheDirectory = null,
         ?NameConverterInterface $nameConverter = null,
-        array $transformerFactories = [],
         iterable $propertyTransformers = [],
         ?ExpressionLanguageProvider $expressionLanguageProvider = null,
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
