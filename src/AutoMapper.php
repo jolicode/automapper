@@ -26,6 +26,8 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
+use Symfony\Component\Serializer\Mapping\ClassDiscriminatorMapping;
+use Symfony\Component\Serializer\Mapping\ClassDiscriminatorResolverInterface;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
@@ -46,6 +48,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         private readonly MetadataRegistry $metadataRegistry,
         private readonly ProviderRegistry $providerRegistry,
         private readonly ?ExpressionLanguageProvider $expressionLanguageProvider = null,
+        private readonly ?ClassDiscriminatorResolverInterface $classDiscriminatorResolver = null,
     ) {
     }
 
@@ -134,6 +137,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
      * @param TransformerFactoryInterface[]                  $transformerFactories
      * @param ProviderInterface[]                            $providers
      * @param iterable<string, PropertyTransformerInterface> $propertyTransformers
+     * @param iterable<string, ClassDiscriminatorMapping>    $discriminatorMappings
      *
      * @return self
      */
@@ -147,6 +151,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
         iterable $providers = [],
         ?ObjectManager $objectManager = null,
+        array $discriminatorMappings = [],
     ): AutoMapperInterface {
         if (class_exists(AttributeLoader::class)) {
             $loaderClass = new AttributeLoader();
@@ -161,11 +166,14 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         }
 
         $classMetadataFactory = null;
-        $classDiscriminatorFromClassMetadata = null;
+        $classDiscriminatorResolver = null;
 
         if (class_exists(ClassMetadataFactory::class) && $loaderClass !== null) {
             $classMetadataFactory = new ClassMetadataFactory($loaderClass);
-            $classDiscriminatorFromClassMetadata = new ClassDiscriminatorFromClassMetadata($classMetadataFactory);
+            $classDiscriminatorResolver = new ClassDiscriminatorResolver(
+                classDiscriminator: new ClassDiscriminatorFromClassMetadata($classMetadataFactory),
+                mappings: $discriminatorMappings,
+            );
         }
 
         $providers = iterator_to_array($providers);
@@ -177,7 +185,6 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         $customTransformerRegistry = new PropertyTransformerRegistry($propertyTransformers);
         $metadataRegistry = new MetadataRegistry($configuration);
         $providerRegistry = new ProviderRegistry($providers);
-        $classDiscriminatorResolver = new ClassDiscriminatorResolver($classDiscriminatorFromClassMetadata);
 
         $metadataFactory = MetadataFactory::create(
             $configuration,
