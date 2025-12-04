@@ -1,5 +1,5 @@
 <h1 align="center">
-  <a href="https://github.com/jolicode/automapper"><img src="https://jolicode.com/media/original/oss/headers/automapper.png" alt="automapper"></a>
+  <a href="https://github.com/jolicode/automapper"><img src="https://jolicode.com/media/original/oss/headers/automapper.png?v2" alt="automapper"></a>
   <br />
   AutoMapper
   <br />
