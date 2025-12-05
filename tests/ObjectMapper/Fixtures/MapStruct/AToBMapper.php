@@ -11,13 +11,12 @@
 
 namespace AutoMapper\Tests\ObjectMapper\Fixtures\MapStruct;
 
-use Symfony\Component\ObjectMapper\ObjectMapper;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 #[Map(source: Source::class, target: Target::class)]
 class AToBMapper implements ObjectMapperInterface
 {
-    public function __construct(private readonly ObjectMapper $objectMapper)
+    public function __construct(private readonly ObjectMapperInterface $objectMapper)
     {
     }
 
