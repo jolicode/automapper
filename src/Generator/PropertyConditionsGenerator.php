@@ -246,6 +246,12 @@ final readonly class PropertyConditionsGenerator
         }
 
         $callableName = null;
+        $value = $metadata->variableRegistry->getSourceInput();
+
+        // use read accessor
+        if ($propertyMetadata->source->accessor !== null) {
+            $value = $propertyMetadata->source->accessor->getExpression($metadata->variableRegistry->getSourceInput());
+        }
 
         if (\is_callable($propertyMetadata->if, false, $callableName)) {
             if (\function_exists($callableName)) {
@@ -257,7 +263,7 @@ final readonly class PropertyConditionsGenerator
                     return new Expr\FuncCall(
                         new Name($callableName),
                         [
-                            new Arg(new Expr\Variable('value')),
+                            new Arg($value),
                         ]
                     );
                 }
@@ -270,7 +276,7 @@ final readonly class PropertyConditionsGenerator
             return new Expr\FuncCall(
                 new Name($callableName),
                 [
-                    new Arg(new Expr\Variable('value')),
+                    new Arg($value),
                     new Arg(new Expr\Variable('context')),
                 ]
             );
@@ -284,17 +290,17 @@ final readonly class PropertyConditionsGenerator
                     new Name\FullyQualified($metadata->mapperMetadata->source),
                     $propertyMetadata->if,
                     [
-                        new Arg(new Expr\Variable('value')),
+                        new Arg($value),
                         new Arg(new Expr\Variable('context')),
                     ]
                 );
             }
 
             return new Expr\MethodCall(
-                new Expr\Variable('value'),
+                $metadata->variableRegistry->getSourceInput(),
                 $propertyMetadata->if,
                 [
-                    new Arg(new Expr\Variable('value')),
+                    new Arg($value),
                     new Arg(new Expr\Variable('context')),
                 ]
             );

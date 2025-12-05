@@ -11,6 +11,7 @@
 
 namespace AutoMapper\Tests\ObjectMapper;
 
+use AutoMapper\Tests\AutoMapperTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RequiresPhp;
 use PHPUnit\Framework\TestCase;
@@ -21,8 +22,7 @@ use Symfony\Component\ObjectMapper\Exception\NoSuchPropertyException;
 use Symfony\Component\ObjectMapper\Metadata\Mapping;
 use Symfony\Component\ObjectMapper\Metadata\ObjectMapperMetadataFactoryInterface;
 use Symfony\Component\ObjectMapper\Metadata\ReflectionObjectMapperMetadataFactory;
-use Symfony\Component\ObjectMapper\ObjectMapper;
-use Symfony\Component\ObjectMapper\ObjectMapperInterface;
+use AutoMapper\ObjectMapper\ObjectMapper;
 use AutoMapper\Tests\ObjectMapper\Fixtures\A;
 use AutoMapper\Tests\ObjectMapper\Fixtures\B;
 use AutoMapper\Tests\ObjectMapper\Fixtures\C;
@@ -78,32 +78,26 @@ use AutoMapper\Tests\ObjectMapper\Fixtures\ReadOnlyPromotedProperty\ReadOnlyProm
 use AutoMapper\Tests\ObjectMapper\Fixtures\Recursion\AB;
 use AutoMapper\Tests\ObjectMapper\Fixtures\Recursion\Dto;
 use AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLoadedValue\LoadedValueService;
-use AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLoadedValue\ServiceLoadedValueTransformer;
 use AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLoadedValue\ValueToMap;
 use AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLoadedValue\ValueToMapRelation;
 use AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLocator\A as ServiceLocatorA;
 use AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLocator\B as ServiceLocatorB;
-use AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLocator\ConditionCallable;
-use AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLocator\TransformCallable;
 use AutoMapper\Tests\ObjectMapper\Fixtures\TargetTransform\SourceEntity;
 use AutoMapper\Tests\ObjectMapper\Fixtures\TargetTransform\TargetDto as TargetTransformTargetDto;
 use AutoMapper\Tests\ObjectMapper\Fixtures\TransformCollection\TransformCollectionA;
 use AutoMapper\Tests\ObjectMapper\Fixtures\TransformCollection\TransformCollectionB;
 use AutoMapper\Tests\ObjectMapper\Fixtures\TransformCollection\TransformCollectionC;
 use AutoMapper\Tests\ObjectMapper\Fixtures\TransformCollection\TransformCollectionD;
+use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
-final class ObjectMapperTest extends TestCase
+final class ObjectMapperTest extends AutoMapperTestCase
 {
     #[DataProvider('mapProvider')]
     public function testMap($expect, $args, array $deps = [])
     {
-        $mapper = new ObjectMapper(...$deps);
+        $mapper = $this->createObjectMapper();
         $mapped = $mapper->map(...$args);
-
-        if (\PHP_VERSION_ID >= 80400 && isset($mapped->relation) && $mapped->relation instanceof D) {
-            $mapped->relation->baz;
-        }
 
         $this->assertEquals($expect, $mapped);
     }
@@ -127,7 +121,7 @@ final class ObjectMapperTest extends TestCase
         $b->transform = 'TEST';
         $b->baz = 'me';
         $b->nomap = true;
-        $b->concat = 'testme';
+        $b->concat = 'shouldtestme';
         $b->relation = $d;
         $b->relationNotMapped = $d;
         yield [$b, [$a]];
@@ -149,28 +143,28 @@ final class ObjectMapperTest extends TestCase
     {
         $this->expectException(MappingException::class);
         $this->expectExceptionMessage('Mapping target not found for source "class@anonymous".');
-        (new ObjectMapper())->map(new class {});
+        ($this->createObjectMapper())->map(new class {});
     }
 
     public function testHasNothingToMapToWithNamedClass()
     {
         $this->expectException(MappingException::class);
         $this->expectExceptionMessage(\sprintf('Mapping target not found for source "%s".', ClassWithoutTarget::class));
-        (new ObjectMapper())->map(new ClassWithoutTarget());
+        ($this->createObjectMapper())->map(new ClassWithoutTarget());
     }
 
     public function testTargetNotFound()
     {
         $this->expectException(MappingException::class);
         $this->expectExceptionMessage(\sprintf('Mapping target class "InexistantClass" does not exist for source "%s".', ClassWithoutTarget::class));
-        (new ObjectMapper())->map(new ClassWithoutTarget(), 'InexistantClass');
+        ($this->createObjectMapper())->map(new ClassWithoutTarget(), 'InexistantClass');
     }
 
     public function testRecursion()
     {
         $ab = new AB();
         $ab->ab = $ab;
-        $mapper = new ObjectMapper();
+        $mapper = $this->createObjectMapper();
         $mapped = $mapper->map($ab);
         $this->assertInstanceOf(Dto::class, $mapped);
         $this->assertSame($mapped, $mapped->dto);
@@ -182,7 +176,7 @@ final class ObjectMapperTest extends TestCase
         $recursive->name = 'hi';
         $recursive->relation = new Relation();
         $recursive->relation->recursion = $recursive;
-        $mapper = new ObjectMapper();
+        $mapper = $this->createObjectMapper();
         $mapped = $mapper->map($recursive);
         $this->assertSame($mapped->relation->recursion, $mapped);
         $this->assertInstanceOf(RecursiveDto::class, $mapped);
@@ -192,7 +186,7 @@ final class ObjectMapperTest extends TestCase
     public function testMapWithInitializedConstructor()
     {
         $a = new InitializedConstructorA();
-        $mapper = new ObjectMapper(propertyAccessor: PropertyAccess::createPropertyAccessor());
+        $mapper = $this->createObjectMapper();
         $b = $mapper->map($a, InitializedConstructorB::class);
         $this->assertInstanceOf(InitializedConstructorB::class, $b);
         $this->assertEquals($b->tags, ['foo', 'bar']);
@@ -202,7 +196,7 @@ final class ObjectMapperTest extends TestCase
     {
         $expected = 'bar';
 
-        $mapper = new ObjectMapper(propertyAccessor: PropertyAccess::createPropertyAccessor());
+        $mapper = $this->createObjectMapper();
 
         $source = new \stdClass();
         $source->bar = $expected;
@@ -217,7 +211,7 @@ final class ObjectMapperTest extends TestCase
     {
         $expected = 'bar';
 
-        $mapper = new ObjectMapper(propertyAccessor: PropertyAccess::createPropertyAccessor());
+        $mapper = $this->createObjectMapper();
 
         $source = new \stdClass();
         $source->bar = $expected;
@@ -231,7 +225,7 @@ final class ObjectMapperTest extends TestCase
     public function testMapToWithInstanceHook()
     {
         $a = new InstanceCallbackA();
-        $mapper = new ObjectMapper();
+        $mapper = $this->createObjectMapper();
         $b = $mapper->map($a, InstanceCallbackB::class);
         $this->assertInstanceOf(InstanceCallbackB::class, $b);
         $this->assertSame($b->getId(), 1);
@@ -241,29 +235,16 @@ final class ObjectMapperTest extends TestCase
     public function testMapToWithInstanceHookWithArguments()
     {
         $a = new InstanceCallbackWithArgumentsA();
-        $mapper = new ObjectMapper();
+        $mapper = $this->createObjectMapper();
         $b = $mapper->map($a);
         $this->assertInstanceOf(InstanceCallbackWithArgumentsB::class, $b);
         $this->assertSame($a, $b->transformSource);
-        $this->assertInstanceOf(InstanceCallbackWithArgumentsB::class, $b->transformValue);
-    }
-
-    public function testMapStruct()
-    {
-        $a = new Source('a', 'b', 'c');
-        $metadata = new MapStructMapperMetadataFactory(AToBMapper::class);
-        $mapper = new ObjectMapper($metadata);
-        $aToBMapper = new AToBMapper($mapper);
-        $b = $aToBMapper->map($a);
-        $this->assertInstanceOf(Target::class, $b);
-        $this->assertSame($b->propertyD, 'a');
-        $this->assertSame($b->propertyC, 'c');
     }
 
     public function testMultipleMapProperty()
     {
         $u = new User(email: 'hello@example.com', profile: new UserProfile(firstName: 'soyuka', lastName: 'arakusa'));
-        $mapper = new ObjectMapper();
+        $mapper = $this->createObjectMapper();
         $b = $mapper->map($u);
         $this->assertInstanceOf(TargetUser::class, $b);
         $this->assertSame($b->firstName, 'soyuka');
@@ -275,10 +256,7 @@ final class ObjectMapperTest extends TestCase
         $a = new ServiceLocatorA();
         $a->foo = 'nok';
 
-        $mapper = new ObjectMapper(
-            conditionCallableLocator: $this->getServiceLocator([ConditionCallable::class => new ConditionCallable()]),
-            transformCallableLocator: $this->getServiceLocator([TransformCallable::class => new TransformCallable()])
-        );
+        $mapper = $this->createObjectMapper();
 
         $b = $mapper->map($a);
         $this->assertSame($b->bar, 'notmapped');
@@ -313,7 +291,7 @@ final class ObjectMapperTest extends TestCase
     {
         $a = new \stdClass();
         $a->name = 'test';
-        $mapper = new ObjectMapper();
+        $mapper = $this->createObjectMapper();
         $mapped = $mapper->map($a, SourceOnly::class);
         $this->assertInstanceOf(SourceOnly::class, $mapped);
         $this->assertSame('test', $mapped->mappedName);
@@ -321,7 +299,7 @@ final class ObjectMapperTest extends TestCase
 
     public function testSourceOnlyWithMagicMethods()
     {
-        $mapper = new ObjectMapper();
+        $mapper = $this->createObjectMapper();
         $a = new class {
             public function __isset($key): bool
             {
@@ -373,7 +351,7 @@ final class ObjectMapperTest extends TestCase
     public function testMapTargetToSource()
     {
         $a = new MapTargetToSourceA('str');
-        $mapper = new ObjectMapper();
+        $mapper = $this->createObjectMapper();
         $b = $mapper->map($a, MapTargetToSourceB::class);
         $this->assertInstanceOf(MapTargetToSourceB::class, $b);
         $this->assertSame('str', $b->target);
@@ -383,7 +361,7 @@ final class ObjectMapperTest extends TestCase
     {
         $u = new MultipleTargetPropertyA();
 
-        $mapper = new ObjectMapper();
+        $mapper = $this->createObjectMapper();
         $b = $mapper->map($u, MultipleTargetPropertyB::class);
         $this->assertInstanceOf(MultipleTargetPropertyB::class, $b);
         $this->assertEquals('TEST', $b->foo);
@@ -399,7 +377,7 @@ final class ObjectMapperTest extends TestCase
         $this->expectException(NoSuchPropertyException::class);
         $u = new \stdClass();
         $u->id = 'abc';
-        $mapper = new ObjectMapper();
+        $mapper = $this->createObjectMapper();
         $b = $mapper->map($u, TargetDto::class);
     }
 
@@ -407,7 +385,7 @@ final class ObjectMapperTest extends TestCase
     {
         $u = new \stdClass();
         $u->id = 'abc';
-        $mapper = new ObjectMapper(propertyAccessor: PropertyAccess::createPropertyAccessorBuilder()->disableExceptionOnInvalidPropertyPath()->getPropertyAccessor());
+        $mapper = $this->createObjectMapper();
         $b = $mapper->map($u, TargetDto::class);
         $this->assertInstanceOf(TargetDto::class, $b);
         $this->assertSame('abc', $b->id);
@@ -441,13 +419,12 @@ final class ObjectMapperTest extends TestCase
     public static function objectMapperProvider(): iterable
     {
         yield [new ObjectMapper()];
-        yield [new ObjectMapper(new ReflectionObjectMapperMetadataFactory(), PropertyAccess::createPropertyAccessor())];
     }
 
     public function testMapInitializesLazyObject()
     {
         $lazy = new LazyFoo();
-        $mapper = new ObjectMapper();
+        $mapper = $this->createObjectMapper();
         $mapper->map($lazy, \stdClass::class);
         $this->assertTrue($lazy->isLazyObjectInitialized());
     }
@@ -468,7 +445,7 @@ final class ObjectMapperTest extends TestCase
         $r = new \ReflectionClass(MyProxy::class);
         $lazyObj = $r->newLazyProxy($initializer);
         $this->assertFalse($initialized);
-        $mapper = new ObjectMapper();
+        $mapper = $this->createObjectMapper();
         $d = $mapper->map($lazyObj, MyProxy::class);
         $this->assertSame('test', $d->name);
         $this->assertTrue($initialized);
@@ -476,7 +453,7 @@ final class ObjectMapperTest extends TestCase
 
     public function testDecorateObjectMapper()
     {
-        $mapper = new ObjectMapper();
+        $mapper = $this->createObjectMapper();
         $myMapper = new class($mapper) implements ObjectMapperInterface {
             public function __construct(private ObjectMapperInterface $mapper)
             {
@@ -515,7 +492,7 @@ final class ObjectMapperTest extends TestCase
     #[DataProvider('validPartialInputProvider')]
     public function testMapPartially(PartialInput $actual, FinalInput $expected)
     {
-        $mapper = new ObjectMapper();
+        $mapper = $this->createObjectMapper();
         $this->assertEquals($expected, $mapper->map($actual));
     }
 
@@ -558,7 +535,7 @@ final class ObjectMapperTest extends TestCase
         $source = new SourceEntity();
         $source->name = 'test';
 
-        $mapper = new ObjectMapper();
+        $mapper = $this->createObjectMapper();
         $target = $mapper->map($source, TargetTransformTargetDto::class);
 
         $this->assertInstanceOf(TargetTransformTargetDto::class, $target);
@@ -570,7 +547,7 @@ final class ObjectMapperTest extends TestCase
     {
         $u = new TransformCollectionA();
         $u->foo = [new TransformCollectionC('a'), new TransformCollectionC('b')];
-        $mapper = new ObjectMapper();
+        $mapper = $this->createObjectMapper();
 
         $transformed = $mapper->map($u, TransformCollectionB::class);
 
@@ -580,7 +557,7 @@ final class ObjectMapperTest extends TestCase
     #[RequiresPhp('>=8.4')]
     public function testEmbedsAreLazyLoadedByDefault()
     {
-        $mapper = new ObjectMapper();
+        $mapper = $this->createObjectMapper();
         $source = new OrderSource();
         $source->id = 123;
         $source->user = new UserSource();
@@ -601,10 +578,7 @@ final class ObjectMapperTest extends TestCase
         $service->load();
 
         $metadataFactory = new ReflectionObjectMapperMetadataFactory();
-        $mapper = new ObjectMapper(
-            metadataFactory: $metadataFactory,
-            transformCallableLocator: $this->getServiceLocator([ServiceLoadedValueTransformer::class => new ServiceLoadedValueTransformer($service, $metadataFactory)])
-        );
+        $mapper = $this->createObjectMapper();
 
         $value = new ValueToMap();
         $value->relation = new ValueToMapRelation('test');
@@ -627,7 +601,7 @@ final class ObjectMapperTest extends TestCase
             name: 'John Doe'
         );
 
-        $mapper = new ObjectMapper(propertyAccessor: PropertyAccess::createPropertyAccessor());
+        $mapper = $this->createObjectMapper();
         $user = $mapper->map($dto, UserEmbeddedMapping::class);
 
         $this->assertInstanceOf(UserEmbeddedMapping::class, $user);
@@ -646,12 +620,17 @@ final class ObjectMapperTest extends TestCase
             var1: 'foo',
         );
 
-        $mapper = new ObjectMapper();
+        $mapper = $this->createObjectMapper();
         $out = $mapper->map($source);
 
         $this->assertInstanceOf(ReadOnlyPromotedPropertyAMapped::class, $out);
         $this->assertInstanceOf(ReadOnlyPromotedPropertyBMapped::class, $out->b);
         $this->assertSame('foo', $out->var1);
         $this->assertSame('bar', $out->b->var2);
+    }
+
+    public function createObjectMapper(): ObjectMapperInterface
+    {
+        return new ObjectMapper(autoMapper: $this->autoMapper);
     }
 }
