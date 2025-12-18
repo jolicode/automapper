@@ -1,0 +1,7 @@
+AutoMapper\Tests\AutoMapperTest\ArrayString\Foo {
+  -optionValueIds: [
+    "foo"
+    "bar"
+    "baz"
+  ]
+}
