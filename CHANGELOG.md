@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- [GH#304](https://github.com/jolicode/automapper/pull/304) ; Allow to override source and/or target property type 
 - [GH#297](https://github.com/jolicode/automapper/pull/297) : Support PHP 8.5 and Symfony 8, this library now use the `TypeInfo` Component for types instead of PropertyInfo directly.
 - [BC Break] `PropertyTransformerSupportInterface` does not use a `TypesMatching` anymore, you can get the type directly from `SourcePropertyMetadata` or `TargetPropertyMetadata`.
 - Debug command now show the type of each property mapped, transformers will also display more information.
