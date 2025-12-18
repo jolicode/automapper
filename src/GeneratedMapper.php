@@ -22,6 +22,8 @@ abstract class GeneratedMapper implements MapperInterface
     final public function __construct(
         protected ContainerInterface $serviceLocator,
         protected ?ExpressionLanguageProvider $expressionLanguageProvider = null,
+        protected readonly ?ContainerInterface $transformCallableLocator = null,
+        protected readonly ?ContainerInterface $conditionCallableLocator = null,
     ) {
         $this->initialize();
     }

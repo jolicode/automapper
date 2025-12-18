@@ -17,6 +17,7 @@ use PhpParser\Parser;
 use PhpParser\ParserFactory;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
+use Symfony\Component\ObjectMapper\ConditionCallableInterface;
 use function AutoMapper\PhpParser\create_expr_array_item;
 use function AutoMapper\PhpParser\create_scalar_int;
 
@@ -247,10 +248,11 @@ final readonly class PropertyConditionsGenerator
 
         $callableName = null;
         $value = $metadata->variableRegistry->getSourceInput();
+        $input = null;
 
         // use read accessor
         if ($propertyMetadata->source->accessor !== null) {
-            $value = $propertyMetadata->source->accessor->getExpression($metadata->variableRegistry->getSourceInput());
+            $input = $propertyMetadata->source->accessor->getExpression($metadata->variableRegistry->getSourceInput());
         }
 
         if (\is_callable($propertyMetadata->if, false, $callableName)) {
@@ -263,7 +265,7 @@ final readonly class PropertyConditionsGenerator
                     return new Expr\FuncCall(
                         new Name($callableName),
                         [
-                            new Arg($value),
+                            new Arg($input ?? $value),
                         ]
                     );
                 }
@@ -276,7 +278,7 @@ final readonly class PropertyConditionsGenerator
             return new Expr\FuncCall(
                 new Name($callableName),
                 [
-                    new Arg($value),
+                    new Arg($input ?? $value),
                     new Arg(new Expr\Variable('context')),
                 ]
             );
@@ -290,7 +292,7 @@ final readonly class PropertyConditionsGenerator
                     new Name\FullyQualified($metadata->mapperMetadata->source),
                     $propertyMetadata->if,
                     [
-                        new Arg($value),
+                        new Arg($input ?? $value),
                         new Arg(new Expr\Variable('context')),
                     ]
                 );
@@ -300,6 +302,27 @@ final readonly class PropertyConditionsGenerator
                 $metadata->variableRegistry->getSourceInput(),
                 $propertyMetadata->if,
                 [
+                    new Arg($input ?? $value),
+                    new Arg(new Expr\Variable('context')),
+                ]
+            );
+        }
+
+        if (class_exists($propertyMetadata->if) && is_subclass_of($propertyMetadata->if, ConditionCallableInterface::class)) {
+            return new Expr\MethodCall(
+                new Expr\NullsafeMethodCall(
+                    new Expr\PropertyFetch(
+                        new Expr\Variable('this'),
+                        'conditionCallableLocator'
+                    ),
+                    'get',
+                    [
+                        new Arg(new Scalar\String_($propertyMetadata->if)),
+                    ]
+                ),
+                '__invoke',
+                [
+                    new Arg($input ?? $value),
                     new Arg($value),
                     new Arg(new Expr\Variable('context')),
                 ]

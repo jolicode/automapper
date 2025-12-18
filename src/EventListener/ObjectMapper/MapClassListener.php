@@ -9,10 +9,12 @@ use AutoMapper\Event\TargetPropertyMetadata;
 use AutoMapper\Exception\BadMapDefinitionException;
 use AutoMapper\Transformer\CallableTransformer;
 use AutoMapper\Transformer\ExpressionLanguageTransformer;
+use AutoMapper\Transformer\ServiceLocatorTransformer;
 use AutoMapper\Transformer\TransformerInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\ExpressionLanguage\SyntaxError;
 use Symfony\Component\ObjectMapper\Attribute\Map;
+use Symfony\Component\ObjectMapper\TransformCallableInterface;
 
 final readonly class MapClassListener
 {
@@ -24,7 +26,7 @@ final readonly class MapClassListener
     public function __invoke(GenerateMapperEvent $event): void
     {
         // only handle class to class mapping
-        if (!$event->mapperMetadata->sourceReflectionClass || !$event->mapperMetadata->targetReflectionClass) {
+        if (!$event->mapperMetadata->sourceReflectionClass && !$event->mapperMetadata->targetReflectionClass) {
             return;
         }
 
@@ -32,19 +34,21 @@ final readonly class MapClassListener
         $reflectionClass = null;
         $isSource = false;
 
-        foreach ($event->mapperMetadata->sourceReflectionClass->getAttributes(Map::class) as $sourceAttribute) {
-            /** @var Map $attribute */
-            $attribute = $sourceAttribute->newInstance();
+        if ($event->mapperMetadata->sourceReflectionClass) {
+            foreach ($event->mapperMetadata->sourceReflectionClass->getAttributes(Map::class) as $sourceAttribute) {
+                /** @var Map $attribute */
+                $attribute = $sourceAttribute->newInstance();
 
-            if (!$attribute->target || $attribute->target === $event->mapperMetadata->target) {
-                $mapAttribute = $attribute;
-                $reflectionClass = $event->mapperMetadata->sourceReflectionClass;
-                $isSource = true;
-                break;
+                if (!$attribute->target || $attribute->target === $event->mapperMetadata->target) {
+                    $mapAttribute = $attribute;
+                    $reflectionClass = $event->mapperMetadata->sourceReflectionClass;
+                    $isSource = true;
+                    break;
+                }
             }
         }
 
-        if (!$mapAttribute) {
+        if (!$mapAttribute && $event->mapperMetadata->targetReflectionClass) {
             foreach ($event->mapperMetadata->targetReflectionClass->getAttributes(Map::class) as $targetAttribute) {
                 /** @var Map $attribute */
                 $attribute = $targetAttribute->newInstance();
@@ -115,6 +119,8 @@ final readonly class MapClassListener
                 } else {
                     $transformer = new CallableTransformer($transformerCallable, $fromSource, !$fromSource);
                 }
+            } elseif (\is_string($transformerCallable) && class_exists($transformerCallable) && is_subclass_of($transformerCallable, TransformCallableInterface::class)) {
+                $transformer = new ServiceLocatorTransformer($transformerCallable);
             } elseif (\is_string($transformerCallable)) {
                 try {
                     $expression = $this->expressionLanguage->compile($transformerCallable, ['value' => 'source', 'context']);
