@@ -7,11 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.0.0] - 2026-01-01
+### Added
 - [GH#297](https://github.com/jolicode/automapper/pull/297) : Support PHP 8.5 and Symfony 8, this library now use the `TypeInfo` Component for types instead of PropertyInfo directly.
-- [BC Break] `PropertyTransformerSupportInterface` does not use a `TypesMatching` anymore, you can get the type directly from `SourcePropertyMetadata` or `TargetPropertyMetadata`.
 - Debug command now show the type of each property mapped, transformers will also display more information.
 - Profiler now show the type of each property mapped, transformers will also display more information.
 - Add a castor task to serve the symfony app in tests for debugging purpose.
+
+### Changed
+- [BC Break] `PropertyTransformerSupportInterface` does not use a `TypesMatching` anymore, you can get the type directly from `SourcePropertyMetadata` or `TargetPropertyMetadata`.
 
 ## [9.5.0] - 2025-09-18
 ### Added
@@ -428,7 +432,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * [AutoMapper] [GH#179](https://github.com/janephp/janephp/pull/179) Fixing incompatible changes in Symfony 5.0
 
-[Unreleased]: https://github.com/jolicode/automapper/compare/9.5.0...HEAD
+[Unreleased]: https://github.com/jolicode/automapper/compare/10.0.0...HEAD
+[10.0.0]: https://github.com/jolicode/automapper/compare/9.5.0...10.0.0
 [9.5.0]: https://github.com/janephp/janephp/compare/9.4.1...9.5.0
 [9.4.1]: https://github.com/janephp/janephp/compare/9.4.0...9.4.1
 [9.4.0]: https://github.com/janephp/janephp/compare/9.3.1...9.4.0
