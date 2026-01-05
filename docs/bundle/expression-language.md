@@ -11,7 +11,7 @@ The `env` function allow you to access the environment variables.
 ```php
 class Entity
 {
-    #[MapTo('array', if: "env('FEATURE_ENABLED')")]
+    #[MapTo(target: 'array', if: "env('FEATURE_ENABLED')")]
     public string $name;
 }
 ```

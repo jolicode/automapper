@@ -23,6 +23,8 @@ final readonly class MapFrom
      * @param string|null                                                                                              $dateTimeFormat         The date-time format to use when transforming this property
      * @param bool|null                                                                                                $extractTypesFromGetter If true, the types will be extracted from the getter method
      * @param bool|null                                                                                                $identifier             If true, the property will be used as an identifier
+     * @param Type|string|null                                                                                         $sourcePropertyType     Override the source property type, where this property is mapped from
+     * @param Type|string|null                                                                                         $targetPropertyType     Override the target property type, which in this case is the property type where the attribute is defined
      */
     public function __construct(
         public string|array|null $source = null,
@@ -36,8 +38,8 @@ final readonly class MapFrom
         public ?string $dateTimeFormat = null,
         public ?bool $extractTypesFromGetter = null,
         public ?bool $identifier = null,
-        public ?Type $sourceType = null,
-        public ?Type $targetType = null,
+        public string|Type|null $sourcePropertyType = null,
+        public string|Type|null $targetPropertyType = null,
     ) {
     }
 }

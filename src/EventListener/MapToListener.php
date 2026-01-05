@@ -69,8 +69,11 @@ final readonly class MapToListener extends MapListener
             return;
         }
 
-        $sourceProperty = new SourcePropertyMetadata($property, type: $mapTo->sourceType);
-        $targetProperty = new TargetPropertyMetadata($mapTo->property ?? $property, type: $mapTo->targetType);
+        $sourcePropertyType = \is_string($mapTo->sourcePropertyType) ? $this->stringTypeResolver->resolve($mapTo->sourcePropertyType) : $mapTo->sourcePropertyType;
+        $targetPropertyType = \is_string($mapTo->targetPropertyType) ? $this->stringTypeResolver->resolve($mapTo->targetPropertyType) : $mapTo->targetPropertyType;
+
+        $sourceProperty = new SourcePropertyMetadata($property, type: $sourcePropertyType);
+        $targetProperty = new TargetPropertyMetadata($mapTo->property ?? $property, type: $targetPropertyType);
 
         $propertyMetadata = new PropertyMetadataEvent(
             mapperMetadata: $event->mapperMetadata,
