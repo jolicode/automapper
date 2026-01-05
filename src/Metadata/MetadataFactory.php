@@ -16,6 +16,7 @@ use AutoMapper\EventListener\MapperListener;
 use AutoMapper\EventListener\MapProviderListener;
 use AutoMapper\EventListener\MapToContextListener;
 use AutoMapper\EventListener\MapToListener;
+use AutoMapper\EventListener\ObjectMapper\MapClassListener;
 use AutoMapper\EventListener\Symfony\ClassDiscriminatorListener;
 use AutoMapper\EventListener\Symfony\NameConverterListener;
 use AutoMapper\EventListener\Symfony\SerializerGroupListener;
@@ -51,6 +52,7 @@ use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 use Symfony\Component\PropertyInfo\Extractor\PhpStanExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
@@ -393,6 +395,10 @@ final class MetadataFactory
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapFromListener($customTransformerRegistry, $expressionLanguage));
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapperListener());
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapProviderListener());
+
+        if (interface_exists(ObjectMapperInterface::class)) {
+            $eventDispatcher->addListener(GenerateMapperEvent::class, new MapClassListener($expressionLanguage));
+        }
 
         // Create transformer factories
         $factories = [
