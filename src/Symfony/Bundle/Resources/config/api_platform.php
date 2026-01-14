@@ -9,6 +9,7 @@ use AutoMapper\EventListener\ApiPlatform\JsonLdListener;
 use AutoMapper\Provider\ApiPlatform\IriProvider;
 use AutoMapper\Transformer\ApiPlatform\JsonLdContextTransformer;
 use AutoMapper\Transformer\ApiPlatform\JsonLdIdTransformer;
+use AutoMapper\Transformer\ApiPlatform\JsonLdObjectToIdTransformerFactory;
 
 return static function (ContainerConfigurator $container) {
     $container->services()
@@ -36,5 +37,12 @@ return static function (ContainerConfigurator $container) {
                 service('api_platform.resource_class_resolver'),
             ])
             ->tag('automapper.provider', ['priority' => 0])
+
+        ->set(JsonLdObjectToIdTransformerFactory::class)
+            ->args([
+                service('api_platform.resource_class_resolver'),
+                service('serializer.mapping.class_metadata_factory'),
+            ])
+            ->tag('automapper.transformer_factory', ['priority' => -1003])
     ;
 };

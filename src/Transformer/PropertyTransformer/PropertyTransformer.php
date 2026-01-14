@@ -34,7 +34,7 @@ final readonly class PropertyTransformer implements TransformerInterface, AllowN
         $this->parser = $parser ?? (new ParserFactory())->createForHostVersion();
     }
 
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr $existingValue = null): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source, ?Expr $existingValue = null): array
     {
         $context = new Expr\Variable('context');
 

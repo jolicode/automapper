@@ -17,7 +17,7 @@ use PhpParser\Node\Expr;
  */
 final class CopyEnumTransformer implements TransformerInterface
 {
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr $existingValue = null): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source, ?Expr $existingValue = null): array
     {
         /* No transform here it's the same value and it's a copy so we do not need to clone */
         return [$input, []];

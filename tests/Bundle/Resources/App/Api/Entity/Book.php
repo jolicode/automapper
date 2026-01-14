@@ -9,6 +9,7 @@ use AutoMapper\Attribute\Mapper;
 use AutoMapper\Attribute\MapTo;
 use AutoMapper\Tests\Bundle\Resources\App\Api\Processor\BookProcessor;
 use AutoMapper\Tests\Bundle\Resources\App\Api\Provider\BookProvider;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 /** A book. */
 #[ApiResource(provider: BookProvider::class, processor: BookProcessor::class)]
@@ -25,6 +26,7 @@ class Book
     public string $description = '';
 
     /** The author of this book. */
+    #[Groups('group')]
     public string $author = '';
 
     /** The publication date of this book. */

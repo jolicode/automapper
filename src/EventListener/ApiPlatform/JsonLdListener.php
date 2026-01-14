@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\EventListener\ApiPlatform;
 
-use ApiPlatform\Api\ResourceClassResolverInterface as LegacyResourceClassResolverInterface;
 use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 use ApiPlatform\Metadata\ResourceClassResolverInterface;
@@ -21,7 +20,7 @@ use AutoMapper\Transformer\PropertyTransformer\PropertyTransformer;
 final readonly class JsonLdListener
 {
     public function __construct(
-        private ResourceClassResolverInterface|LegacyResourceClassResolverInterface $resourceClassResolver,
+        private ResourceClassResolverInterface $resourceClassResolver,
         private ResourceMetadataCollectionFactoryInterface $resourceMetadataCollectionFactory,
     ) {
     }

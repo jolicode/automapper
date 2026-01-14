@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer\ApiPlatform;
 
-use ApiPlatform\Api\IriConverterInterface as LegacyIriConverterInterface;
 use ApiPlatform\Metadata\IriConverterInterface;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 
 final readonly class JsonLdIdTransformer implements PropertyTransformerInterface
 {
     public function __construct(
-        private LegacyIriConverterInterface|IriConverterInterface $iriConverter,
+        private IriConverterInterface $iriConverter,
     ) {
     }
 

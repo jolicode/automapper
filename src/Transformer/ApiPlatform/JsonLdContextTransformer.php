@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer\ApiPlatform;
 
-use ApiPlatform\Api\ResourceClassResolverInterface as LegacyResourceClassResolverInterface;
 use ApiPlatform\JsonLd\AnonymousContextBuilderInterface;
 use ApiPlatform\JsonLd\ContextBuilderInterface;
 use ApiPlatform\Metadata\ResourceClassResolverInterface;
@@ -14,7 +13,7 @@ final readonly class JsonLdContextTransformer implements PropertyTransformerInte
 {
     public function __construct(
         private ContextBuilderInterface $contextBuilder,
-        private LegacyResourceClassResolverInterface|ResourceClassResolverInterface $resourceClassResolver,
+        private ResourceClassResolverInterface $resourceClassResolver,
     ) {
     }
 

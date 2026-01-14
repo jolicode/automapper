@@ -53,16 +53,16 @@ return static function (ContainerConfigurator $container) {
             ->tag('automapper.transformer_factory', ['priority' => -1002])
 
         ->set(ObjectTransformerFactory::class)
-            ->tag('automapper.transformer_factory', ['priority' => -1003])
-
-        ->set(EnumTransformerFactory::class)
             ->tag('automapper.transformer_factory', ['priority' => -1004])
 
-        ->set(MixedTransformerFactory::class)
+        ->set(EnumTransformerFactory::class)
             ->tag('automapper.transformer_factory', ['priority' => -1005])
 
-        ->set(CopyTransformerFactory::class)
+        ->set(MixedTransformerFactory::class)
             ->tag('automapper.transformer_factory', ['priority' => -1006])
+
+        ->set(CopyTransformerFactory::class)
+            ->tag('automapper.transformer_factory', ['priority' => -1007])
 
         ->set(SymfonyUidTransformerFactory::class)
     ;

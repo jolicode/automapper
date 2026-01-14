@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/castor-php/php-qa.git",
-                "reference": "fe2f69be9071622375ce42e8d7ae718ecf3194db"
+                "reference": "e07419eef665508df2fec960d920e74de82396b9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/castor-php/php-qa/zipball/fe2f69be9071622375ce42e8d7ae718ecf3194db",
-                "reference": "fe2f69be9071622375ce42e8d7ae718ecf3194db",
+                "url": "https://api.github.com/repos/castor-php/php-qa/zipball/e07419eef665508df2fec960d920e74de82396b9",
+                "reference": "e07419eef665508df2fec960d920e74de82396b9",
                 "shasum": ""
             },
             "require-dev": {
@@ -48,7 +48,7 @@
                 "issues": "https://github.com/castor-php/php-qa/issues",
                 "source": "https://github.com/castor-php/php-qa/tree/main"
             },
-            "time": "2025-11-28T14:04:27+00:00"
+            "time": "2026-01-07T11:06:34+00:00"
         }
     ],
     "packages-dev": [],

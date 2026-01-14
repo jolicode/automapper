@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - [BC Break] `PropertyTransformerSupportInterface` does not use a `TypesMatching` anymore, you can get the type directly from `SourcePropertyMetadata` or `TargetPropertyMetadata`.
 
+### Fixed
+ - [GH#303](https://github.com/jolicode/automapper/pull/302) Fix api platform not returning an iri when there is no property mapped.
+
 ## [9.5.0] - 2025-09-18
 ### Added
 - [GH#260](https://github.com/jolicode/automapper/pull/260) Add support for identifiers detection and comparison of objects, this allow mappers to detect if objects are equals based on some properties, which allow better deep merge / update of collections. 

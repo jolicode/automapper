@@ -30,7 +30,7 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
     ) {
     }
 
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr $existingValue = null): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source, ?Expr $existingValue = null): array
     {
         $mapperName = $this->getDependencyName();
 
@@ -80,7 +80,7 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
         ]), []];
     }
 
-    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): ?Expr
+    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source): ?Expr
     {
         if ($this->sourceType instanceof Type\ObjectType) {
             $condition = new Expr\Instanceof_($input, new Name\FullyQualified($this->sourceType->getClassName()));
