@@ -16,7 +16,7 @@ final readonly class CustomProvider implements ProviderInterface
     ) {
     }
 
-    public function provide(string $targetType, mixed $source, array $context): object|array|null
+    public function provide(string $targetType, mixed $source, array $context, mixed $id): object|array|null
     {
         return $this->value;
     }

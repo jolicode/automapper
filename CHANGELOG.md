@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - [BC Break] `PropertyTransformerSupportInterface` does not use a `TypesMatching` anymore, you can get the type directly from `SourcePropertyMetadata` or `TargetPropertyMetadata`.
+- [BC BREAK] `ProviderInterface::provide` method now receive also the identifiers of the object to provide.
 
 ### Fixed
  - [GH#303](https://github.com/jolicode/automapper/pull/302) Fix api platform not returning an iri when there is no property mapped.

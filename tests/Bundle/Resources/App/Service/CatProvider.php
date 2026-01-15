@@ -9,7 +9,7 @@ use AutoMapper\Tests\Bundle\Resources\App\Entity\Cat;
 
 class CatProvider implements ProviderInterface
 {
-    public function provide(string $targetType, mixed $source, array $context): object|array|null
+    public function provide(string $targetType, mixed $source, array $context, mixed $id): object|array|null
     {
         return new Cat();
     }
