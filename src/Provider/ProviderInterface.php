@@ -17,8 +17,9 @@ interface ProviderInterface
      * @param class-string<object>|'array' $targetType the target type
      * @param mixed                        $source     the source value)
      * @param MapperContextArray           $context    the context
+     * @param mixed                        $id         identifier to use to fetch the data from the source
      *
      * @return object|array<mixed>|null the value to provide
      */
-    public function provide(string $targetType, mixed $source, array $context, /* mixed $id */): object|array|null;
+    public function provide(string $targetType, mixed $source, array $context, mixed $id): object|array|null;
 }

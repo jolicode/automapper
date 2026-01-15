@@ -18,7 +18,7 @@ final readonly class IriProvider implements ProviderInterface
     ) {
     }
 
-    public function provide(string $targetType, mixed $source, array $context): object|array|null
+    public function provide(string $targetType, mixed $source, array $context, mixed $id): object|array|null
     {
         if (($context[MapperContext::NORMALIZER_FORMAT] ?? false) !== 'jsonld') {
             return null;
