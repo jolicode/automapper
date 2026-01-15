@@ -1,0 +1,5 @@
+AutoMapper\Tests\AutoMapperTest\ArraySourcePropertyType\Dto {
+  +age: [
+    10.0
+  ]
+}

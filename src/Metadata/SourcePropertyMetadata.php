@@ -38,6 +38,7 @@ final readonly class SourcePropertyMetadata
             $metadata->checkExists ?? false,
             $metadata->groups,
             $metadata->dateTimeFormat ?? \DateTimeInterface::RFC3339,
+            $metadata->type
         );
     }
 
