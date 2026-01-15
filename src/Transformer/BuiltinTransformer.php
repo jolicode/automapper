@@ -89,7 +89,7 @@ final readonly class BuiltinTransformer implements TransformerInterface, CheckTy
     ) {
     }
 
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr $existingValue = null): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source, ?Expr $existingValue = null): array
     {
         $targetTypes = [];
 
@@ -137,7 +137,7 @@ final readonly class BuiltinTransformer implements TransformerInterface, CheckTy
         return [$input, []];
     }
 
-    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): ?Expr
+    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source): ?Expr
     {
         if ($this->sourceType->getTypeIdentifier() === TypeIdentifier::NULL) {
             return null;

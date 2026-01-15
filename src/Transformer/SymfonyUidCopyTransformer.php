@@ -21,7 +21,7 @@ use Symfony\Component\Uid\Uuid;
  */
 final class SymfonyUidCopyTransformer implements TransformerInterface
 {
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr $existingValue = null): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source, ?Expr $existingValue = null): array
     {
         /*
          * Create a Symfony Uid object from another Symfony Uid object.

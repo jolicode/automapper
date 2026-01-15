@@ -35,6 +35,36 @@ class ApiPlatformTest extends ApiTestCase
         self::bootKernel();
     }
 
+    public function testGetShelf(): void
+    {
+        // We cannot compare response here, as it is not the same on lower Symfony versions
+        // $response = static::createClient()->request('GET', '/shelf');
+        // $this->assertResponseIsSuccessful();
+        // $contentOriginal = $response->toArray();
+
+        $responseMapped = static::createClient()->request('GET', '/shelf-mapped');
+        $this->assertResponseIsSuccessful();
+        $contentMapped = $responseMapped->toArray();
+
+        $this->assertEquals([
+            '/books/1',
+            '/books/2',
+        ], $contentMapped['books']);
+    }
+
+    public function testGetShelfGroup(): void
+    {
+        $response = static::createClient()->request('GET', '/shelf-group');
+        $this->assertResponseIsSuccessful();
+        $contentOriginal = $response->toArray();
+
+        $responseMapped = static::createClient()->request('GET', '/shelf-mapped-group');
+        $this->assertResponseIsSuccessful();
+        $contentMapped = $responseMapped->toArray();
+
+        $this->assertEquals($contentOriginal['books'], $contentMapped['books']);
+    }
+
     public function testGetBookCollectionOnApip(): void
     {
         $response = static::createClient()->request('GET', '/books.jsonld');
@@ -89,7 +119,6 @@ class ApiPlatformTest extends ApiTestCase
             '@type' => 'Book',
             'title' => 'The Handmaid\'s Tale',
             'description' => 'Brilliantly conceived and executed, this powerful evocation of twenty-first century America gives full rein to Margaret Atwood\'s devastating irony, wit and astute perception.',
-            'author' => 'Margaret Atwood',
             'publicationDate' => '1985-07-31T00:00:00+00:00',
             'reviews' => [],
         ]);

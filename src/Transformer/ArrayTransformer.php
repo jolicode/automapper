@@ -35,7 +35,7 @@ final readonly class ArrayTransformer extends AbstractArrayTransformer implement
         return new Expr\Assign(new Expr\ArrayDimFetch($valuesVar), $outputVar);
     }
 
-    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): ?Expr
+    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source): ?Expr
     {
         $isArrayCheck = new Expr\FuncCall(
             new Name('is_array'),

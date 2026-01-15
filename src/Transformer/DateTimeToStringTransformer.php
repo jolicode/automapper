@@ -26,7 +26,7 @@ final class DateTimeToStringTransformer implements TransformerInterface, CheckTy
     ) {
     }
 
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr $existingValue = null): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source, ?Expr $existingValue = null): array
     {
         /*
          * Format the date time object to a string.
@@ -43,7 +43,7 @@ final class DateTimeToStringTransformer implements TransformerInterface, CheckTy
         ]), []];
     }
 
-    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source): ?Expr
+    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source): ?Expr
     {
         return new Expr\Instanceof_($input, new FullyQualified(\DateTimeInterface::class));
     }

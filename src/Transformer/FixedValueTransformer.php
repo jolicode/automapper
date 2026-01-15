@@ -26,7 +26,7 @@ final readonly class FixedValueTransformer implements TransformerInterface, Allo
         $this->parser = $parser ?? (new ParserFactory())->createForHostVersion();
     }
 
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr $existingValue = null): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source, ?Expr $existingValue = null): array
     {
         $expr = $this->parser->parse('<?php ' . var_export($this->value, true) . ';')[0] ?? null;
 
