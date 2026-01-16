@@ -45,7 +45,7 @@
         "symfony/framework-bundle": "*",
         "symfony/http-client": "^6.4 || ^7.0",
         "symfony/http-kernel": "^6.4 || ^7.0",
-        "symfony/serializer": "*",
+        "symfony/serializer": "^6.4 || ^7.0",
         "symfony/stopwatch": "^6.4 || ^7.0",
         "symfony/twig-bundle": "^6.4 || ^7.0",
         "symfony/uid": "^6.4 || ^7.0",
