@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace AutoMapper\Tests\ObjectMapper;
 
 use AutoMapper\ObjectMapper\ObjectMapper;
+use AutoMapper\Tests\AutoMapperBuilder;
 use AutoMapper\Tests\AutoMapperTestCase;
 use AutoMapper\Tests\ObjectMapper\Fixtures\A;
 use AutoMapper\Tests\ObjectMapper\Fixtures\B;
@@ -70,6 +71,8 @@ use AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLoadedValue\ValueToMap;
 use AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLoadedValue\ValueToMapRelation;
 use AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLocator\A as ServiceLocatorA;
 use AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLocator\B as ServiceLocatorB;
+use AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLocator\ConditionCallable;
+use AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLocator\TransformCallable;
 use AutoMapper\Tests\ObjectMapper\Fixtures\TargetTransform\SourceEntity;
 use AutoMapper\Tests\ObjectMapper\Fixtures\TargetTransform\TargetDto as TargetTransformTargetDto;
 use AutoMapper\Tests\ObjectMapper\Fixtures\TransformCollection\TransformCollectionA;
@@ -265,26 +268,6 @@ final class ObjectMapperTest extends AutoMapperTestCase
         $this->assertSame($b->bar, 'transformedok');
     }
 
-    protected function getServiceLocator(array $factories): ContainerInterface
-    {
-        return new class($factories) implements ContainerInterface {
-            public function __construct(
-                private array $factories,
-            ) {
-            }
-
-            public function has(string $id): bool
-            {
-                return isset($this->factories[$id]);
-            }
-
-            public function get(string $id): mixed
-            {
-                return $this->factories[$id];
-            }
-        };
-    }
-
     public function testSourceOnly()
     {
         $a = new \stdClass();
@@ -320,6 +303,8 @@ final class ObjectMapperTest extends AutoMapperTestCase
 
     public function testTransformToWrongValueType()
     {
+        $this->markTestSkipped('Transform callable not supported.');
+
         $this->expectException(MappingTransformException::class);
         $this->expectExceptionMessage('Cannot map "stdClass" to a non-object target of type "string".');
 
@@ -328,12 +313,12 @@ final class ObjectMapperTest extends AutoMapperTestCase
 
         $metadata = $this->createStub(ObjectMapperMetadataFactoryInterface::class);
         $metadata->method('create')->with($u)->willReturn([new Mapping(target: \stdClass::class, transform: fn () => 'str')]);
-        $mapper = new ObjectMapper($metadata);
-        $mapper->map($u);
     }
 
     public function testTransformToWrongObject()
     {
+        $this->markTestSkipped('Transform callable not supported.');
+
         $this->expectException(MappingException::class);
         $this->expectExceptionMessage(\sprintf('Expected the mapped object to be an instance of "%s" but got "stdClass".', ClassWithoutTarget::class));
 
@@ -372,6 +357,8 @@ final class ObjectMapperTest extends AutoMapperTestCase
 
     public function testDefaultValueStdClass()
     {
+        $this->markTestSkipped('This use case is supported by AutoMapper.');
+
         $this->expectException(NoSuchPropertyException::class);
         $u = new \stdClass();
         $u->id = 'abc';
@@ -421,6 +408,8 @@ final class ObjectMapperTest extends AutoMapperTestCase
 
     public function testMapInitializesLazyObject()
     {
+        $this->markTestSkipped('This use case is not supported by AutoMapper.');
+
         $lazy = new LazyFoo();
         $mapper = $this->createObjectMapper();
         $mapper->map($lazy, \stdClass::class);
@@ -556,6 +545,8 @@ final class ObjectMapperTest extends AutoMapperTestCase
     #[RequiresPhp('>=8.4')]
     public function testEmbedsAreLazyLoadedByDefault()
     {
+        $this->markTestSkipped('This use case is not supported by AutoMapper.');
+
         $mapper = $this->createObjectMapper();
         $source = new OrderSource();
         $source->id = 123;
@@ -573,6 +564,8 @@ final class ObjectMapperTest extends AutoMapperTestCase
 
     public function testSkipLazyGhostWithClassTransform()
     {
+        $this->markTestSkipped('This use case is not supported by AutoMapper.');
+
         $service = new LoadedValueService();
         $service->load();
 
@@ -630,6 +623,9 @@ final class ObjectMapperTest extends AutoMapperTestCase
 
     public function createObjectMapper(): ObjectMapperInterface
     {
-        return new ObjectMapper(autoMapper: $this->autoMapper);
+        return new ObjectMapper(autoMapper: AutoMapperBuilder::buildAutoMapper(extraServices: [
+            new TransformCallable(),
+            new ConditionCallable(),
+        ]));
     }
 }

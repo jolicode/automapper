@@ -63,7 +63,7 @@ final readonly class ObjectMapper implements ObjectMapperInterface
     {
         $mapTo = null;
         foreach ($metadata as $mapAttribute) {
-            if (($if = $mapAttribute->if) && ($fn = $this->getCallable($if, $this->conditionCallableLocator)) && !$this->call($fn, $value, $source, $target)) {
+            if (($if = $mapAttribute->if) && ($fn = $this->getCallable($if)) && !$this->call($fn, $value, $source, $target)) {
                 continue;
             }
 

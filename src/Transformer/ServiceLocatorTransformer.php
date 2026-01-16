@@ -22,15 +22,15 @@ final class ServiceLocatorTransformer implements TransformerInterface
     ) {
     }
 
-    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr\Variable $source, ?Expr $existingValue = null): array
+    public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source, ?Expr $existingValue = null): array
     {
-        /** $this->transformCallableLocator?->get($serviceId)->__invoke($value, $source, $context) */
+        /** $this->serviceLocator?->get($serviceId)->__invoke($value, $source, $context) */
         return [
             new Expr\MethodCall(
                 new Expr\MethodCall(
                     new Expr\NullsafePropertyFetch(
                         new Expr\Variable('this'),
-                        'transformCallableLocator'
+                        'serviceLocator'
                     ),
                     'get',
                     [
@@ -41,7 +41,7 @@ final class ServiceLocatorTransformer implements TransformerInterface
                 [
                     new Arg($input),
                     new Arg($source),
-                    new Arg(new Expr\Variable('context')),
+                    new Arg(new Expr\Variable('result')),
                 ]
             ),
         ];

@@ -326,7 +326,7 @@ final readonly class PropertyConditionsGenerator
                 new Expr\NullsafeMethodCall(
                     new Expr\PropertyFetch(
                         new Expr\Variable('this'),
-                        'conditionCallableLocator'
+                        'serviceLocator'
                     ),
                     'get',
                     [
@@ -337,7 +337,7 @@ final readonly class PropertyConditionsGenerator
                 [
                     new Arg($input ?? $value),
                     new Arg($value),
-                    new Arg(new Expr\Variable('context')),
+                    new Arg(new Expr\Variable('result')),
                 ]
             );
         }

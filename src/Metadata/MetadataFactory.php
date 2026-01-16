@@ -16,7 +16,8 @@ use AutoMapper\EventListener\MapperListener;
 use AutoMapper\EventListener\MapProviderListener;
 use AutoMapper\EventListener\MapToContextListener;
 use AutoMapper\EventListener\MapToListener;
-use AutoMapper\EventListener\ObjectMapper\MapClassListener;
+use AutoMapper\EventListener\ObjectMapper\MapSourceListener;
+use AutoMapper\EventListener\ObjectMapper\MapTargetListener;
 use AutoMapper\EventListener\Symfony\ClassDiscriminatorListener;
 use AutoMapper\EventListener\Symfony\NameConverterListener;
 use AutoMapper\EventListener\Symfony\SerializerGroupListener;
@@ -402,7 +403,8 @@ final class MetadataFactory
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapProviderListener());
 
         if (interface_exists(ObjectMapperInterface::class)) {
-            $eventDispatcher->addListener(GenerateMapperEvent::class, new MapClassListener($expressionLanguage));
+            $eventDispatcher->addListener(GenerateMapperEvent::class, new MapSourceListener($expressionLanguage));
+            $eventDispatcher->addListener(GenerateMapperEvent::class, new MapTargetListener($expressionLanguage));
         }
 
         // Create transformer factories

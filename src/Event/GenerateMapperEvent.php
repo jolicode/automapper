@@ -6,11 +6,12 @@ namespace AutoMapper\Event;
 
 use AutoMapper\ConstructorStrategy;
 use AutoMapper\Metadata\MapperMetadata;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * @internal
  */
-final class GenerateMapperEvent
+final class GenerateMapperEvent extends Event
 {
     /**
      * @param PropertyMetadataEvent[] $properties A list of properties to add to this mapping
