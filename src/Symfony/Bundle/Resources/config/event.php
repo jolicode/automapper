@@ -12,7 +12,6 @@ use AutoMapper\EventListener\MapProviderListener;
 use AutoMapper\EventListener\MapToContextListener;
 use AutoMapper\EventListener\MapToListener;
 use AutoMapper\EventListener\Symfony\NameConverterListener;
-use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 
 return static function (ContainerConfigurator $container) {
@@ -21,10 +20,10 @@ return static function (ContainerConfigurator $container) {
             ->args([service('automapper.property_info.reflection_extractor')])
             ->tag('kernel.event_listener', ['event' => PropertyMetadataEvent::class, 'priority' => 64])
         ->set(MapToListener::class)
-            ->args([service(PropertyTransformerRegistry::class), service('automapper.expression_language')])
+            ->args([service('automapper.mapper_service_locator'), service('automapper.expression_language')])
             ->tag('kernel.event_listener', ['event' => GenerateMapperEvent::class, 'priority' => 64])
         ->set(MapFromListener::class)
-            ->args([service(PropertyTransformerRegistry::class), service('automapper.expression_language')])
+            ->args([service('automapper.mapper_service_locator'), service('automapper.expression_language')])
             ->tag('kernel.event_listener', ['event' => GenerateMapperEvent::class, 'priority' => 32])
         ->set(MapProviderListener::class)
             ->tag('kernel.event_listener', ['event' => GenerateMapperEvent::class, 'priority' => 128])

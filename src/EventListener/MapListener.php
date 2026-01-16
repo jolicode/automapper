@@ -11,8 +11,8 @@ use AutoMapper\Transformer\CallableTransformer;
 use AutoMapper\Transformer\ExpressionLanguageTransformer;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformer;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
-use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
 use AutoMapper\Transformer\TransformerInterface;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\ExpressionLanguage\SyntaxError;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
@@ -26,7 +26,7 @@ use Symfony\Component\TypeInfo\TypeResolver\StringTypeResolver;
 abstract readonly class MapListener
 {
     public function __construct(
-        private PropertyTransformerRegistry $propertyTransformerRegistry,
+        private ContainerInterface $serviceLocator,
         private ExpressionLanguage $expressionLanguage,
         private InflectorInterface $inflector = new EnglishInflector(),
         protected StringTypeResolver $stringTypeResolver = new StringTypeResolver(),
@@ -48,7 +48,7 @@ abstract readonly class MapListener
                 throw new BadMapDefinitionException('Closure transformer is not supported.');
             }
 
-            if (\is_string($transformerCallable) && ($customTransformer = $this->propertyTransformerRegistry->getPropertyTransformer($transformerCallable)) && $customTransformer instanceof PropertyTransformerInterface) {
+            if (\is_string($transformerCallable) && $this->serviceLocator->has($transformerCallable) && ($customTransformer = $this->serviceLocator->get($transformerCallable)) && $customTransformer instanceof PropertyTransformerInterface) {
                 $transformer = new PropertyTransformer($transformerCallable);
             } elseif (\is_callable($transformerCallable, false, $callableName)) {
                 $transformer = new CallableTransformer($callableName);

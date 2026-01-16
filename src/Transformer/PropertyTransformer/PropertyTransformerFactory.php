@@ -16,8 +16,12 @@ use AutoMapper\Transformer\TransformerInterface;
  */
 final class PropertyTransformerFactory implements PrioritizedTransformerFactoryInterface, TransformerFactoryInterface
 {
+    /** @var array<string, PropertyTransformerSupportInterface>|null */
+    private $prioritizedPropertyTransformers;
+
     public function __construct(
-        private readonly PropertyTransformerRegistry $propertyTransformerRegistry,
+        /** @var iterable<string, PropertyTransformerSupportInterface> */
+        private readonly iterable $propertyTransformersSupportList,
     ) {
     }
 
@@ -28,12 +32,34 @@ final class PropertyTransformerFactory implements PrioritizedTransformerFactoryI
 
     public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
-        $id = $this->propertyTransformerRegistry->getPropertyTransformersForMapper($source, $target, $mapperMetadata);
-
-        if (null === $id) {
-            return null;
+        foreach ($this->prioritizedPropertyTransformers() as $id => $propertyTransformer) {
+            if ($propertyTransformer instanceof PropertyTransformerSupportInterface && $propertyTransformer->supports($source, $target, $mapperMetadata)) {
+                return new PropertyTransformer($id);
+            }
         }
 
-        return new PropertyTransformer($id);
+        return null;
+    }
+
+    /**
+     * @return array<string, PropertyTransformerSupportInterface>
+     */
+    private function prioritizedPropertyTransformers(): array
+    {
+        if (null === $this->prioritizedPropertyTransformers) {
+            $this->prioritizedPropertyTransformers = iterator_to_array($this->propertyTransformersSupportList);
+
+            uasort(
+                $this->prioritizedPropertyTransformers,
+                static function (PropertyTransformerSupportInterface $a, PropertyTransformerSupportInterface $b): int {
+                    $aPriority = $a instanceof PrioritizedPropertyTransformerInterface ? $a->getPriority() : 0;
+                    $bPriority = $b instanceof PrioritizedPropertyTransformerInterface ? $b->getPriority() : 0;
+
+                    return $bPriority <=> $aPriority;
+                }
+            );
+        }
+
+        return $this->prioritizedPropertyTransformers;
     }
 }
