@@ -26,7 +26,7 @@ final class GeneratorMetadata
         public readonly ConstructorStrategy $constructorStrategy = ConstructorStrategy::AUTO,
         public readonly bool $allowReadOnlyTargetToPopulate = false,
         public readonly bool $strictTypes = false,
-        public readonly ?string $provider = null,
+        public readonly string|null $provider = null,
     ) {
         $this->variableRegistry = new VariableRegistry();
     }

@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+namespace AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLoadedValue;
+
+use Symfony\Component\ObjectMapper\Attribute\Map;
+
+#[Map(target: LoadedValue::class, transform: ServiceLoadedValueTransformer::class)]
+class ValueToMapRelation
+{
+    public function __construct(
+        public string $name,
+    ) {
+    }
+}

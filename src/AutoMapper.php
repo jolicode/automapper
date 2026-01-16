@@ -131,6 +131,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
     /**
      * @param ProviderInterface[]                                $providers
      * @param iterable<string|int, PropertyTransformerInterface> $propertyTransformers
+     * @param iterable<string|int, object>                       $extraMapperServices
      *
      * @return self
      */
@@ -143,6 +144,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
         iterable $providers = [],
         ?ObjectManager $objectManager = null,
+        iterable $extraMapperServices = [],
     ): AutoMapperInterface {
         if (class_exists(AttributeLoader::class)) {
             $loaderClass = new AttributeLoader();
@@ -191,6 +193,14 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
             if ($propertyTransformer instanceof PropertyTransformerSupportInterface) {
                 $propertyTransformersSupportList[$key] = $propertyTransformer;
             }
+        }
+
+        foreach ($extraMapperServices as $key => $mapperService) {
+            if (\is_int($key)) {
+                $key = $mapperService::class;
+            }
+
+            $serviceLocator->set($key, $mapperService);
         }
 
         $metadataRegistry = new MetadataRegistry($configuration);

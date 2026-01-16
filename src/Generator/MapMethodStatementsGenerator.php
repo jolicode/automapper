@@ -294,35 +294,64 @@ final readonly class MapMethodStatementsGenerator
         }
 
         $variableRegistry = $metadata->variableRegistry;
+        $statements = [];
+        $callableName = null;
+
+        if (\is_callable($metadata->provider, false, $callableName)) {
+            /*
+             * Get result from callable if available
+             *
+             * ```php
+             * $result ??= callable(Target::class, $value, $context, $this->getTargetIdentifiers($value));
+             * ```
+             */
+            $statements[] = new Stmt\Expression(
+                new Expr\AssignOp\Coalesce(
+                    $variableRegistry->getResult(),
+                    new Expr\FuncCall(
+                        new Name($callableName), [
+                            new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
+                            new Arg($variableRegistry->getSourceInput()),
+                            new Arg($variableRegistry->getContext()),
+                            new Arg(new Expr\MethodCall(new Expr\Variable('this'), 'getTargetIdentifiers', [
+                                new Arg(new Expr\Variable('value')),
+                            ])),
+                        ]),
+                )
+            );
+        } else {
+            /*
+             * Get result from provider if available
+             *
+             * ```php
+             * $result ??= $this->providerRegistry->getProvider($metadata->provider)->provide($source, $context);
+             * ```
+             */
+            $statements[] = new Stmt\Expression(
+                new Expr\AssignOp\Coalesce(
+                    $variableRegistry->getResult(),
+                    new Expr\MethodCall(new Expr\MethodCall(new Expr\PropertyFetch(new Expr\Variable('this'), 'serviceLocator'), 'get', [
+                        new Arg(new Scalar\String_($metadata->provider)),
+                    ]), 'provide', [
+                        new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
+                        new Arg($variableRegistry->getSourceInput()),
+                        new Arg($variableRegistry->getContext()),
+                        new Arg(new Expr\MethodCall(new Expr\Variable('this'), 'getTargetIdentifiers', [
+                            new Arg(new Expr\Variable('value')),
+                        ])),
+                    ]),
+                )
+            );
+        }
 
         /*
-         * Get result from provider if available
-         *
-         * ```php
-         * $result ??= $this->providerRegistry->getProvider($metadata->provider)->provide($source, $context);
+         * Return early if the result is an EarlyReturn instance
          *
          * if ($result instanceof EarlyReturn) {
          *     return $result->value;
          * }
          * ```
          */
-        $statements = [];
-        $statements[] = new Stmt\Expression(
-            new Expr\AssignOp\Coalesce(
-                $variableRegistry->getResult(),
-                new Expr\MethodCall(new Expr\MethodCall(new Expr\PropertyFetch(new Expr\Variable('this'), 'serviceLocator'), 'get', [
-                    new Arg(new Scalar\String_($metadata->provider)),
-                ]), 'provide', [
-                    new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
-                    new Arg($variableRegistry->getSourceInput()),
-                    new Arg($variableRegistry->getContext()),
-                    new Arg(new Expr\MethodCall(new Expr\Variable('this'), 'getTargetIdentifiers', [
-                        new Arg(new Expr\Variable('value')),
-                    ])),
-                ]),
-            )
-        );
-
         $statements[] = new Stmt\If_(
             new Expr\Instanceof_($variableRegistry->getResult(), new Name(EarlyReturn::class)),
             [
