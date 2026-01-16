@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper;
 
-use AutoMapper\Provider\ProviderRegistry;
 use AutoMapper\Symfony\ExpressionLanguageProvider;
-use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
+use Psr\Container\ContainerInterface;
 
 /**
  * Class derived for each generated mapper.
@@ -21,8 +20,7 @@ use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
 abstract class GeneratedMapper implements MapperInterface
 {
     final public function __construct(
-        protected PropertyTransformerRegistry $transformerRegistry,
-        protected ProviderRegistry $providerRegistry,
+        protected ContainerInterface $serviceLocator,
         protected ?ExpressionLanguageProvider $expressionLanguageProvider = null,
     ) {
         $this->initialize();

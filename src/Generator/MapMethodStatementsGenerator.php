@@ -310,7 +310,7 @@ final readonly class MapMethodStatementsGenerator
         $statements[] = new Stmt\Expression(
             new Expr\AssignOp\Coalesce(
                 $variableRegistry->getResult(),
-                new Expr\MethodCall(new Expr\MethodCall(new Expr\PropertyFetch(new Expr\Variable('this'), 'providerRegistry'), 'getProvider', [
+                new Expr\MethodCall(new Expr\MethodCall(new Expr\PropertyFetch(new Expr\Variable('this'), 'serviceLocator'), 'get', [
                     new Arg(new Scalar\String_($metadata->provider)),
                 ]), 'provide', [
                     new Arg(new Scalar\String_($metadata->mapperMetadata->target)),

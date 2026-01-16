@@ -19,6 +19,7 @@ use AutoMapper\Provider\ProviderInterface;
 use AutoMapper\Symfony\Bundle\CacheWarmup\CacheWarmer;
 use AutoMapper\Symfony\Bundle\ReflectionClassRecursiveIterator;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerSupportInterface;
 use AutoMapper\Transformer\SymfonyUidTransformerFactory;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\FileLocator;
@@ -56,7 +57,6 @@ class AutoMapperExtension extends Extension
         $loader->load('generator.php');
         $loader->load('metadata.php');
         $loader->load('property_info.php');
-        $loader->load('provider.php');
         $loader->load('symfony.php');
         $loader->load('transformers.php');
 
@@ -80,9 +80,10 @@ class AutoMapperExtension extends Extension
 
         $container->setParameter('automapper.map_private_properties', $config['map_private_properties']);
 
-        $container->registerForAutoconfiguration(PropertyTransformerInterface::class)->addTag('automapper.property_transformer');
+        $container->registerForAutoconfiguration(PropertyTransformerInterface::class)->addTag('automapper.mapper_service');
+        $container->registerForAutoconfiguration(ProviderInterface::class)->addTag('automapper.mapper_service');
 
-        $container->registerForAutoconfiguration(ProviderInterface::class)->addTag('automapper.provider');
+        $container->registerForAutoconfiguration(PropertyTransformerSupportInterface::class)->addTag('automapper.property_transformer_support');
 
         if ($config['loader']['eval']) {
             $container

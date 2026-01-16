@@ -51,7 +51,7 @@ final readonly class PropertyTransformer implements TransformerInterface, AllowN
 
         $statements = [];
         $transformExpr = new Expr\MethodCall(
-            new Expr\MethodCall(new Expr\PropertyFetch(new Expr\Variable('this'), 'transformerRegistry'), 'getPropertyTransformer', [
+            new Expr\MethodCall(new Expr\PropertyFetch(new Expr\Variable('this'), 'serviceLocator'), 'get', [
                 new Arg(new Scalar\String_($this->propertyTransformerId)),
             ]),
             'transform',

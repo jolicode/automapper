@@ -27,12 +27,12 @@ class AutoMapperWithCustomTransformerTest extends AutoMapperTestCase
 {
     public function testFromSourceCanUseCustomTransformer(): void
     {
-        $this->autoMapper = AutoMapperBuilder::buildAutoMapper(classPrefix: 'FromSourceCustomTransformer_', propertyTransformers: [
+        $autoMapper = AutoMapperBuilder::buildAutoMapper(classPrefix: 'FromSourceCustomTransformer_', propertyTransformers: [
             new FromSourceCustomModelTransformer(),
             new FromSourceCustomPropertyTransformer(),
         ]);
 
-        $mapped = $this->autoMapper->map(self::createUserDTO(), 'array');
+        $mapped = $autoMapper->map(self::createUserDTO(), 'array');
         self::assertSame(
             'name DTO set by custom property transformer',
             $mapped['name']

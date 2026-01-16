@@ -22,6 +22,6 @@ return static function (ContainerConfigurator $container) {
 
         ->set(DoctrineProvider::class)
             ->args([service('automapper.doctrine.object_manager')])
-            ->tag('automapper.provider', ['priority' => 0])
+            ->tag('automapper.mapper_service', ['priority' => 0])
     ;
 };

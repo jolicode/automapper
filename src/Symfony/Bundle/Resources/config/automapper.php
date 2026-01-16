@@ -14,9 +14,7 @@ use AutoMapper\Loader\EvalLoader;
 use AutoMapper\Loader\FileLoader;
 use AutoMapper\Loader\FileReloadStrategy;
 use AutoMapper\Metadata\MetadataFactory;
-use AutoMapper\Provider\ProviderRegistry;
 use AutoMapper\Symfony\ExpressionLanguageProvider;
-use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
 
@@ -25,9 +23,8 @@ return static function (ContainerConfigurator $container) {
         ->set(AutoMapper::class)
             ->args([
                 service(ClassLoaderInterface::class),
-                service(PropertyTransformerRegistry::class),
                 service('automapper.config_mapping_registry'),
-                service(ProviderRegistry::class),
+                service('automapper.mapper_service_locator'),
                 service(ExpressionLanguageProvider::class),
             ])
             ->alias(AutoMapperInterface::class, AutoMapper::class)->public()

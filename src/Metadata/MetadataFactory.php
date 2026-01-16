@@ -42,12 +42,13 @@ use AutoMapper\Transformer\NullableTargetTransformerFactory;
 use AutoMapper\Transformer\NullableTransformerFactory;
 use AutoMapper\Transformer\ObjectTransformerFactory;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerFactory;
-use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerSupportInterface;
 use AutoMapper\Transformer\SymfonyUidTransformerFactory;
 use AutoMapper\Transformer\TransformerFactoryInterface;
 use AutoMapper\Transformer\UniqueTypeTransformerFactory;
 use AutoMapper\Transformer\VoidTransformer;
 use Doctrine\Persistence\ObjectManager;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
@@ -345,9 +346,13 @@ final class MetadataFactory
         );
     }
 
+    /**
+     * @param iterable<string, PropertyTransformerSupportInterface> $propertyTransformersSupportList A list of property transformers that can be applied automatically based on property metadata
+     */
     public static function create(
         Configuration $configuration,
-        PropertyTransformerRegistry $customTransformerRegistry,
+        ContainerInterface $serviceLocator,
+        iterable $propertyTransformersSupportList,
         MetadataRegistry $metadataRegistry,
         ClassDiscriminatorResolver $classDiscriminatorResolver,
         ?ClassMetadataFactory $classMetadataFactory = null,
@@ -389,8 +394,8 @@ final class MetadataFactory
         }
 
         $eventDispatcher->addListener(PropertyMetadataEvent::class, new MapToContextListener($reflectionExtractor));
-        $eventDispatcher->addListener(GenerateMapperEvent::class, new MapToListener($customTransformerRegistry, $expressionLanguage));
-        $eventDispatcher->addListener(GenerateMapperEvent::class, new MapFromListener($customTransformerRegistry, $expressionLanguage));
+        $eventDispatcher->addListener(GenerateMapperEvent::class, new MapToListener($serviceLocator, $expressionLanguage));
+        $eventDispatcher->addListener(GenerateMapperEvent::class, new MapFromListener($serviceLocator, $expressionLanguage));
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapperListener());
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapProviderListener());
 
@@ -406,7 +411,7 @@ final class MetadataFactory
             new ArrayTransformerFactory(),
             new ObjectTransformerFactory(),
             new EnumTransformerFactory(),
-            new PropertyTransformerFactory($customTransformerRegistry),
+            new PropertyTransformerFactory($propertyTransformersSupportList),
             new MixedTransformerFactory(),
             new CopyTransformerFactory(),
         ];

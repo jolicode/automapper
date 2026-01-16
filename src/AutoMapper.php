@@ -14,11 +14,12 @@ use AutoMapper\Metadata\MetadataFactory;
 use AutoMapper\Metadata\MetadataRegistry;
 use AutoMapper\Provider\Doctrine\DoctrineProvider;
 use AutoMapper\Provider\ProviderInterface;
-use AutoMapper\Provider\ProviderRegistry;
 use AutoMapper\Symfony\ExpressionLanguageProvider;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
-use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerRegistry;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerSupportInterface;
 use Doctrine\Persistence\ObjectManager;
+use Psr\Container\ContainerInterface;
+use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
@@ -41,9 +42,8 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
 
     public function __construct(
         private readonly ClassLoaderInterface $classLoader,
-        private readonly PropertyTransformerRegistry $propertyTransformerRegistry,
         private readonly MetadataRegistry $metadataRegistry,
-        private readonly ProviderRegistry $providerRegistry,
+        private readonly ContainerInterface $serviceLocator,
         private readonly ?ExpressionLanguageProvider $expressionLanguageProvider = null,
     ) {
     }
@@ -73,8 +73,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
 
         /** @var GeneratedMapper<Source, Target>|GeneratedMapper<array<mixed>, Target>|GeneratedMapper<Source, array<mixed>> $mapper */
         $mapper = new $className(
-            $this->propertyTransformerRegistry,
-            $this->providerRegistry,
+            $this->serviceLocator,
             $this->expressionLanguageProvider,
         );
 
@@ -130,8 +129,8 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
     }
 
     /**
-     * @param ProviderInterface[]                            $providers
-     * @param iterable<string, PropertyTransformerInterface> $propertyTransformers
+     * @param ProviderInterface[]                                $providers
+     * @param iterable<string|int, PropertyTransformerInterface> $propertyTransformers
      *
      * @return self
      */
@@ -171,14 +170,36 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
             $providers[] = new DoctrineProvider($objectManager);
         }
 
-        $customTransformerRegistry = new PropertyTransformerRegistry($propertyTransformers);
+        $serviceLocator = new Container();
+        $propertyTransformersSupportList = [];
+
+        foreach ($providers as $key => $provider) {
+            if (\is_int($key)) {
+                $key = $provider::class;
+            }
+
+            $serviceLocator->set($key, $provider);
+        }
+
+        foreach ($propertyTransformers as $key => $propertyTransformer) {
+            if (\is_int($key)) {
+                $key = $propertyTransformer::class;
+            }
+
+            $serviceLocator->set($key, $propertyTransformer);
+
+            if ($propertyTransformer instanceof PropertyTransformerSupportInterface) {
+                $propertyTransformersSupportList[$key] = $propertyTransformer;
+            }
+        }
+
         $metadataRegistry = new MetadataRegistry($configuration);
-        $providerRegistry = new ProviderRegistry($providers);
         $classDiscriminatorResolver = new ClassDiscriminatorResolver($classDiscriminatorFromClassMetadata);
 
         $metadataFactory = MetadataFactory::create(
             $configuration,
-            $customTransformerRegistry,
+            $serviceLocator,
+            $propertyTransformersSupportList,
             $metadataRegistry,
             $classDiscriminatorResolver,
             $classMetadataFactory,
@@ -202,6 +223,6 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
             $loader = new FileLoader($mapperGenerator, $metadataFactory, $cacheDirectory, $lockFactory, $configuration->reloadStrategy);
         }
 
-        return new self($loader, $customTransformerRegistry, $metadataRegistry, $providerRegistry, $expressionLanguageProvider);
+        return new self($loader, $metadataRegistry, $serviceLocator, $expressionLanguageProvider);
     }
 }
