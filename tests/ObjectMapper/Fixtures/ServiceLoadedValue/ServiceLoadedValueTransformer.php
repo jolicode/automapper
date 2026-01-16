@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -19,15 +21,18 @@ use Symfony\Component\ObjectMapper\TransformCallableInterface;
  */
 class ServiceLoadedValueTransformer implements TransformCallableInterface
 {
-    public function __construct(private readonly LoadedValueService $serviceLoadedValue, private readonly ObjectMapperMetadataFactoryInterface $metadata)
-    {
+    public function __construct(
+        private readonly LoadedValueService $serviceLoadedValue,
+        private readonly ObjectMapperMetadataFactoryInterface $metadata,
+    ) {
     }
 
     public function __invoke(mixed $value, object $source, ?object $target): mixed
     {
         $metadata = $this->metadata->create($value);
-        \assert(count($metadata) === 1);
+        \assert(\count($metadata) === 1);
         \assert($metadata[0]->target === LoadedValue::class);
+
         return $this->serviceLoadedValue->get();
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -11,18 +13,8 @@
 
 namespace AutoMapper\Tests\ObjectMapper;
 
-use AutoMapper\Tests\AutoMapperTestCase;
-use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\RequiresPhp;
-use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
-use Symfony\Component\ObjectMapper\Exception\MappingException;
-use Symfony\Component\ObjectMapper\Exception\MappingTransformException;
-use Symfony\Component\ObjectMapper\Exception\NoSuchPropertyException;
-use Symfony\Component\ObjectMapper\Metadata\Mapping;
-use Symfony\Component\ObjectMapper\Metadata\ObjectMapperMetadataFactoryInterface;
-use Symfony\Component\ObjectMapper\Metadata\ReflectionObjectMapperMetadataFactory;
 use AutoMapper\ObjectMapper\ObjectMapper;
+use AutoMapper\Tests\AutoMapperTestCase;
 use AutoMapper\Tests\ObjectMapper\Fixtures\A;
 use AutoMapper\Tests\ObjectMapper\Fixtures\B;
 use AutoMapper\Tests\ObjectMapper\Fixtures\C;
@@ -53,10 +45,6 @@ use AutoMapper\Tests\ObjectMapper\Fixtures\InstanceCallback\B as InstanceCallbac
 use AutoMapper\Tests\ObjectMapper\Fixtures\InstanceCallbackWithArguments\A as InstanceCallbackWithArgumentsA;
 use AutoMapper\Tests\ObjectMapper\Fixtures\InstanceCallbackWithArguments\B as InstanceCallbackWithArgumentsB;
 use AutoMapper\Tests\ObjectMapper\Fixtures\LazyFoo;
-use AutoMapper\Tests\ObjectMapper\Fixtures\MapStruct\AToBMapper;
-use AutoMapper\Tests\ObjectMapper\Fixtures\MapStruct\MapStructMapperMetadataFactory;
-use AutoMapper\Tests\ObjectMapper\Fixtures\MapStruct\Source;
-use AutoMapper\Tests\ObjectMapper\Fixtures\MapStruct\Target;
 use AutoMapper\Tests\ObjectMapper\Fixtures\MapTargetToSource\A as MapTargetToSourceA;
 use AutoMapper\Tests\ObjectMapper\Fixtures\MapTargetToSource\B as MapTargetToSourceB;
 use AutoMapper\Tests\ObjectMapper\Fixtures\MultipleTargetProperty\A as MultipleTargetPropertyA;
@@ -88,6 +76,15 @@ use AutoMapper\Tests\ObjectMapper\Fixtures\TransformCollection\TransformCollecti
 use AutoMapper\Tests\ObjectMapper\Fixtures\TransformCollection\TransformCollectionB;
 use AutoMapper\Tests\ObjectMapper\Fixtures\TransformCollection\TransformCollectionC;
 use AutoMapper\Tests\ObjectMapper\Fixtures\TransformCollection\TransformCollectionD;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RequiresPhp;
+use Psr\Container\ContainerInterface;
+use Symfony\Component\ObjectMapper\Exception\MappingException;
+use Symfony\Component\ObjectMapper\Exception\MappingTransformException;
+use Symfony\Component\ObjectMapper\Exception\NoSuchPropertyException;
+use Symfony\Component\ObjectMapper\Metadata\Mapping;
+use Symfony\Component\ObjectMapper\Metadata\ObjectMapperMetadataFactoryInterface;
+use Symfony\Component\ObjectMapper\Metadata\ReflectionObjectMapperMetadataFactory;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
@@ -120,7 +117,7 @@ final class ObjectMapperTest extends AutoMapperTestCase
         $b = new B('test');
         $b->transform = 'TEST';
         $b->baz = 'me';
-        $b->nomap = true;
+        $b->nomap = false;
         $b->concat = 'shouldtestme';
         $b->relation = $d;
         $b->relationNotMapped = $d;
@@ -143,21 +140,21 @@ final class ObjectMapperTest extends AutoMapperTestCase
     {
         $this->expectException(MappingException::class);
         $this->expectExceptionMessage('Mapping target not found for source "class@anonymous".');
-        ($this->createObjectMapper())->map(new class {});
+        $this->createObjectMapper()->map(new class {});
     }
 
     public function testHasNothingToMapToWithNamedClass()
     {
         $this->expectException(MappingException::class);
         $this->expectExceptionMessage(\sprintf('Mapping target not found for source "%s".', ClassWithoutTarget::class));
-        ($this->createObjectMapper())->map(new ClassWithoutTarget());
+        $this->createObjectMapper()->map(new ClassWithoutTarget());
     }
 
     public function testTargetNotFound()
     {
         $this->expectException(MappingException::class);
         $this->expectExceptionMessage(\sprintf('Mapping target class "InexistantClass" does not exist for source "%s".', ClassWithoutTarget::class));
-        ($this->createObjectMapper())->map(new ClassWithoutTarget(), 'InexistantClass');
+        $this->createObjectMapper()->map(new ClassWithoutTarget(), 'InexistantClass');
     }
 
     public function testRecursion()
@@ -271,8 +268,9 @@ final class ObjectMapperTest extends AutoMapperTestCase
     protected function getServiceLocator(array $factories): ContainerInterface
     {
         return new class($factories) implements ContainerInterface {
-            public function __construct(private array $factories)
-            {
+            public function __construct(
+                private array $factories,
+            ) {
             }
 
             public function has(string $id): bool
@@ -455,8 +453,9 @@ final class ObjectMapperTest extends AutoMapperTestCase
     {
         $mapper = $this->createObjectMapper();
         $myMapper = new class($mapper) implements ObjectMapperInterface {
-            public function __construct(private ObjectMapperInterface $mapper)
-            {
+            public function __construct(
+                private ObjectMapperInterface $mapper,
+            ) {
                 $this->mapper = $mapper->withObjectMapper($this);
             }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -17,7 +19,7 @@ use AutoMapper\Tests\ObjectMapper\Fixtures\MapStruct\Map;
 class Source
 {
     public function __construct(
-        public int    $number,
+        public int $number,
         public string $name,
     ) {
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -16,7 +18,8 @@ use Symfony\Component\ObjectMapper\Attribute\Map;
 #[Map(source: A::class)]
 class B
 {
-    public function __construct(#[Map(source: 'source')] public string $target)
-    {
+    public function __construct(
+        #[Map(source: 'source')] public string $target,
+    ) {
     }
 }

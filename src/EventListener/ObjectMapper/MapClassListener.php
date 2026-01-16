@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\EventListener\ObjectMapper;
 
 use AutoMapper\Event\GenerateMapperEvent;
@@ -73,15 +75,22 @@ final readonly class MapClassListener
                 /** @var Map $attribute */
                 $attribute = $propertyAttribute->newInstance();
                 $propertyMetadata = new PropertyMetadataEvent(
-                /**
-                 * public ?string $if = null,// @TODO
-                 */
+                    /*
+                     * public ?string $if = null,// @TODO
+                     */
                     $event->mapperMetadata,
                     new SourcePropertyMetadata($isSource ? $property->getName() : ($attribute->source ?? $property->getName())),
                     new TargetPropertyMetadata($isSource ? ($attribute->target ?? $property->getName()) : $property->getName()),
                     transformer: $this->getTransformerFromMapAttribute($reflectionClass->getName(), $attribute, $isSource),
-                    if: $attribute->if,
                 );
+
+                $ifCallableName = null;
+
+                if ($attribute->if && is_callable($attribute->if, false, $ifCallableName)) {
+                    $propertyMetadata->if = $ifCallableName;
+                } elseif (is_string($attribute->if)) {
+                    $propertyMetadata->if = $attribute->if;
+                }
 
                 $properties[] = $propertyMetadata;
             }
@@ -90,7 +99,11 @@ final readonly class MapClassListener
         $event->properties = $properties;
 
         if ($mapAttribute->transform) {
-            $event->provider = $mapAttribute->transform;
+            $callableName = null;
+
+            if (is_callable($mapAttribute->transform, false, $callableName)) {
+                $event->provider = $callableName;
+            }
         }
     }
 

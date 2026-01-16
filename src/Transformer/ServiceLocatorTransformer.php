@@ -27,16 +27,16 @@ final class ServiceLocatorTransformer implements TransformerInterface
         /** $this->transformCallableLocator?->get($serviceId)->__invoke($value, $source, $context) */
         return [
             new Expr\MethodCall(
-            new Expr\MethodCall(
-                new Expr\NullsafePropertyFetch(
-                    new Expr\Variable('this'),
-                    'transformCallableLocator'
+                new Expr\MethodCall(
+                    new Expr\NullsafePropertyFetch(
+                        new Expr\Variable('this'),
+                        'transformCallableLocator'
+                    ),
+                    'get',
+                    [
+                        new Arg(new Scalar\String_($this->serviceId)),
+                    ]
                 ),
-                'get',
-                [
-                    new Arg(new Scalar\String_($this->serviceId)),
-                ]
-            ),
                 '__invoke',
                 [
                     new Arg($input),

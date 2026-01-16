@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\Tests\ObjectMapper\Fixtures\EmbeddedMapping;
 
 class User

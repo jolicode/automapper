@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -17,8 +19,9 @@ use Symfony\Component\ObjectMapper\Attribute\Map;
 #[Map(target: C::class, if: [A::class, 'shouldMapToC'])]
 class A
 {
-    public function __construct(public readonly string $foo = 'bar')
-    {
+    public function __construct(
+        public readonly string $foo = 'bar',
+    ) {
     }
 
     public static function shouldMapToB(mixed $value, object $object): bool

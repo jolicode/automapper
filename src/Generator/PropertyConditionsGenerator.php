@@ -16,8 +16,8 @@ use PhpParser\Node\Stmt;
 use PhpParser\Parser;
 use PhpParser\ParserFactory;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
-
 use Symfony\Component\ObjectMapper\ConditionCallableInterface;
+
 use function AutoMapper\PhpParser\create_expr_array_item;
 use function AutoMapper\PhpParser\create_scalar_int;
 
@@ -265,12 +265,22 @@ final readonly class PropertyConditionsGenerator
                     return new Expr\FuncCall(
                         new Name($callableName),
                         [
-                            new Arg($input ?? $value),
+                            new Arg($value),
                         ]
                     );
                 }
 
-                if ($argumentsCount > 2) {
+                if ($argumentsCount === 2) {
+                    return new Expr\FuncCall(
+                        new Name($callableName),
+                        [
+                            new Arg($value),
+                            new Arg(new Expr\Variable('context')),
+                        ]
+                    );
+                }
+
+                if ($argumentsCount > 3) {
                     throw new CompileException('Callable condition must have 1 or 2 arguments required, but it has ' . $argumentsCount);
                 }
             }
@@ -278,7 +288,8 @@ final readonly class PropertyConditionsGenerator
             return new Expr\FuncCall(
                 new Name($callableName),
                 [
-                    new Arg($input ?? $value),
+                    new Arg($value),
+                    new Arg($input),
                     new Arg(new Expr\Variable('context')),
                 ]
             );
@@ -292,7 +303,8 @@ final readonly class PropertyConditionsGenerator
                     new Name\FullyQualified($metadata->mapperMetadata->source),
                     $propertyMetadata->if,
                     [
-                        new Arg($input ?? $value),
+                        new Arg($value),
+                        new Arg($input),
                         new Arg(new Expr\Variable('context')),
                     ]
                 );
@@ -302,7 +314,8 @@ final readonly class PropertyConditionsGenerator
                 $metadata->variableRegistry->getSourceInput(),
                 $propertyMetadata->if,
                 [
-                    new Arg($input ?? $value),
+                    // pass null as value if there is no read accessor
+                    new Arg($input ?? new Name('null')),
                     new Arg(new Expr\Variable('context')),
                 ]
             );

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -22,8 +24,9 @@ use Symfony\Component\ObjectMapper\ObjectMapperInterface;
  */
 final class MapStructMapperMetadataFactory implements ObjectMapperMetadataFactoryInterface
 {
-    public function __construct(private readonly string $mapper)
-    {
+    public function __construct(
+        private readonly string $mapper,
+    ) {
         if (!is_a($mapper, ObjectMapperInterface::class, true)) {
             throw new \RuntimeException(\sprintf('Mapper should implement "%s".', ObjectMapperInterface::class));
         }

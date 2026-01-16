@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -16,8 +18,9 @@ use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 #[Map(source: Source::class, target: Target::class)]
 class AToBMapper implements ObjectMapperInterface
 {
-    public function __construct(private readonly ObjectMapperInterface $objectMapper)
-    {
+    public function __construct(
+        private readonly ObjectMapperInterface $objectMapper,
+    ) {
     }
 
     #[Map(source: 'propertyA', target: 'propertyD')]

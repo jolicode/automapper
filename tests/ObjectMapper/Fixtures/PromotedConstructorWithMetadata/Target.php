@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -19,7 +21,7 @@ class Target
          * happened earlier already.
          */
         public string $notOnSourceButRequired,
-        public int    $number,
+        public int $number,
         public string $name,
     ) {
     }

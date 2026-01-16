@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -43,6 +45,6 @@ class A
 
     public static function concatFn($v, $object): string
     {
-        return $v.$object->foo.$object->baz;
+        return $v . $object->foo . $object->baz;
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -13,8 +15,9 @@ namespace AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLoadedValue;
 
 class LoadedValueService
 {
-    public function __construct(private ?LoadedValue $value = null)
-    {
+    public function __construct(
+        private ?LoadedValue $value = null,
+    ) {
     }
 
     public function load(): void

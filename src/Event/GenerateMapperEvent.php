@@ -18,7 +18,7 @@ final class GenerateMapperEvent
     public function __construct(
         public readonly MapperMetadata $mapperMetadata,
         public array $properties = [],
-        public null|string|array $provider = null,
+        public string|null $provider = null,
         public ?bool $checkAttributes = null,
         public ?ConstructorStrategy $constructorStrategy = null,
         public ?bool $allowReadOnlyTargetToPopulate = null,

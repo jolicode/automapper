@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -13,7 +15,9 @@ namespace AutoMapper\Tests\ObjectMapper\Fixtures;
 
 class D
 {
-    public function __construct(public string $baz, public string $bat)
-    {
+    public function __construct(
+        public string $baz,
+        public string $bat,
+    ) {
     }
 }

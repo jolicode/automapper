@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AutoMapper\ObjectMapper;
 
 use AutoMapper\AutoMapper;
@@ -19,8 +21,7 @@ final readonly class ObjectMapper implements ObjectMapperInterface
         private ObjectMapperMetadataFactoryInterface $metadataFactory = new ReflectionObjectMapperMetadataFactory(),
         ?AutoMapperInterface $autoMapper = null,
         private ?ContainerInterface $conditionCallableLocator = null,
-    )
-    {
+    ) {
         $this->autoMapper = $autoMapper ?? AutoMapper::create();
     }
 
@@ -33,7 +34,7 @@ final readonly class ObjectMapper implements ObjectMapperInterface
         }
 
         if (!$target) {
-            throw new MappingException(sprintf('Mapping target not found for source "%s".', get_debug_type($source)));
+            throw new MappingException(\sprintf('Mapping target not found for source "%s".', get_debug_type($source)));
         }
 
         if (\is_string($target) && !class_exists($target)) {

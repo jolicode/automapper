@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator;
 
-use AutoMapper\Exception\CompileException;
 use AutoMapper\Exception\ReadOnlyTargetException;
 use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
 use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
@@ -296,14 +295,9 @@ final readonly class MapMethodStatementsGenerator
 
         $variableRegistry = $metadata->variableRegistry;
         $statements = [];
+        $callableName = null;
 
-        if (is_array($metadata->provider) || is_callable($metadata->provider)) {
-            $callableName = null;
-
-            if (!is_callable($metadata->provider, false, $callableName)) {
-                return [];
-            }
-
+        if (\is_callable($metadata->provider, false, $callableName)) {
             /*
              * Get result from callable if available
              *
@@ -316,17 +310,16 @@ final readonly class MapMethodStatementsGenerator
                     $variableRegistry->getResult(),
                     new Expr\FuncCall(
                         new Name($callableName), [
-                        new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
-                        new Arg($variableRegistry->getSourceInput()),
-                        new Arg($variableRegistry->getContext()),
-                        new Arg(new Expr\MethodCall(new Expr\Variable('this'), 'getTargetIdentifiers', [
-                            new Arg(new Expr\Variable('value')),
-                        ])),
-                    ]),
+                            new Arg(new Scalar\String_($metadata->mapperMetadata->target)),
+                            new Arg($variableRegistry->getSourceInput()),
+                            new Arg($variableRegistry->getContext()),
+                            new Arg(new Expr\MethodCall(new Expr\Variable('this'), 'getTargetIdentifiers', [
+                                new Arg(new Expr\Variable('value')),
+                            ])),
+                        ]),
                 )
             );
         } else {
-
             /*
              * Get result from provider if available
              *

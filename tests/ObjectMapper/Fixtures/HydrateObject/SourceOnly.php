@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -17,7 +19,7 @@ class SourceOnly
 {
     public function __construct(
         #[Map(source: 'name')] public string $mappedName,
-        #[Map(if: false)] public ?string $mappedDescription = null
+        #[Map(if: false)] public ?string $mappedDescription = null,
     ) {
     }
 }

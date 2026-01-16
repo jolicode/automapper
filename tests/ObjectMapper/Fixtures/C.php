@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -16,7 +18,9 @@ use Symfony\Component\ObjectMapper\Attribute\Map;
 #[Map(D::class)]
 class C
 {
-    public function __construct(#[Map('baz')] public readonly string $foo, #[Map('bat')] public readonly string $bar)
-    {
+    public function __construct(
+        #[Map('baz')] public readonly string $foo,
+        #[Map('bat')] public readonly string $bar,
+    ) {
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -13,8 +15,10 @@ namespace AutoMapper\Tests\ObjectMapper\Fixtures\Flatten;
 
 readonly class UserProfile
 {
-    public function __construct(public string $firstName, public string $lastName)
-    {
+    public function __construct(
+        public string $firstName,
+        public string $lastName,
+    ) {
     }
 
     public static function getFirstName($v, $object)

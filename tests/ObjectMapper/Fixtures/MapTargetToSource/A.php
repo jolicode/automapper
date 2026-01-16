@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -13,7 +15,8 @@ namespace AutoMapper\Tests\ObjectMapper\Fixtures\MapTargetToSource;
 
 class A
 {
-    public function __construct(public string $source)
-    {
+    public function __construct(
+        public string $source,
+    ) {
     }
 }
