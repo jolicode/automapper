@@ -6,11 +6,13 @@ namespace AutoMapper\EventListener;
 
 use AutoMapper\Attribute\MapFrom;
 use AutoMapper\Attribute\MapTo;
+use AutoMapper\AttributeReference\Reference;
 use AutoMapper\Exception\BadMapDefinitionException;
 use AutoMapper\Transformer\CallableTransformer;
 use AutoMapper\Transformer\ExpressionLanguageTransformer;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformer;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
+use AutoMapper\Transformer\ReferenceTransformer;
 use AutoMapper\Transformer\TransformerInterface;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
@@ -33,7 +35,7 @@ abstract readonly class MapListener
     ) {
     }
 
-    protected function getTransformerFromMapAttribute(string $class, MapTo|MapFrom $attribute, bool $fromSource = true): ?TransformerInterface
+    protected function getTransformerFromMapAttribute(string $class, MapTo|MapFrom $attribute, Reference $reference, bool $fromSource = true): ?TransformerInterface
     {
         $transformer = null;
 
@@ -42,13 +44,8 @@ abstract readonly class MapListener
             $transformerCallable = $attribute->transformer;
 
             if ($transformerCallable instanceof \Closure) {
-                // This is not supported because we cannot generate code from a closure
-                // However this should never be possible since attributes does not allow to pass a closure
-                // Let's keep this check for future proof
-                throw new BadMapDefinitionException('Closure transformer is not supported.');
-            }
-
-            if (\is_string($transformerCallable) && $this->serviceLocator->has($transformerCallable) && ($customTransformer = $this->serviceLocator->get($transformerCallable)) && $customTransformer instanceof PropertyTransformerInterface) {
+                $transformer = new ReferenceTransformer($reference);
+            } elseif (\is_string($transformerCallable) && $this->serviceLocator->has($transformerCallable) && ($customTransformer = $this->serviceLocator->get($transformerCallable)) && $customTransformer instanceof PropertyTransformerInterface) {
                 $transformer = new PropertyTransformer($transformerCallable);
             } elseif (\is_callable($transformerCallable, false, $callableName)) {
                 $transformer = new CallableTransformer($callableName);

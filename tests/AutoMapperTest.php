@@ -30,6 +30,7 @@ use AutoMapper\Tests\Fixtures\ConstructorWithDefaultValuesAsObjects;
 use AutoMapper\Tests\Fixtures\Dog;
 use AutoMapper\Tests\Fixtures\Fish;
 use AutoMapper\Tests\Fixtures\FooGenerator;
+use AutoMapper\Tests\Fixtures\FooTransformerStaticCallable;
 use AutoMapper\Tests\Fixtures\HasDateTime;
 use AutoMapper\Tests\Fixtures\HasDateTimeImmutable;
 use AutoMapper\Tests\Fixtures\HasDateTimeImmutableWithNullValue;
@@ -1310,6 +1311,20 @@ class AutoMapperTest extends AutoMapperTestCase
         self::assertCount(1, $categoryDTO->posts);
         self::assertEquals('Example', $categoryDTO->posts[0]->name);
         self::assertEquals($categoryDTO, $categoryDTO->posts[0]->category);
+    }
+
+    public function testStaticCallable(): void
+    {
+        if (version_compare(PHP_VERSION, '8.5.0', '<')) {
+            $this->markTestSkipped('Static callables are supported since PHP 8.5.');
+        }
+
+        $foo = new FooTransformerStaticCallable();
+        $foo->foo = 'foo';
+
+        $array = $this->autoMapper->map($foo, 'array');
+
+        self::assertSame(['foo' => 'bar'], $array);
     }
 
     public static function provideAutoMapperFixturesTests(): iterable
