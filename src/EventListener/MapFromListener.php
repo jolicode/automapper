@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace AutoMapper\EventListener;
 
 use AutoMapper\Attribute\MapFrom;
+use AutoMapper\Attribute\MapTo;
+use AutoMapper\AttributeReference\Reference;
 use AutoMapper\Event\GenerateMapperEvent;
 use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\Event\SourcePropertyMetadata;
@@ -32,10 +34,9 @@ final readonly class MapFromListener extends MapListener
                 continue;
             }
 
-            foreach ($mapFromAttributes as $mapFromAttribute) {
+            foreach ($mapFromAttributes as $index => $mapFromAttribute) {
                 /** @var MapFrom $mapFromAttributeInstance */
                 $mapFromAttributeInstance = $mapFromAttribute->newInstance();
-                $property = null;
 
                 if ($reflectionClassOrPropertyOrMethod instanceof \ReflectionClass) {
                     if ($mapFromAttributeInstance->property === null) {
@@ -47,20 +48,25 @@ final readonly class MapFromListener extends MapListener
                     }
 
                     $property = $mapFromAttributeInstance->property;
+                    $reference = new Reference(MapTo::class, $index, $reflectionClassOrPropertyOrMethod->getName());
                 } elseif ($reflectionClassOrPropertyOrMethod instanceof \ReflectionMethod) {
                     $property = $this->getPropertyName($reflectionClassOrPropertyOrMethod->getName(), $properties);
+                    $reference = new Reference(MapTo::class, $index, $reflectionClassOrPropertyOrMethod->getDeclaringClass()->getName(), methodName: $reflectionClassOrPropertyOrMethod->getName());
+                } else {
+                    $property = $reflectionClassOrPropertyOrMethod->getName();
+                    $reference = new Reference(MapTo::class, $index, $reflectionClassOrPropertyOrMethod->getDeclaringClass()->getName(), propertyName: $reflectionClassOrPropertyOrMethod->getName());
                 }
 
                 if (null === $property) {
                     $property = $reflectionClassOrPropertyOrMethod->getName();
                 }
 
-                $this->addPropertyFromTarget($event, $mapFromAttributeInstance, $property);
+                $this->addPropertyFromTarget($event, $mapFromAttributeInstance, $property, $reference);
             }
         }
     }
 
-    private function addPropertyFromTarget(GenerateMapperEvent $event, MapFrom $mapFrom, string $property): void
+    private function addPropertyFromTarget(GenerateMapperEvent $event, MapFrom $mapFrom, string $property, Reference $reference): void
     {
         $sources = null === $mapFrom->source ? null : (\is_array($mapFrom->source) ? $mapFrom->source : [$mapFrom->source]);
 
@@ -79,7 +85,7 @@ final readonly class MapFromListener extends MapListener
             source: $sourceProperty,
             target: $targetProperty,
             maxDepth: $mapFrom->maxDepth,
-            transformer: $this->getTransformerFromMapAttribute($event->mapperMetadata->target, $mapFrom, false),
+            transformer: $this->getTransformerFromMapAttribute($event->mapperMetadata->target, $mapFrom, $reference, false),
             dateTimeFormat: $mapFrom->dateTimeFormat,
             ignored: $mapFrom->ignore,
             ignoreReason: $mapFrom->ignore === true ? 'Property is ignored by MapFrom Attribute on Target' : null,
