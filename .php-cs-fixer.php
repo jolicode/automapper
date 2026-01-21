@@ -5,6 +5,7 @@ $finder = (new PhpCsFixer\Finder())
     ->in(__DIR__ . '/tests')
     ->append([__DIR__ . '/castor.php'])
     ->exclude(['cache', 'Bundle/Resources/var', 'Bundle/Resources/config'])
+    ->notName('FooTransformerStaticCallable.php')
 ;
 
 return (new PhpCsFixer\Config())
@@ -25,7 +26,7 @@ return (new PhpCsFixer\Config())
         'function_declaration' => ['trailing_comma_single_line' => true],
         'phpdoc_to_comment' => ['allow_before_return_statement' => true],
         'psr_autoloading'  => false, // Does not work well with "map.php" files in tests
-        PhpCsFixerCustomFixers\Fixer\MultilinePromotedPropertiesFixer::name() => true,
+        'multiline_promoted_properties' => true,
     ])
     ->setFinder($finder)
 ;
