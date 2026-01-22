@@ -30,6 +30,7 @@ use AutoMapper\Tests\Fixtures\ConstructorWithDefaultValuesAsObjects;
 use AutoMapper\Tests\Fixtures\Dog;
 use AutoMapper\Tests\Fixtures\Fish;
 use AutoMapper\Tests\Fixtures\FooGenerator;
+use AutoMapper\Tests\Fixtures\FooTransformerObjectCallable;
 use AutoMapper\Tests\Fixtures\FooTransformerStaticCallable;
 use AutoMapper\Tests\Fixtures\HasDateTime;
 use AutoMapper\Tests\Fixtures\HasDateTimeImmutable;
@@ -1386,6 +1387,16 @@ class AutoMapperTest extends AutoMapperTestCase
         $array = $this->autoMapper->map($foo, 'array');
 
         self::assertSame(['foo' => 'bar'], $array);
+    }
+
+    public function testObjectInvokableCallable(): void
+    {
+        $foo = new FooTransformerObjectCallable();
+        $foo->foo = 'foo';
+
+        $array = $this->autoMapper->map($foo, 'array');
+
+        self::assertSame(['foo' => 'test'], $array);
     }
 
     public static function provideAutoMapperFixturesTests(): iterable

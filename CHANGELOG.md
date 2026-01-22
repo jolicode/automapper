@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#304](https://github.com/jolicode/automapper/pull/304) ; Allow to override source and/or target property type 
 - Add support for static callable in attribute transformer 
 - Initial support for nested properties
+- Add support for object invokable transformer in attribute transformer
 
 ### Changed
 - [BC Break] `PropertyTransformerSupportInterface` does not use a `TypesMatching` anymore, you can get the type directly from `SourcePropertyMetadata` or `TargetPropertyMetadata`.

@@ -47,8 +47,10 @@ abstract readonly class MapListener
                 $transformer = new ReferenceTransformer($reference);
             } elseif (\is_string($transformerCallable) && $this->serviceLocator->has($transformerCallable) && ($customTransformer = $this->serviceLocator->get($transformerCallable)) && $customTransformer instanceof PropertyTransformerInterface) {
                 $transformer = new PropertyTransformer($transformerCallable);
-            } elseif (\is_callable($transformerCallable, false, $callableName)) {
+            } elseif (!\is_object($transformerCallable) && \is_callable($transformerCallable, false, $callableName)) {
                 $transformer = new CallableTransformer($callableName);
+            } elseif (\is_object($transformerCallable) && \is_callable($transformerCallable)) {
+                $transformer = new ReferenceTransformer($reference);
             } elseif (\is_string($transformerCallable) && method_exists($class, $transformerCallable)) {
                 $reflMethod = new \ReflectionMethod($class, $transformerCallable);
 
