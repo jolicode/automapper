@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Event;
 
 use AutoMapper\Extractor\ReadAccessor;
-use AutoMapper\Extractor\WriteMutator;
+use AutoMapper\Extractor\WriteMutatorInterface;
 use Symfony\Component\TypeInfo\Type;
 
 /**
@@ -25,7 +25,7 @@ final class TargetPropertyMetadata
         public string $property,
         public ?array $types = null,
         public ?ReadAccessor $readAccessor = null,
-        public ?WriteMutator $writeMutator = null,
+        public ?WriteMutatorInterface $writeMutator = null,
         public ?string $parameterInConstructor = null,
         public bool $extractGroupsIfNull = true,
         public ?array $groups = null,

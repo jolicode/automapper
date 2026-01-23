@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
-use AutoMapper\Extractor\WriteMutator;
 use AutoMapper\Generator\UniqueVariableScope;
 use AutoMapper\MapperContext;
 use AutoMapper\Metadata\PropertyMetadata;
@@ -53,7 +52,7 @@ abstract readonly class AbstractArrayTransformer implements \Stringable, Transfo
 
         $itemStatements = array_merge($itemStatements, $transformStatements);
 
-        if (null === $propertyMapping->target->parameterInConstructor && $propertyMapping->target->writeMutator && $propertyMapping->target->writeMutator->type === WriteMutator::TYPE_ADDER_AND_REMOVER) {
+        if (null === $propertyMapping->target->parameterInConstructor && $propertyMapping->target->writeMutator?->isAdderRemover()) {
             /**
              * Use add and remove methods.
              *

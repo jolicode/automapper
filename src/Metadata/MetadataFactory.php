@@ -21,10 +21,10 @@ use AutoMapper\EventListener\Symfony\NameConverterListener;
 use AutoMapper\EventListener\Symfony\SerializerGroupListener;
 use AutoMapper\EventListener\Symfony\SerializerIgnoreListener;
 use AutoMapper\EventListener\Symfony\SerializerMaxDepthListener;
+use AutoMapper\Extractor\ConstructorWriteMutator;
 use AutoMapper\Extractor\FromSourceMappingExtractor;
 use AutoMapper\Extractor\FromTargetMappingExtractor;
 use AutoMapper\Extractor\SourceTargetMappingExtractor;
-use AutoMapper\Extractor\WriteMutator;
 use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
 use AutoMapper\Transformer\AllowNullValueTransformerInterface;
 use AutoMapper\Transformer\ArrayTransformerFactory;
@@ -267,7 +267,7 @@ final class MetadataFactory
                     'enable_constructor_extraction' => true,
                 ]);
 
-                if ($mutator !== null && $mutator->type === WriteMutator::TYPE_CONSTRUCTOR && $mutator->parameter !== null) {
+                if ($mutator instanceof ConstructorWriteMutator) {
                     $propertyMappedEvent->target->parameterInConstructor = $mutator->parameter->getName();
                 }
             }

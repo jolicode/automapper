@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer\PropertyTransformer;
 
-use AutoMapper\Extractor\WriteMutator;
 use AutoMapper\Generator\UniqueVariableScope;
 use AutoMapper\Metadata\PropertyMetadata;
 use AutoMapper\Transformer\AllowNullValueTransformerInterface;
@@ -70,7 +69,7 @@ final readonly class PropertyTransformer implements TransformerInterface, AllowN
          *     $target->add($value);
          * }
          */
-        if ($propertyMapping->target->writeMutator && $propertyMapping->target->writeMutator->type === WriteMutator::TYPE_ADDER_AND_REMOVER) {
+        if ($propertyMapping->target->writeMutator?->isAdderRemover()) {
             $mappedValueVar = new Expr\Variable($uniqueVariableScope->getUniqueName('mappedValue'));
 
             $statements[] = new Stmt\Expression(new Expr\Assign(

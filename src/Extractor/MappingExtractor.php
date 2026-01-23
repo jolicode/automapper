@@ -112,25 +112,25 @@ abstract class MappingExtractor implements MappingExtractorInterface
         );
     }
 
-    public function getWriteMutator(string $source, string $target, string $property, array $context = [], bool $allowExtraProperties = false): ?WriteMutator
+    public function getWriteMutator(string $source, string $target, string $property, array $context = [], bool $allowExtraProperties = false): ?WriteMutatorInterface
     {
         $writeInfo = $this->writeInfoExtractor->getWriteInfo($target, $property, $context);
         $removeMethodName = null;
 
         if (null === $writeInfo || PropertyWriteInfo::TYPE_NONE === $writeInfo->getType()) {
             if ('array' === $target) {
-                return new WriteMutator(WriteMutator::TYPE_ARRAY_DIMENSION, $property, false);
+                return new ArrayWriteMutator($property);
             }
 
             if (\stdClass::class === $target) {
-                return new WriteMutator(WriteMutator::TYPE_PROPERTY, $property, false);
+                return new PropertyWriteMutator($property, false);
             }
 
             if ($allowExtraProperties) {
                 $implements = class_implements($target);
 
                 if ($implements !== false && \in_array(\ArrayAccess::class, $implements, true)) {
-                    return new WriteMutator(WriteMutator::TYPE_ARRAY_DIMENSION, $property, false);
+                    return new ArrayWriteMutator($property);
                 }
             }
 
@@ -140,28 +140,18 @@ abstract class MappingExtractor implements MappingExtractorInterface
         if (PropertyWriteInfo::TYPE_CONSTRUCTOR === $writeInfo->getType()) {
             $parameter = new \ReflectionParameter([$target, '__construct'], $writeInfo->getName());
 
-            return new WriteMutator(WriteMutator::TYPE_CONSTRUCTOR, $writeInfo->getName(), false, $parameter);
+            return new ConstructorWriteMutator($parameter);
         }
 
-        $type = WriteMutator::TYPE_PROPERTY;
-
         if (PropertyWriteInfo::TYPE_METHOD === $writeInfo->getType()) {
-            $type = WriteMutator::TYPE_METHOD;
+            return new MethodWriteMutator($writeInfo->getName());
         }
 
         if (PropertyWriteInfo::TYPE_ADDER_AND_REMOVER === $writeInfo->getType()) {
-            $type = WriteMutator::TYPE_ADDER_AND_REMOVER;
-            $removeMethodName = $writeInfo->getRemoverInfo()->getName();
-            $writeInfo = $writeInfo->getAdderInfo();
+            return new AddRemoveWriteMutator($writeInfo->getAdderInfo()->getName(), $writeInfo->getRemoverInfo()->getName());
         }
 
-        return new WriteMutator(
-            $type,
-            $writeInfo->getName(),
-            PropertyReadInfo::VISIBILITY_PUBLIC !== $writeInfo->getVisibility(),
-            null,
-            $removeMethodName,
-        );
+        return new PropertyWriteMutator($writeInfo->getName(), PropertyReadInfo::VISIBILITY_PUBLIC !== $writeInfo->getVisibility());
     }
 
     public function getCheckExists(string $class, string $property): bool

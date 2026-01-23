@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
-use AutoMapper\Extractor\WriteMutator;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
@@ -56,7 +55,7 @@ final class DoctrineCollectionTransformerFactory implements TransformerFactoryIn
                 $subItemTransformer->deepTargetToPopulate = false;
             }
 
-            if ($target->writeMutator?->type === WriteMutator::TYPE_ADDER_AND_REMOVER) {
+            if ($target->writeMutator?->isAdderRemover()) {
                 return new ArrayTransformer($subItemTransformer);
             }
 

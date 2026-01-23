@@ -54,5 +54,5 @@ interface MappingExtractorInterface
      *
      * @param array<string, mixed> $context
      */
-    public function getWriteMutator(string $source, string $target, string $property, array $context = []): ?WriteMutator;
+    public function getWriteMutator(string $source, string $target, string $property, array $context = []): ?WriteMutatorInterface;
 }
