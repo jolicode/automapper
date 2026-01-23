@@ -46,12 +46,16 @@ interface MappingExtractorInterface
 
     /**
      * Extracts read accessor for a given source, target and property.
+     *
+     * @param class-string|'array' $class
      */
     public function getReadAccessor(string $class, string $property): ?ReadAccessorInterface;
 
     /**
      * Extracts write mutator for a given source, target and property.
      *
+     * @param class-string|'array' $source
+     * @param class-string|'array' $target
      * @param array<string, mixed> $context
      */
     public function getWriteMutator(string $source, string $target, string $property, array $context = []): ?WriteMutatorInterface;

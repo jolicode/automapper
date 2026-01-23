@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\AutoMapperTest\Nested;
 
+use AutoMapper\Attribute\MapFrom;
 use AutoMapper\Attribute\MapTo;
 use AutoMapper\Tests\AutoMapperBuilder;
 
 class UserDto
 {
     public function __construct(
-        #[MapTo(User::class, property: 'address.zipcode')]
+        #[MapTo(property: 'address.zipcode')]
+        #[MapFrom(property: 'address.zipcode')]
         public string $userAddressZipcode,
-        #[MapTo(User::class, property: 'address.city')]
+        #[MapTo(property: 'address.city')]
+        #[MapFrom(property: 'address.city')]
         public string $userAddressCity,
         public string $name,
     ) {
@@ -36,10 +39,23 @@ class Address
     public string $city;
 }
 
-$dto = new UserDto(
-    userAddressZipcode: '12345',
-    userAddressCity: 'Test City',
-    name: 'John Doe'
-);
+return (function () {
+    $autoMapper = AutoMapperBuilder::buildAutoMapper();
+    $dto = new UserDto(
+        userAddressZipcode: '12345',
+        userAddressCity: 'Test City',
+        name: 'John Doe'
+    );
 
-return AutoMapperBuilder::buildAutoMapper()->map($dto, User::class);
+    $user = $autoMapper->map($dto, User::class);
+
+    yield 'to-nested' => $user;
+
+    yield 'from-nested' => $autoMapper->map($user, UserDto::class);
+
+    $arrayNested = $autoMapper->map($dto, 'array');
+
+    yield 'to-nested-array' => $arrayNested;
+
+    yield 'from-nested-array' => $autoMapper->map($arrayNested, UserDto::class);
+})();

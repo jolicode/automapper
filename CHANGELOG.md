@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add a castor task to serve the symfony app in tests for debugging purpose.
 - [GH#304](https://github.com/jolicode/automapper/pull/304) ; Allow to override source and/or target property type 
 - Add support for static callable in attribute transformer 
+- Initial support for nested properties
 
 ### Changed
 - [BC Break] `PropertyTransformerSupportInterface` does not use a `TypesMatching` anymore, you can get the type directly from `SourcePropertyMetadata` or `TargetPropertyMetadata`.
