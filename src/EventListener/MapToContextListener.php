@@ -6,7 +6,7 @@ namespace AutoMapper\EventListener;
 
 use AutoMapper\Attribute\MapToContext;
 use AutoMapper\Event\PropertyMetadataEvent;
-use AutoMapper\Extractor\ReadAccessor;
+use AutoMapper\Extractor\MethodReadAccessor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyReadInfo;
 use Symfony\Component\PropertyInfo\PropertyReadInfoExtractorInterface;
@@ -67,12 +67,11 @@ final readonly class MapToContextListener
             return;
         }
 
-        $event->source->accessor = new ReadAccessor(
-            ReadAccessor::TYPE_METHOD,
+        $event->source->accessor = new MethodReadAccessor(
+            $event->source->property,
             $readInfo->getName(),
             $event->mapperMetadata->source,
             PropertyReadInfo::VISIBILITY_PUBLIC !== $readInfo->getVisibility(),
-            $event->source->property,
             $contextParameters
         );
     }

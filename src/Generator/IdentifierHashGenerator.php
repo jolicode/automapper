@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator;
 
-use AutoMapper\Extractor\ReadAccessor;
+use AutoMapper\Extractor\ReadAccessorInterface;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Transformer\IdentifierHashInterface;
 use PhpParser\Builder;
@@ -199,7 +199,7 @@ final readonly class IdentifierHashGenerator
 
         // foreach property we check
         foreach ($identifiers as $property) {
-            /** @var ReadAccessor $accessor */
+            /** @var ReadAccessorInterface $accessor */
             $accessor = $property->source->accessor;
 
             // check if the source is defined

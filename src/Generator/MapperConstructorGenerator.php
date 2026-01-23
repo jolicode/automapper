@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator;
 
-use AutoMapper\Extractor\ReadAccessor;
+use AutoMapper\Extractor\PropertyReadAccessor;
 use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\PropertyMetadata;
@@ -127,7 +127,7 @@ final readonly class MapperConstructorGenerator
 
         return new Stmt\Expression(
             new Expr\Assign(
-                new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), ReadAccessor::EXTRACT_TARGET_CALLBACK), new Scalar\String_($propertyMetadata->target->property)),
+                new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), PropertyReadAccessor::EXTRACT_TARGET_CALLBACK), new Scalar\String_($propertyMetadata->target->property)),
                 $extractCallback
             ));
     }
@@ -149,7 +149,7 @@ final readonly class MapperConstructorGenerator
 
         return new Stmt\Expression(
             new Expr\Assign(
-                new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), ReadAccessor::EXTRACT_TARGET_IS_NULL_CALLBACK), new Scalar\String_($propertyMetadata->target->property)),
+                new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), PropertyReadAccessor::EXTRACT_TARGET_IS_NULL_CALLBACK), new Scalar\String_($propertyMetadata->target->property)),
                 $extractNullCallback
             ));
     }
@@ -171,7 +171,7 @@ final readonly class MapperConstructorGenerator
 
         return new Stmt\Expression(
             new Expr\Assign(
-                new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), ReadAccessor::EXTRACT_TARGET_IS_UNDEFINED_CALLBACK), new Scalar\String_($propertyMetadata->target->property)),
+                new Expr\ArrayDimFetch(new Expr\PropertyFetch(new Expr\Variable('this'), PropertyReadAccessor::EXTRACT_TARGET_IS_UNDEFINED_CALLBACK), new Scalar\String_($propertyMetadata->target->property)),
                 $extractUndefinedCallback
             ));
     }

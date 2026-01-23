@@ -73,14 +73,14 @@ abstract class MappingExtractor implements MappingExtractorInterface
         }
     }
 
-    public function getReadAccessor(string $class, string $property, bool $allowExtraProperties = false): ?ReadAccessor
+    public function getReadAccessor(string $class, string $property, bool $allowExtraProperties = false): ?ReadAccessorInterface
     {
         if ('array' === $class) {
-            return new ReadAccessor(ReadAccessor::TYPE_ARRAY_DIMENSION, $property);
+            return new ArrayReadAccessor($property);
         }
 
         if (\stdClass::class === $class) {
-            return new ReadAccessor(ReadAccessor::TYPE_PROPERTY, $property);
+            return new PropertyReadAccessor($property);
         }
 
         $readInfo = $this->readInfoExtractor->getReadInfo($class, $property);
@@ -90,32 +90,26 @@ abstract class MappingExtractor implements MappingExtractorInterface
                 $implements = class_implements($class);
 
                 if ($implements !== false && \in_array(\ArrayAccess::class, $implements, true)) {
-                    return new ReadAccessor(ReadAccessor::TYPE_ARRAY_ACCESS, $property);
+                    return new ArrayReadAccessor($property, true);
                 }
             }
 
             return null;
         }
 
-        $type = ReadAccessor::TYPE_PROPERTY;
-
         if (PropertyReadInfo::TYPE_METHOD === $readInfo->getType()) {
-            $type = ReadAccessor::TYPE_METHOD;
+            return new MethodReadAccessor($property, $readInfo->getName(), $class, PropertyReadInfo::VISIBILITY_PUBLIC !== $readInfo->getVisibility());
         }
 
-        return new ReadAccessor(
-            $type,
+        return new PropertyReadAccessor(
             $readInfo->getName(),
-            $class,
             PropertyReadInfo::VISIBILITY_PUBLIC !== $readInfo->getVisibility(),
-            $property
         );
     }
 
     public function getWriteMutator(string $source, string $target, string $property, array $context = [], bool $allowExtraProperties = false): ?WriteMutatorInterface
     {
         $writeInfo = $this->writeInfoExtractor->getWriteInfo($target, $property, $context);
-        $removeMethodName = null;
 
         if (null === $writeInfo || PropertyWriteInfo::TYPE_NONE === $writeInfo->getType()) {
             if ('array' === $target) {

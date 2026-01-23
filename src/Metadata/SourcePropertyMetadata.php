@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Metadata;
 
 use AutoMapper\Event\SourcePropertyMetadata as SourcePropertyMetadataEvent;
-use AutoMapper\Extractor\ReadAccessor;
+use AutoMapper\Extractor\ReadAccessorInterface;
 use Symfony\Component\TypeInfo\Type;
 
 /**
@@ -22,7 +22,7 @@ final readonly class SourcePropertyMetadata
      */
     public function __construct(
         public string $property,
-        public ?ReadAccessor $accessor = null,
+        public ?ReadAccessorInterface $accessor = null,
         public bool $checkExists = false,
         public ?array $groups = null,
         public string $dateTimeFormat = \DateTimeInterface::RFC3339,
