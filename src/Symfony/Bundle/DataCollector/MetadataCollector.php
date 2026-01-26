@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\Symfony\Bundle\DataCollector;
 
-use AutoMapper\Extractor\WriteMutator;
 use AutoMapper\Generator\UniqueVariableScope;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\MetadataFactory;
@@ -71,7 +70,7 @@ class MetadataCollector extends AbstractDataCollector
                             new Expr\Variable('source')
                         );
 
-                        if ($property->target->writeMutator && $property->target->writeMutator->type !== WriteMutator::TYPE_ADDER_AND_REMOVER) {
+                        if ($property->target->writeMutator?->isAdderRemover()) {
                             $propStatements[] = new Stmt\Expression($property->target->writeMutator->getExpression(
                                 new Expr\Variable('target'),
                                 $output,

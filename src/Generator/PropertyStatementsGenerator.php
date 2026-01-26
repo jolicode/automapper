@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\Generator;
 
-use AutoMapper\Extractor\WriteMutator;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\PropertyMetadata;
 use AutoMapper\Transformer\AllowNullValueTransformerInterface;
@@ -52,7 +51,7 @@ final readonly class PropertyStatementsGenerator
             $variableRegistry->getSourceInput()
         );
 
-        if ($propertyMetadata->target->writeMutator && $propertyMetadata->target->writeMutator->type !== WriteMutator::TYPE_ADDER_AND_REMOVER) {
+        if ($propertyMetadata->target->writeMutator && !$propertyMetadata->target->writeMutator->isAdderRemover()) {
             /** Create expression to write the transformed value to the target only if not add / remove mutator, as it's already called by the transformer in this case */
             $writeExpression = $propertyMetadata->target->writeMutator->getExpression(
                 $variableRegistry->getResult(),

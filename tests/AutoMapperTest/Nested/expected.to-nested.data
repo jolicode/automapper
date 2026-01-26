@@ -1,0 +1,7 @@
+AutoMapper\Tests\AutoMapperTest\Nested\User {
+  +name: "John Doe"
+  +address: AutoMapper\Tests\AutoMapperTest\Nested\Address {
+    +zipcode: "12345"
+    +city: "Test City"
+  }
+}

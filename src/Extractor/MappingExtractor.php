@@ -12,6 +12,8 @@ use Symfony\Component\PropertyInfo\PropertyReadInfoExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyWriteInfo;
 use Symfony\Component\PropertyInfo\PropertyWriteInfoExtractorInterface;
+use Symfony\Component\TypeInfo\Type;
+use Symfony\Component\TypeInfo\TypeIdentifier;
 
 /**
  * @internal
@@ -73,95 +75,85 @@ abstract class MappingExtractor implements MappingExtractorInterface
         }
     }
 
-    public function getReadAccessor(string $class, string $property, bool $allowExtraProperties = false): ?ReadAccessor
+    public function getReadAccessor(string $class, string $property, bool $allowExtraProperties = false): ?ReadAccessorInterface
     {
+        // split to first dot for nested properties
+        $exploded = explode('.', $property, 2);
+
+        if (2 === \count($exploded)) {
+            [$parent, $child] = $exploded;
+        } else {
+            return $this->doGetReadAccessor($class, $property, $allowExtraProperties);
+        }
+
         if ('array' === $class) {
-            return new ReadAccessor(ReadAccessor::TYPE_ARRAY_DIMENSION, $property);
+            $type = Type::array();
+        } elseif (\stdClass::class === $class) {
+            $type = Type::object(\stdClass::class);
+        } else {
+            $type = $this->sourceTypeExtractor->getType($class, $parent);
         }
 
-        if (\stdClass::class === $class) {
-            return new ReadAccessor(ReadAccessor::TYPE_PROPERTY, $property);
-        }
+        $parentAccessor = $this->doGetReadAccessor($class, $parent, $allowExtraProperties);
 
-        $readInfo = $this->readInfoExtractor->getReadInfo($class, $property);
-
-        if (null === $readInfo) {
-            if ($allowExtraProperties) {
-                $implements = class_implements($class);
-
-                if ($implements !== false && \in_array(\ArrayAccess::class, $implements, true)) {
-                    return new ReadAccessor(ReadAccessor::TYPE_ARRAY_ACCESS, $property);
-                }
-            }
-
+        if ($type instanceof Type\ObjectType) {
+            /** @var class-string $childClass */
+            $childClass = $type->getClassName();
+            $childAccessor = $this->getReadAccessor($childClass, $child, $allowExtraProperties);
+        } elseif ($type?->isIdentifiedBy(TypeIdentifier::ARRAY)) {
+            $childAccessor = $this->getReadAccessor('array', $child, $allowExtraProperties);
+        } else {
             return null;
         }
 
-        $type = ReadAccessor::TYPE_PROPERTY;
-
-        if (PropertyReadInfo::TYPE_METHOD === $readInfo->getType()) {
-            $type = ReadAccessor::TYPE_METHOD;
+        if (null === $parentAccessor || null === $childAccessor) {
+            return null;
         }
 
-        return new ReadAccessor(
-            $type,
-            $readInfo->getName(),
-            $class,
-            PropertyReadInfo::VISIBILITY_PUBLIC !== $readInfo->getVisibility(),
-            $property
-        );
+        return new NestedReadAccessor($parentAccessor, $childAccessor);
     }
 
-    public function getWriteMutator(string $source, string $target, string $property, array $context = [], bool $allowExtraProperties = false): ?WriteMutator
+    public function getWriteMutator(string $source, string $target, string $property, array $context = [], bool $allowExtraProperties = false): ?WriteMutatorInterface
     {
-        $writeInfo = $this->writeInfoExtractor->getWriteInfo($target, $property, $context);
-        $removeMethodName = null;
+        // split to last dot for nested properties
+        $lastDotPosition = strrpos($property, '.');
 
-        if (null === $writeInfo || PropertyWriteInfo::TYPE_NONE === $writeInfo->getType()) {
-            if ('array' === $target) {
-                return new WriteMutator(WriteMutator::TYPE_ARRAY_DIMENSION, $property, false);
-            }
+        if (false === $lastDotPosition) {
+            return $this->doGetWriteMutator($target, $property, $context, $allowExtraProperties);
+        }
 
-            if (\stdClass::class === $target) {
-                return new WriteMutator(WriteMutator::TYPE_PROPERTY, $property, false);
-            }
+        $parent = substr($property, 0, $lastDotPosition);
+        $child = substr($property, $lastDotPosition + 1);
+        $accessor = $this->getReadAccessor($target, $parent, $allowExtraProperties);
 
-            if ($allowExtraProperties) {
-                $implements = class_implements($target);
+        if ($target === 'array') {
+            $lastAccessorType = Type::array();
+        } elseif (\stdClass::class === $target) {
+            $lastAccessorType = Type::object(\stdClass::class);
+        } else {
+            $lastAccessorType = $this->findLastTypeForAccessor($target, $parent);
+        }
 
-                if ($implements !== false && \in_array(\ArrayAccess::class, $implements, true)) {
-                    return new WriteMutator(WriteMutator::TYPE_ARRAY_DIMENSION, $property, false);
-                }
-            }
-
+        if (null === $lastAccessorType) {
             return null;
         }
 
-        if (PropertyWriteInfo::TYPE_CONSTRUCTOR === $writeInfo->getType()) {
-            $parameter = new \ReflectionParameter([$target, '__construct'], $writeInfo->getName());
-
-            return new WriteMutator(WriteMutator::TYPE_CONSTRUCTOR, $writeInfo->getName(), false, $parameter);
+        if ($lastAccessorType instanceof Type\ObjectType) {
+            /** @var class-string|'array' $targetClass */
+            $targetClass = $lastAccessorType->getClassName();
+        } elseif ($lastAccessorType->isIdentifiedBy(TypeIdentifier::ARRAY)) {
+            $targetClass = 'array';
+        } else {
+            return null;
         }
 
-        $type = WriteMutator::TYPE_PROPERTY;
+        $mutator = $this->doGetWriteMutator($targetClass, $child, $context, $allowExtraProperties);
 
-        if (PropertyWriteInfo::TYPE_METHOD === $writeInfo->getType()) {
-            $type = WriteMutator::TYPE_METHOD;
+        if (null === $accessor || null === $mutator) {
+            return null;
         }
 
-        if (PropertyWriteInfo::TYPE_ADDER_AND_REMOVER === $writeInfo->getType()) {
-            $type = WriteMutator::TYPE_ADDER_AND_REMOVER;
-            $removeMethodName = $writeInfo->getRemoverInfo()->getName();
-            $writeInfo = $writeInfo->getAdderInfo();
-        }
-
-        return new WriteMutator(
-            $type,
-            $writeInfo->getName(),
-            PropertyReadInfo::VISIBILITY_PUBLIC !== $writeInfo->getVisibility(),
-            null,
-            $removeMethodName,
-        );
+        return new NestedWriteMutator($accessor, $mutator);
     }
 
     public function getCheckExists(string $class, string $property): bool
@@ -189,5 +181,112 @@ abstract class MappingExtractor implements MappingExtractorInterface
         }
 
         return $this->configuration->dateTimeFormat;
+    }
+
+    /**
+     * @param class-string $source
+     */
+    private function findLastTypeForAccessor(string $source, string $property): ?Type
+    {
+        $exploded = explode('.', $property, 2);
+
+        if (2 === \count($exploded)) {
+            [$parent, $child] = $exploded;
+        } else {
+            return $this->sourceTypeExtractor->getType($source, $property);
+        }
+
+        $parentType = $this->sourceTypeExtractor->getType($source, $parent);
+
+        if ($parentType instanceof Type\ObjectType) {
+            /** @var class-string $className */
+            $className = $parentType->getClassName();
+
+            return $this->findLastTypeForAccessor($className, $child);
+        }
+
+        return $parentType;
+    }
+
+    /**
+     * @param class-string|'array' $class
+     */
+    private function doGetReadAccessor(string $class, string $property, bool $allowExtraProperties = false): ?ReadAccessorInterface
+    {
+        if ('array' === $class) {
+            return new ArrayReadAccessor($property);
+        }
+
+        if (\stdClass::class === $class) {
+            return new PropertyReadAccessor($property);
+        }
+
+        $readInfo = $this->readInfoExtractor->getReadInfo($class, $property);
+
+        if (null === $readInfo) {
+            if ($allowExtraProperties) {
+                $implements = class_implements($class);
+
+                if ($implements !== false && \in_array(\ArrayAccess::class, $implements, true)) {
+                    return new ArrayReadAccessor($property, true);
+                }
+            }
+
+            return null;
+        }
+
+        if (PropertyReadInfo::TYPE_METHOD === $readInfo->getType()) {
+            return new MethodReadAccessor($property, $readInfo->getName(), $class, PropertyReadInfo::VISIBILITY_PUBLIC !== $readInfo->getVisibility());
+        }
+
+        return new PropertyReadAccessor(
+            $readInfo->getName(),
+            PropertyReadInfo::VISIBILITY_PUBLIC !== $readInfo->getVisibility(),
+        );
+    }
+
+    /**
+     * @param class-string|'array' $target
+     * @param array<string, mixed> $context
+     */
+    private function doGetWriteMutator(string $target, string $property, array $context = [], bool $allowExtraProperties = false): ?WriteMutatorInterface
+    {
+        $writeInfo = $this->writeInfoExtractor->getWriteInfo($target, $property, $context);
+
+        if (null === $writeInfo || PropertyWriteInfo::TYPE_NONE === $writeInfo->getType()) {
+            if ('array' === $target) {
+                return new ArrayWriteMutator($property);
+            }
+
+            if (\stdClass::class === $target) {
+                return new PropertyWriteMutator($property, false);
+            }
+
+            if ($allowExtraProperties) {
+                $implements = class_implements($target);
+
+                if ($implements !== false && \in_array(\ArrayAccess::class, $implements, true)) {
+                    return new ArrayWriteMutator($property);
+                }
+            }
+
+            return null;
+        }
+
+        if (PropertyWriteInfo::TYPE_CONSTRUCTOR === $writeInfo->getType()) {
+            $parameter = new \ReflectionParameter([$target, '__construct'], $writeInfo->getName());
+
+            return new ConstructorWriteMutator($parameter);
+        }
+
+        if (PropertyWriteInfo::TYPE_METHOD === $writeInfo->getType()) {
+            return new MethodWriteMutator($writeInfo->getName());
+        }
+
+        if (PropertyWriteInfo::TYPE_ADDER_AND_REMOVER === $writeInfo->getType()) {
+            return new AddRemoveWriteMutator($writeInfo->getAdderInfo()->getName(), $writeInfo->getRemoverInfo()->getName());
+        }
+
+        return new PropertyWriteMutator($writeInfo->getName(), PropertyReadInfo::VISIBILITY_PUBLIC !== $writeInfo->getVisibility());
     }
 }

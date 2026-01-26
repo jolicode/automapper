@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace AutoMapper\Metadata;
 
 use AutoMapper\Event\TargetPropertyMetadata as EventTargetPropertyMetadata;
-use AutoMapper\Extractor\ReadAccessor;
-use AutoMapper\Extractor\WriteMutator;
+use AutoMapper\Extractor\ReadAccessorInterface;
+use AutoMapper\Extractor\WriteMutatorInterface;
 use Symfony\Component\TypeInfo\Type;
 
 /**
@@ -23,8 +23,8 @@ final readonly class TargetPropertyMetadata
      */
     public function __construct(
         public string $property,
-        public ?ReadAccessor $readAccessor = null,
-        public ?WriteMutator $writeMutator = null,
+        public ?ReadAccessorInterface $readAccessor = null,
+        public ?WriteMutatorInterface $writeMutator = null,
         public ?string $parameterInConstructor = null,
         public ?array $groups = null,
         public string $dateTimeFormat = \DateTimeInterface::RFC3339,

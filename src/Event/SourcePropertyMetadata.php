@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Event;
 
-use AutoMapper\Extractor\ReadAccessor;
+use AutoMapper\Extractor\ReadAccessorInterface;
 use Symfony\Component\TypeInfo\Type;
 
 /**
@@ -21,7 +21,7 @@ final class SourcePropertyMetadata
      */
     public function __construct(
         public string $property,
-        public ?ReadAccessor $accessor = null,
+        public ?ReadAccessorInterface $accessor = null,
         public ?bool $checkExists = null,
         public bool $extractGroupsIfNull = true,
         public ?array $groups = null,

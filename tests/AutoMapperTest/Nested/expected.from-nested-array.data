@@ -1,0 +1,5 @@
+AutoMapper\Tests\AutoMapperTest\Nested\UserDto {
+  +userAddressZipcode: "12345"
+  +userAddressCity: "Test City"
+  +name: "John Doe"
+}

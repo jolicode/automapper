@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Transformer;
 
-use AutoMapper\Extractor\ReadAccessor;
+use AutoMapper\Extractor\PropertyReadAccessor;
 use AutoMapper\Generator\UniqueVariableScope;
 use AutoMapper\Metadata\PropertyMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
@@ -23,7 +23,7 @@ trait EvalTransformerTrait
             $propertyMapping = new PropertyMetadata(
                 new SourcePropertyMetadata(
                     'dummy',
-                    new ReadAccessor(ReadAccessor::TYPE_PROPERTY, 'dummy'),
+                    new PropertyReadAccessor('dummy'),
                 ),
                 new TargetPropertyMetadata(
                     'dummy',

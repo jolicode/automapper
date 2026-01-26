@@ -1,0 +1,7 @@
+[
+  "address" => [
+    "city" => "Test City"
+    "zipcode" => "12345"
+  ]
+  "name" => "John Doe"
+]
