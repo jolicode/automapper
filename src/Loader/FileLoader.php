@@ -40,6 +40,7 @@ final class FileLoader implements ClassLoaderInterface
     public function loadClass(MapperMetadata $mapperMetadata): void
     {
         $className = $mapperMetadata->className;
+
         $classPath = $this->directory . \DIRECTORY_SEPARATOR . $className . '.php';
 
         // We lock the file here, because another process could be writing the file at the same time

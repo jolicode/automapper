@@ -56,6 +56,7 @@ class MapperContext
     public const DATETIME_FORCE_TIMEZONE = 'datetime_force_timezone';
     public const MAP_TO_ACCESSOR_PARAMETER = 'map_to_accessor_parameter';
     public const NORMALIZER_FORMAT = 'normalizer_format';
+    public const LAZY_MAPPING = 'lazy_mapping';
 
     /** @var MapperContextArray */
     private array $context = [
@@ -342,5 +343,13 @@ class MapperContext
         } catch (\Exception $e) {
             throw new InvalidArgumentException("Invalid timezone \"$timezone\" passed to automapper context.", previous: $e);
         }
+    }
+
+    /**
+     * @param array{lazy_mapping?: bool} $context
+     */
+    public static function shouldLazyLoad(array $context): bool
+    {
+        return $context[self::LAZY_MAPPING] ?? false;
     }
 }

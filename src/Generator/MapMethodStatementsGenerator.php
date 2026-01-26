@@ -44,26 +44,17 @@ final readonly class MapMethodStatementsGenerator
     }
 
     /**
-     * @return list<Stmt>
+     * @return array{0: list<Stmt>, 1: list<Stmt>, 2: list<Stmt>}
      */
-    public function getStatements(GeneratorMetadata $metadata): array
+    public function getMappingStatements(GeneratorMetadata $metadata): array
     {
-        $variableRegistry = $metadata->variableRegistry;
-
-        $statements = [$this->ifSourceIsNullReturnNull($metadata)];
-        $statements = [...$statements, ...$this->handleCircularReference($metadata)];
-
-        if ($this->createObjectStatementsGenerator->canUseTargetToPopulate($metadata)) {
-            $statements = [...$statements, ...$this->initializeTargetToPopulate($metadata)];
-            $statements = [...$statements, ...$this->initializeTargetFromProvider($metadata)];
-        }
-
-        $statements = [...$statements, ...$this->createObjectStatementsGenerator->generate($metadata, $variableRegistry)];
-
-        $addedDependenciesStatements = $this->handleDependencies($metadata);
-
+        // Statements to be executed to construct the object with the constructor
+        $constructorStatements = $this->createObjectStatementsGenerator->getConstructStatements($metadata);
+        // Statements to be executed if the target is populated
         $duplicatedStatements = [];
+        // Statements to be executed after the constructor
         $setterStatements = [];
+
         foreach ($metadata->propertiesMetadata as $propertyMetadata) {
             /**
              * This is the main loop to map the properties from the source to the target, there is 3 main steps in order to generate this code :.
@@ -97,6 +88,30 @@ final readonly class MapMethodStatementsGenerator
                 $setterStatements = [...$setterStatements, ...$propStatements];
             }
         }
+
+        return [$constructorStatements, $duplicatedStatements, $setterStatements];
+    }
+
+    /**
+     * @param list<Stmt> $duplicatedStatements
+     *
+     * @return list<Stmt>
+     */
+    public function getStatements(GeneratorMetadata $metadata, array $duplicatedStatements, bool $callDoConstruct): array
+    {
+        $variableRegistry = $metadata->variableRegistry;
+
+        $statements = [$this->ifSourceIsNullReturnNull($metadata)];
+        $statements = [...$statements, ...$this->handleCircularReference($metadata)];
+
+        if ($this->createObjectStatementsGenerator->canUseTargetToPopulate($metadata)) {
+            $statements = [...$statements, ...$this->initializeTargetToPopulate($metadata)];
+            $statements = [...$statements, ...$this->initializeTargetFromProvider($metadata)];
+        }
+
+        $statements = [...$statements, ...$this->createObjectStatementsGenerator->generate($metadata, $variableRegistry, $callDoConstruct)];
+
+        $addedDependenciesStatements = $this->handleDependencies($metadata);
 
         if (\count($duplicatedStatements) > 0 && \count($metadata->getPropertiesInConstructor())) {
             /**
@@ -141,9 +156,19 @@ final readonly class MapMethodStatementsGenerator
             $statements = [...$statements, ...$addedDependenciesStatements];
         }
 
+        $mapStatement = new Stmt\Expression(new Expr\MethodCall(
+            new Expr\Variable('this'),
+            'doMap',
+            [
+                new Arg($variableRegistry->getSourceInput()),
+                new Arg($variableRegistry->getResult()),
+                new Arg($variableRegistry->getContext()),
+            ]
+        ));
+
         return [
             ...$statements,
-            ...$setterStatements,
+            $mapStatement,
             new Stmt\Return_($variableRegistry->getResult()),
         ];
     }
