@@ -247,28 +247,49 @@ final readonly class MapMethodStatementsGenerator
             ]),
         ];
 
-        if (!interface_exists(LazyObjectInterface::class)) {
-            return $statements;
+        if (interface_exists(LazyObjectInterface::class)) {
+            /**
+             *  ```php
+             *  if ($source instanceof LazyObjectInterface) {
+             *     $source->initializeLazyObject();
+             *  } else {
+             *      ...
+             *  }
+             *  ```.
+             */
+            $statements = [
+                new Stmt\If_(new Expr\Instanceof_($metadata->variableRegistry->getSourceInput(), new Name\FullyQualified(LazyObjectInterface::class)), [
+                    'stmts' => [
+                        new Stmt\Expression(
+                            new Expr\MethodCall($metadata->variableRegistry->getSourceInput(), 'initializeLazyObject')
+                        ),
+                    ],
+                    'else' => new Stmt\Else_($statements),
+                ]),
+            ];
         }
 
         /**
-         *  ```php
-         *  if ($source instanceof LazyObjectInterface) {
-         *     $source->initializeLazyObject();
-         *  } else {
-         *      ...
-         *  }
-         *  ```.
+         * ```php
+         * if ($context[MapperContext::INITIALIZE_LAZY_OBJECT] ?? false) {
+         *     ...
+         * }
+         * ```.
          */
+
         return [
-            new Stmt\If_(new Expr\Instanceof_($metadata->variableRegistry->getSourceInput(), new Name\FullyQualified(LazyObjectInterface::class)), [
-                'stmts' => [
-                    new Stmt\Expression(
-                        new Expr\MethodCall($metadata->variableRegistry->getSourceInput(), 'initializeLazyObject')
+            new Stmt\If_(
+                new Expr\BinaryOp\Coalesce(
+                    new Expr\ArrayDimFetch(
+                        $metadata->variableRegistry->getContext(),
+                        new Scalar\String_(MapperContext::INITIALIZE_LAZY_OBJECT)
                     ),
-                ],
-                'else' => new Stmt\Else_($statements),
-            ]),
+                    new Expr\ConstFetch(new Name('false'))
+                ),
+                [
+                    'stmts' => $statements,
+                ]
+            ),
         ];
     }
 

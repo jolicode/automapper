@@ -33,30 +33,33 @@ use AutoMapper\Exception\InvalidArgumentException;
  *   "datetime_format"?: string,
  *   "datetime_force_timezone"?: string,
  *   "map_to_accessor_parameter"?: array<string, string>,
- *   "normalizer_format"?: string
+ *   "normalizer_format"?: string,
+ *   "initialize_lazy_object"?: bool,
+ *   "lazy_mapping"?: bool,
  * }
  */
 class MapperContext
 {
-    public const GROUPS = 'groups';
-    public const ALLOWED_ATTRIBUTES = 'allowed_attributes';
-    public const IGNORED_ATTRIBUTES = 'ignored_attributes';
-    public const CIRCULAR_REFERENCE_LIMIT = 'circular_reference_limit';
-    public const CIRCULAR_REFERENCE_HANDLER = 'circular_reference_handler';
-    public const CIRCULAR_REFERENCE_REGISTRY = 'circular_reference_registry';
-    public const CIRCULAR_COUNT_REFERENCE_REGISTRY = 'circular_count_reference_registry';
-    public const DEPTH = 'depth';
-    public const TARGET_TO_POPULATE = 'target_to_populate';
-    public const DEEP_TARGET_TO_POPULATE = 'deep_target_to_populate';
-    public const CONSTRUCTOR_ARGUMENTS = 'constructor_arguments';
-    public const SKIP_NULL_VALUES = 'skip_null_values';
-    public const SKIP_UNINITIALIZED_VALUES = 'skip_uninitialized_values';
-    public const ALLOW_READONLY_TARGET_TO_POPULATE = 'allow_readonly_target_to_populate';
-    public const DATETIME_FORMAT = 'datetime_format';
-    public const DATETIME_FORCE_TIMEZONE = 'datetime_force_timezone';
-    public const MAP_TO_ACCESSOR_PARAMETER = 'map_to_accessor_parameter';
-    public const NORMALIZER_FORMAT = 'normalizer_format';
-    public const LAZY_MAPPING = 'lazy_mapping';
+    public const string GROUPS = 'groups';
+    public const string ALLOWED_ATTRIBUTES = 'allowed_attributes';
+    public const string IGNORED_ATTRIBUTES = 'ignored_attributes';
+    public const string CIRCULAR_REFERENCE_LIMIT = 'circular_reference_limit';
+    public const string CIRCULAR_REFERENCE_HANDLER = 'circular_reference_handler';
+    public const string CIRCULAR_REFERENCE_REGISTRY = 'circular_reference_registry';
+    public const string CIRCULAR_COUNT_REFERENCE_REGISTRY = 'circular_count_reference_registry';
+    public const string DEPTH = 'depth';
+    public const string TARGET_TO_POPULATE = 'target_to_populate';
+    public const string DEEP_TARGET_TO_POPULATE = 'deep_target_to_populate';
+    public const string CONSTRUCTOR_ARGUMENTS = 'constructor_arguments';
+    public const string SKIP_NULL_VALUES = 'skip_null_values';
+    public const string SKIP_UNINITIALIZED_VALUES = 'skip_uninitialized_values';
+    public const string ALLOW_READONLY_TARGET_TO_POPULATE = 'allow_readonly_target_to_populate';
+    public const string DATETIME_FORMAT = 'datetime_format';
+    public const string DATETIME_FORCE_TIMEZONE = 'datetime_force_timezone';
+    public const string MAP_TO_ACCESSOR_PARAMETER = 'map_to_accessor_parameter';
+    public const string NORMALIZER_FORMAT = 'normalizer_format';
+    public const string INITIALIZE_LAZY_OBJECT = 'initialize_lazy_object';
+    public const string LAZY_MAPPING = 'lazy_mapping';
 
     /** @var MapperContextArray */
     private array $context = [

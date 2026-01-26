@@ -68,6 +68,7 @@ final readonly class ObjectMapper implements ObjectMapperInterface
 
         return $this->autoMapper->map($source, $target, [
             MapperContext::SKIP_UNINITIALIZED_VALUES => true,
+            MapperContext::INITIALIZE_LAZY_OBJECT => true,
         ]);
     }
 
