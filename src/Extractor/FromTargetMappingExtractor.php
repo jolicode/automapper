@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Extractor;
 
+use AutoMapper\Lazy\LazyMap;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
 use Symfony\Component\TypeInfo\Type;
@@ -89,7 +90,15 @@ final class FromTargetMappingExtractor extends MappingExtractor
 
         // Transform objects to array or \stdClass given the target
         if ($type instanceof Type\ObjectType && \stdClass::class !== $type->getClassName()) {
-            return $source === 'array' ? Type::arrayShape([]) : Type::object(\stdClass::class);
+            if ($source === 'array') {
+                return Type::arrayShape([]);
+            }
+
+            if ($source === \stdClass::class) {
+                return Type::object(\stdClass::class);
+            }
+
+            return Type::object(LazyMap::class);
         }
 
         return $type;

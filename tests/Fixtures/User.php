@@ -68,7 +68,9 @@ class User
         $this->email = 'test';
         $this->createdAt = new \DateTime();
         $this->money = 20.10;
-        $this->languages = new \ArrayObject();
+        $this->languages = [];
+
+        $this->createdAt->setMicrosecond(0);
     }
 
     /**
