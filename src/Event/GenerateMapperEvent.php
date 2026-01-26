@@ -7,6 +7,7 @@ namespace AutoMapper\Event;
 use AutoMapper\ConstructorStrategy;
 use AutoMapper\Metadata\Discriminator;
 use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\Provider;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
@@ -20,7 +21,7 @@ final class GenerateMapperEvent extends Event
     public function __construct(
         public readonly MapperMetadata $mapperMetadata,
         public array $properties = [],
-        public ?string $provider = null,
+        public ?Provider $provider = null,
         public ?bool $checkAttributes = null,
         public ?ConstructorStrategy $constructorStrategy = null,
         public ?bool $allowReadOnlyTargetToPopulate = null,
@@ -28,7 +29,6 @@ final class GenerateMapperEvent extends Event
         public ?bool $allowExtraProperties = null,
         public ?Discriminator $sourceDiscriminator = null,
         public ?Discriminator $targetDiscriminator = null,
-        public bool $isProviderFromObjectMapper = false,
     ) {
     }
 }

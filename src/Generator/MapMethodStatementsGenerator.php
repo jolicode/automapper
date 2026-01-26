@@ -9,6 +9,7 @@ use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
 use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
 use AutoMapper\MapperContext;
 use AutoMapper\Metadata\GeneratorMetadata;
+use AutoMapper\Metadata\Provider;
 use AutoMapper\Provider\EarlyReturn;
 use PhpParser\Comment;
 use PhpParser\Node\Arg;
@@ -420,10 +421,8 @@ final readonly class MapMethodStatementsGenerator
         }
 
         $variableRegistry = $metadata->variableRegistry;
-        $statements = [];
-        $callableName = null;
 
-        if ($metadata->isProviderFromObjectMapper) {
+        if ($metadata->provider->isFromObjectMapper) {
             // When the provider is from the ObjectMapper, we call it with 3 arguments
             /*
              * $result ?? (new ReflectionClass($metadata->mapperMetadata->target))->newInstanceWithoutConstructor();
@@ -449,58 +448,65 @@ final readonly class MapMethodStatementsGenerator
             ];
         }
 
-        if (\is_callable($metadata->provider, false, $callableName)) {
+        if ($metadata->provider->type === Provider::TYPE_CALLABLE) {
             /*
              * Get result from callable if available
              *
              * ```php
-             * $result ??= callable(Target::class, $value, $context, $this->getTargetIdentifiers($value));
+             * callable(Target::class, $value, $context, $this->getTargetIdentifiers($value));
              * ```
              */
-            $statements[] = new Stmt\Expression(
-                new Expr\AssignOp\Coalesce(
-                    $variableRegistry->getResult(),
-                    new Expr\FuncCall(new Name($callableName), $args),
-                )
-            );
+            $providerExpression = new Expr\FuncCall(new Name($metadata->provider->value), $args);
+        } elseif ($metadata->provider->type === Provider::TYPE_SERVICE_CALLABLE) {
+            /*
+             * Get result from provider if available
+             *
+             * ```php
+             * $this->serviceLocator->get($metadata->provider)($source, $context);
+             * ```
+             */
+            $providerExpression = new Expr\FuncCall(new Expr\MethodCall(new Expr\PropertyFetch(new Expr\Variable('this'), 'serviceLocator'), 'get', [
+                new Arg(new Scalar\String_($metadata->provider->value)),
+            ]), $args);
         } else {
             /*
              * Get result from provider if available
              *
              * ```php
-             * $result ??= $this->providerRegistry->getProvider($metadata->provider)->provide($source, $context);
+             * $this->serviceLocator->get($metadata->provider)->provide($source, $context);
              * ```
              */
-            $statements[] = new Stmt\Expression(
-                new Expr\AssignOp\Coalesce(
-                    $variableRegistry->getResult(),
-                    new Expr\MethodCall(new Expr\MethodCall(new Expr\PropertyFetch(new Expr\Variable('this'), 'serviceLocator'), 'get', [
-                        new Arg(new Scalar\String_($metadata->provider)),
-                    ]), 'provide', $args),
-                )
-            );
+            $providerExpression = new Expr\MethodCall(new Expr\MethodCall(new Expr\PropertyFetch(new Expr\Variable('this'), 'serviceLocator'), 'get', [
+                new Arg(new Scalar\String_($metadata->provider->value)),
+            ]), 'provide', $args);
         }
 
         /*
-         * Return early if the result is an EarlyReturn instance
+         * $result ??= provider(...);
          *
          * if ($result instanceof EarlyReturn) {
          *     return $result->value;
          * }
          * ```
          */
-        $statements[] = new Stmt\If_(
-            new Expr\Instanceof_($variableRegistry->getResult(), new Name(EarlyReturn::class)),
-            [
-                'stmts' => [
-                    new Stmt\Return_(
-                        new Expr\PropertyFetch($variableRegistry->getResult(), 'value')
-                    ),
-                ],
-            ]
-        );
-
-        return $statements;
+        return [
+            new Stmt\Expression(
+                new Expr\AssignOp\Coalesce(
+                    $variableRegistry->getResult(),
+                    $providerExpression,
+                )
+            ),
+            new Stmt\If_(
+                new Expr\Instanceof_($variableRegistry->getResult(), new Name(EarlyReturn::class)),
+                [
+                    'stmts' => [
+                        new Stmt\Return_(
+                            new Expr\PropertyFetch($variableRegistry->getResult(), 'value')
+                        ),
+                    ],
+                ]
+            ),
+        ];
     }
 
     /**

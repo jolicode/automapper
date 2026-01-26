@@ -9,6 +9,7 @@ use AutoMapper\Event\GenerateMapperEvent;
 use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\Event\SourcePropertyMetadata;
 use AutoMapper\Event\TargetPropertyMetadata;
+use AutoMapper\Metadata\Provider;
 use Symfony\Component\ObjectMapper\Attribute\Map;
 
 final readonly class MapTargetListener extends MapListener
@@ -74,8 +75,11 @@ final readonly class MapTargetListener extends MapListener
             $callableName = null;
 
             if (\is_callable($mapAttribute->transform, false, $callableName)) {
-                $event->provider = $callableName;
-                $event->isProviderFromObjectMapper = true;
+                $event->provider = new Provider(Provider::TYPE_CALLABLE, $callableName, true);
+            }
+
+            if (\is_string($mapAttribute->transform) && $this->serviceLocator->has($mapAttribute->transform)) {
+                $event->provider = new Provider(Provider::TYPE_SERVICE_CALLABLE, $mapAttribute->transform, true);
             }
         }
     }

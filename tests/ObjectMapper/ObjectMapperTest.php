@@ -67,6 +67,7 @@ use AutoMapper\Tests\ObjectMapper\Fixtures\ReadOnlyPromotedProperty\ReadOnlyProm
 use AutoMapper\Tests\ObjectMapper\Fixtures\Recursion\AB;
 use AutoMapper\Tests\ObjectMapper\Fixtures\Recursion\Dto;
 use AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLoadedValue\LoadedValueService;
+use AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLoadedValue\ServiceLoadedValueTransformer;
 use AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLoadedValue\ValueToMap;
 use AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLoadedValue\ValueToMapRelation;
 use AutoMapper\Tests\ObjectMapper\Fixtures\ServiceLocator\A as ServiceLocatorA;
@@ -92,6 +93,15 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 
 final class ObjectMapperTest extends AutoMapperTestCase
 {
+    protected LoadedValueService $service;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->service = new LoadedValueService();
+    }
+
     #[DataProvider('mapProvider')]
     public function testMap($expect, $args, array $deps = [])
     {
@@ -542,7 +552,7 @@ final class ObjectMapperTest extends AutoMapperTestCase
     #[RequiresPhp('>=8.4')]
     public function testEmbedsAreLazyLoadedByDefault()
     {
-        $this->markTestSkipped('This use case is not supported by AutoMapper.');
+        $this->markTestSkipped('Lazy Loading is not enable by default and works differently.');
 
         $mapper = $this->createObjectMapper();
         $source = new OrderSource();
@@ -561,25 +571,17 @@ final class ObjectMapperTest extends AutoMapperTestCase
 
     public function testSkipLazyGhostWithClassTransform()
     {
-        $this->markTestSkipped('This use case is not supported by AutoMapper.');
-
-        $service = new LoadedValueService();
-        $service->load();
-
-        $metadataFactory = new ReflectionObjectMapperMetadataFactory();
         $mapper = $this->createObjectMapper();
 
         $value = new ValueToMap();
         $value->relation = new ValueToMapRelation('test');
 
         $result = $mapper->map($value);
-        if (\PHP_VERSION_ID >= 80400) {
-            $refl = new \ReflectionClass($result->relation);
-            $this->assertFalse($refl->isUninitializedLazyObject($result->relation));
-        }
+        $refl = new \ReflectionClass($result->relation);
+        $this->assertFalse($refl->isUninitializedLazyObject($result->relation));
 
-        $this->assertSame($result->relation, $service->get());
-        $this->assertSame($result->relation->name, 'loaded');
+        $this->assertSame($result->relation, $this->service->get());
+        $this->assertSame('test', $result->relation->name);
     }
 
     public function testMapEmbeddedProperties()
@@ -620,9 +622,13 @@ final class ObjectMapperTest extends AutoMapperTestCase
 
     public function createObjectMapper(): ObjectMapperInterface
     {
+        $metadataFactory = new ReflectionObjectMapperMetadataFactory();
+        $this->service->load();
+
         return new ObjectMapper(autoMapper: AutoMapperBuilder::buildAutoMapper(extraServices: [
             new TransformCallable(),
             new ConditionCallable(),
+            new ServiceLoadedValueTransformer($this->service, $metadataFactory),
         ]));
     }
 }

@@ -11,6 +11,7 @@ use AutoMapper\Transformer\ExpressionLanguageTransformer;
 use AutoMapper\Transformer\ReferenceTransformer;
 use AutoMapper\Transformer\ServiceLocatorTransformer;
 use AutoMapper\Transformer\TransformerInterface;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\ExpressionLanguage\SyntaxError;
 use Symfony\Component\ObjectMapper\Attribute\Map;
@@ -19,6 +20,7 @@ use Symfony\Component\ObjectMapper\TransformCallableInterface;
 abstract readonly class MapListener
 {
     public function __construct(
+        protected ContainerInterface $serviceLocator,
         private ExpressionLanguage $expressionLanguage,
     ) {
     }

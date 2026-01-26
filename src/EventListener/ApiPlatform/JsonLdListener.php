@@ -11,6 +11,7 @@ use AutoMapper\Event\GenerateMapperEvent;
 use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\Event\SourcePropertyMetadata;
 use AutoMapper\Event\TargetPropertyMetadata;
+use AutoMapper\Metadata\Provider;
 use AutoMapper\Provider\ApiPlatform\IriProvider;
 use AutoMapper\Transformer\ApiPlatform\JsonLdContextTransformer;
 use AutoMapper\Transformer\ApiPlatform\JsonLdIdTransformer;
@@ -68,7 +69,7 @@ final readonly class JsonLdListener
         }
 
         if ($event->mapperMetadata->source === 'array' && $this->resourceClassResolver->isResourceClass($event->mapperMetadata->target)) {
-            $event->provider ??= IriProvider::class;
+            $event->provider ??= new Provider(Provider::TYPE_SERVICE, IriProvider::class);
         }
     }
 }

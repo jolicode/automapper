@@ -336,7 +336,6 @@ final class MetadataFactory
             $mapperEvent->provider,
             $mapperEvent->sourceDiscriminator,
             $mapperEvent->targetDiscriminator,
-            $mapperEvent->isProviderFromObjectMapper,
         );
     }
 
@@ -394,8 +393,8 @@ final class MetadataFactory
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapProviderListener());
 
         if (interface_exists(ObjectMapperInterface::class)) {
-            $eventDispatcher->addListener(GenerateMapperEvent::class, new MapSourceListener($expressionLanguage));
-            $eventDispatcher->addListener(GenerateMapperEvent::class, new MapTargetListener($expressionLanguage));
+            $eventDispatcher->addListener(GenerateMapperEvent::class, new MapSourceListener($serviceLocator, $expressionLanguage));
+            $eventDispatcher->addListener(GenerateMapperEvent::class, new MapTargetListener($serviceLocator, $expressionLanguage));
         }
 
         // Create transformer factories
