@@ -27,6 +27,8 @@ final class GeneratorMetadata
         public readonly bool $allowReadOnlyTargetToPopulate = false,
         public readonly bool $strictTypes = false,
         public readonly ?string $provider = null,
+        public readonly ?Discriminator $sourceDiscriminator = null,
+        public readonly ?Discriminator $targetDiscriminator = null,
     ) {
         $this->variableRegistry = new VariableRegistry();
     }

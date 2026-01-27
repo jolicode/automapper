@@ -8,6 +8,7 @@ use AutoMapper\Event\GenerateMapperEvent;
 use AutoMapper\Event\PropertyMetadataEvent;
 use AutoMapper\Event\SourcePropertyMetadata;
 use AutoMapper\Event\TargetPropertyMetadata;
+use AutoMapper\Metadata\Discriminator;
 use AutoMapper\Transformer\FixedValueTransformer;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorMapping;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorResolverInterface;
@@ -37,6 +38,14 @@ final readonly class ClassDiscriminatorListener
                 }
             }
 
+            if (null === $sourceType) {
+                // It means the source is a parent class or interface of the mapped types
+                $event->sourceDiscriminator = new Discriminator(
+                    mapping: $classDiscriminatorMappingSource->getTypesMapping(),
+                    propertyName: $classDiscriminatorMappingSource->getTypeProperty(),
+                );
+            }
+
             $property = $classDiscriminatorMappingSource->getTypeProperty();
             $sourceProperty = new SourcePropertyMetadata($property);
             $targetProperty = new TargetPropertyMetadata($property);
@@ -50,6 +59,23 @@ final readonly class ClassDiscriminatorListener
         }
 
         if ($classDiscriminatorMappingTarget) {
+            $targetType = null;
+
+            foreach ($classDiscriminatorMappingTarget->getTypesMapping() as $type => $class) {
+                if ($class === $event->mapperMetadata->target) {
+                    $targetType = $type;
+                    break;
+                }
+            }
+
+            if (null === $targetType) {
+                // It means the target is a parent class or interface of the mapped types
+                $event->targetDiscriminator = new Discriminator(
+                    mapping: $classDiscriminatorMappingTarget->getTypesMapping(),
+                    propertyName: $classDiscriminatorMappingTarget->getTypeProperty(),
+                );
+            }
+
             $property = $classDiscriminatorMappingTarget->getTypeProperty();
             $sourceProperty = new SourcePropertyMetadata($property);
             $targetProperty = new TargetPropertyMetadata($property);

@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use AutoMapper\Event\GenerateMapperEvent;
 use AutoMapper\Event\PropertyMetadataEvent;
+use AutoMapper\EventListener\Symfony\ClassDiscriminatorListener;
 use AutoMapper\EventListener\Symfony\NameConverterListener;
 use AutoMapper\EventListener\Symfony\SerializerGroupListener;
 use AutoMapper\EventListener\Symfony\SerializerIgnoreListener;
 use AutoMapper\EventListener\Symfony\SerializerMaxDepthListener;
-use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\NameConverter\MetadataAwareNameConverter;
 
@@ -27,8 +28,9 @@ return static function (ContainerConfigurator $container) {
             ->args([service('serializer.mapping.class_metadata_factory')])
             ->tag('kernel.event_listener', ['event' => PropertyMetadataEvent::class, 'priority' => -64])
 
-        ->set(ClassDiscriminatorResolver::class)
+        ->set(ClassDiscriminatorListener::class)
             ->args([service('automapper.mapping.class_discriminator_from_class_metadata')])
+            ->tag('kernel.event_listener', ['event' => GenerateMapperEvent::class, 'priority' => -64])
 
         ->set('automapper.mapping.class_discriminator_from_class_metadata', ClassDiscriminatorFromClassMetadata::class)
             ->args([service('serializer.mapping.class_metadata_factory')])
