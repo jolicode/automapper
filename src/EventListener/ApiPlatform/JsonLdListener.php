@@ -16,6 +16,7 @@ use AutoMapper\Transformer\ApiPlatform\JsonLdContextTransformer;
 use AutoMapper\Transformer\ApiPlatform\JsonLdIdTransformer;
 use AutoMapper\Transformer\FixedValueTransformer;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformer;
+use PhpParser\Node\Scalar;
 
 final readonly class JsonLdListener
 {
@@ -60,7 +61,7 @@ final readonly class JsonLdListener
                 mapperMetadata: $event->mapperMetadata,
                 source: new SourcePropertyMetadata('@context'),
                 target: new TargetPropertyMetadata('@context'),
-                transformer: new PropertyTransformer(JsonLdContextTransformer::class, ['forced_resource_class' => $event->mapperMetadata->source]),
+                transformer: new PropertyTransformer(JsonLdContextTransformer::class, computedValueExpr: new Scalar\String_($event->mapperMetadata->source)),
                 if: "(context['normalizer_format'] ?? false) === 'jsonld' and (context['jsonld_has_context'] ?? false) === false and (context['depth'] ?? 0) <= 1",
                 disableGroupsCheck: true,
             );

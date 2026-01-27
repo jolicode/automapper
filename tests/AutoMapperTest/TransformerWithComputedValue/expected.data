@@ -1,0 +1,3 @@
+AutoMapper\Tests\AutoMapperTest\TransformerWithComputedValue\Foo {
+  +foo: "computed value"
+}

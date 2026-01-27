@@ -17,17 +17,22 @@ final readonly class JsonLdContextTransformer implements PropertyTransformerInte
     ) {
     }
 
-    public function transform(mixed $value, object|array $source, array $context): mixed
+    public function transform(mixed $value, object|array $source, array $context, mixed $computed = null): mixed
     {
         if (!\is_object($source)) {
             return null;
         }
 
-        $resourceClass = $context['forced_resource_class'] ?? $this->resourceClassResolver->isResourceClass($source::class) ? $this->resourceClassResolver->getResourceClass($source) : null;
+        $resourceClass = $computed ?? $this->resourceClassResolver->isResourceClass(
+            $source::class
+        ) ? $this->resourceClassResolver->getResourceClass($source) : null;
 
         if (null === $resourceClass) {
             if ($this->contextBuilder instanceof AnonymousContextBuilderInterface) {
-                return $this->contextBuilder->getAnonymousResourceContext($source, ($context['output'] ?? []) + ['api_resource' => $context['api_resource'] ?? null]);
+                return $this->contextBuilder->getAnonymousResourceContext(
+                    $source,
+                    ($context['output'] ?? []) + ['api_resource' => $context['api_resource'] ?? null]
+                );
             }
 
             return null;
