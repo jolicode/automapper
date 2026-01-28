@@ -46,6 +46,7 @@
         "symfony/framework-bundle": "^7.4 || ^8.0",
         "symfony/http-client": "^7.4 || ^8.0",
         "symfony/http-kernel": "^7.4 || ^8.0",
+        "symfony/object-mapper": "^7.4 || ^8.0",
         "symfony/phpunit-bridge": "^8.0",
         "symfony/serializer": "^7.4 || ^8.0",
         "symfony/stopwatch": "^7.4 || ^8.0",

@@ -7,11 +7,13 @@ namespace AutoMapper\Event;
 use AutoMapper\ConstructorStrategy;
 use AutoMapper\Metadata\Discriminator;
 use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\Provider;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * @internal
  */
-final class GenerateMapperEvent
+final class GenerateMapperEvent extends Event
 {
     /**
      * @param PropertyMetadataEvent[] $properties A list of properties to add to this mapping
@@ -19,7 +21,7 @@ final class GenerateMapperEvent
     public function __construct(
         public readonly MapperMetadata $mapperMetadata,
         public array $properties = [],
-        public ?string $provider = null,
+        public ?Provider $provider = null,
         public ?bool $checkAttributes = null,
         public ?ConstructorStrategy $constructorStrategy = null,
         public ?bool $allowReadOnlyTargetToPopulate = null,

@@ -29,6 +29,7 @@ class AutoMapperBuilder
         ?ExpressionLanguageProvider $expressionLanguageProvider = null,
         EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
         ?ObjectManager $objectManager = null,
+        array $extraServices = [],
     ): AutoMapper {
         $skipCacheRemove = $_SERVER['SKIP_CACHE_REMOVE'] ?? false;
 
@@ -53,6 +54,7 @@ class AutoMapperBuilder
             eventDispatcher: $eventDispatcher,
             providers: $providers,
             objectManager: $objectManager,
+            extraMapperServices: $extraServices,
         );
     }
 }

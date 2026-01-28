@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial support for nested properties
 - Add support for object invokable transformer in attribute transformer
 - Add a new interface `PropertyTransformerComputeInterface` to allow property transformers with supports, to compute a value that will be fixed during code generation.
+- Support ObjectMapper attributes
+- Add an implementation for Symfony `ObjectMapperInterface` using AutoMapper
 
 ### Changed
 - [BC Break] `PropertyTransformerSupportInterface` does not use a `TypesMatching` anymore, you can get the type directly from `SourcePropertyMetadata` or `TargetPropertyMetadata`.

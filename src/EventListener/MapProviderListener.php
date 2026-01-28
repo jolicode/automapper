@@ -7,6 +7,7 @@ namespace AutoMapper\EventListener;
 use AutoMapper\Attribute\MapProvider;
 use AutoMapper\Event\GenerateMapperEvent;
 use AutoMapper\Exception\BadMapDefinitionException;
+use AutoMapper\Metadata\Provider;
 
 /**
  * @internal
@@ -60,7 +61,7 @@ final readonly class MapProviderListener
         if (false === $eventProvider) {
             $event->provider = null;
         } else {
-            $event->provider = $eventProvider;
+            $event->provider = new Provider(Provider::TYPE_SERVICE, $eventProvider);
         }
     }
 }
