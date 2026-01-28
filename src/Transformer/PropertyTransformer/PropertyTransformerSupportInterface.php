@@ -13,7 +13,7 @@ use AutoMapper\Metadata\TargetPropertyMetadata;
  *
  * @experimental
  */
-interface PropertyTransformerSupportInterface
+interface PropertyTransformerSupportInterface extends PropertyTransformerInterface
 {
     /**
      * When implemented with a PropertyTransformerInterface, this method is called to check if the transformer supports the given properties.

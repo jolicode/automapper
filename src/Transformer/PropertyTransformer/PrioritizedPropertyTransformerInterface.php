@@ -7,7 +7,7 @@ namespace AutoMapper\Transformer\PropertyTransformer;
 /**
  * @experimental
  */
-interface PrioritizedPropertyTransformerInterface
+interface PrioritizedPropertyTransformerInterface extends PropertyTransformerSupportInterface
 {
     public function getPriority(): int;
 }
