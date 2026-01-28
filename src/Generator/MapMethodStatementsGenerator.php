@@ -132,26 +132,32 @@ final readonly class MapMethodStatementsGenerator
              * }
              */
             $lastStatement = $statements[array_key_last($statements)];
-            \assert($lastStatement instanceof Stmt\If_);
-            $lastStatement->stmts = [
-                ...$lastStatement->stmts,
-                ...$addedDependenciesStatements,
-            ];
-            /*
-             * Generate else statements when the result is already an object, which means it has already been created,
-             * so we need to execute the statements that need to be executed before the constructor since the constructor has already been called
-             *
-             * ```php
-             * if (null !== $result) {
-             *     .. // create object statements
-             * } else {
-             *     // remap property from the constructor in case object already exists so we do not loose information
-             *     $source->propertyName = $this->extractCallbacks['propertyName']($source);
-             *     ...
-             * }
-             * ```
-             */
-            $statements[] = new Stmt\Else_(array_merge($addedDependenciesStatements, $duplicatedStatements));
+
+            if ($lastStatement instanceof Stmt\If_) {
+                $lastStatement->stmts = [
+                    ...$lastStatement->stmts,
+                    ...$addedDependenciesStatements,
+                ];
+
+                $statements[] = new Stmt\Else_(array_merge($addedDependenciesStatements, $duplicatedStatements));
+            } else {
+                $statements = [...$statements, ...$addedDependenciesStatements, ...$duplicatedStatements];
+            }
+
+        /*
+         * Generate else statements when the result is already an object, which means it has already been created,
+         * so we need to execute the statements that need to be executed before the constructor since the constructor has already been called
+         *
+         * ```php
+         * if (null !== $result) {
+         *     .. // create object statements
+         * } else {
+         *     // remap property from the constructor in case object already exists so we do not loose information
+         *     $source->propertyName = $this->extractCallbacks['propertyName']($source);
+         *     ...
+         * }
+         * ```
+         */
         } else {
             $statements = [...$statements, ...$addedDependenciesStatements];
         }

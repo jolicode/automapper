@@ -36,7 +36,6 @@ use AutoMapper\Transformer\DateTimeTransformerFactory;
 use AutoMapper\Transformer\DependentTransformerInterface;
 use AutoMapper\Transformer\DoctrineCollectionTransformerFactory;
 use AutoMapper\Transformer\EnumTransformerFactory;
-use AutoMapper\Transformer\MapperDependency;
 use AutoMapper\Transformer\MixedTransformerFactory;
 use AutoMapper\Transformer\MultipleTransformerFactory;
 use AutoMapper\Transformer\NullableTargetTransformerFactory;
@@ -106,22 +105,14 @@ final class MetadataFactory
             }
 
             // Add dependencies from discriminator to the mapper
-            if ($this->classDiscriminatorResolver->hasClassDiscriminator($metadata, true)) {
-                foreach ($this->classDiscriminatorResolver->discriminatorMapperNames($metadata, true) as $newSourceType => $mapperDependencyName) {
-                    $dependencyMetadata = $this->getGeneratorMetadata($newSourceType, $metadata->mapperMetadata->target);
-                    $mapperDependency = new MapperDependency($mapperDependencyName, $newSourceType, $metadata->mapperMetadata->target);
-
-                    $metadata->addDependency(new Dependency($mapperDependency, $dependencyMetadata));
-                }
+            foreach ($this->classDiscriminatorResolver->getMappersList($metadata, true) as $mapperDependency) {
+                $dependencyMetadata = $this->getGeneratorMetadata($mapperDependency->source, $mapperDependency->target);
+                $metadata->addDependency(new Dependency($mapperDependency, $dependencyMetadata));
             }
 
-            if ($this->classDiscriminatorResolver->hasClassDiscriminator($metadata, false)) {
-                foreach ($this->classDiscriminatorResolver->discriminatorMapperNames($metadata, false) as $newTargetType => $mapperDependencyName) {
-                    $dependencyMetadata = $this->getGeneratorMetadata($metadata->mapperMetadata->source, $newTargetType);
-                    $mapperDependency = new MapperDependency($mapperDependencyName, $metadata->mapperMetadata->source, $newTargetType);
-
-                    $metadata->addDependency(new Dependency($mapperDependency, $dependencyMetadata));
-                }
+            foreach ($this->classDiscriminatorResolver->getMappersList($metadata, false) as $mapperDependency) {
+                $dependencyMetadata = $this->getGeneratorMetadata($mapperDependency->source, $mapperDependency->target);
+                $metadata->addDependency(new Dependency($mapperDependency, $dependencyMetadata));
             }
         }
 
@@ -152,16 +143,12 @@ final class MetadataFactory
             }
 
             // Add dependencies from discriminator to the mapper
-            if ($this->classDiscriminatorResolver->hasClassDiscriminator($generatorMetadata, true)) {
-                foreach ($this->classDiscriminatorResolver->discriminatorMapperNames($generatorMetadata, true) as $newSourceType => $mapperDependencyName) {
-                    $remainingMetadata[] = $metadataRegistry->get($newSourceType, $generatorMetadata->mapperMetadata->target);
-                }
+            foreach ($this->classDiscriminatorResolver->getMappersList($generatorMetadata, true) as $mapperDependency) {
+                $remainingMetadata[] = $metadataRegistry->get($mapperDependency->source, $mapperDependency->target);
             }
 
-            if ($this->classDiscriminatorResolver->hasClassDiscriminator($generatorMetadata, false)) {
-                foreach ($this->classDiscriminatorResolver->discriminatorMapperNames($generatorMetadata, false) as $newTargetType => $mapperDependencyName) {
-                    $remainingMetadata[] = $metadataRegistry->get($generatorMetadata->mapperMetadata->source, $newTargetType);
-                }
+            foreach ($this->classDiscriminatorResolver->getMappersList($generatorMetadata, false) as $mapperDependency) {
+                $remainingMetadata[] = $metadataRegistry->get($mapperDependency->source, $mapperDependency->target);
             }
         }
     }
@@ -344,6 +331,8 @@ final class MetadataFactory
             $mapperEvent->allowReadOnlyTargetToPopulate ?? $this->configuration->allowReadOnlyTargetToPopulate,
             $mapperEvent->strictTypes ?? $this->configuration->strictTypes,
             $mapperEvent->provider,
+            $mapperEvent->sourceDiscriminator,
+            $mapperEvent->targetDiscriminator,
         );
     }
 

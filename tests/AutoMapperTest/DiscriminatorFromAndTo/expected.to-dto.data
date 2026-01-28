@@ -1,0 +1,6 @@
+AutoMapper\Tests\AutoMapperTest\DiscriminatorFromAndTo\OwnerDto {
+  +pet: AutoMapper\Tests\AutoMapperTest\DiscriminatorFromAndTo\DogDto {
+    +name: "Rex"
+    +breed: "German Shepherd"
+  }
+}

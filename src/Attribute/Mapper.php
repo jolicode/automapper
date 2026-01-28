@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Attribute;
 
 use AutoMapper\ConstructorStrategy;
+use AutoMapper\Metadata\Discriminator;
 
 /**
  * Configures a mapper.
@@ -27,6 +28,7 @@ final readonly class Mapper
         public int $priority = 0,
         public ?string $dateTimeFormat = null,
         public ?bool $allowExtraProperties = null,
+        public ?Discriminator $discriminator = null,
     ) {
     }
 }

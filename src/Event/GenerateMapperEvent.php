@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AutoMapper\Event;
 
 use AutoMapper\ConstructorStrategy;
+use AutoMapper\Metadata\Discriminator;
 use AutoMapper\Metadata\MapperMetadata;
 
 /**
@@ -24,6 +25,8 @@ final class GenerateMapperEvent
         public ?bool $allowReadOnlyTargetToPopulate = null,
         public ?bool $strictTypes = null,
         public ?bool $allowExtraProperties = null,
+        public ?Discriminator $sourceDiscriminator = null,
+        public ?Discriminator $targetDiscriminator = null,
     ) {
     }
 }

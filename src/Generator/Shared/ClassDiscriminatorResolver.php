@@ -6,91 +6,70 @@ namespace AutoMapper\Generator\Shared;
 
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\PropertyMetadata;
-use AutoMapper\Transformer\TransformerInterface;
-use Symfony\Component\Serializer\Mapping\ClassDiscriminatorMapping;
-use Symfony\Component\Serializer\Mapping\ClassDiscriminatorResolverInterface;
+use AutoMapper\Transformer\MapperDependency;
 
 /**
  * @internal
  */
 final readonly class ClassDiscriminatorResolver
 {
-    public function __construct(
-        private ?ClassDiscriminatorResolverInterface $classDiscriminator = null,
-    ) {
-    }
-
     public function hasClassDiscriminator(GeneratorMetadata $metadata, bool $fromSource): bool
     {
-        if (!($fromSource ? $metadata->isSourceUserDefined() : $metadata->isTargetUserDefined())
-            || !($propertyMetadata = $this->getDiscriminatorPropertyMetadata($metadata, $fromSource))
-            || !$propertyMetadata->transformer instanceof TransformerInterface
-        ) {
-            return false;
+        if ($fromSource) {
+            return $metadata->sourceDiscriminator !== null;
         }
 
-        return true;
+        return $metadata->targetDiscriminator !== null;
     }
 
     public function getDiscriminatorPropertyMetadata(GeneratorMetadata $metadata, bool $fromSource): ?PropertyMetadata
     {
-        $classDiscriminatorMapping = $this->classDiscriminator?->getMappingForClass($fromSource ? $metadata->mapperMetadata->source : $metadata->mapperMetadata->target);
+        $discriminator = $fromSource ? $metadata->sourceDiscriminator : $metadata->targetDiscriminator;
 
-        if (!$classDiscriminatorMapping) {
+        if (!$discriminator) {
             return null;
         }
 
-        foreach ($metadata->propertiesMetadata as $propertyMetadata) {
-            if (($fromSource ? $propertyMetadata->source->property : $propertyMetadata->target->property) === $classDiscriminatorMapping->getTypeProperty()) {
-                return $propertyMetadata;
-            }
+        if ($discriminator->propertyName === null) {
+            return null;
         }
 
-        return null;
+        return array_find($metadata->propertiesMetadata,
+            fn ($propertyMetadata,
+            ) => ($fromSource ? $propertyMetadata->source->property : $propertyMetadata->target->property) === $discriminator->propertyName
+        );
     }
 
     /**
-     * @return array<class-string<object>, string>
+     * @return list<MapperDependency>
      */
-    public function discriminatorMapperNames(GeneratorMetadata $metadata, bool $fromSource): array
+    public function getMappersList(GeneratorMetadata $metadata, bool $fromSource): array
     {
-        $classDiscriminatorMapping = $this->classDiscriminator?->getMappingForClass($fromSource ? $metadata->mapperMetadata->source : $metadata->mapperMetadata->target);
+        $discriminator = $fromSource ? $metadata->sourceDiscriminator : $metadata->targetDiscriminator;
 
-        if (!$classDiscriminatorMapping) {
+        if (!$discriminator) {
             return [];
         }
 
-        return array_combine(
-            array_values($classDiscriminatorMapping->getTypesMapping()),
-            $this->discriminatorNames($metadata, $classDiscriminatorMapping, $fromSource)
-        );
-    }
+        $classList = array_values($discriminator->mapping);
+        $typeList = array_keys($discriminator->mapping);
+        $targetClassList = $discriminator->propertyName === null ? $typeList : array_fill(0, \count($classList), $fromSource ? $metadata->mapperMetadata->target : $metadata->mapperMetadata->source);
+        $mappers = [];
 
-    /**
-     * @return array<string, string>
-     */
-    public function discriminatorMapperNamesIndexedByTypeValue(GeneratorMetadata $metadata, bool $fromSource): array
-    {
-        $classDiscriminatorMapping = $this->classDiscriminator?->getMappingForClass($fromSource ? $metadata->mapperMetadata->source : $metadata->mapperMetadata->target);
+        foreach ($classList as $index => $className) {
+            /** @var class-string $sourceClass */
+            $sourceClass = $fromSource ? $className : $targetClassList[$index];
+            /** @var class-string $targetClass */
+            $targetClass = $fromSource ? $targetClassList[$index] : $className;
 
-        if (!$classDiscriminatorMapping) {
-            return [];
+            $mappers[] = new MapperDependency(
+                name: "Discriminator_Mapper_{$sourceClass}_{$targetClass}",
+                source: $sourceClass,
+                target: $targetClass,
+                type: $typeList[$index],
+            );
         }
 
-        return array_combine(
-            array_keys($classDiscriminatorMapping->getTypesMapping()),
-            $this->discriminatorNames($metadata, $classDiscriminatorMapping, $fromSource)
-        );
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function discriminatorNames(GeneratorMetadata $metadata, ClassDiscriminatorMapping $classDiscriminatorMapping, bool $fromSource): array
-    {
-        return array_map(
-            static fn (string $typeTarget) => $fromSource ? "Discriminator_Mapper_{$typeTarget}_{$metadata->mapperMetadata->target}" : "Discriminator_Mapper_{$metadata->mapperMetadata->source}_{$typeTarget}",
-            $classDiscriminatorMapping->getTypesMapping()
-        );
+        return $mappers;
     }
 }

@@ -18,7 +18,7 @@ final readonly class MapperListener
 
     public function __invoke(GenerateMapperEvent $event): void
     {
-        /** @var Mapper[] $mappers */
+        /** @var array{0: Mapper, 1: bool}[] $mappers */
         $mappers = [];
 
         if ($event->mapperMetadata->sourceReflectionClass) {
@@ -27,15 +27,15 @@ final readonly class MapperListener
                 $mapper = $attribute->newInstance();
 
                 if ($mapper->target === null) {
-                    $mappers[] = $mapper;
+                    $mappers[] = [$mapper, true];
                 }
 
                 if (\is_string($mapper->target) && $mapper->target === $event->mapperMetadata->target) {
-                    $mappers[] = $mapper;
+                    $mappers[] = [$mapper, true];
                 }
 
                 if (\is_array($mapper->target) && \in_array($event->mapperMetadata->target, $mapper->target, true)) {
-                    $mappers[] = $mapper;
+                    $mappers[] = [$mapper, true];
                 }
             }
         }
@@ -46,28 +46,27 @@ final readonly class MapperListener
                 $mapper = $attribute->newInstance();
 
                 if ($mapper->source === null) {
-                    $mappers[] = $mapper;
+                    $mappers[] = [$mapper, false];
                 }
 
                 if (\is_string($mapper->source) && $mapper->source === $event->mapperMetadata->source) {
-                    $mappers[] = $mapper;
+                    $mappers[] = [$mapper, false];
                 }
 
                 if (\is_array($mapper->source) && \in_array($event->mapperMetadata->source, $mapper->source, true)) {
-                    $mappers[] = $mapper;
+                    $mappers[] = [$mapper, false];
                 }
             }
         }
-
         if (0 === \count($mappers)) {
             return;
         }
 
         // sort by priority
-        usort($mappers, fn (Mapper $a, Mapper $b) => $a->priority <=> $b->priority);
+        usort($mappers, fn (array $a, array $b) => $a[0]->priority <=> $b[0]->priority);
 
         // get mapper with highest priority
-        $mapper = $mappers[0];
+        [$mapper, $fromSource] = $mappers[0];
 
         $event->checkAttributes ??= $mapper->checkAttributes;
         $event->constructorStrategy ??= $mapper->constructorStrategy;
@@ -75,5 +74,13 @@ final readonly class MapperListener
         $event->strictTypes ??= $mapper->strictTypes;
         $event->allowExtraProperties ??= $mapper->allowExtraProperties;
         $event->mapperMetadata->dateTimeFormat = $mapper->dateTimeFormat;
+
+        if ($mapper->discriminator) {
+            if ($fromSource) {
+                $event->sourceDiscriminator = $mapper->discriminator;
+            } else {
+                $event->targetDiscriminator = $mapper->discriminator;
+            }
+        }
     }
 }

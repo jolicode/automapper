@@ -21,6 +21,7 @@ final readonly class MapperDependency
         public string $name,
         public string $source,
         public string $target,
+        public ?string $type = null,
     ) {
     }
 }
