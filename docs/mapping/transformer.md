@@ -126,10 +126,9 @@ namespace App\Transformer;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
-use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerSupportInterface;
 
-class UrlTransformer implements PropertyTransformerInterface, PropertyTransformerSupportInterface
+class UrlTransformer implements PropertyTransformerSupportInterface
 {
     public function __construct(private UrlGeneratorInterface $urlGenerator)
     {
@@ -158,7 +157,7 @@ If you have multiple transformers that can be applied to the same transformation
 ```php
 namespace App\Transformer;
 
-class UrlTransformer implements PropertyTransformerInterface, PropertyTransformerSupportInterface, PrioritizedPropertyTransformerInterface
+class UrlTransformer implements PropertyTransformerSupportInterface, PrioritizedPropertyTransformerInterface
 {
     // ...
     
@@ -170,3 +169,48 @@ class UrlTransformer implements PropertyTransformerInterface, PropertyTransforme
 ```
 
 When multiple transformers can be applied, the one with the highest priority will be used.
+
+### Computing extra data for the transformer
+
+In some cases you may want to compute extra data that will be passed to the transformer. This is possible by 
+implementing the `PropertyTransformerDataProviderInterface` interface.
+
+```php
+namespace App\Transformer;
+
+use AutoMapper\Metadata\MapperMetadata;
+use AutoMapper\Metadata\SourcePropertyMetadata;
+use AutoMapper\Metadata\TargetPropertyMetadata;
+use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerSupportInterface;
+
+class UrlTransformer implements PropertyTransformerComputeInterface
+{
+    public function __construct()
+    {
+    }
+    
+    public function supports(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool
+    {
+        return $source->type->isIdentifiedBy(TypeIdentifier::INT && $source->property === 'id' && $target->property === 'url';
+    }
+
+    public function compute(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): mixed
+    {
+        // Compute extra data here
+        return 'some computed data';
+    }
+    
+    public function transform(mixed $value, object|array $source, array $context, mixed $computed = null): mixed
+    {
+        return $computed . $value;
+    }
+}
+```
+
+The value returned by the `compute` method will be created when generating the mapper and passed as a static value to 
+the `transform` method each time it is needed.
+
+> [!WARNING]
+> This value is only computed when the transformer comes from guessed with the `supports` method. If you specify the transformer
+> manually in the `#[MapTo]` or `#[MapFrom]` attribute, the `compute` method will not be called and there will be no value passed
+> to the `transform` method.

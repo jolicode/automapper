@@ -26,6 +26,7 @@ automapper:
     reload_strategy: "always"
   serializer_attributes: true
   api_platform: false
+  object_mapper: false
   name_converter: null
   mapping:
     paths:
@@ -79,6 +80,8 @@ indicate if we use the attribute of the symfony/serializer during the mapping, t
 `#[MaxDepth]`, `#[Ignore]` and `#[DiscriminatorMap]` attributes;
 * `api_platform` (default: `false`): A boolean which indicate if we use services from the api-platform/core package and
 inject extra data (json ld) in the mappers when we map a Resource class to or from an array.
+* `object_mapper` (default: `false`): A boolean which indicate if we use attributes from the symfony/object-mapper
+component to configure the mapping, and use AutoMapper as an implementation for `ObjectMapperInterface`
 * `doctrine` (default: `false`): A boolean which indicate if we want to use service from doctrine to extract more 
     information about the classes, and use doctrine to fetch existing objects. It will use by default the `doctrine.orm.entity_manager`
     service if present, will then try to use the `doctrine_mongodb.odm.document_manager` service, or throw an exception if none of them

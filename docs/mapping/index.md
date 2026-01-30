@@ -5,7 +5,7 @@ a `source` and a `target`.
 
 - [Mapper attribute](mapper-attribute.md)
 - [MapTo and MapFrom attributes](attributes.md)
-- [Symfony Serializer attributes](serializer.md)
+- [Nested properties](nested.md)
 - [Mapping a collection](map-collection.md)
 - [Ignoring properties](ignoring-properties.md)
 - [Conditional mapping](conditional-mapping.md)
@@ -16,3 +16,4 @@ a `source` and a `target`.
 - [Mapping inheritance](inheritance.md)
 - [Identifier: mapping existing objects](identifier.md)
 - [DateTime format](date-time.md)
+- [Symfony Serializer attributes](serializer.md)

@@ -8,5 +8,6 @@ features linked to Symfony way of doing things.
 - [Cache Warmup](cache-warmup.md)
 - [Expression Language](expression-language.md)
 - [Api Platform](api-platform.md)
+- [Object Mapper](object-mapper.md)
 - [Migrate existing application](migrate.md)
 - [Debugging](debugging.md)

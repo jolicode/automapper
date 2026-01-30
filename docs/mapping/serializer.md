@@ -97,3 +97,20 @@ use Symfony\Component\Serializer\Serializer;
 $autoMapper = AutoMapper::create();
 $serializer = new Serializer([new AutoMapperNormalizer($autoMapper)]);
 ```
+
+### Discriminator Map
+
+The Symfony Serializer `#[DiscriminatorMap]` attribute can be used to define a discriminator map for polymorphic mapping.
+
+```php
+use Symfony\Component\Serializer\Annotation\DiscriminatorMap;
+
+#[DiscriminatorMap(typeProperty: 'type', mapping: [
+    'dog' => Dog::class,
+    'cat' => Cat::class,
+])]
+abstract class Pet
+{
+    public $name;
+}
+```
