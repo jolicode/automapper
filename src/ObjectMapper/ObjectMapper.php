@@ -20,9 +20,9 @@ final readonly class ObjectMapper implements ObjectMapperInterface
     private AutoMapperInterface $autoMapper;
 
     public function __construct(
-        private ObjectMapperMetadataFactoryInterface $metadataFactory = new ReflectionObjectMapperMetadataFactory(),
         ?AutoMapperInterface $autoMapper = null,
         private ?ContainerInterface $serviceLocator = null,
+        private ObjectMapperMetadataFactoryInterface $metadataFactory = new ReflectionObjectMapperMetadataFactory(),
     ) {
         $this->autoMapper = $autoMapper ?? AutoMapper::create();
     }

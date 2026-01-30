@@ -26,6 +26,11 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\ObjectMapper\ObjectMapperInterface;
+use AutoMapper\Tests\ObjectMapper\Fixtures\A;
+use AutoMapper\Tests\ObjectMapper\Fixtures\B;
+use AutoMapper\Tests\ObjectMapper\Fixtures\C;
+use AutoMapper\Tests\ObjectMapper\Fixtures\D;
 
 class ServiceInstantiationTest extends WebTestCase
 {
@@ -283,5 +288,40 @@ class ServiceInstantiationTest extends WebTestCase
     {
         parent::tearDown();
         restore_exception_handler();
+    }
+
+    #[DataProvider('mapProvider')]
+    public function testObjectMapper($expect, $args, array $deps = [])
+    {
+        static::bootKernel();
+        $mapper = static::$kernel->getContainer()->get(ObjectMapperInterface::class);
+        $mapped = $mapper->map(...$args);
+
+        $this->assertEquals($expect, $mapped);
+    }
+
+    /**
+     * @return iterable<array{0: object, 1: array, 2: array}>
+     */
+    public static function mapProvider(): iterable
+    {
+        $d = new D(baz: 'foo', bat: 'bar');
+        $c = new C(foo: 'foo', bar: 'bar');
+        $a = new A();
+        $a->foo = 'test';
+        $a->transform = 'test';
+        $a->baz = 'me';
+        $a->notinb = 'test';
+        $a->relation = $c;
+        $a->relationNotMapped = $d;
+
+        $b = new B('test');
+        $b->transform = 'TEST';
+        $b->baz = 'me';
+        $b->nomap = false;
+        $b->concat = 'shouldtestme';
+        $b->relation = $d;
+        $b->relationNotMapped = $d;
+        yield [$b, [$a]];
     }
 }

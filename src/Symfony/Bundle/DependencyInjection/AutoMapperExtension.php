@@ -136,6 +136,10 @@ class AutoMapperExtension extends Extension
             $loader->load('api_platform.php');
         }
 
+        if ($config['object_mapper']) {
+            $loader->load('object_mapper.php');
+        }
+
         if ($config['doctrine']) {
             $loader->load('doctrine.php');
         }

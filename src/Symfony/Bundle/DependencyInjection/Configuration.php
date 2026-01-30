@@ -42,6 +42,7 @@ readonly class Configuration implements ConfigurationInterface
                 ->end()
                 ->booleanNode('serializer_attributes')->defaultValue(interface_exists(SerializerInterface::class))->end()
                 ->booleanNode('api_platform')->defaultFalse()->end()
+                ->booleanNode('object_mapper')->defaultFalse()->end()
                 ->booleanNode('doctrine')->defaultFalse()->end()
                 ->scalarNode('name_converter')->defaultNull()->end()
                 ->arrayNode('loader')

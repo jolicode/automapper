@@ -320,7 +320,7 @@ final class ObjectMapperTest extends AutoMapperTestCase
 
         $metadata = $this->createStub(ObjectMapperMetadataFactoryInterface::class);
         $metadata->method('create')->with($u)->willReturn([new Mapping(target: \stdClass::class, transform: fn () => 'str')]);
-        $mapper = new ObjectMapper($metadata);
+        $mapper = new ObjectMapper(metadataFactory: $metadata);
         $mapper->map($u);
     }
 
@@ -334,7 +334,7 @@ final class ObjectMapperTest extends AutoMapperTestCase
 
         $metadata = $this->createStub(ObjectMapperMetadataFactoryInterface::class);
         $metadata->method('create')->with($u)->willReturn([new Mapping(target: ClassWithoutTarget::class, transform: fn () => new \stdClass())]);
-        $mapper = new ObjectMapper($metadata);
+        $mapper = new ObjectMapper(metadataFactory: $metadata);
         $mapper->map($u);
     }
 
