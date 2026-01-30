@@ -1,0 +1,6 @@
+AutoMapper\Tests\AutoMapperTest\DiscriminatorAttributeArray\Owner {
+  +pet: AutoMapper\Tests\AutoMapperTest\DiscriminatorAttributeArray\Dog {
+    +name: "Rex"
+    +breed: "German Shepherd"
+  }
+}
