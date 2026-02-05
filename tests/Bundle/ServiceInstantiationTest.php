@@ -20,6 +20,10 @@ use AutoMapper\Tests\Bundle\Resources\App\Entity\FooMapTo;
 use AutoMapper\Tests\Bundle\Resources\App\Entity\SomeEnum;
 use AutoMapper\Tests\Bundle\Resources\App\Entity\User;
 use AutoMapper\Tests\Bundle\Resources\App\Entity\UserDTO;
+use AutoMapper\Tests\ObjectMapper\Fixtures\A;
+use AutoMapper\Tests\ObjectMapper\Fixtures\B;
+use AutoMapper\Tests\ObjectMapper\Fixtures\C;
+use AutoMapper\Tests\ObjectMapper\Fixtures\D;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Filesystem\Filesystem;
@@ -27,10 +31,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
-use AutoMapper\Tests\ObjectMapper\Fixtures\A;
-use AutoMapper\Tests\ObjectMapper\Fixtures\B;
-use AutoMapper\Tests\ObjectMapper\Fixtures\C;
-use AutoMapper\Tests\ObjectMapper\Fixtures\D;
 
 class ServiceInstantiationTest extends WebTestCase
 {
