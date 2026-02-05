@@ -6,6 +6,7 @@ automapper:
     eval: false
     reload_strategy: 'always'
   api_platform: true
+  object_mapper: true
   doctrine: true
   name_converter: AutoMapper\Tests\Bundle\Resources\App\Service\IdNameConverter
   map_private_properties: false

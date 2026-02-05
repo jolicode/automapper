@@ -1,0 +1,7 @@
+[
+  "pet" => [
+    "breed" => "German Shepherd"
+    "name" => "Rex"
+    "type" => "dog"
+  ]
+]

@@ -7,24 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- [GH#297](https://github.com/jolicode/automapper/pull/297) : Support PHP 8.5 and Symfony 8, this library now use the `TypeInfo` Component for types instead of PropertyInfo directly.
-- Debug command now show the type of each property mapped, transformers will also display more information.
-- Profiler now show the type of each property mapped, transformers will also display more information.
-- Add a castor task to serve the symfony app in tests for debugging purpose.
-- [GH#304](https://github.com/jolicode/automapper/pull/304) ; Allow to override source and/or target property type 
-- Add support for static callable in attribute transformer 
-- Initial support for nested properties
-- Add support for object invokable transformer in attribute transformer
-- Add a new interface `PropertyTransformerComputeInterface` to allow property transformers with supports, to compute a value that will be fixed during code generation.
-- Support ObjectMapper attributes
-- Add an implementation for Symfony `ObjectMapperInterface` using AutoMapper
+- [GH#297](https://github.com/jolicode/automapper/pull/297) Support PHP 8.5 and Symfony 8, this library now use the `TypeInfo` Component for types instead of PropertyInfo directly.
+- [GH#297](https://github.com/jolicode/automapper/pull/297) Debug command now show the type of each property mapped, transformers will also display more information.
+- [GH#297](https://github.com/jolicode/automapper/pull/297) Profiler now show the type of each property mapped, transformers will also display more information.
+- [GH#304](https://github.com/jolicode/automapper/pull/304) Allow to override source and/or target property type.
+- [GH#314](https://github.com/jolicode/automapper/pull/314) Add support for static callable in attribute transformer.
+- [GH#317](https://github.com/jolicode/automapper/pull/317) Initial support for nested properties.
+- [GH#318](https://github.com/jolicode/automapper/pull/318) Add support for lazy mapping.
+- [GH#316](https://github.com/jolicode/automapper/pull/316) Add support for object invokable transformer in attribute transformer.
+- [GH#319](https://github.com/jolicode/automapper/pull/319) Add support for discriminator with `Mapper` attribute.
+- [GH#320](https://github.com/jolicode/automapper/pull/320) Add a new interface `PropertyTransformerComputeInterface` to allow property transformers with supports, to compute a value that will be fixed during code generation.
+- [GH#306](https://github.com/jolicode/automapper/pull/306) Support ObjectMapper attributes.
+- [GH#306](https://github.com/jolicode/automapper/pull/306) Add an implementation for Symfony `ObjectMapperInterface` using AutoMapper.
 
 ### Changed
-- [BC Break] `PropertyTransformerSupportInterface` does not use a `TypesMatching` anymore, you can get the type directly from `SourcePropertyMetadata` or `TargetPropertyMetadata`.
-- [BC BREAK] `ProviderInterface::provide` method now receive also the identifiers of the object to provide.
+- **[BC Break]** [GH#297](https://github.com/jolicode/automapper/pull/297) `PropertyTransformerSupportInterface` does not use a `TypesMatching` anymore, you can get the type directly from `SourcePropertyMetadata` or `TargetPropertyMetadata`.
+- **[BC Break]** [GH#297](https://github.com/jolicode/automapper/pull/297) `ProviderInterface::provide` method now receive also the identifiers of the object to provide.
 
 ### Fixed
  - [GH#303](https://github.com/jolicode/automapper/pull/302) Fix api platform not returning an iri when there is no property mapped.
+
+### Miscellaneous
+- [GH#297](https://github.com/jolicode/automapper/pull/297) Add a castor task to serve the symfony app in tests for debugging purpose.
 
 ## [9.5.0] - 2025-09-18
 ### Added
