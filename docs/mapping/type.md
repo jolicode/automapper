@@ -7,13 +7,13 @@ like an array or `\stdClass`, the property type is not available.
 
 In this case the type is, by default, transformed to a native PHP type (`int`, `float`, `string`, `bool`, `array`, `object`, `null`).
 
-You can override this behavior by specifying the `sourcePropertyType` or `targetPropertyType` argument in the 
-`#[MapTo]` or `#[MapFrom]` attributes.
+You can override this behavior by specifying the `sourcePropertyType` or `targetPropertyType` argument in the `#[MapTo]` or 
+`#[MapFrom]` attributes. You can override the source type, the target type, or both, depending on the mapping direction.
 
 ```php
 class Entity
 {
-    #[MapTo(target: 'array', targetPropertyType: 'int']
+    #[MapTo(target: 'array', targetPropertyType: 'int')]
     public string $number;
 }
 ```
@@ -25,7 +25,7 @@ This can also be useful when mapping to an object type with an union type, but y
 ```php
 class EntityDto
 {
-    #[MapTo(target: Entity:class, sourcePropertyType: 'int']
+    #[MapTo(target: Entity::class, sourcePropertyType: 'int')]
     private int|float $value;
 }
 ```

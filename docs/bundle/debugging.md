@@ -23,3 +23,13 @@ You can find the panel in the Symfony profiler under the `AutoMapper` tab.
 
 ![Profiler](../images/debug-profiler-1.png)
 ![Profiler](../images/debug-profiler-2.png)
+
+## What is displayed
+
+Both the debug command and the profiler show the same kind of information for each mapper:
+
+- **Property types:** For each mapped property, the source and target property names are shown **with their types** (e.g. `title (string) -> name (string)`). This helps you see how AutoMapper interprets each property and which transformer will be used.
+- **Transformer:** The transformer used for each property is displayed. When the transformer supports it, a detailed description is shown (e.g. `ObjectTransformer<SourceType, TargetType>` for object-to-object mapping, or nested type information for array transformers).
+- **Ignored / not used properties:** Properties that are not mapped are listed with the reason they are skipped (e.g. no matching source property, ignored by attribute, or condition not met).
+
+In the profiler, you can also use **Show Code** for each property to see the exact generated PHP snippet that performs the mapping.
