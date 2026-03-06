@@ -1,0 +1,13 @@
+AutoMapper\Tests\AutoMapperTest\ArraySourceCastShapeNested\Dto {
+  +data: [
+    "count" => 5
+    "tags" => [
+      "php"
+      "symfony"
+    ]
+    "user" => [
+      "age" => 28
+      "name" => "Alice"
+    ]
+  ]
+}

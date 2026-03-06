@@ -1,0 +1,16 @@
+AutoMapper\Tests\AutoMapperTest\ArraySourceCastShapeComplex\DtoNestedShapeWithCollection {
+  +data: [
+    "items" => [
+      AutoMapper\Tests\AutoMapperTest\ArraySourceCastShapeComplex\Tag {
+        +label: "a"
+      }
+      AutoMapper\Tests\AutoMapperTest\ArraySourceCastShapeComplex\Tag {
+        +label: "b"
+      }
+    ]
+    "meta" => [
+      "count" => 7
+      "title" => "Test"
+    ]
+  ]
+}

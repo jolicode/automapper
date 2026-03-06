@@ -1,0 +1,18 @@
+AutoMapper\Tests\AutoMapperTest\ArraySourceCastShapeComplex\DtoObjectsAndScalars {
+  +data: [
+    "active" => true
+    "profile" => AutoMapper\Tests\AutoMapperTest\ArraySourceCastShapeComplex\Profile {
+      +name: "Alice"
+      +age: 28
+    }
+    "score" => 100
+    "tags" => [
+      AutoMapper\Tests\AutoMapperTest\ArraySourceCastShapeComplex\Tag {
+        +label: "php"
+      }
+      AutoMapper\Tests\AutoMapperTest\ArraySourceCastShapeComplex\Tag {
+        +label: "symfony"
+      }
+    ]
+  ]
+}

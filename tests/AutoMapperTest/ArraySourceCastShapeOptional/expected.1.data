@@ -1,0 +1,6 @@
+AutoMapper\Tests\AutoMapperTest\ArraySourceCastShapeOptional\Dto {
+  +profile: [
+    "age" => 25
+    "name" => "Jane"
+  ]
+}

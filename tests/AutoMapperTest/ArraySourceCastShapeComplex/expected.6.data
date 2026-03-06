@@ -1,0 +1,14 @@
+AutoMapper\Tests\AutoMapperTest\ArraySourceCastShapeComplex\DtoMixedDepth {
+  +data: [
+    "users" => [
+      [
+        "name" => "Alice"
+        "score" => 9.5
+      ]
+      [
+        "name" => "Bob"
+        "score" => 8.0
+      ]
+    ]
+  ]
+}
