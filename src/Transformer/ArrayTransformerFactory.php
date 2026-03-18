@@ -48,7 +48,7 @@ final class ArrayTransformerFactory implements TransformerFactoryInterface, Prio
                     $fieldSourceType = $sourceShape[$key]['type'] ?? Type::mixed();
                     [$fieldSourceType] = $this->overrideSourceCollectionType($fieldSourceType, $fieldTargetType);
                 } else {
-                    $fieldSourceType = $fieldTargetType;
+                    $fieldSourceType = $sourceShape[$key]['type'] ?? $fieldTargetType;
                 }
 
                 $newSource = $source->withType($fieldSourceType);
