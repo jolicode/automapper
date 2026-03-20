@@ -31,44 +31,6 @@ final class ArrayTransformerFactory implements TransformerFactoryInterface, Prio
             return null;
         }
 
-        // Handle array shape types — per-key transformers (skip empty shapes from object mapping)
-        if ($targetType instanceof Type\ArrayShapeType && [] !== $targetType->getShape()) {
-            $fieldTransformers = [];
-            $sourceIsUntyped = isset($mapperMetadata->source)
-                && \in_array($mapperMetadata->source, ['array', \stdClass::class, LazyMap::class], true);
-
-            $sourceShape = $sourceType instanceof Type\ArrayShapeType ? $sourceType->getShape() : [];
-
-            foreach ($targetType->getShape() as $key => $field) {
-                $fieldTargetType = $field['type'];
-
-                if ($sourceIsUntyped) {
-                    // Use the mirrored source type from FromTargetMappingExtractor,
-                    // then override to mixed only for matching builtins (to force casts).
-                    $fieldSourceType = $sourceShape[$key]['type'] ?? Type::mixed();
-                    [$fieldSourceType] = $this->overrideSourceCollectionType($fieldSourceType, $fieldTargetType);
-                } else {
-                    $fieldSourceType = $sourceShape[$key]['type'] ?? $fieldTargetType;
-                }
-
-                $newSource = $source->withType($fieldSourceType);
-                $newTarget = $target->withType($fieldTargetType);
-
-                $fieldTransformer = $this->chainTransformerFactory->getTransformer($newSource, $newTarget, $mapperMetadata);
-
-                if (null === $fieldTransformer) {
-                    return null;
-                }
-
-                $fieldTransformers[$key] = [
-                    'transformer' => $fieldTransformer,
-                    'optional' => $field['optional'],
-                ];
-            }
-
-            return new ArrayShapeTransformer($fieldTransformers);
-        }
-
         if (!$this->isCollectionType($sourceType) || !$this->isCollectionType($targetType)) {
             return null;
         }

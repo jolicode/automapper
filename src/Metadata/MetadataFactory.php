@@ -30,6 +30,7 @@ use AutoMapper\Extractor\SourceTargetMappingExtractor;
 use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
 use AutoMapper\Lazy\LazyMap;
 use AutoMapper\Transformer\AllowNullValueTransformerInterface;
+use AutoMapper\Transformer\ArrayShapeTransformerFactory;
 use AutoMapper\Transformer\ArrayTransformerFactory;
 use AutoMapper\Transformer\BuiltinTransformerFactory;
 use AutoMapper\Transformer\ChainTransformerFactory;
@@ -406,6 +407,7 @@ final class MetadataFactory
             new UniqueTypeTransformerFactory(),
             new DateTimeTransformerFactory(),
             new BuiltinTransformerFactory(),
+            new ArrayShapeTransformerFactory(),
             new ArrayTransformerFactory(),
             new ObjectTransformerFactory(),
             new EnumTransformerFactory(),

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use AutoMapper\Transformer\ArrayShapeTransformerFactory;
 use AutoMapper\Transformer\ArrayTransformerFactory;
 use AutoMapper\Transformer\BuiltinTransformerFactory;
 use AutoMapper\Transformer\ChainTransformerFactory;
@@ -49,8 +50,11 @@ return static function (ContainerConfigurator $container) {
         ->set(BuiltinTransformerFactory::class)
             ->tag('automapper.transformer_factory', ['priority' => -1001])
 
-        ->set(ArrayTransformerFactory::class)
+        ->set(ArrayShapeTransformerFactory::class)
             ->tag('automapper.transformer_factory', ['priority' => -1002])
+
+        ->set(ArrayTransformerFactory::class)
+            ->tag('automapper.transformer_factory', ['priority' => -1003])
 
         ->set(ObjectTransformerFactory::class)
             ->tag('automapper.transformer_factory', ['priority' => -1004])
