@@ -1,0 +1,7 @@
+AutoMapper\Tests\AutoMapperTest\ArraySourceCastShapeComplex\DtoNullableAndOptional {
+  +data: [
+    "age" => 30
+    "bio" => "Hello world"
+    "name" => "John"
+  ]
+}

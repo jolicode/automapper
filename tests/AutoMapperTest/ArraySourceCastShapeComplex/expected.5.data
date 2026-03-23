@@ -1,0 +1,8 @@
+AutoMapper\Tests\AutoMapperTest\ArraySourceCastShapeComplex\DtoDateTimeInShape {
+  +data: [
+    "created" => DateTimeImmutable @1736937000 {
+      date: 2025-01-15 10:30:00.0 +00:00
+    }
+    "label" => "event"
+  ]
+}

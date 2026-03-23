@@ -92,6 +92,23 @@ final class FromTargetMappingExtractor extends MappingExtractor
             return new Type\IntersectionType(...$types);
         }
 
+        if ($type instanceof Type\ArrayShapeType) {
+            $transformedShape = [];
+            foreach ($type->getShape() as $key => $field) {
+                $transformedType = $this->transformTargetType($source, $field['type']);
+                $transformedShape[$key] = [
+                    'type' => $transformedType ?? Type::mixed(),
+                    'optional' => $field['optional'],
+                ];
+            }
+
+            return new Type\ArrayShapeType(
+                $transformedShape,
+                $type->getExtraKeyType(),
+                $type->getExtraValueType(),
+            );
+        }
+
         if ($type instanceof Type\CollectionType) {
             $keyType = $this->transformTargetType($source, $type->getCollectionKeyType());
             $valueType = $this->transformTargetType($source, $type->getCollectionValueType());

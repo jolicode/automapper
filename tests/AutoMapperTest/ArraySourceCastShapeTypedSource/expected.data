@@ -1,0 +1,7 @@
+AutoMapper\Tests\AutoMapperTest\ArraySourceCastShapeTypedSource\TargetDto {
+  +data: [
+    "active" => true
+    "age" => 30
+    "score" => 9.5
+  ]
+}
