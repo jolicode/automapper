@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [9.5.1] - 2026-04-27
+### Fixed
+- Allow type resolver deps in 2.0 
+
 ## [9.5.0] - 2025-09-18
 ### Added
 - [GH#260](https://github.com/jolicode/automapper/pull/260) Add support for identifiers detection and comparison of objects, this allow mappers to detect if objects are equals based on some properties, which allow better deep merge / update of collections. 
