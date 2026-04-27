@@ -27,7 +27,7 @@
         "symfony/property-info": "^7.4 || ^8.0",
         "symfony/property-access": "^7.4 || ^8.0",
         "symfony/type-info": "^7.4 || ^8.0",
-        "phpdocumentor/type-resolver": "^1.12",
+        "phpdocumentor/type-resolver": "^1.12 || ^2.0",
         "phpstan/phpdoc-parser": "^2.3"
     },
     "require-dev": {
