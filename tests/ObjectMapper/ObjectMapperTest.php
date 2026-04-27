@@ -421,7 +421,7 @@ final class ObjectMapperTest extends AutoMapperTestCase
         $this->assertTrue($lazy->isLazyObjectInitialized());
     }
 
-    #[RequiresPhp('>=8.4')]
+    #[RequiresPhp('>=8.4.0')]
     public function testMapInitializesNativePhp84LazyObject()
     {
         $initialized = false;
@@ -549,7 +549,7 @@ final class ObjectMapperTest extends AutoMapperTestCase
         $this->assertEquals([new TransformCollectionD('a'), new TransformCollectionD('b')], $transformed->foo);
     }
 
-    #[RequiresPhp('>=8.4')]
+    #[RequiresPhp('>=8.4.0')]
     public function testEmbedsAreLazyLoadedByDefault()
     {
         $this->markTestSkipped('Lazy Loading is not enable by default and works differently.');
