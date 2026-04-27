@@ -12,6 +12,7 @@ use AutoMapper\Metadata\TargetPropertyMetadata;
 use AutoMapper\Symfony\Bundle\CacheWarmup\CacheWarmer;
 use AutoMapper\Symfony\Bundle\DataCollector\MetadataCollector;
 use AutoMapper\Tests\Bundle\Resources\App\AppKernel;
+use AutoMapper\Tests\Bundle\Resources\App\Entity\Address;
 use AutoMapper\Tests\Bundle\Resources\App\Entity\AddressDTO;
 use AutoMapper\Tests\Bundle\Resources\App\Entity\ClassWithMapToContextAttribute;
 use AutoMapper\Tests\Bundle\Resources\App\Entity\ClassWithPrivateProperty;
@@ -156,7 +157,7 @@ class ServiceInstantiationTest extends WebTestCase
     public static function mapFromClassWithPrivatePropertyProvider(): iterable
     {
         yield 'disallow private properties' => [[], []];
-        yield 'allow private properties' => [['additionalConfigFile' => __DIR__ . '/Resources/config/with-private-properties.yml'], ['foo' => 'foo', 'bar' => 'bar']];
+        yield 'allow private properties' => [['additionalConfigFile' => __DIR__ . '/Resources/config/with-private-properties.yml'], ['foo' => 'foo', 'bar' => 'bar', 'addresses' => []]];
     }
 
     /**
@@ -323,5 +324,20 @@ class ServiceInstantiationTest extends WebTestCase
         $b->relation = $d;
         $b->relationNotMapped = $d;
         yield [$b, [$a]];
+    }
+
+    public function testMapFromClassWithPrivatePropertyPhpstan(): void
+    {
+        static::bootKernel([
+            'additionalConfigFile' => __DIR__ . '/Resources/config/with-private-properties.yml',
+        ]);
+        $autoMapper = self::getContainer()->get(AutoMapperInterface::class);
+        $address = new Address();
+        $address->setCity('Toulon');
+
+        self::assertEquals(
+            ['foo' => 'foo', 'bar' => 'bar', 'addresses' => [['city' => 'Toulon']]],
+            $autoMapper->map(new ClassWithPrivateProperty('foo', [$address]), 'array')
+        );
     }
 }

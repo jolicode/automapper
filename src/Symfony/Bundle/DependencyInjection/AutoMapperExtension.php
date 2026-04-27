@@ -76,6 +76,12 @@ class AutoMapperExtension extends Extension
         if ($config['map_private_properties']) {
             $container->getDefinition('automapper.property_info.reflection_extractor')
                 ->replaceArgument('$accessFlags', ReflectionExtractor::ALLOW_PUBLIC | ReflectionExtractor::ALLOW_PRIVATE | ReflectionExtractor::ALLOW_PROTECTED);
+
+            $container->getDefinition('automapper.property_info.phpstan_source_extractor')
+                ->replaceArgument('$allowPrivateAccess', true);
+
+            $container->getDefinition('automapper.property_info.phpstan_target_extractor')
+                ->replaceArgument('$allowPrivateAccess', true);
         }
 
         $container->setParameter('automapper.map_private_properties', $config['map_private_properties']);
