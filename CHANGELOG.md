@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [10.2.0] - 2026-27-04
+### Added
+- [GH#336](https://github.com/jolicode/automapper/pull/336) Support for array shape
+
+### Fixed
+- [GH#340](https://github.com/jolicode/automapper/pull/340) Allow type resolver in 2.0 for dependencies
+- [GH#341](https://github.com/jolicode/automapper/pull/341) Fix phpstan extractor not using private properties in bundle
+
 ## [10.1.0] - 2026-18-03
 ### Added
 - [GH#328](https://github.com/jolicode/automapper/pull/328) Register mappers as lazy to reduce initialization calls when sub mappers are not used
