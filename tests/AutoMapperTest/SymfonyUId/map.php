@@ -56,7 +56,7 @@ class SymfonyUuidUser
     }
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     // array -> object

@@ -18,7 +18,7 @@ use PhpParser\Node\Stmt;
 final readonly class IdentifierHashGenerator
 {
     /**
-     * @return list<Stmt>
+     * @return Stmt[]
      */
     private function getStatements(GeneratorMetadata $metadata, bool $fromSource): array
     {

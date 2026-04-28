@@ -22,7 +22,7 @@ use Symfony\Component\DependencyInjection\ServiceLocator;
  */
 class AutoMapperMapToTest extends AutoMapperTestCase
 {
-    public function testMapTo()
+    public function testMapTo(): void
     {
         $foo = new FooMapTo('foo');
         $bar = $this->autoMapper->map($foo, Bar::class);
@@ -34,10 +34,10 @@ class AutoMapperMapToTest extends AutoMapperTestCase
         $this->assertSame('d', $bar->getB());
     }
 
-    public function testMapToArray()
+    public function testMapToArray(): void
     {
         $expressionLanguageProvider = new ExpressionLanguageProvider(new ServiceLocator([
-            'transformerWithDependency' => fn () => fn () => new TransformerWithDependency(new FooDependency()),
+            'transformerWithDependency' => static fn () => static fn () => new TransformerWithDependency(new FooDependency()),
         ]));
 
         $this->autoMapper = AutoMapperBuilder::buildAutoMapper(propertyTransformers: [new TransformerWithDependency(new FooDependency())], expressionLanguageProvider: $expressionLanguageProvider);
@@ -84,10 +84,10 @@ class AutoMapperMapToTest extends AutoMapperTestCase
         $this->assertSame(0.0, $bar['fooFloat']);
     }
 
-    public function testMapToArrayGroups()
+    public function testMapToArrayGroups(): void
     {
         $expressionLanguageProvider = new ExpressionLanguageProvider(new ServiceLocator([
-            'transformerWithDependency' => fn () => fn () => new TransformerWithDependency(new FooDependency()),
+            'transformerWithDependency' => static fn () => static fn () => new TransformerWithDependency(new FooDependency()),
         ]));
 
         $this->autoMapper = AutoMapperBuilder::buildAutoMapper(propertyTransformers: [new TransformerWithDependency(new FooDependency())], expressionLanguageProvider: $expressionLanguageProvider);
@@ -107,7 +107,7 @@ class AutoMapperMapToTest extends AutoMapperTestCase
         self::assertArrayNotHasKey('externalProperty', $bar);
     }
 
-    public function testMapFromArray()
+    public function testMapFromArray(): void
     {
         $foo = ['b' => 'foo', 'bar' => 'bar', 'baz' => 'baz', 'foo' => 'foo', 'c' => 'foo', 'd' => 'foo'];
         $bar = $this->autoMapper->map($foo, Bar::class);
@@ -120,7 +120,7 @@ class AutoMapperMapToTest extends AutoMapperTestCase
         $this->assertSame('', $bar->getB());
     }
 
-    public function testPriority()
+    public function testPriority(): void
     {
         $foo = new PriorityMapTo('foo');
 
@@ -130,7 +130,7 @@ class AutoMapperMapToTest extends AutoMapperTestCase
         self::assertSame('foo', $result['foo']);
     }
 
-    public function testBadDefinitionOnTransformer()
+    public function testBadDefinitionOnTransformer(): void
     {
         $foo = new BadMapToTransformer('foo');
 

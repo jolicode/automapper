@@ -22,7 +22,7 @@ class Library
     public Collection $books;
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     $library = new Library();

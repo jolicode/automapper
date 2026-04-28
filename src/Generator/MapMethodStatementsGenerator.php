@@ -47,7 +47,7 @@ final readonly class MapMethodStatementsGenerator
     }
 
     /**
-     * @return array{0: list<Stmt>, 1: list<Stmt>, 2: list<Stmt>}
+     * @return array{0: Stmt[], 1: Stmt[], 2: Stmt[]}
      */
     public function getMappingStatements(GeneratorMetadata $metadata): array
     {
@@ -96,9 +96,9 @@ final readonly class MapMethodStatementsGenerator
     }
 
     /**
-     * @param list<Stmt> $duplicatedStatements
+     * @param Stmt[] $duplicatedStatements
      *
-     * @return list<Stmt>
+     * @return Stmt[]
      */
     public function getStatements(GeneratorMetadata $metadata, array $duplicatedStatements, bool $callDoConstruct): array
     {
@@ -305,7 +305,7 @@ final readonly class MapMethodStatementsGenerator
      * }
      * ```
      *
-     * @return list<Stmt>
+     * @return Stmt[]
      */
     private function handleCircularReference(GeneratorMetadata $metadata): array
     {
@@ -350,7 +350,7 @@ final readonly class MapMethodStatementsGenerator
     }
 
     /**
-     * @return list<Stmt>
+     * @return Stmt[]
      */
     private function initializeTargetToPopulate(GeneratorMetadata $metadata): array
     {
@@ -412,7 +412,7 @@ final readonly class MapMethodStatementsGenerator
     }
 
     /**
-     * @return list<Stmt>
+     * @return Stmt[]
      */
     private function initializeTargetFromProvider(GeneratorMetadata $metadata): array
     {
@@ -510,7 +510,7 @@ final readonly class MapMethodStatementsGenerator
     }
 
     /**
-     * @return list<Stmt>
+     * @return Stmt[]
      */
     private function handleDependencies(GeneratorMetadata $metadata): array
     {

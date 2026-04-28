@@ -49,7 +49,7 @@ abstract readonly class MapListener
                 $transformer = new PropertyTransformer($transformerCallable);
             } elseif (!\is_object($transformerCallable) && \is_callable($transformerCallable, false, $callableName)) {
                 $transformer = new CallableTransformer($callableName);
-            } elseif (\is_object($transformerCallable) && \is_callable($transformerCallable)) {
+            } elseif (\is_callable($transformerCallable)) {
                 $transformer = new ReferenceTransformer($reference);
             } elseif (\is_string($transformerCallable) && method_exists($class, $transformerCallable)) {
                 $reflMethod = new \ReflectionMethod($class, $transformerCallable);

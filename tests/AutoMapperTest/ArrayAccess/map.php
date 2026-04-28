@@ -18,7 +18,7 @@ class Foo
     public int $bar = 2;
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     yield $autoMapper->map(new LikeArray(['foo' => 'foofoo', 'bar' => 10]), Foo::class);

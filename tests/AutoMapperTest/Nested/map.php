@@ -39,7 +39,7 @@ class Address
     public string $city;
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
     $dto = new UserDto(
         userAddressZipcode: '12345',

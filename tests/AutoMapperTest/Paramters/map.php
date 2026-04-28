@@ -36,7 +36,7 @@ class Paramters
     }
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     $arguments = ['foo', 'bar', 'baz'];

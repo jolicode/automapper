@@ -105,7 +105,7 @@ final readonly class JsonLdObjectToIdTransformer implements TransformerInterface
                             new Expr\Array_()
                         )
                     ),
-                    new Arg(new Expr\Array_(array_map(function (string $group) {
+                    new Arg(new Expr\Array_(array_map(static function (string $group) {
                         return create_expr_array_item(new Scalar\String_($group));
                     }, $this->groups))),
                 ])

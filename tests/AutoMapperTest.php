@@ -65,7 +65,7 @@ class AutoMapperTest extends AutoMapperTestCase
         parent::setUp();
 
         $this->setUpVarDumper([
-            \Throwable::class => function (\Throwable $e) {
+            \Throwable::class => static function (\Throwable $e) {
                 return [
                     'class' => $e::class,
                     'message' => $e->getMessage(),
@@ -354,7 +354,7 @@ class AutoMapperTest extends AutoMapperTestCase
     public function testSkippedGroups(): void
     {
         $eventDispatcher = new EventDispatcher();
-        $eventDispatcher->addListener(PropertyMetadataEvent::class, function (PropertyMetadataEvent $event) {
+        $eventDispatcher->addListener(PropertyMetadataEvent::class, static function (PropertyMetadataEvent $event) {
             $event->disableGroupsCheck = true;
         });
 
@@ -646,7 +646,7 @@ class AutoMapperTest extends AutoMapperTestCase
         $nodeA->parent = $nodeA;
 
         $context = new MapperContext();
-        $context->setCircularReferenceHandler(function () {
+        $context->setCircularReferenceHandler(static function () {
             return 'foo';
         });
 

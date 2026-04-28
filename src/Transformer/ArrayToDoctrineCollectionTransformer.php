@@ -22,7 +22,7 @@ use PhpParser\Node\Stmt;
 final class ArrayToDoctrineCollectionTransformer implements \Stringable, TransformerInterface, DependentTransformerInterface
 {
     public function __construct(
-        protected TransformerInterface $itemTransformer,
+        private TransformerInterface $itemTransformer,
     ) {
     }
 

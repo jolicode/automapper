@@ -14,7 +14,7 @@ class Foo
     }
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     $foo = new Foo([

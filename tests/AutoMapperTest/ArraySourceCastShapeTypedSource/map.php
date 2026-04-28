@@ -18,7 +18,7 @@ class TargetDto
     public array $data;
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     $source = new SourceDto();

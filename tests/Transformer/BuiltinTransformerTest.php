@@ -261,7 +261,7 @@ class BuiltinTransformerTest extends TestCase
     {
         $transformer = new BuiltinTransformer(Type::builtin('iterable'), Type::builtin('array'));
 
-        $closure = function () {
+        $closure = static function () {
             yield 1;
             yield 2;
         };
@@ -283,7 +283,7 @@ class BuiltinTransformerTest extends TestCase
     {
         $transformer = new BuiltinTransformer(Type::callable(), Type::string());
 
-        $output = $this->evalTransformer($transformer, function ($test) {
+        $output = $this->evalTransformer($transformer, static function ($test) {
             return $test;
         });
 

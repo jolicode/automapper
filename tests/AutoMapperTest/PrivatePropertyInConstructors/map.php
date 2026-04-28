@@ -42,7 +42,7 @@ final readonly class OtherClass
     }
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     yield 'from-array' => $autoMapper->map(

@@ -24,44 +24,47 @@ use function AutoMapper\PhpParser\create_expr_array_item;
  */
 final readonly class BuiltinTransformer implements TransformerInterface, CheckTypeInterface
 {
-    private const CAST_MAPPING = [
+    /**
+     * @var array<string, array<string, (callable(Expr): Expr)|class-string<Cast>>>
+     */
+    private const array CAST_MAPPING = [
         TypeIdentifier::BOOL->value => [
             TypeIdentifier::INT->value => Cast\Int_::class,
             TypeIdentifier::STRING->value => Cast\String_::class,
-            TypeIdentifier::FLOAT->value => 'toFloat',
-            TypeIdentifier::ARRAY->value => 'toArray',
-            TypeIdentifier::ITERABLE->value => 'toArray',
+            TypeIdentifier::FLOAT->value => [self::class, 'toFloat'],
+            TypeIdentifier::ARRAY->value => [self::class, 'toArray'],
+            TypeIdentifier::ITERABLE->value => [self::class, 'toArray'],
         ],
         TypeIdentifier::MIXED->value => [
             TypeIdentifier::INT->value => Cast\Int_::class,
             TypeIdentifier::STRING->value => Cast\String_::class,
-            TypeIdentifier::FLOAT->value => 'toFloat',
+            TypeIdentifier::FLOAT->value => [self::class, 'toFloat'],
             TypeIdentifier::BOOL->value => Cast\Bool_::class,
-            TypeIdentifier::ARRAY->value => 'toArray',
-            TypeIdentifier::ITERABLE->value => 'toArray',
+            TypeIdentifier::ARRAY->value => [self::class, 'toArray'],
+            TypeIdentifier::ITERABLE->value => [self::class, 'toArray'],
         ],
         TypeIdentifier::FLOAT->value => [
             TypeIdentifier::STRING->value => Cast\String_::class,
             TypeIdentifier::INT->value => Cast\Int_::class,
             TypeIdentifier::BOOL->value => Cast\Bool_::class,
-            TypeIdentifier::ARRAY->value => 'toArray',
-            TypeIdentifier::ITERABLE->value => 'toArray',
+            TypeIdentifier::ARRAY->value => [self::class, 'toArray'],
+            TypeIdentifier::ITERABLE->value => [self::class, 'toArray'],
         ],
         TypeIdentifier::INT->value => [
-            TypeIdentifier::FLOAT->value => 'toFloat',
+            TypeIdentifier::FLOAT->value => [self::class, 'toFloat'],
             TypeIdentifier::STRING->value => Cast\String_::class,
             TypeIdentifier::BOOL->value => Cast\Bool_::class,
-            TypeIdentifier::ARRAY->value => 'toArray',
-            TypeIdentifier::ITERABLE->value => 'toArray',
+            TypeIdentifier::ARRAY->value => [self::class, 'toArray'],
+            TypeIdentifier::ITERABLE->value => [self::class, 'toArray'],
         ],
         TypeIdentifier::ITERABLE->value => [
-            TypeIdentifier::ARRAY->value => 'fromIteratorToArray',
+            TypeIdentifier::ARRAY->value => [self::class, 'fromIteratorToArray'],
         ],
         TypeIdentifier::ARRAY->value => [],
         TypeIdentifier::STRING->value => [
-            TypeIdentifier::ARRAY->value => 'toArray',
-            TypeIdentifier::ITERABLE->value => 'toArray',
-            TypeIdentifier::FLOAT->value => 'toFloat',
+            TypeIdentifier::ARRAY->value => [self::class, 'toArray'],
+            TypeIdentifier::ITERABLE->value => [self::class, 'toArray'],
+            TypeIdentifier::FLOAT->value => [self::class, 'toFloat'],
             TypeIdentifier::INT->value => Cast\Int_::class,
             TypeIdentifier::BOOL->value => Cast\Bool_::class,
         ],
@@ -110,15 +113,17 @@ final readonly class BuiltinTransformer implements TransformerInterface, CheckTy
             return [$input, []];
         }
 
-        foreach (self::CAST_MAPPING[$this->sourceType->getTypeIdentifier()->value] as $castType => $castMethod) {
+        foreach (self::CAST_MAPPING[$this->sourceType->getTypeIdentifier()->value] ?? [] as $castType => $castMethod) {
             if (\in_array($castType, $targetTypes, true)) {
-                if (method_exists($this, $castMethod)) {
-                    /*
+                if (\is_callable($castMethod)) {
+                    /**
+                     * @var (callable(Expr $input): Expr) $castMethod
+                     *
                      * Use specific cast expression if callback exist in this class
                      *
                      * $array = [$source->property];
                      */
-                    return [$this->$castMethod($input), []];
+                    return [$castMethod($input), []];
                 }
 
                 if (!class_exists($castMethod)) {
@@ -156,17 +161,17 @@ final readonly class BuiltinTransformer implements TransformerInterface, CheckTy
         );
     }
 
-    private function toArray(Expr $input): Expr
+    public static function toArray(Expr $input): Expr
     {
         return new Expr\Array_([create_expr_array_item($input)]);
     }
 
-    private function toFloat(Expr $input): Expr
+    public static function toFloat(Expr $input): Expr
     {
         return new Cast\Double($input, ['kind' => Cast\Double::KIND_FLOAT]);
     }
 
-    private function fromIteratorToArray(Expr $input): Expr
+    public static function fromIteratorToArray(Expr $input): Expr
     {
         return new Expr\FuncCall(new Name('iterator_to_array'), [
             new Arg($input),

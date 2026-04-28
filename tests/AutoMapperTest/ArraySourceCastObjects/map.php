@@ -18,7 +18,7 @@ class ContainerDto
     public array $items;
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     yield $autoMapper->map([

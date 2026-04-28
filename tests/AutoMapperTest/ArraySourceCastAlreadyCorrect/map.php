@@ -15,7 +15,7 @@ class Dto
     public array $names;
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     // Values already match target types — should pass through without issues

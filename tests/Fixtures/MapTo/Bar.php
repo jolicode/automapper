@@ -26,7 +26,7 @@ class Bar
     }
 
     #[MapFrom(source: FooMapTo::class, property: 'd')]
-    public function setB(string $b)
+    public function setB(string $b): void
     {
         $this->b = $b;
     }

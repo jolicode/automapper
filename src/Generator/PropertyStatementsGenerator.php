@@ -23,7 +23,7 @@ final readonly class PropertyStatementsGenerator
     }
 
     /**
-     * @return list<Stmt>
+     * @return Stmt[]
      */
     public function generate(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): array
     {
@@ -35,7 +35,7 @@ final readonly class PropertyStatementsGenerator
         $fieldValueExpr = $propertyMetadata->source->accessor?->getExpression($variableRegistry->getSourceInput());
 
         if (null === $fieldValueExpr) {
-            if (!($propertyMetadata->transformer instanceof AllowNullValueTransformerInterface)) {
+            if (!$propertyMetadata->transformer instanceof AllowNullValueTransformerInterface) {
                 return [];
             }
 

@@ -21,7 +21,6 @@ use AutoMapper\Symfony\Bundle\ReflectionClassRecursiveIterator;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerInterface;
 use AutoMapper\Transformer\PropertyTransformer\PropertyTransformerSupportInterface;
 use AutoMapper\Transformer\SymfonyUidTransformerFactory;
-use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -32,20 +31,42 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Uid\AbstractUid;
 
+/**
+ * @phpstan-type AutoMapperConfig array{
+ *     class_prefix: string,
+ *     constructor_strategy: string,
+ *     date_time_format: string,
+ *     check_attributes: bool,
+ *     auto_register: bool,
+ *     map_private_properties: bool,
+ *     allow_readonly_target_to_populate: bool,
+ *     normalizer: array{
+ *         enabled: bool,
+ *         only_registered_mapping: bool,
+ *         priority: int,
+ *     },
+ *     serializer_attributes: bool,
+ *     api_platform: bool,
+ *     object_mapper: bool,
+ *     doctrine: bool,
+ *     name_converter: string|null,
+ *     loader: array{
+ *         eval: bool,
+ *         cache_dir: string,
+ *         reload_strategy: string,
+ *     },
+ *     mapping: array{
+ *         paths: string[],
+ *         mappers: array<int, array{source: class-string|'array', target: class-string|'array', reverse: bool}>,
+ *     }
+ * }
+ */
 class AutoMapperExtension extends Extension
 {
-    /**
-     * @param array<mixed> $config
-     */
-    public function getConfiguration(array $config, ContainerBuilder $container): ?ConfigurationInterface
-    {
-        return new Configuration();
-    }
-
     public function load(array $configs, ContainerBuilder $container): void
     {
-        /** @var Configuration $configuration */
-        $configuration = $this->getConfiguration($configs, $container);
+        $configuration = new Configuration();
+        /** @var AutoMapperConfig $config */
         $config = $this->processConfiguration($configuration, $configs);
 
         $loader = new PhpFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));

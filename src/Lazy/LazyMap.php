@@ -10,7 +10,7 @@ namespace AutoMapper\Lazy;
  */
 final class LazyMap implements \ArrayAccess, \JsonSerializable, \IteratorAggregate
 {
-    /** @var array<mixed> */
+    /** @var array<string, mixed> */
     private mixed $mappedValue = [];
 
     private bool $initialized = false;
@@ -41,6 +41,9 @@ final class LazyMap implements \ArrayAccess, \JsonSerializable, \IteratorAggrega
         return $this->mappedValue[$offset];
     }
 
+    /**
+     * @param string $offset
+     */
     public function offsetSet(mixed $offset, mixed $value): void
     {
         $this->initialize();

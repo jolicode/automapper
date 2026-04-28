@@ -45,7 +45,7 @@ final readonly class CreateTargetStatementsGenerator
      * }
      * ```
      *
-     * @return list<Stmt>
+     * @return Stmt[]
      */
     public function generate(GeneratorMetadata $metadata, VariableRegistry $variableRegistry, bool $callDoConstruct): array
     {
@@ -218,7 +218,7 @@ final readonly class CreateTargetStatementsGenerator
     }
 
     /**
-     * @return list<Stmt>
+     * @return Stmt[]
      */
     public function getConstructStatements(GeneratorMetadata $metadata): array
     {
@@ -290,7 +290,7 @@ final readonly class CreateTargetStatementsGenerator
      *  }
      * ```
      *
-     * @return list<Stmt>|null
+     * @return Stmt[]|null
      */
     private function constructorArgument(Expr\ArrayDimFetch $assignVar, GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata, \ReflectionParameter $parameter): ?array
     {
@@ -299,7 +299,7 @@ final readonly class CreateTargetStatementsGenerator
         $conditionDefined = $propertyMetadata->source->accessor?->getIsDefinedExpression($variableRegistry->getSourceInput(), $parameter->allowsNull());
 
         if (null === $fieldValueExpr) {
-            if (!($propertyMetadata->transformer instanceof AllowNullValueTransformerInterface)) {
+            if (!$propertyMetadata->transformer instanceof AllowNullValueTransformerInterface) {
                 return null;
             }
 
@@ -393,7 +393,7 @@ final readonly class CreateTargetStatementsGenerator
      *   }
      *  ```
      *
-     * @return list<Stmt>
+     * @return Stmt[]
      */
     private function constructorArgumentWithoutSource(Expr\ArrayDimFetch $assignVar, GeneratorMetadata $metadata, \ReflectionParameter $constructorParameter): array
     {

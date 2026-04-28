@@ -292,7 +292,7 @@ class ServiceInstantiationTest extends WebTestCase
     }
 
     #[DataProvider('mapProvider')]
-    public function testObjectMapper($expect, $args, array $deps = [])
+    public function testObjectMapper($expect, $args, array $deps = []): void
     {
         static::bootKernel();
         $mapper = static::$kernel->getContainer()->get(ObjectMapperInterface::class);

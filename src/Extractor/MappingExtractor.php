@@ -34,7 +34,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
     }
 
     /**
-     * @return list<string>
+     * @return array<string>
      */
     public function getProperties(string $class, bool $withConstructorParameters = false): iterable
     {

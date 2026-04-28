@@ -29,7 +29,7 @@ class UserConstructorDTOWithRelation
     }
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     $user = ['name' => 'foo'];

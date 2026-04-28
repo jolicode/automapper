@@ -91,15 +91,15 @@ class MetadataCollector extends AbstractDataCollector
                             'code' => $this->highlightStatements($propStatements),
                         ];
                     },
-                    array_filter($metadata->propertiesMetadata, fn (PropertyMetadata $property) => !$property->ignored)
+                    array_filter($metadata->propertiesMetadata, static fn (PropertyMetadata $property) => !$property->ignored)
                 ),
                 'notUsedProperties' => array_map(
-                    fn (PropertyMetadata $property) => [
+                    static fn (PropertyMetadata $property) => [
                         'source' => $property->source,
                         'target' => $property->target,
                         'reason' => $property->ignoreReason,
                     ],
-                    array_filter($metadata->propertiesMetadata, fn (PropertyMetadata $property) => $property->ignored)
+                    array_filter($metadata->propertiesMetadata, static fn (PropertyMetadata $property) => $property->ignored)
                 ),
                 'fileCode' => $fileCode,
             ];

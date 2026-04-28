@@ -24,7 +24,7 @@ class FooWithArrayCollection
     public ArrayCollection $bars;
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     $data = [

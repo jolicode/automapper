@@ -47,7 +47,7 @@ class DtoMixedDepth
     public array $data;
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     // 1. Object field + collection of objects + scalar casts

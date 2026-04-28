@@ -11,7 +11,7 @@ class DeepObjectPopulateParentDummy
      */
     private $child;
 
-    public function setChild(?DeepObjectPopulateChildDummy $child)
+    public function setChild(?DeepObjectPopulateChildDummy $child): void
     {
         $this->child = $child;
     }

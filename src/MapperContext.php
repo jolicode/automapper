@@ -14,13 +14,12 @@ use AutoMapper\Exception\InvalidArgumentException;
  *
  * @author Joel Wurtz <jwurtz@jolicode.com>
  *
- * @phpstan-type CircularReferenceHandler (callable(mixed, array): mixed)
  * @phpstan-type MapperContextArray array{
  *   "groups"?: string[]|null,
  *   "allowed_attributes"?: string[]|array<string, string[]>|null,
  *   "ignored_attributes"?: string[]|array<string, string[]>|null,
  *   "circular_reference_limit"?: int|null,
- *   "circular_reference_handler"?: callable|null,
+ *   "circular_reference_handler"?: (callable(mixed, array<string, mixed> $context): mixed)|null,
  *   "circular_reference_registry"?: array<string, mixed>,
  *   "circular_count_reference_registry"?: array<string, int>,
  *   "depth"?: int,

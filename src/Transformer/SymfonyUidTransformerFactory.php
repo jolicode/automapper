@@ -50,10 +50,10 @@ final class SymfonyUidTransformerFactory implements TransformerFactoryInterface,
             return [false, false, null];
         }
 
-        /** @var class-string|null $typeClassName */
+        /** @var class-string $typeClassName */
         $typeClassName = $type->getClassName();
 
-        if (null === $typeClassName || !class_exists($typeClassName)) {
+        if (!class_exists($typeClassName)) {
             return [false, false, null];
         }
 

@@ -19,8 +19,8 @@ use PhpParser\ParserFactory;
  */
 final class PropertyTransformerFactory implements PrioritizedTransformerFactoryInterface, TransformerFactoryInterface
 {
-    /** @var array<string, PropertyTransformerSupportInterface>|null */
-    private $prioritizedPropertyTransformers;
+    /** @var array<string, PropertyTransformerSupportInterface> */
+    private array $prioritizedPropertyTransformers;
 
     private Parser $parser;
 
@@ -40,7 +40,7 @@ final class PropertyTransformerFactory implements PrioritizedTransformerFactoryI
     public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
         foreach ($this->prioritizedPropertyTransformers() as $id => $propertyTransformer) {
-            if ($propertyTransformer instanceof PropertyTransformerSupportInterface && $propertyTransformer->supports($source, $target, $mapperMetadata)) {
+            if ($propertyTransformer->supports($source, $target, $mapperMetadata)) {
                 if ($propertyTransformer instanceof PropertyTransformerComputeInterface) {
                     $computedValueCode = $propertyTransformer->compute($source, $target, $mapperMetadata);
                     $stmts = $this->parser->parse('<?php ' . var_export($computedValueCode, true) . ';');
@@ -61,7 +61,7 @@ final class PropertyTransformerFactory implements PrioritizedTransformerFactoryI
      */
     private function prioritizedPropertyTransformers(): array
     {
-        if (null === $this->prioritizedPropertyTransformers) {
+        if (!isset($this->prioritizedPropertyTransformers)) {
             $this->prioritizedPropertyTransformers = iterator_to_array($this->propertyTransformersSupportList);
 
             uasort(

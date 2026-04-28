@@ -14,13 +14,13 @@ class UserApiResource
 #[\AllowDynamicProperties]
 class UserEntity
 {
-    public function setRoles(array $roles)
+    public function setRoles(array $roles): void
     {
         $this->roles = $roles; // [["ROLE_USER"]];
     }
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     $userApiResource = new UserApiResource();

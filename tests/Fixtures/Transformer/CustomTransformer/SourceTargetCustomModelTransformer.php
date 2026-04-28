@@ -17,11 +17,11 @@ final readonly class SourceTargetCustomModelTransformer implements PropertyTrans
 {
     public function supports(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool
     {
-        if (!$source->type->isSatisfiedBy(fn (Type $type) => $type instanceof Type\ObjectType && $type->getClassName() === AddressDTO::class)) {
+        if (!$source->type->isSatisfiedBy(static fn (Type $type) => $type instanceof Type\ObjectType && $type->getClassName() === AddressDTO::class)) {
             return false;
         }
 
-        if (!$target->type->isSatisfiedBy(fn (Type $type) => $type instanceof Type\ObjectType && $type->getClassName() === Address::class)) {
+        if (!$target->type->isSatisfiedBy(static fn (Type $type) => $type instanceof Type\ObjectType && $type->getClassName() === Address::class)) {
             return false;
         }
 

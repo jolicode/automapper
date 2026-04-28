@@ -12,7 +12,7 @@ class Dto
     public array $values;
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     yield $autoMapper->map([

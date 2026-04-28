@@ -68,7 +68,7 @@ abstract readonly class AbstractArrayTransformer implements \Stringable, Transfo
                     new Expr\ConstFetch(new Name('false'))
                 );
 
-                if ($propertyMapping->target->readAccessor !== null && $this->itemTransformer instanceof IdentifierHashInterface) {
+                if ($this->itemTransformer instanceof IdentifierHashInterface) {
                     $targetHashVar = new Expr\Variable($uniqueVariableScope->getUniqueName('targetHash'));
 
                     $loopExistingStatements[] = new Stmt\If_($isDeepPopulateExpr, [

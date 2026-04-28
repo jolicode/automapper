@@ -105,7 +105,7 @@ final readonly class MapperListener
         }
 
         // sort by priority
-        usort($mappers, fn (array $a, array $b) => $a[0]->priority <=> $b[0]->priority);
+        usort($mappers, static fn (array $a, array $b) => $a[0]->priority <=> $b[0]->priority);
 
         return $mappers[0];
     }

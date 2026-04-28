@@ -30,7 +30,7 @@ class MyObject
     public string $bar;
 }
 
-return (function () {
+return (static function () {
     $myObject = new MyObject();
     $myObject->foo = 'bar';
 

@@ -22,7 +22,7 @@ final readonly class ArrayReadAccessor implements ReadAccessorInterface
         return new Expr\ArrayDimFetch($input, new Scalar\String_($this->property));
     }
 
-    public function getIsDefinedExpression(Expr\Variable $input, bool $nullable = false, bool $target = false): ?Expr
+    public function getIsDefinedExpression(Expr\Variable $input, bool $nullable = false, bool $target = false): Expr
     {
         if ($this->isArrayAccess) {
             return new Expr\MethodCall($input, 'offsetExists', [new Arg(new Scalar\String_($this->property))]);

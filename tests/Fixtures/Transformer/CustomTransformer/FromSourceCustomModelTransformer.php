@@ -16,7 +16,7 @@ final readonly class FromSourceCustomModelTransformer implements PropertyTransfo
 {
     public function supports(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): bool
     {
-        if (!$source->type->isSatisfiedBy(fn (Type $type) => $type instanceof Type\ObjectType && $type->getClassName() === AddressDTO::class)) {
+        if (!$source->type->isSatisfiedBy(static fn (Type $type) => $type instanceof Type\ObjectType && $type->getClassName() === AddressDTO::class)) {
             return false;
         }
 

@@ -20,7 +20,7 @@ class TypeEnforcementNumberObject
      */
     public $number;
 
-    public function setNumber($number)
+    public function setNumber($number): void
     {
         $this->number = $number;
     }

@@ -24,7 +24,7 @@ trait TypeEnforcementTestTrait
 {
     abstract protected function getDenormalizerForTypeEnforcement(): DenormalizerInterface;
 
-    public function testRejectInvalidType()
+    public function testRejectInvalidType(): void
     {
         $denormalizer = $this->getDenormalizerForTypeEnforcement();
 
@@ -32,7 +32,7 @@ trait TypeEnforcementTestTrait
         $denormalizer->denormalize(['date' => 'foo'], ObjectOuter::class);
     }
 
-    public function testDoNotRejectInvalidTypeOnDisableTypeEnforcementContextOption()
+    public function testDoNotRejectInvalidTypeOnDisableTypeEnforcementContextOption(): void
     {
         $denormalizer = $this->getDenormalizerForTypeEnforcement();
 

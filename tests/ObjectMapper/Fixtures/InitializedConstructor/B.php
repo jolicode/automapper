@@ -22,12 +22,12 @@ class B
         $this->tags = [];
     }
 
-    public function addTag($tag)
+    public function addTag($tag): void
     {
         $this->tags[] = $tag;
     }
 
-    public function removeTag($tag)
+    public function removeTag($tag): void
     {
     }
 }

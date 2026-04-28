@@ -33,12 +33,13 @@ final readonly class ObjectMapper implements ObjectMapperInterface
         $map = $this->getMapTarget($metadata, null, $source, null);
 
         if (null === $target) {
-            /** @var class-string|object $target */
+            /** @var class-string $target */
             $target = $map?->target;
         }
 
         if ($target && $map && $map->transform) {
             // Support only one transform for object mapper at the moment
+            /** @var (string|callable(mixed $value, object $source, ?object $target): mixed) $transform */
             $transform = \is_array($map->transform) ? $map->transform[0] : $map->transform;
 
             if ($fn = $this->getCallable($transform)) {
@@ -73,7 +74,7 @@ final readonly class ObjectMapper implements ObjectMapperInterface
     }
 
     /**
-     * @param callable(mixed $value, object $source, ?object $target): mixed $fn
+     * @param (callable(mixed $value, object $source, ?object $target): mixed)|callable-string $fn
      */
     private function call(callable $fn, mixed $value, object $source, ?object $target = null): mixed
     {
@@ -114,7 +115,7 @@ final readonly class ObjectMapper implements ObjectMapperInterface
         }
 
         if ($this->serviceLocator?->has($fn)) {
-            /** @var callable(mixed $value, object $source, ?object $target): mixed) */
+            /** @var callable(mixed $value, object $source, ?object $target): mixed */
             return $this->serviceLocator->get($fn);
         }
 

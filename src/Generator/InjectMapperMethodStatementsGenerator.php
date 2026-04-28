@@ -35,7 +35,7 @@ final readonly class InjectMapperMethodStatementsGenerator
     }
 
     /**
-     * @return list<Stmt>
+     * @return Stmt[]
      */
     public function getStatements(Expr\Variable $automapperRegistryVariable, GeneratorMetadata $metadata): array
     {

@@ -98,7 +98,7 @@ final readonly class MultipleTransformer implements \Stringable, TransformerInte
     public function __toString(): string
     {
         $transformerStrings = array_map(
-            function ($transformerData) {
+            static function ($transformerData) {
                 if ($transformerData['transformer'] instanceof \Stringable) {
                     return (string) $transformerData['transformer'];
                 }

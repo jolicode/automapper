@@ -12,7 +12,7 @@ class GroupDummyParent
     private $kevin;
     private $coopTilleuls;
 
-    public function setKevin($kevin)
+    public function setKevin($kevin): void
     {
         $this->kevin = $kevin;
     }
@@ -22,7 +22,7 @@ class GroupDummyParent
         return $this->kevin;
     }
 
-    public function setCoopTilleuls($coopTilleuls)
+    public function setCoopTilleuls($coopTilleuls): void
     {
         $this->coopTilleuls = $coopTilleuls;
     }

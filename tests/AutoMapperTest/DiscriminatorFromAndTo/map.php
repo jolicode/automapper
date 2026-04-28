@@ -84,7 +84,7 @@ class CatDto extends PetDto
     }
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
     $pet = new Dog('Rex', 'German Shepherd');

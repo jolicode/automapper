@@ -63,7 +63,7 @@ class UserDTO
     /** @var \DateTimeInterface[]|int[] */
     public array $times = [];
 
-    public function setName($name)
+    public function setName($name): void
     {
         $this->name = $name;
     }

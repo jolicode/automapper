@@ -27,7 +27,7 @@ final class DoctrineCollectionTransformerFactory implements TransformerFactoryIn
             return null;
         }
 
-        $isDoctrineCollection = $target->type->isSatisfiedBy(function (Type $type) {
+        $isDoctrineCollection = $target->type->isSatisfiedBy(static function (Type $type) {
             if (!$type instanceof Type\ObjectType) {
                 return false;
             }

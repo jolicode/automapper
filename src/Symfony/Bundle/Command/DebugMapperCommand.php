@@ -60,7 +60,7 @@ final class DebugMapperCommand extends Command
         $style->table(
             ['Mapper', 'Source', 'Target'],
             array_map(
-                fn (Dependency $dependency) => [
+                static fn (Dependency $dependency) => [
                     $dependency->mapperDependency->name,
                     $dependency->mapperDependency->source,
                     $dependency->mapperDependency->target,
@@ -74,14 +74,14 @@ final class DebugMapperCommand extends Command
         $style->table(
             [\sprintf('%s -> %s', $source, $target), 'If', 'Transformer', 'Groups', 'MaxDepth'],
             array_map(
-                fn (PropertyMetadata $property) => [
+                static fn (PropertyMetadata $property) => [
                     $property->source->property . ' (' . $property->source->type . ') -> ' . $property->target->property . ' (' . $property->target->type . ') ',
                     $property->if,
                     $property->transformer instanceof \Stringable ? (string) $property->transformer : \get_class($property->transformer),
                     $property->disableGroupsCheck ? 'Disabled' : implode(', ', $property->groups ?? []),
                     $property->maxDepth,
                 ],
-                array_filter($metadata->propertiesMetadata, fn (PropertyMetadata $property) => !$property->ignored)
+                array_filter($metadata->propertiesMetadata, static fn (PropertyMetadata $property) => !$property->ignored)
             )
         );
 
@@ -90,11 +90,11 @@ final class DebugMapperCommand extends Command
         $style->table(
             [\sprintf('%s -> %s', $source, $target), 'Not used reason'],
             array_map(
-                fn (PropertyMetadata $property) => [
+                static fn (PropertyMetadata $property) => [
                     $property->source->property . ' (' . $property->source->type . ') -> ' . $property->target->property . ' (' . $property->target->type . ') ',
                     $property->ignoreReason,
                 ],
-                array_filter($metadata->propertiesMetadata, fn (PropertyMetadata $property) => $property->ignored)
+                array_filter($metadata->propertiesMetadata, static fn (PropertyMetadata $property) => $property->ignored)
             )
         );
 

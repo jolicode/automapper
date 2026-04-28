@@ -30,7 +30,7 @@ trait CallbacksTestTrait
     abstract protected function getNormalizerForCallbacksWithPropertyTypeExtractor(): NormalizerInterface;
 
     #[DataProvider('provideNormalizeCallbacks')]
-    public function testNormalizeCallbacks($callbacks, $valueBar, $result)
+    public function testNormalizeCallbacks($callbacks, $valueBar, $result): void
     {
         self::markTestSkipped('Callbacks not supported.');
 
@@ -43,7 +43,7 @@ trait CallbacksTestTrait
     }
 
     #[DataProvider('provideNormalizeCallbacks')]
-    public function testNormalizeCallbacksWithTypedProperty($callbacks, $valueBar, $result)
+    public function testNormalizeCallbacksWithTypedProperty($callbacks, $valueBar, $result): void
     {
         self::markTestSkipped('Callbacks not supported.');
 
@@ -56,7 +56,7 @@ trait CallbacksTestTrait
     }
 
     #[DataProvider('provideDenormalizeCallbacks')]
-    public function testDenormalizeCallbacks($callbacks, $valueBar, $result)
+    public function testDenormalizeCallbacks($callbacks, $valueBar, $result): void
     {
         self::markTestSkipped('Callbacks not supported.');
 
@@ -68,7 +68,7 @@ trait CallbacksTestTrait
     }
 
     #[DataProvider('providerDenormalizeCallbacksWithTypedProperty')]
-    public function testDenormalizeCallbacksWithTypedProperty($callbacks, $valueBar, $result)
+    public function testDenormalizeCallbacksWithTypedProperty($callbacks, $valueBar, $result): void
     {
         self::markTestSkipped('Callbacks not supported.');
 
@@ -80,7 +80,7 @@ trait CallbacksTestTrait
     }
 
     #[DataProvider('providerDenormalizeCallbacksWithTypedProperty')]
-    public function testDenormalizeCallbacksWithNoConstructorArgument($callbacks, $valueBar, $result)
+    public function testDenormalizeCallbacksWithNoConstructorArgument($callbacks, $valueBar, $result): void
     {
         self::markTestSkipped('Callbacks not supported.');
 
@@ -98,7 +98,7 @@ trait CallbacksTestTrait
     }
 
     #[DataProvider('provideInvalidCallbacks')]
-    public function testUncallableCallbacks($callbacks)
+    public function testUncallableCallbacks($callbacks): void
     {
         self::markTestSkipped('Callbacks not supported.');
 
@@ -151,7 +151,7 @@ trait CallbacksTestTrait
             ],
             'Collect a property' => [
                 [
-                    'bar' => function (array $bars) {
+                    'bar' => static function (array $bars) {
                         $result = '';
                         foreach ($bars as $bar) {
                             $result .= $bar->bar;
@@ -165,7 +165,7 @@ trait CallbacksTestTrait
             ],
             'Count a property' => [
                 [
-                    'bar' => fn (array $bars) => \count($bars),
+                    'bar' => static fn (array $bars) => \count($bars),
                 ],
                 [new CallbacksObject(), new CallbacksObject()],
                 ['bar' => 2, 'foo' => null],
@@ -213,7 +213,7 @@ trait CallbacksTestTrait
             ],
             'Collect a property' => [
                 [
-                    'bar' => function (array $bars) {
+                    'bar' => static function (array $bars) {
                         $result = '';
                         foreach ($bars as $bar) {
                             $result .= $bar->bar;
@@ -227,7 +227,7 @@ trait CallbacksTestTrait
             ],
             'Count a property' => [
                 [
-                    'bar' => fn (array $bars) => \count($bars),
+                    'bar' => static fn (array $bars) => \count($bars),
                 ],
                 [new CallbacksObject(), new CallbacksObject()],
                 new CallbacksObject(2),

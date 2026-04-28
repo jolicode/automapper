@@ -79,7 +79,7 @@ class ToAdderCollection
     }
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     $from = new From();

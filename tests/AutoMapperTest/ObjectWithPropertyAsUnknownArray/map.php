@@ -32,7 +32,7 @@ final readonly class PageDto
     }
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
     $entity = new Page();
     $entity->components[] = ['name' => 'my name'];

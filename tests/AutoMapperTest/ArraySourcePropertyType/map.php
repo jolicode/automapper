@@ -14,7 +14,7 @@ class Dto
     public array $age;
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     yield $autoMapper->map(['age' => ['10']], Dto::class);
