@@ -117,7 +117,7 @@ final class FromTargetMappingExtractor extends MappingExtractor
         }
 
         // Transform datetime to string
-        if ($type instanceof Type\ObjectType && $type->getClassName() !== null && (\DateTimeInterface::class === $type->getClassName() || is_subclass_of($type->getClassName(), \DateTimeInterface::class))) {
+        if ($type instanceof Type\ObjectType && (\DateTimeInterface::class === $type->getClassName() || is_subclass_of($type->getClassName(), \DateTimeInterface::class))) {
             return Type::string();
         }
 

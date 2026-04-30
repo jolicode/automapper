@@ -28,7 +28,7 @@ class TestTarget
     }
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     $classContainer = new ClassContainer();

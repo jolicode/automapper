@@ -23,7 +23,7 @@ final readonly class MapperConstructorGenerator
     }
 
     /**
-     * @return list<Stmt>
+     * @return Stmt[]
      */
     public function getStatements(GeneratorMetadata $metadata): array
     {

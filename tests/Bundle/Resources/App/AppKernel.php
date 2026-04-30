@@ -38,6 +38,10 @@ class AppKernel extends Kernel
 
     public function getCacheDir(): string
     {
+        if ($this->getEnvironment() === 'dev') {
+            return parent::getCacheDir();
+        }
+
         return parent::getCacheDir() . '/' . md5($this->additionalConfigFile ?? '');
     }
 }

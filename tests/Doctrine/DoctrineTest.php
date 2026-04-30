@@ -32,7 +32,7 @@ class DoctrineTest extends AutoMapperTestCase
         $this->autoMapper = AutoMapperBuilder::buildAutoMapper(objectManager: $this->entityManager);
     }
 
-    private function buildDatabase()
+    private function buildDatabase(): void
     {
         // delete the database file
         if (file_exists(__DIR__ . '/db.sqlite')) {

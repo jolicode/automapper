@@ -53,7 +53,7 @@ final readonly class PropertyReadAccessor implements ReadAccessorInterface
         return new Expr\PropertyFetch($input, $this->property);
     }
 
-    public function getIsDefinedExpression(Expr\Variable $input, bool $nullable = false, bool $target = false): ?Expr
+    public function getIsDefinedExpression(Expr\Variable $input, bool $nullable = false, bool $target = false): Expr
     {
         if ($this->private) {
             /*

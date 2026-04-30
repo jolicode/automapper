@@ -24,8 +24,8 @@ final class FileLoader implements ClassLoaderInterface
 {
     private readonly PrettyPrinterAbstract $printer;
 
-    /** @var array<class-string, string>|null */
-    private ?array $registry = null;
+    /** @var array<class-string, string> */
+    private array $registry;
 
     public function __construct(
         private readonly MapperGenerator $generator,
@@ -107,7 +107,7 @@ final class FileLoader implements ClassLoaderInterface
      */
     private function addHashToRegistry(string $className, string $hash): void
     {
-        if (null === $this->registry) {
+        if (!isset($this->registry)) {
             $this->registry = [];
         }
 
@@ -119,7 +119,7 @@ final class FileLoader implements ClassLoaderInterface
     /** @return array<class-string, string> */
     private function getRegistry(): array
     {
-        if (null === $this->registry) {
+        if (!isset($this->registry)) {
             $registryPath = $this->directory . \DIRECTORY_SEPARATOR . 'registry.php';
 
             if (!file_exists($registryPath)) {

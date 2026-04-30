@@ -33,12 +33,10 @@ class ChainTransformerFactory implements TransformerFactoryInterface
     public function getTransformer(SourcePropertyMetadata $source, TargetPropertyMetadata $target, MapperMetadata $mapperMetadata): ?TransformerInterface
     {
         foreach ($this->factories as $factory) {
-            if ($factory instanceof TransformerFactoryInterface) {
-                $transformer = $factory->getTransformer($source, $target, $mapperMetadata);
+            $transformer = $factory->getTransformer($source, $target, $mapperMetadata);
 
-                if (null !== $transformer) {
-                    return $transformer;
-                }
+            if (null !== $transformer) {
+                return $transformer;
             }
         }
 

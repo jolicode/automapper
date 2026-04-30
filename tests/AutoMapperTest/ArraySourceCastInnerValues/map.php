@@ -21,7 +21,7 @@ class Dto
     public array $flags;
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     yield $autoMapper->map([

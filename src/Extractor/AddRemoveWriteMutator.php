@@ -22,7 +22,7 @@ final readonly class AddRemoveWriteMutator implements WriteMutatorInterface
         ]);
     }
 
-    public function getRemoveExpression(Expr $object, Expr $value): ?Expr
+    public function getRemoveExpression(Expr $object, Expr $value): Expr
     {
         return new Expr\MethodCall($object, $this->removeMethodName, [
             new Arg($value),

@@ -20,7 +20,7 @@ trait ConstructorArgumentsTestTrait
 {
     abstract protected function getDenormalizerForConstructArguments(): DenormalizerInterface;
 
-    public function testDefaultConstructorArguments()
+    public function testDefaultConstructorArguments(): void
     {
         $data = [
             'foo' => 10,
@@ -37,7 +37,7 @@ trait ConstructorArgumentsTestTrait
         $this->assertEquals(new ConstructorArgumentsObject(10, '', null), $result);
     }
 
-    public function testMetadataAwareNameConvertorWithNotSerializedConstructorParameter()
+    public function testMetadataAwareNameConvertorWithNotSerializedConstructorParameter(): void
     {
         $denormalizer = $this->getDenormalizerForConstructArguments();
 
@@ -56,7 +56,7 @@ trait ConstructorArgumentsTestTrait
         );
     }
 
-    public function testConstructorWithMissingData()
+    public function testConstructorWithMissingData(): void
     {
         $data = [
             'bar' => 10,
@@ -73,7 +73,7 @@ trait ConstructorArgumentsTestTrait
         }
     }
 
-    public function testExceptionsAreCollectedForConstructorWithMissingData()
+    public function testExceptionsAreCollectedForConstructorWithMissingData(): void
     {
         self::markTestSkipped('Exceptions collection is not supported yet.');
 
@@ -107,7 +107,7 @@ class NotSerializedConstructorArgumentDummy
         return $this->bar;
     }
 
-    public function setBar($bar)
+    public function setBar($bar): void
     {
         $this->bar = $bar;
     }

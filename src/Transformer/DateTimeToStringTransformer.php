@@ -43,7 +43,7 @@ final class DateTimeToStringTransformer implements TransformerInterface, CheckTy
         ]), []];
     }
 
-    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source): ?Expr
+    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source): Expr
     {
         return new Expr\Instanceof_($input, new FullyQualified(\DateTimeInterface::class));
     }

@@ -26,7 +26,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
  */
 readonly class AutoMapperNormalizer implements NormalizerInterface, DenormalizerInterface
 {
-    private const SERIALIZER_CONTEXT_MAPPING = [
+    private const array SERIALIZER_CONTEXT_MAPPING = [
         AbstractNormalizer::GROUPS => MapperContext::GROUPS,
         AbstractNormalizer::ATTRIBUTES => MapperContext::ALLOWED_ATTRIBUTES,
         AbstractNormalizer::IGNORED_ATTRIBUTES => MapperContext::IGNORED_ATTRIBUTES,
@@ -46,7 +46,7 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
      * @param object               $object
      * @param array<string, mixed> $context
      *
-     * @return array<string, mixed>
+     * @return array<mixed>|null
      */
     public function normalize(mixed $object, ?string $format = null, array $context = []): ?array
     {
@@ -160,6 +160,10 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
         }
 
         if (\array_key_exists(AbstractNormalizer::DEFAULT_CONSTRUCTOR_ARGUMENTS, $serializerContext) && is_iterable($serializerContext[AbstractNormalizer::DEFAULT_CONSTRUCTOR_ARGUMENTS])) {
+            /**
+             * @var string               $class
+             * @var array<string, mixed> $keyArgs
+             */
             foreach ($serializerContext[AbstractNormalizer::DEFAULT_CONSTRUCTOR_ARGUMENTS] as $class => $keyArgs) {
                 foreach ($keyArgs as $key => $value) {
                     $context[MapperContext::CONSTRUCTOR_ARGUMENTS][$class][$key] = $value;
@@ -180,9 +184,9 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
         }
 
         if (\array_key_exists(AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER, $serializerContext)) {
-            /** @var callable(object, string, array<mixed>) $callback */
+            /** @var (callable(mixed, string|null, array<mixed>): mixed) $callback */
             $callback = $serializerContext[AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER];
-            $context[MapperContext::CIRCULAR_REFERENCE_HANDLER] = function ($object, array $context) use ($format, $callback) {
+            $context[MapperContext::CIRCULAR_REFERENCE_HANDLER] = static function ($object, array $context) use ($format, $callback) {
                 return $callback($object, $format, $context);
             };
 

@@ -1,12 +1,49 @@
 parameters:
-	level: max
-	paths:
-		- src/
+    level: max
+    paths:
+        - src/
 
-	tmpDir: cache
+    tmpDir: cache
+    treatPhpDocTypesAsCertain: false
 
-	ignoreErrors:
-		-
-			message: "#^Method AutoMapper\\\\ObjectMapper\\\\ObjectMapper\\:\\:map\\(\\) should return T of object but returns object\\|null\\.$#"
-			count: 1
-			path: src/ObjectMapper/ObjectMapper.php
+    ignoreErrors:
+        -
+            message: "#^Method AutoMapper\\\\ObjectMapper\\\\ObjectMapper\\:\\:map\\(\\) should return T of object but returns object\\|null\\.$#"
+            count: 1
+            path: src/ObjectMapper/ObjectMapper.php
+
+        -
+            message: '#^Parameter \#2 \$array of function implode expects array\<string\>, array given\.$#'
+            identifier: argument.type
+            count: 1
+            path: src/EventListener/MapListener.php
+
+        -
+            message: '#^Binary operation "\." between mixed and string results in an error\.$#'
+            identifier: binaryOp.invalid
+            count: 1
+            path: src/EventListener/MapToContextListener.php
+
+        -
+            message: '#^Parameter \$mapping of class AutoMapper\\Metadata\\Discriminator constructor expects array\<string, class\-string\>, array given\.$#'
+            identifier: argument.type
+            count: 2
+            path: src/EventListener/Symfony/ClassDiscriminatorListener.php
+
+        -
+            message: '#^Call to function function_exists\(\) with callable\-string will always evaluate to true\.$#'
+            identifier: function.alreadyNarrowedType
+            count: 1
+            path: src/Generator/PropertyConditionsGenerator.php
+
+        -
+            message: '#^Method AutoMapper\\Loader\\FileLoader\:\:getRegistry\(\) should return array\<class\-string, string\> but returns array\.$#'
+            identifier: return.type
+            count: 1
+            path: src/Loader/FileLoader.php
+
+        -
+            message: '#^Property AutoMapper\\Loader\\FileLoader\:\:\$registry \(array\<class\-string, string\>\) does not accept mixed\.$#'
+            identifier: assign.propertyType
+            count: 1
+            path: src/Loader/FileLoader.php

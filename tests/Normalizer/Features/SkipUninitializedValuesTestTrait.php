@@ -24,7 +24,7 @@ trait SkipUninitializedValuesTestTrait
     abstract protected function getNormalizerForSkipUninitializedValues(): NormalizerInterface;
 
     #[DataProvider('skipUninitializedValuesFlagProvider')]
-    public function testSkipUninitializedValues(array $context)
+    public function testSkipUninitializedValues(array $context): void
     {
         self::markTestSkipped('Uninitialized properties are not supported yet');
 
@@ -50,7 +50,7 @@ trait SkipUninitializedValuesTestTrait
         yield 'using default context value' => [['groups' => ['foo']]];
     }
 
-    public function testWithoutSkipUninitializedValues()
+    public function testWithoutSkipUninitializedValues(): void
     {
         $object = new TypedPropertiesObjectWithGetters();
 

@@ -40,7 +40,7 @@ class TypeB implements MyInterface
     }
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
 
     $something = [

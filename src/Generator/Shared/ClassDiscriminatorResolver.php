@@ -35,7 +35,7 @@ final readonly class ClassDiscriminatorResolver
         }
 
         return array_find($metadata->propertiesMetadata,
-            fn ($propertyMetadata,
+            static fn ($propertyMetadata,
             ) => ($fromSource ? $propertyMetadata->source->property : $propertyMetadata->target->property) === $discriminator->propertyName
         );
     }

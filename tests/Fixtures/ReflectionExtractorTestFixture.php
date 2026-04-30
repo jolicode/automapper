@@ -15,7 +15,7 @@ class ReflectionExtractorTestFixture
         return 'string';
     }
 
-    public function setFoo(string $foo)
+    public function setFoo(string $foo): void
     {
     }
 
@@ -34,11 +34,11 @@ class ReflectionExtractorTestFixture
         return false;
     }
 
-    public function __get($name)
+    public function __get($name): void
     {
     }
 
-    public function __set($name, $value)
+    public function __set($name, $value): void
     {
     }
 }

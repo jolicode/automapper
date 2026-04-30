@@ -46,6 +46,9 @@ final class ReflectionReference
         return self::$method[$key];
     }
 
+    /**
+     * @param class-string $className
+     */
     public static function fromProperty(string $className, string $propertyName): self
     {
         $key = $className . '::$' . $propertyName;

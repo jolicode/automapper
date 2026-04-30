@@ -33,7 +33,7 @@ trait ContextMetadataTestTrait
     /**
      * @dataProvider contextMetadataDummyProvider
      */
-    public function testContextMetadataNormalize(string $contextMetadataDummyClass)
+    public function testContextMetadataNormalize(string $contextMetadataDummyClass): void
     {
         $classMetadataFactory = new ClassMetadataFactory(new AttributeLoader());
         $normalizer = new ObjectNormalizer($classMetadataFactory, null, null, new PhpDocExtractor());
@@ -56,7 +56,7 @@ trait ContextMetadataTestTrait
     /**
      * @dataProvider contextMetadataDummyProvider
      */
-    public function testContextMetadataContextDenormalize(string $contextMetadataDummyClass)
+    public function testContextMetadataContextDenormalize(string $contextMetadataDummyClass): void
     {
         $classMetadataFactory = new ClassMetadataFactory(new AttributeLoader());
         $normalizer = new ObjectNormalizer($classMetadataFactory, null, null, new PhpDocExtractor());
@@ -88,7 +88,7 @@ trait ContextMetadataTestTrait
         ];
     }
 
-    public function testContextDenormalizeWithNameConverter()
+    public function testContextDenormalizeWithNameConverter(): void
     {
         $classMetadataFactory = new ClassMetadataFactory(new AttributeLoader());
         $normalizer = new ObjectNormalizer($classMetadataFactory, new CamelCaseToSnakeCaseNameConverter(), null, new PhpDocExtractor());

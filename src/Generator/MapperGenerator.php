@@ -144,7 +144,7 @@ final readonly class MapperGenerator
      * }
      * ```
      *
-     * @param list<Stmt> $duplicatedStatements
+     * @param Stmt[] $duplicatedStatements
      */
     private function mapMethod(GeneratorMetadata $metadata, array $duplicatedStatements, bool $callDoConstruct): Stmt\ClassMethod
     {
@@ -174,7 +174,7 @@ final readonly class MapperGenerator
      * }
      * ```
      *
-     * @param list<Stmt> $constructorStatements
+     * @param Stmt[] $constructorStatements
      */
     private function doConstructMethod(GeneratorMetadata $metadata, array $constructorStatements): Stmt\ClassMethod
     {
@@ -197,7 +197,7 @@ final readonly class MapperGenerator
      * }
      * ```
      *
-     * @param list<Stmt> $setterStatements
+     * @param Stmt[] $setterStatements
      */
     private function doMapMethod(GeneratorMetadata $metadata, array $setterStatements): Stmt\ClassMethod
     {

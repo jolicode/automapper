@@ -27,7 +27,7 @@ final readonly class DiscriminatorStatementsGenerator
     }
 
     /**
-     * @return list<Stmt>
+     * @return Stmt[]
      *
      * We return the object created with the correct mapper depending on the variant, this will skip the next mapping phase in this situation
      *
@@ -111,7 +111,7 @@ final readonly class DiscriminatorStatementsGenerator
             );
         }
 
-        $isDefinedExpression = $propertyMetadata->source->accessor?->getIsDefinedExpression($variableRegistry->getSourceInput());
+        $isDefinedExpression = $propertyMetadata->source->accessor->getIsDefinedExpression($variableRegistry->getSourceInput());
 
         if (!$isDefinedExpression) {
             return $discriminateStatements;

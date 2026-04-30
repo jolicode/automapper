@@ -12,7 +12,7 @@ class Dto
     public array $profile;
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     // With optional key present

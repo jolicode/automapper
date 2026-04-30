@@ -58,19 +58,19 @@ abstract class GeneratedMapper implements MapperInterface
     /** @var array<string, callable(): mixed> */
     protected array $extractCallbacks = [];
 
-    /** @var array<string, callable(): bool>) */
+    /** @var array<string, callable(): bool> */
     protected array $extractIsNullCallbacks = [];
 
-    /** @var array<string, callable(): bool>) */
+    /** @var array<string, callable(): bool> */
     protected array $extractIsUndefinedCallbacks = [];
 
     /** @var array<string, callable(): mixed> */
     protected array $extractTargetCallbacks = [];
 
-    /** @var array<string, callable(): bool>) */
+    /** @var array<string, (callable(): bool)> */
     protected array $extractTargetIsNullCallbacks = [];
 
-    /** @var array<string, callable(): bool>) */
+    /** @var array<string, (callable(): bool)> */
     protected array $extractTargetIsUndefinedCallbacks = [];
 
     /** @var Target|\ReflectionClass<object> */

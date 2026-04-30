@@ -16,7 +16,7 @@ final readonly class Bar
     }
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     yield 'to_array' => $autoMapper->map(new Bar(true), 'array');

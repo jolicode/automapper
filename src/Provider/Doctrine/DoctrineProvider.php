@@ -17,7 +17,7 @@ final readonly class DoctrineProvider implements ProviderInterface
     /**
      * @param class-string<object> $targetType The class name of the
      */
-    public function provide(string $targetType, mixed $source, array $context, mixed $id): object|array|null
+    public function provide(string $targetType, mixed $source, array $context, mixed $id): ?object
     {
         if ($id !== null) {
             return $this->objectManager->find($targetType, $id);

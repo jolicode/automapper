@@ -22,7 +22,7 @@ final readonly class MethodReadAccessor implements ReadAccessorInterface
      * @param array<string, string> $context
      */
     public function __construct(
-        public string $property,
+        public ?string $property,
         public string $method,
         public string $sourceClass,
         public bool $private = false,

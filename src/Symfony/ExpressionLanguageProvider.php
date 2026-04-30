@@ -28,7 +28,7 @@ final readonly class ExpressionLanguageProvider implements ExpressionFunctionPro
         foreach ($this->functions->getProvidedServices() as $function => $type) {
             $functions[] = new ExpressionFunction(
                 $function,
-                static fn (...$args) => \sprintf('($this->expressionLanguageProvider->get(%s)(%s))', var_export($function, true), implode(', ', $args)),
+                static fn (string ...$args) => \sprintf('($this->expressionLanguageProvider->get(%s)(%s))', var_export($function, true), implode(', ', $args)),
                 fn ($values, ...$args) => $this->get($function)(...$args)
             );
         }

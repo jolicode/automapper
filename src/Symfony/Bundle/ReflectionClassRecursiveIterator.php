@@ -20,6 +20,8 @@ final class ReflectionClassRecursiveIterator
      */
     public static function getReflectionClassesFromDirectories(array $directories): iterable
     {
+        $includedFiles = [];
+
         foreach ($directories as $path) {
             $iterator = new \RegexIterator(
                 new \RecursiveIteratorIterator(

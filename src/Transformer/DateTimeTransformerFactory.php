@@ -37,7 +37,7 @@ final class DateTimeTransformerFactory implements TransformerFactoryInterface, P
         return null;
     }
 
-    protected function createTransformerForSourceAndTarget(?Type $targetType): ?TransformerInterface
+    private function createTransformerForSourceAndTarget(?Type $targetType): TransformerInterface
     {
         // if target is mutable
         if ($this->isDateTimeMutable($targetType)) {
@@ -48,7 +48,7 @@ final class DateTimeTransformerFactory implements TransformerFactoryInterface, P
         return new DateTimeInterfaceToImmutableTransformer();
     }
 
-    protected function createTransformerForSource(?Type $targetType, SourcePropertyMetadata $metadata): ?TransformerInterface
+    private function createTransformerForSource(?Type $targetType, SourcePropertyMetadata $metadata): ?TransformerInterface
     {
         if ($targetType !== null && $targetType->isIdentifiedBy(TypeIdentifier::STRING)) {
             return new DateTimeToStringTransformer($metadata->dateTimeFormat);
@@ -57,7 +57,7 @@ final class DateTimeTransformerFactory implements TransformerFactoryInterface, P
         return null;
     }
 
-    protected function createTransformerForTarget(?Type $sourceType, ?Type $targetType, TargetPropertyMetadata $metadata): ?TransformerInterface
+    private function createTransformerForTarget(?Type $sourceType, ?Type $targetType, TargetPropertyMetadata $metadata): ?TransformerInterface
     {
         if ($sourceType !== null && $sourceType->isIdentifiedBy(TypeIdentifier::STRING)) {
             return new StringToDateTimeTransformer($this->getClassName($targetType), $metadata->dateTimeFormat);

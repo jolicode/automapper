@@ -85,12 +85,9 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
 
     public function map(array|object $source, string|array|object $target, array $context = []): array|object|null
     {
-        $sourceType = $targetType = null;
-
         if (\is_object($source)) {
-            /** @var class-string<object> $sourceType */
             $sourceType = $source::class;
-        } elseif (\is_array($source)) {
+        } else {
             $sourceType = 'array';
         }
 
@@ -102,7 +99,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
             $targetType = 'array';
             $context[MapperContext::TARGET_TO_POPULATE] = $target;
             $context[MapperContext::DEEP_TARGET_TO_POPULATE] ??= true;
-        } elseif (\is_string($target)) {
+        } else {
             $targetType = $target;
         }
 
@@ -116,6 +113,7 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
     public function mapCollection(iterable $collection, string $target, array $context = []): array
     {
         $output = [];
+        /** @var string|int $k */
         foreach ($collection as $k => $item) {
             if (\is_array($item) && 'array' === $target) {
                 throw new InvalidMappingException('Cannot map this value, both source and target are array.');

@@ -24,9 +24,9 @@ class MapperContextTest extends TestCase
 
         $user = new UserDTO();
 
-        self::assertTrue(MapperContext::isAllowedAttribute($context->toArray(), 'id', function () use ($user) { return !isset($user->id) && null === $user->id; }, false));
-        self::assertFalse(MapperContext::isAllowedAttribute($context->toArray(), 'age', function () use ($user) { return !isset($user->age) && null === $user->age; }, false));
-        self::assertFalse(MapperContext::isAllowedAttribute($context->toArray(), 'name', function () { return false; }, false));
+        self::assertTrue(MapperContext::isAllowedAttribute($context->toArray(), 'id', static function () use ($user) { return !isset($user->id) && null === $user->id; }, false));
+        self::assertFalse(MapperContext::isAllowedAttribute($context->toArray(), 'age', static function () use ($user) { return !isset($user->age) && null === $user->age; }, false));
+        self::assertFalse(MapperContext::isAllowedAttribute($context->toArray(), 'name', static function () { return false; }, false));
     }
 
     public function testCircularReferenceLimit(): void
@@ -64,7 +64,7 @@ class MapperContextTest extends TestCase
     {
         $object = new \stdClass();
         $context = new MapperContext();
-        $context->setCircularReferenceHandler(function ($object) {
+        $context->setCircularReferenceHandler(static function ($object) {
             return $object;
         });
         $context = MapperContext::withReference($context->toArray(), 'reference', $object);
@@ -138,7 +138,7 @@ class MapperContextTest extends TestCase
             ],
         ];
 
-        self::assertTrue(MapperContext::isAllowedAttribute($context, 'foo', function () use ($data) { return !isset($data->foo) && null === $data->foo; }, false));
+        self::assertTrue(MapperContext::isAllowedAttribute($context, 'foo', static function () use ($data) { return !isset($data->foo) && null === $data->foo; }, false));
         $newContext = MapperContext::withNewContext($context, 'foo');
 
         self::assertEquals(['bar'], $newContext[MapperContext::ALLOWED_ATTRIBUTES]);
@@ -148,7 +148,7 @@ class MapperContextTest extends TestCase
     {
         $data = new UserDTO();
         $context = [MapperContext::SKIP_NULL_VALUES => true];
-        self::assertFalse(MapperContext::isAllowedAttribute($context, 'id', function () use ($data) { return !isset($data->id) && null === $data->id; }, false));
+        self::assertFalse(MapperContext::isAllowedAttribute($context, 'id', static function () use ($data) { return !isset($data->id) && null === $data->id; }, false));
     }
 
     #[DataProvider('forcedTimeZoneProvider')]

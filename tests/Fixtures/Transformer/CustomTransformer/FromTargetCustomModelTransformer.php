@@ -21,7 +21,7 @@ final readonly class FromTargetCustomModelTransformer implements PropertyTransfo
             return false;
         }
 
-        if (!$target->type->isSatisfiedBy(fn (Type $type) => $type instanceof Type\ObjectType && $type->getClassName() === AddressDTO::class)) {
+        if (!$target->type->isSatisfiedBy(static fn (Type $type) => $type instanceof Type\ObjectType && $type->getClassName() === AddressDTO::class)) {
             return false;
         }
 

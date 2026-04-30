@@ -31,6 +31,7 @@ final readonly class JsonLdContextTransformer implements PropertyTransformerInte
             if ($this->contextBuilder instanceof AnonymousContextBuilderInterface) {
                 return $this->contextBuilder->getAnonymousResourceContext(
                     $source,
+                    /* @phpstan-ignore-next-line */
                     ($context['output'] ?? []) + ['api_resource' => $context['api_resource'] ?? null]
                 );
             }

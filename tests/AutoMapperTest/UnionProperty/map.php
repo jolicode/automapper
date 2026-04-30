@@ -30,7 +30,7 @@ final readonly class ObjectsUnionProperty
     }
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     yield 'bar' => $autoMapper->map(new ObjectsUnionProperty(new Bar('bar')), 'array');

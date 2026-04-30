@@ -15,7 +15,7 @@ class Dto
     public array $rates;
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     yield $autoMapper->map([
