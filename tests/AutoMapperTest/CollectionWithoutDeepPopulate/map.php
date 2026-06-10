@@ -71,20 +71,15 @@ class Target
             if ($existing->id === $item->id) {
                 unset($this->items[$key]);
                 $this->items = array_values($this->items);
+
                 return;
             }
         }
     }
-
-    /** @return TargetItem[] */
-    public function getItems(): array
-    {
-        return $this->items;
-    }
 }
 
-return (function () {
-    $autoMapper = AutoMapperBuilder::buildAutoMapper(mapPrivatePropertiesAndMethod: true);
+return (static function () {
+    $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     $source = new Source();
 

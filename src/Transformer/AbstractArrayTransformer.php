@@ -44,13 +44,11 @@ abstract readonly class AbstractArrayTransformer implements \Stringable, Transfo
         $loopKeyVar = new Expr\Variable($uniqueVariableScope->getUniqueName('key'));
 
         $itemStatements = [];
-        $existingValue = new Expr\Variable($uniqueVariableScope->getUniqueName('existingValue'));
         $assignByRef = $this->itemTransformer instanceof AssignedByReferenceTransformerInterface && $this->itemTransformer->assignByRef();
+        $existingValue = null;
 
-        // Pre-compute $existingValue BEFORE the inner transformer is called: it consumes
-        // $existingValue (via withNewContext) and emitting the assignment afterwards
-        // produced "Undefined variable" warnings in PHP 8+.
         if ($propertyMapping->target->readAccessor !== null && $this->itemTransformer instanceof IdentifierHashInterface) {
+            $existingValue = new Expr\Variable($uniqueVariableScope->getUniqueName('existingValue'));
             $hashValueTargetVariable = new Expr\Variable($uniqueVariableScope->getUniqueName('hashValueTarget'));
             $itemStatements[] = new Stmt\Expression(new Expr\Assign($hashValueTargetVariable, $this->itemTransformer->getSourceHashExpression($loopValueVar)));
             $itemStatements[] = new Stmt\Expression(new Expr\Assign($existingValue, new Expr\BinaryOp\Coalesce(new Expr\ArrayDimFetch($exisingValuesIndexed, $hashValueTargetVariable), new Expr\ConstFetch(new Name('null')))));
