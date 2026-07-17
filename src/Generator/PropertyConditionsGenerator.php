@@ -145,7 +145,7 @@ final readonly class PropertyConditionsGenerator
             new Arg($variableRegistry->getContext()),
             new Arg(new Scalar\String_($propertyMetadata->source->property)),
             new Arg(new Expr\Closure([
-                'uses' => [new Expr\ClosureUse($variableRegistry->getSourceInput())],
+                'uses' => [new Expr\ClosureUse($variableRegistry->getSourceInput()), new Expr\ClosureUse($variableRegistry->getContext())],
                 'stmts' => [new Stmt\Return_($propertyMetadata->source->accessor->getIsNullExpression($variableRegistry->getSourceInput()))],
             ])),
             new Arg($propertyMetadata->source->accessor->getIsUndefinedExpression($variableRegistry->getSourceInput())),
