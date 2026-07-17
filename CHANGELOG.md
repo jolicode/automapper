@@ -6,8 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Fixed
+- Use the `MapFrom` attribute reference instead of `MapTo` when resolving transformers in `MapFromListener`
+- Do not run a transformation on a null source value when the target is not nullable, a `TypeError` is thrown for typed properties instead of the transformation crashing on the null value
+- Create backed enum from scalar source value instead of assigning the raw scalar
+- Convert between different backed enums through their backing value instead of copying the source instance
+- Normalize leading backslash in class names resolved from docblocks, fixing a parse error in generated mappers for global namespace classes and the `__PM__` proxy name off-by-one
+- Implement `CheckTypeInterface` on enum, date-time and uid transformers so union source types generate a runtime check for every branch
+- Unwrap nullable doctrine collection target type, items are mapped to the collection value type instead of plain arrays
+- Capture the context in the `isAllowedAttribute` closure, fixing `MapToContext` combined with `skip_null_values`
+- Guard nested property accessors (`parent.child`) against null or uninitialized parent values on read, write and constructor paths, support private nested leaf properties and nullable parent types
+- Support variadic constructor parameters, values are spread as individual arguments and an absent variadic no longer throws `MissingConstructorArgumentsException`
+- The highest priority `Mapper` attribute wins as documented, instead of the lowest
+- Correct identifier hashing: scalar identifiers are cast to string, object identifiers are hashed through their own mapper and `hash_final` no longer receives a string as its boolean argument, fixing mappers generated with `strictTypes: true`
+- Atomic mapper file writes and locked registry updates in `FileLoader`, fixing partially written files and lost registry entries under concurrency, the cache warmer no longer discards previously registered mapper hashes
+- Initialize `LazyMap` only once instead of re-running the mapping on every access
+- Align `Map` attribute `if` condition semantics with symfony/object-mapper: `if: false` never maps the property, callables receive the value first and class level `Map` targets also match child classes
+- Do not register the cache warmer when the `eval` loader is enabled, fixing container compilation with `automapper.loader.eval: true`
+- Detect doctrine entities even when their metadata is not loaded yet, fixing missing provider and identifier on cold metadata factories
+- Do not map static properties
 
-## [10.2.0] - 2026-27-04
+## [10.2.0] - 2026-04-27
 ### Added
 - [GH#336](https://github.com/jolicode/automapper/pull/336) Support for array shape
 
@@ -15,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#340](https://github.com/jolicode/automapper/pull/340) Allow type resolver in 2.0 for dependencies
 - [GH#341](https://github.com/jolicode/automapper/pull/341) Fix phpstan extractor not using private properties in bundle
 
-## [10.1.0] - 2026-18-03
+## [10.1.0] - 2026-03-18
 ### Added
 - [GH#328](https://github.com/jolicode/automapper/pull/328) Register mappers as lazy to reduce initialization calls when sub mappers are not used
 
@@ -28,18 +47,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#331](https://github.com/jolicode/automapper/pull/331) Fix syntax error in supports method return statement example
 - [GH#329](https://github.com/jolicode/automapper/pull/329) Fix some typos
 
-## [10.0.3] - 2025-25-02
+## [10.0.3] - 2025-02-25
 - [GH#327](https://github.com/jolicode/automapper/pull/327) Fix cache extractor in symfony bundle being mixed between source and target.
 
-## [10.0.2] - 2025-24-02
+## [10.0.2] - 2025-02-24
 ### Fixed
 - [GH#326](https://github.com/jolicode/automapper/pull/326) Fix array, be consistent with old behavior, undefined array should be mapped with their keys.
 
-## [10.0.1] - 2025-24-02
+## [10.0.1] - 2025-02-24
 ### Fixed
 - [GH#325](https://github.com/jolicode/automapper/pull/325) Fix creating union or intersection type when not enough types.
 
-## [10.0.0] - 2025-10-02
+## [10.0.0] - 2025-02-10
 ### Added
 - [GH#297](https://github.com/jolicode/automapper/pull/297) Support PHP 8.5 and Symfony 8, this library now use the `TypeInfo` Component for types instead of PropertyInfo directly.
 - [GH#297](https://github.com/jolicode/automapper/pull/297) Debug command now show the type of each property mapped, transformers will also display more information.
