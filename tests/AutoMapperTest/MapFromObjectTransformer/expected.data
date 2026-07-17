@@ -1,0 +1,3 @@
+AutoMapper\Tests\AutoMapperTest\MapFromObjectTransformer\OrderDto {
+  +price: "123.45 €"
+}
