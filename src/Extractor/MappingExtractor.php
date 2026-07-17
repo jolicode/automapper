@@ -44,6 +44,13 @@ abstract class MappingExtractor implements MappingExtractorInterface
 
         $properties = $this->propertyInfoExtractor->getProperties($class) ?? [];
 
+        // static properties are not part of an object state, they must not be mapped
+        $reflectionClass = new \ReflectionClass($class);
+        $properties = array_values(array_filter(
+            $properties,
+            static fn (string $property) => !($reflectionClass->hasProperty($property) && $reflectionClass->getProperty($property)->isStatic()),
+        ));
+
         if ($withConstructorParameters) {
             $properties = array_values(
                 array_unique(
