@@ -63,11 +63,37 @@ final readonly class MapSourceListener extends MapListener
 
                 if ($attribute->if instanceof TargetClass) {
                     $reflectionObject = new \ReflectionClass($attribute->if);
-                    /** @var string $targetClassName */
-                    $targetClassName = $reflectionObject->getProperty('className')->getRawValue($attribute->if);
 
-                    if ($targetClassName !== null && $event->mapperMetadata->target !== $targetClassName && !is_subclass_of($event->mapperMetadata->target, $targetClassName)) {
-                        continue;
+                    if ($reflectionObject->hasProperty('className')) {
+                        /** @var string $targetClassName */
+                        $targetClassName = $reflectionObject->getProperty('className')->getRawValue($attribute->if);
+
+                        if (
+                            $targetClassName !== null
+                            && $event->mapperMetadata->target !== $targetClassName
+                            && !is_subclass_of($event->mapperMetadata->target, $targetClassName)
+                        ) {
+                            continue;
+                        }
+                    }
+
+                    if ($reflectionObject->hasProperty('targets')) {
+                        /** @var string[] $targets */
+                        $targets = $reflectionObject->getProperty('targets')->getRawValue($attribute->if);
+                        $anyTrue = false;
+
+                        foreach ($targets as $targetClassName) {
+                            if ($event->mapperMetadata->target === $targetClassName
+                                || is_subclass_of($event->mapperMetadata->target, $targetClassName)
+                            ) {
+                                $anyTrue = true;
+                                break;
+                            }
+                        }
+
+                        if (!$anyTrue) {
+                            continue;
+                        }
                     }
                 } elseif ($attribute->if && \is_callable($attribute->if, false, $ifCallableName)) {
                     if (\is_object($attribute->if)) {
