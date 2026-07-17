@@ -1,0 +1,3 @@
+AutoMapper\Tests\AutoMapperTest\MapperAttributePriority\Entity {
+  +foo: "bar"
+}
