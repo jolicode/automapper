@@ -1,0 +1,10 @@
+AutoMapper\Tests\AutoMapperTest\ScalarToBackedEnum\Target {
+  +status: AutoMapper\Tests\AutoMapperTest\ScalarToBackedEnum\Status {
+    +name: "Active"
+    +value: "active"
+  }
+  +level: AutoMapper\Tests\AutoMapperTest\ScalarToBackedEnum\Level {
+    +name: "High"
+    +value: 10
+  }
+}
