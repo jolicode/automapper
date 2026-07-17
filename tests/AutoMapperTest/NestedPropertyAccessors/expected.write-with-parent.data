@@ -1,0 +1,5 @@
+AutoMapper\Tests\AutoMapperTest\NestedPropertyAccessors\NestedTarget {
+  +address: AutoMapper\Tests\AutoMapperTest\NestedPropertyAccessors\Address {
+    +zipcode: "75000"
+  }
+}

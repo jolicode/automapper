@@ -89,12 +89,12 @@ final readonly class MethodReadAccessor implements ReadAccessorInterface
         return new Expr\MethodCall($input, $this->method, $methodCallArguments);
     }
 
-    public function getIsDefinedExpression(Expr\Variable $input, bool $nullable = false, bool $target = false): ?Expr
+    public function getIsDefinedExpression(Expr $input, bool $nullable = false, bool $target = false): ?Expr
     {
         return null;
     }
 
-    public function getIsNullExpression(Expr\Variable $input, bool $target = false): Expr
+    public function getIsNullExpression(Expr $input, bool $target = false): Expr
     {
         $methodCallExpr = $this->getExpression($input);
 
@@ -107,7 +107,7 @@ final readonly class MethodReadAccessor implements ReadAccessorInterface
         );
     }
 
-    public function getIsUndefinedExpression(Expr\Variable $input, bool $target = false): Expr
+    public function getIsUndefinedExpression(Expr $input, bool $target = false): Expr
     {
         return new Expr\ConstFetch(new Name('false'));
     }

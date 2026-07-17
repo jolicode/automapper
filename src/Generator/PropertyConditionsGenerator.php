@@ -7,6 +7,7 @@ namespace AutoMapper\Generator;
 use AutoMapper\AttributeReference\AttributeInstance;
 use AutoMapper\AttributeReference\Reference;
 use AutoMapper\Exception\CompileException;
+use AutoMapper\Extractor\NestedReadAccessor;
 use AutoMapper\MapperContext;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\PropertyMetadata;
@@ -46,6 +47,7 @@ final readonly class PropertyConditionsGenerator
         $conditions[] = $this->customCondition($metadata, $propertyMetadata);
         $conditions[] = $this->propertyExistsForStdClass($metadata, $propertyMetadata);
         $conditions[] = $this->propertyExistsForArray($metadata, $propertyMetadata);
+        $conditions[] = $this->nestedSourceIsAccessible($metadata, $propertyMetadata);
 
         if (!$onlyExists) {
             $conditions[] = $this->isAllowedAttribute($metadata, $propertyMetadata);
@@ -86,6 +88,22 @@ final readonly class PropertyConditionsGenerator
         }
 
         return $condition;
+    }
+
+    /**
+     * When reading from a nested property, the whole mapping is skipped if a value on the path cannot be accessed.
+     *
+     * ```php
+     * isset($source->parent) && isset($source->parent->child)
+     * ```
+     */
+    private function nestedSourceIsAccessible(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
+    {
+        if (!$propertyMetadata->source->accessor instanceof NestedReadAccessor) {
+            return null;
+        }
+
+        return $propertyMetadata->source->accessor->getIsDefinedExpression($metadata->variableRegistry->getSourceInput());
     }
 
     /**
