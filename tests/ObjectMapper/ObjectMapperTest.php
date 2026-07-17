@@ -129,7 +129,8 @@ final class ObjectMapperTest extends AutoMapperTestCase
         $b = new B('test');
         $b->transform = 'TEST';
         $b->baz = 'me';
-        $b->nomap = false;
+        // A::$nomap is false so its `if: 'boolval'` condition skips the mapping, B keeps its default value
+        $b->nomap = true;
         $b->concat = 'shouldtestme';
         $b->relation = $d;
         $b->relationNotMapped = $d;

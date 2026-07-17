@@ -29,7 +29,7 @@ final readonly class MapTargetListener extends MapListener
             $attribute = $targetAttribute->newInstance();
             $hasAnyMapAttribute = true;
 
-            if (!$attribute->source || $attribute->source === $event->mapperMetadata->source) {
+            if (!$attribute->source || $attribute->source === $event->mapperMetadata->source || is_subclass_of($event->mapperMetadata->source, $attribute->source)) {
                 $mapAttribute = $attribute;
             }
         }
@@ -57,10 +57,14 @@ final readonly class MapTargetListener extends MapListener
                     transformer: $this->getTransformerFromMapAttribute($event->mapperMetadata->targetReflectionClass->getName(), $attribute, $reference, false),
                 );
 
-                $ifCallableName = null;
-
-                if ($attribute->if && \is_callable($attribute->if, false, $ifCallableName)) {
-                    $propertyMetadata->if = $ifCallableName;
+                if (false === $attribute->if) {
+                    // symfony/object-mapper never maps a property with `if: false`
+                    $propertyMetadata->ignored = true;
+                    $propertyMetadata->ignoreReason = 'Property is ignored by Map Attribute if condition';
+                } elseif ($attribute->if && \is_callable($attribute->if, false)) {
+                    // symfony/object-mapper callables have their own calling convention, keep the
+                    // attribute reference so the generated code can replicate it
+                    $propertyMetadata->if = $reference;
                 } elseif (\is_string($attribute->if)) {
                     $propertyMetadata->if = $attribute->if;
                 }

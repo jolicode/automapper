@@ -1,0 +1,5 @@
+AutoMapper\Tests\AutoMapperTest\ObjectMapperIfConditions\TargetB {
+  +username: "jdoe"
+  +hidden: "unchanged"
+  +code: "ABC"
+}
