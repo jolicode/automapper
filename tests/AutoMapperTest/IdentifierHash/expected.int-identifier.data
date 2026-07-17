@@ -1,0 +1,12 @@
+AutoMapper\Tests\AutoMapperTest\IdentifierHash\Basket {
+  +items: [
+    AutoMapper\Tests\AutoMapperTest\IdentifierHash\Item {
+      +id: 1
+      +label: "one updated"
+    }
+    AutoMapper\Tests\AutoMapperTest\IdentifierHash\Item {
+      +id: 3
+      +label: "three"
+    }
+  ]
+}
