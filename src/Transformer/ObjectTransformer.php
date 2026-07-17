@@ -83,7 +83,7 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
     public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source): ?Expr
     {
         if ($this->sourceType instanceof Type\ObjectType) {
-            $condition = new Expr\Instanceof_($input, new Name\FullyQualified($this->sourceType->getClassName()));
+            $condition = new Expr\Instanceof_($input, new Name\FullyQualified(ltrim($this->sourceType->getClassName(), '\\')));
         } elseif ($this->sourceType instanceof Type\BuiltinType) {
             if ($this->sourceType->getTypeIdentifier() === TypeIdentifier::OBJECT) {
                 $condition = new Expr\FuncCall(
@@ -139,7 +139,7 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
              *
              * @var class-string<object> $sourceTypeName
              */
-            $sourceTypeName = $this->sourceType->getClassName();
+            $sourceTypeName = ltrim($this->sourceType->getClassName(), '\\');
         }
 
         return $sourceTypeName;
@@ -158,7 +158,7 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
              *
              * @var class-string<object> $targetTypeName
              */
-            $targetTypeName = $this->targetType->getClassName();
+            $targetTypeName = ltrim($this->targetType->getClassName(), '\\');
         }
 
         return $targetTypeName;

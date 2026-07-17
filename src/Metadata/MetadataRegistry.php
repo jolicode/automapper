@@ -82,6 +82,11 @@ class MetadataRegistry implements \IteratorAggregate, \Countable
      */
     private function getRealClassName(string $className): string
     {
+        // Class names resolved from docblocks may have a leading backslash, normalize it away so
+        // registry keys and generated code always use the same form
+        /** @var class-string<object>|'array' $className */
+        $className = ltrim($className, '\\');
+
         // __CG__: Doctrine Common Marker for Proxy (ODM < 2.0 and ORM < 3.0)
         // __PM__: Ocramius Proxy Manager (ODM >= 2.0)
         $positionCg = strrpos($className, '\\__CG__\\');
@@ -95,8 +100,6 @@ class MetadataRegistry implements \IteratorAggregate, \Countable
             /** @var class-string<object> */
             return substr($className, $positionCg + 8);
         }
-
-        $className = ltrim($className, '\\');
 
         /** @var class-string<object> */
         return substr(

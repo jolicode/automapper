@@ -1,0 +1,7 @@
+AutoMapperGlobalDto {
+  +items: [
+    AutoMapperGlobalItemDto {
+      +name: "foo"
+    }
+  ]
+}
