@@ -17,7 +17,7 @@ use PhpParser\Node\Name;
  *
  * @internal
  */
-final class DateTimeInterfaceToMutableTransformer implements TransformerInterface
+final class DateTimeInterfaceToMutableTransformer implements TransformerInterface, CheckTypeInterface
 {
     public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source, ?Expr $existingValue = null): array
     {
@@ -32,5 +32,11 @@ final class DateTimeInterfaceToMutableTransformer implements TransformerInterfac
             ]),
             [],
         ];
+    }
+
+    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source): Expr
+    {
+        /* $input instanceof \DateTimeInterface */
+        return new Expr\Instanceof_($input, new Name\FullyQualified(\DateTimeInterface::class));
     }
 }

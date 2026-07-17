@@ -9,6 +9,7 @@ use AutoMapper\Metadata\PropertyMetadata;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
+use Symfony\Component\Uid\AbstractUid;
 use Symfony\Component\Uid\Ulid;
 use Symfony\Component\Uid\Uuid;
 
@@ -19,7 +20,7 @@ use Symfony\Component\Uid\Uuid;
  *
  * @internal
  */
-final class SymfonyUidCopyTransformer implements TransformerInterface
+final class SymfonyUidCopyTransformer implements TransformerInterface, CheckTypeInterface
 {
     public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source, ?Expr $existingValue = null): array
     {
@@ -36,5 +37,11 @@ final class SymfonyUidCopyTransformer implements TransformerInterface
             ),
             [],
         ];
+    }
+
+    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source): Expr
+    {
+        /* $input instanceof \Symfony\Component\Uid\AbstractUid */
+        return new Expr\Instanceof_($input, new Name\FullyQualified(AbstractUid::class));
     }
 }

@@ -17,7 +17,7 @@ use PhpParser\Node\Name;
  *
  * @internal
  */
-final readonly class StringToSymfonyUidTransformer implements TransformerInterface
+final readonly class StringToSymfonyUidTransformer implements TransformerInterface, CheckTypeInterface
 {
     public function __construct(
         private string $className,
@@ -35,5 +35,11 @@ final readonly class StringToSymfonyUidTransformer implements TransformerInterfa
             new Expr\New_(new Name($this->className), [new Arg($input)]),
             [],
         ];
+    }
+
+    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source): Expr
+    {
+        /* is_string($input) */
+        return new Expr\FuncCall(new Name('is_string'), [new Arg($input)]);
     }
 }

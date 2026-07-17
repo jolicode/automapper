@@ -7,6 +7,8 @@ namespace AutoMapper\Transformer;
 use AutoMapper\Generator\UniqueVariableScope;
 use AutoMapper\Metadata\PropertyMetadata;
 use PhpParser\Node\Expr;
+use PhpParser\Node\Name;
+use Symfony\Component\Uid\AbstractUid;
 
 /**
  * Transform a \DateTimeInterface object to a string.
@@ -15,7 +17,7 @@ use PhpParser\Node\Expr;
  *
  * @internal
  */
-final readonly class SymfonyUidToStringTransformer implements TransformerInterface
+final readonly class SymfonyUidToStringTransformer implements TransformerInterface, CheckTypeInterface
 {
     public function __construct(
         private bool $isUlid,
@@ -42,5 +44,11 @@ final readonly class SymfonyUidToStringTransformer implements TransformerInterfa
             new Expr\MethodCall($input, 'toRfc4122'),
             [],
         ];
+    }
+
+    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source): Expr
+    {
+        /* $input instanceof \Symfony\Component\Uid\AbstractUid */
+        return new Expr\Instanceof_($input, new Name\FullyQualified(AbstractUid::class));
     }
 }

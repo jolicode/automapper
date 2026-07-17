@@ -17,10 +17,11 @@ use PhpParser\Node\Name;
  *
  * @internal
  */
-final readonly class EnumToEnumTransformer implements TransformerInterface
+final readonly class EnumToEnumTransformer implements TransformerInterface, CheckTypeInterface
 {
     public function __construct(
         private string $targetClassName,
+        private ?string $sourceClassName = null,
     ) {
     }
 
@@ -34,5 +35,11 @@ final readonly class EnumToEnumTransformer implements TransformerInterface
         return [new Expr\StaticCall(new Name\FullyQualified($this->targetClassName), 'from', [
             new Arg(new Expr\PropertyFetch($input, 'value')),
         ]), []];
+    }
+
+    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source): Expr
+    {
+        /* $input instanceof \Some\Enum */
+        return new Expr\Instanceof_($input, new Name\FullyQualified($this->sourceClassName ?? \BackedEnum::class));
     }
 }
