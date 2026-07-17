@@ -107,47 +107,72 @@ final class FileLoader implements ClassLoaderInterface
      */
     private function addHashToRegistry(string $className, string $hash): void
     {
-        if (!isset($this->registry)) {
-            $this->registry = [];
-        }
-
         $registryPath = $this->directory . \DIRECTORY_SEPARATOR . 'registry.php';
-        $this->registry[$className] = $hash;
-        $this->write($registryPath, "<?php\n\nreturn " . var_export($this->registry, true) . ";\n");
+
+        // The registry is shared by all mappers: it is locked globally and reloaded from disk so entries
+        // written concurrently by other processes are not lost
+        $lock = $this->lockFactory->createLock('automapper_registry');
+        $lock->acquire(true);
+
+        try {
+            $this->registry = $this->readRegistry();
+            $this->registry[$className] = $hash;
+            $this->write($registryPath, "<?php\n\nreturn " . var_export($this->registry, true) . ";\n");
+        } finally {
+            $lock->release();
+        }
     }
 
     /** @return array<class-string, string> */
     private function getRegistry(): array
     {
-        if (!isset($this->registry)) {
-            $registryPath = $this->directory . \DIRECTORY_SEPARATOR . 'registry.php';
+        return $this->registry ??= $this->readRegistry();
+    }
 
-            if (!file_exists($registryPath)) {
-                $this->registry = [];
-            } else {
-                $this->registry = require $registryPath;
-            }
+    /** @return array<class-string, string> */
+    private function readRegistry(): array
+    {
+        $registryPath = $this->directory . \DIRECTORY_SEPARATOR . 'registry.php';
+
+        if (!file_exists($registryPath)) {
+            return [];
         }
 
-        return $this->registry;
+        $registry = require $registryPath;
+
+        if (!\is_array($registry)) {
+            // corrupted registry, mappers will be regenerated
+            return [];
+        }
+
+        /** @var array<class-string, string> $registry */
+        return $registry;
     }
 
     private function write(string $file, string $contents): void
     {
-        if (!file_exists($this->directory)) {
-            mkdir($this->directory);
+        if (!is_dir($this->directory) && !@mkdir($this->directory, 0755, true) && !is_dir($this->directory)) {
+            throw new CompileException(\sprintf('Could not create directory "%s"', $this->directory));
         }
 
-        $fp = fopen($file, 'w');
+        // Write to a temporary file then rename: the rename is atomic so a concurrent process can never
+        // require a partially written file
+        $tmpFile = tempnam($this->directory, 'am_');
 
-        if (false === $fp) {
-            throw new CompileException(\sprintf('Could not open file "%s"', $file));
+        if (false === $tmpFile || false === file_put_contents($tmpFile, $contents)) {
+            throw new CompileException(\sprintf('Could not write file "%s"', $file));
         }
 
-        if (flock($fp, LOCK_EX)) {
-            fwrite($fp, $contents);
+        @chmod($tmpFile, 0666 & ~umask());
+
+        if (!rename($tmpFile, $file)) {
+            @unlink($tmpFile);
+
+            throw new CompileException(\sprintf('Could not write file "%s"', $file));
         }
 
-        fclose($fp);
+        if (\function_exists('opcache_invalidate')) {
+            @opcache_invalidate($file, true);
+        }
     }
 }
