@@ -1,0 +1,9 @@
+AutoMapper\Tests\AutoMapperTest\NullableDoctrineCollection\Target {
+  +items: Doctrine\Common\Collections\ArrayCollection {
+    -elements: [
+      AutoMapper\Tests\AutoMapperTest\NullableDoctrineCollection\ItemDto {
+        +name: "foo"
+      }
+    ]
+  }
+}
