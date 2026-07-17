@@ -1,0 +1,5 @@
+[
+  "name" => "foo"
+  "extra" => "bar"
+  "reads" => 1
+]
