@@ -234,16 +234,24 @@ final readonly class CreateTargetStatementsGenerator
 
         $createObjectStatements = [];
         $constructVar = $metadata->variableRegistry->getVariableWithUniqueName('constructArgs');
+        $variadicVar = null;
 
         foreach ($targetConstructor->getParameters() as $constructorParameter) {
             // Find property for parameter
             $propertyMetadata = $metadata->getTargetPropertyWithConstructor($constructorParameter->getName());
 
             $propertyStatements = null;
-            $assignVar = new Expr\ArrayDimFetch(
-                $constructVar,
-                new Scalar\String_($constructorParameter->getName())
-            );
+
+            if ($constructorParameter->isVariadic()) {
+                /* A variadic parameter cannot be passed by name, collect its values in a dedicated variable spread at the end of the constructor call */
+                $variadicVar = $metadata->variableRegistry->getVariableWithUniqueName('variadicConstructArgs');
+                $assignVar = $variadicVar;
+            } else {
+                $assignVar = new Expr\ArrayDimFetch(
+                    $constructVar,
+                    new Scalar\String_($constructorParameter->getName())
+                );
+            }
 
             if (null !== $propertyMetadata) {
                 $propertyStatements = $this->constructorArgument($assignVar, $metadata, $propertyMetadata, $constructorParameter);
@@ -261,16 +269,32 @@ final readonly class CreateTargetStatementsGenerator
             ...$createObjectStatements,
         ];
 
+        if (null !== $variadicVar) {
+            $createObjectStatements = [
+                new Stmt\Expression(new Expr\Assign($variadicVar, new Expr\Array_())),
+                ...$createObjectStatements,
+            ];
+        }
+
         /*
-         * Create object with named constructor arguments
+         * Create object with named constructor arguments, variadic values are spread positionally at the end
          *
-         * $result->__construct(foo: $constructArg1, bar: $constructArg2, ...); // If lazy ghost class is available
+         * $result->__construct(...$constructArgs, ...array_values($variadicConstructArgs));
          */
+        $constructArguments = [new Arg($constructVar, unpack: true)];
+
+        if (null !== $variadicVar) {
+            $constructArguments[] = new Arg(
+                new Expr\FuncCall(new Name('array_values'), [new Arg($variadicVar)]),
+                unpack: true
+            );
+        }
+
         $createObjectStatements[] = new Stmt\Expression(
             new Expr\MethodCall(
                 $metadata->variableRegistry->getResult(),
                 '__construct',
-                [new Arg($constructVar, unpack: true)],
+                $constructArguments,
             )
         );
 
@@ -292,7 +316,7 @@ final readonly class CreateTargetStatementsGenerator
      *
      * @return Stmt[]|null
      */
-    private function constructorArgument(Expr\ArrayDimFetch $assignVar, GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata, \ReflectionParameter $parameter): ?array
+    private function constructorArgument(Expr\ArrayDimFetch|Expr\Variable $assignVar, GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata, \ReflectionParameter $parameter): ?array
     {
         $variableRegistry = $metadata->variableRegistry;
         $fieldValueExpr = $propertyMetadata->source->accessor?->getExpression($variableRegistry->getSourceInput());
@@ -308,7 +332,7 @@ final readonly class CreateTargetStatementsGenerator
 
         $defaultValueExpr = null;
 
-        if (!$parameter->isDefaultValueAvailable()) {
+        if (!$parameter->isDefaultValueAvailable() && !$parameter->isVariadic()) {
             if ($parameter->allowsNull()) {
                 $defaultValueExpr = new Expr\ConstFetch(new Name('null'));
             } else {
@@ -395,12 +419,12 @@ final readonly class CreateTargetStatementsGenerator
      *
      * @return Stmt[]
      */
-    private function constructorArgumentWithoutSource(Expr\ArrayDimFetch $assignVar, GeneratorMetadata $metadata, \ReflectionParameter $constructorParameter): array
+    private function constructorArgumentWithoutSource(Expr\ArrayDimFetch|Expr\Variable $assignVar, GeneratorMetadata $metadata, \ReflectionParameter $constructorParameter): array
     {
         $variableRegistry = $metadata->variableRegistry;
         $defaultValueExpr = null;
 
-        if (!$constructorParameter->isDefaultValueAvailable()) {
+        if (!$constructorParameter->isDefaultValueAvailable() && !$constructorParameter->isVariadic()) {
             if ($constructorParameter->allowsNull()) {
                 $defaultValueExpr = new Expr\ConstFetch(new Name('null'));
             } else {
