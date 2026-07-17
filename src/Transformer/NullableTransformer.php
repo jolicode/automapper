@@ -21,7 +21,7 @@ final readonly class NullableTransformer implements \Stringable, TransformerInte
 {
     public function __construct(
         private TransformerInterface $itemTransformer,
-        private bool $isTargetNullable,
+        public bool $isTargetNullable,
     ) {
     }
 
