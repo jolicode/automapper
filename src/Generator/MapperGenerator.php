@@ -35,6 +35,7 @@ final readonly class MapperGenerator
     private MapperConstructorGenerator $mapperConstructorGenerator;
     private InjectMapperMethodStatementsGenerator $injectMapperMethodStatementsGenerator;
     private MapMethodStatementsGenerator $mapMethodStatementsGenerator;
+    private JsonStreamMethodStatementsGenerator $jsonStreamMethodStatementsGenerator;
     private IdentifierHashGenerator $identifierHashGenerator;
     private bool $disableGeneratedMapper;
 
@@ -52,6 +53,10 @@ final readonly class MapperGenerator
             new DiscriminatorStatementsGenerator($classDiscriminatorResolver, false),
             $cachedReflectionStatementsGenerator,
             $expressionLanguage,
+        );
+
+        $this->jsonStreamMethodStatementsGenerator = new JsonStreamMethodStatementsGenerator(
+            new PropertyConditionsGenerator($expressionLanguage),
         );
 
         $this->injectMapperMethodStatementsGenerator = new InjectMapperMethodStatementsGenerator();
@@ -95,6 +100,12 @@ final readonly class MapperGenerator
         $builder
             ->addStmt($this->doMapMethod($metadata, $setterStatements))
             ->addStmt($this->registerMappersMethod($metadata));
+
+        // Object → array mappers also get a generator method that streams the JSON
+        // straight from the source object, reusing the same read/transform pipeline.
+        if ('array' === $metadata->mapperMetadata->target && 'array' !== $metadata->mapperMetadata->source) {
+            $builder->addStmt($this->mapToJsonStreamMethod($metadata));
+        }
 
         if ($sourceHashMethod = $this->identifierHashGenerator->getSourceHashMethod($metadata)) {
             $builder->addStmt($sourceHashMethod);
@@ -208,6 +219,29 @@ final readonly class MapperGenerator
             ->addParam(new Param($metadata->variableRegistry->getResult(), byRef: true))
             ->addParam(new Param($metadata->variableRegistry->getContext(), default: new Expr\Array_(), type: new Name('array')))
             ->addStmts($setterStatements)
+            ->getNode();
+    }
+
+    /**
+     * Create the mapToJsonStream generator method for this mapper.
+     *
+     * ```php
+     * public function mapToJsonStream($value, array $context = []): iterable {
+     *   yield '{';
+     *   yield '"id":' . json_encode($value->getId());
+     *   ...
+     *   yield '}';
+     * }
+     * ```
+     */
+    private function mapToJsonStreamMethod(GeneratorMetadata $metadata): Stmt\ClassMethod
+    {
+        return (new Builder\Method('mapToJsonStream'))
+            ->makePublic()
+            ->setReturnType('iterable')
+            ->addParam(new Param($metadata->variableRegistry->getSourceInput()))
+            ->addParam(new Param($metadata->variableRegistry->getContext(), default: new Expr\Array_(), type: new Name('array')))
+            ->addStmts($this->jsonStreamMethodStatementsGenerator->getStatements($metadata))
             ->getNode();
     }
 
