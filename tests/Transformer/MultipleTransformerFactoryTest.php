@@ -22,7 +22,7 @@ class MultipleTransformerFactoryTest extends TestCase
         $factory = new MultipleTransformerFactory();
         $factory->setChainTransformerFactory($chainFactory);
 
-        $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $mapperMetadata = $this->createStub(MapperMetadata::class);
 
         $sourceMapperMetadata = new SourcePropertyMetadata('foo', type: Type::union(Type::string(), Type::int()));
         $targetMapperMetadata = new TargetPropertyMetadata('foo');
@@ -47,7 +47,7 @@ class MultipleTransformerFactoryTest extends TestCase
         $factory = new MultipleTransformerFactory();
         $factory->setChainTransformerFactory($chainFactory);
 
-        $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $mapperMetadata = $this->createStub(MapperMetadata::class);
 
         $sourceMapperMetadata = new SourcePropertyMetadata('foo', type: Type::union(Type::string(), Type::int()));
         $targetMapperMetadata = new TargetPropertyMetadata('foo');
@@ -62,7 +62,7 @@ class MultipleTransformerFactoryTest extends TestCase
         $factory = new MultipleTransformerFactory();
         $factory->setChainTransformerFactory($chainFactory);
 
-        $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $mapperMetadata = $this->createStub(MapperMetadata::class);
 
         $sourceMapperMetadata = new SourcePropertyMetadata('foo');
         $targetMapperMetadata = new TargetPropertyMetadata('foo');

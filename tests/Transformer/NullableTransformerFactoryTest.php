@@ -29,7 +29,7 @@ class NullableTransformerFactoryTest extends TestCase
         $factory = new NullableTransformerFactory();
         $factory->setChainTransformerFactory($chainFactory);
 
-        $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $mapperMetadata = $this->createStub(MapperMetadata::class);
 
         $sourceMapperMetadata = new SourcePropertyMetadata('foo', type: Type::nullable(Type::string()));
         $targetMapperMetadata = new TargetPropertyMetadata('foo', type: Type::string());
@@ -70,7 +70,7 @@ class NullableTransformerFactoryTest extends TestCase
         $factory = new NullableTransformerFactory();
         $factory->setChainTransformerFactory($chainFactory);
 
-        $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $mapperMetadata = $this->createStub(MapperMetadata::class);
 
         $sourceMapperMetadata = new SourcePropertyMetadata('foo', type: Type::string());
         $targetMapperMetadata = new TargetPropertyMetadata('foo', type: Type::string());
@@ -85,7 +85,7 @@ class NullableTransformerFactoryTest extends TestCase
         $factory = new NullableTransformerFactory();
         $factory->setChainTransformerFactory($chainFactory);
 
-        $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $mapperMetadata = $this->createStub(MapperMetadata::class);
 
         $sourceMapperMetadata = new SourcePropertyMetadata('foo', type: Type::union(Type::nullable(Type::string()), Type::string()));
         $targetMapperMetadata = new TargetPropertyMetadata('foo', type: Type::string());

@@ -64,13 +64,48 @@ final class ArrayTransformerFactory implements TransformerFactoryInterface, Prio
             $sourceCollectionKeyType = $sourceType instanceof Type\CollectionType ? $sourceType->getCollectionKeyType() : Type::mixed();
 
             if ($sourceCollectionKeyType instanceof Type\BuiltinType && $sourceCollectionKeyType->getTypeIdentifier() === TypeIdentifier::INT) {
-                return new ArrayTransformer($subItemTransformer);
+                $collectionTransformer = new ArrayTransformer($subItemTransformer);
+            } else {
+                $collectionTransformer = new DictionaryTransformer($subItemTransformer);
             }
 
-            return new DictionaryTransformer($subItemTransformer);
+            if ($this->targetCanHoldLazyCollection($targetType, $mapperMetadata)) {
+                return new LazyCollectionTransformer($collectionTransformer, $subItemTransformer);
+            }
+
+            return $collectionTransformer;
         }
 
         return null;
+    }
+
+    /**
+     * Whether the target can store a {@see \AutoMapper\Lazy\LazyCollection} instead of a plain
+     * array: either the target is an array shape (any value is accepted), or the property is typed
+     * as a non-array iterable. A concrete `array`/`list`/`dict` property cannot, and must stay eager.
+     */
+    private function targetCanHoldLazyCollection(Type $targetType, MapperMetadata $mapperMetadata): bool
+    {
+        if (isset($mapperMetadata->target)
+            && \in_array($mapperMetadata->target, ['array', \stdClass::class, LazyMap::class], true)) {
+            return true;
+        }
+
+        if ($targetType instanceof Type\NullableType) {
+            $targetType = $targetType->getWrappedType();
+        }
+
+        if (!$targetType instanceof Type\CollectionType) {
+            return false;
+        }
+
+        $wrappedType = $targetType->getWrappedType();
+
+        while ($wrappedType instanceof Type\GenericType) {
+            $wrappedType = $wrappedType->getWrappedType();
+        }
+
+        return $wrappedType instanceof Type\BuiltinType && $wrappedType->getTypeIdentifier() === TypeIdentifier::ITERABLE;
     }
 
     /**
