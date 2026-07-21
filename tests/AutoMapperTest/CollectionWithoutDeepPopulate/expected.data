@@ -1,0 +1,12 @@
+AutoMapper\Tests\AutoMapperTest\CollectionWithoutDeepPopulate\Target {
+  -items: [
+    AutoMapper\Tests\AutoMapperTest\CollectionWithoutDeepPopulate\TargetItem {
+      +id: 1
+      +label: "first"
+    }
+    AutoMapper\Tests\AutoMapperTest\CollectionWithoutDeepPopulate\TargetItem {
+      +id: 2
+      +label: "second"
+    }
+  ]
+}
