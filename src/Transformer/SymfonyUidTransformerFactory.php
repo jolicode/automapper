@@ -27,7 +27,7 @@ final class SymfonyUidTransformerFactory implements TransformerFactoryInterface,
         $targetUid = $this->getUid($target->type);
 
         if ($sourceUid[0] && $targetUid[0]) {
-            return new SymfonyUidCopyTransformer();
+            return new SymfonyUidCopyTransformer($targetUid[2]);
         }
 
         if ($sourceUid[0]) {
