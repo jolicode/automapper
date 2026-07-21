@@ -19,14 +19,18 @@ return static function (ContainerConfigurator $container) {
                 service('automapper.mapper_service_locator'),
                 service('automapper.expression_language'),
             ])
-            ->tag('kernel.event_listener', ['event' => GenerateMapperEvent::class, 'priority' => 0])
+            // run last (after Doctrine and discriminator listeners) so stopPropagation for Map-attributed
+            // classes does not suppress them, matching the standalone listener order
+            ->tag('kernel.event_listener', ['event' => GenerateMapperEvent::class, 'priority' => -256])
 
         ->set(MapTargetListener::class)
             ->args([
                 service('automapper.mapper_service_locator'),
                 service('automapper.expression_language'),
             ])
-            ->tag('kernel.event_listener', ['event' => GenerateMapperEvent::class, 'priority' => 0])
+            // run last (after Doctrine and discriminator listeners) so stopPropagation for Map-attributed
+            // classes does not suppress them, matching the standalone listener order
+            ->tag('kernel.event_listener', ['event' => GenerateMapperEvent::class, 'priority' => -256])
 
         ->set('automapper.object_mapper')
             ->class(ObjectMapper::class)

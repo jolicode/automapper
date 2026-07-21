@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Bundle\DependencyInjection;
 
+use AutoMapper\Event\GenerateMapperEvent;
+use AutoMapper\EventListener\Doctrine\DoctrineProviderListener;
+use AutoMapper\EventListener\ObjectMapper\MapSourceListener;
+use AutoMapper\EventListener\ObjectMapper\MapTargetListener;
+use AutoMapper\EventListener\Symfony\ClassDiscriminatorListener;
 use AutoMapper\Loader\FileLoader;
 use AutoMapper\Loader\FileReloadStrategy;
 use AutoMapper\Symfony\Bundle\CacheWarmup\CacheWarmer;
@@ -58,6 +63,41 @@ final class AutoMapperExtensionTest extends AbstractExtensionTestCase
 
         $this->assertContainerBuilderHasService(CacheWarmer::class);
         $this->assertContainerBuilderHasParameter('automapper.cache_dir');
+    }
+
+    public function testObjectMapperListenersRunAfterDoctrineAndDiscriminator(): void
+    {
+        $this->container->setParameter('kernel.debug', false);
+        $this->load([
+            'object_mapper' => true,
+            'doctrine' => true,
+            'serializer_attributes' => true,
+        ]);
+
+        $mapSource = $this->generateMapperListenerPriority(MapSourceListener::class);
+        $mapTarget = $this->generateMapperListenerPriority(MapTargetListener::class);
+        $doctrine = $this->generateMapperListenerPriority(DoctrineProviderListener::class);
+        $discriminator = $this->generateMapperListenerPriority(ClassDiscriminatorListener::class);
+
+        // higher priority runs first: MapSource/MapTarget must run after the Doctrine and discriminator
+        // listeners so their stopPropagation for Map-attributed classes does not suppress them
+        self::assertLessThan($doctrine, $mapSource);
+        self::assertLessThan($doctrine, $mapTarget);
+        self::assertLessThan($discriminator, $mapSource);
+        self::assertLessThan($discriminator, $mapTarget);
+    }
+
+    private function generateMapperListenerPriority(string $serviceId): int
+    {
+        $definition = $this->container->getDefinition($serviceId);
+
+        foreach ($definition->getTag('kernel.event_listener') as $tag) {
+            if (($tag['event'] ?? null) === GenerateMapperEvent::class) {
+                return (int) ($tag['priority'] ?? 0);
+            }
+        }
+
+        self::fail(\sprintf('Service "%s" has no GenerateMapperEvent listener tag.', $serviceId));
     }
 
     protected function getContainerExtensions(): array
