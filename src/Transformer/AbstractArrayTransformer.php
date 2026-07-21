@@ -27,6 +27,11 @@ abstract readonly class AbstractArrayTransformer implements \Stringable, Transfo
 
     abstract protected function getAssignExpr(Expr $valuesVar, Expr $outputVar, Expr $loopKeyVar, bool $assignByRef): Expr;
 
+    public function getItemTransformer(): TransformerInterface
+    {
+        return $this->itemTransformer;
+    }
+
     public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source, ?Expr $existingValue = null): array
     {
         /**

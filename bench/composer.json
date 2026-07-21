@@ -1,7 +1,28 @@
 {
     "name": "automapper/bench",
+    "description": "Benchmarks for jolicode/automapper against Symfony JsonStreamer, Serializer and ObjectMapper.",
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
     "require": {
-        "phpbench/phpbench": "^1.2"
+        "php": "^8.4",
+        "jolicode/automapper": "@dev",
+        "phpbench/phpbench": "^1.4",
+        "symfony/cache": "^7.4 || ^8.0",
+        "symfony/json-streamer": "^7.4 || ^8.0",
+        "symfony/object-mapper": "^7.4 || ^8.0",
+        "symfony/property-access": "^7.4 || ^8.0",
+        "symfony/property-info": "^7.4 || ^8.0",
+        "symfony/serializer": "^7.4 || ^8.0",
+        "symfony/type-info": "^7.4 || ^8.0",
+        "symfony/uid": "^7.4 || ^8.0",
+        "phpstan/phpdoc-parser": "^2.3"
     },
     "autoload": {
         "psr-4": {
@@ -13,5 +34,12 @@
             "name": "Joel Wurtz",
             "email": "jwurtz@jolicode.com"
         }
-    ]
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "phpbench/phpbench": true
+        }
+    }
 }

@@ -67,6 +67,20 @@ class LazyMapper implements MapperInterface
     }
 
     /**
+     * Delegates to the generated object → array mapper's JSON streaming method.
+     *
+     * @param array<string, mixed> $context
+     *
+     * @return iterable<string>
+     */
+    public function mapToJsonStream(mixed $value, array $context = []): iterable
+    {
+        $mapper = $this->getMapper();
+
+        return method_exists($mapper, 'mapToJsonStream') ? $mapper->mapToJsonStream($value, $context) : [];
+    }
+
+    /**
      * @return MapperInterface<Source, Target>
      */
     public function getMapper(): MapperInterface

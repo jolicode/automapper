@@ -1,0 +1,18 @@
+{
+    "$schema": "./vendor/phpbench/phpbench/phpbench.schema.json",
+    "runner.bootstrap": "bootstrap.php",
+    "runner.path": "src",
+    "runner.file_pattern": "*Bench.php",
+    "runner.iterations": 5,
+    "runner.revs": 100,
+    "runner.php_config": {
+        "memory_limit": "2048M"
+    },
+    "report.generators": {
+        "memory": {
+            "generator": "expression",
+            "cols": ["benchmark", "subject", "mem_peak", "mode", "rstdev"],
+            "break": ["benchmark"]
+        }
+    }
+}

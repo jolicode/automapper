@@ -41,6 +41,16 @@ final readonly class LazyCollectionTransformer implements TransformerInterface, 
     ) {
     }
 
+    public function getEagerTransformer(): AbstractArrayTransformer
+    {
+        return $this->eagerTransformer;
+    }
+
+    public function getItemTransformer(): TransformerInterface
+    {
+        return $this->itemTransformer;
+    }
+
     public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source, ?Expr $existingValue = null): array
     {
         // Adder/remover targets are populated element by element by side effect, there is no
