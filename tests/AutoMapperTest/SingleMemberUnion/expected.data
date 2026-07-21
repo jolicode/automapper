@@ -1,0 +1,6 @@
+[
+  "int" => "42"
+  "object" => [
+    "error" => "TypeError"
+  ]
+]
