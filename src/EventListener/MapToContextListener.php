@@ -47,7 +47,8 @@ final readonly class MapToContextListener
 
             $reflectionMethod = $reflectionClass->getMethod($methodName);
 
-            if ($reflectionMethod->getModifiers() !== \ReflectionMethod::IS_PUBLIC) {
+            // getModifiers() is a bitmask, comparing it to IS_PUBLIC would reject final or static public methods
+            if (!$reflectionMethod->isPublic()) {
                 continue;
             }
 
