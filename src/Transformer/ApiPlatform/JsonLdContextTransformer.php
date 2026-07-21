@@ -23,9 +23,10 @@ final readonly class JsonLdContextTransformer implements PropertyTransformerInte
             return null;
         }
 
-        $resourceClass = $computed ?? $this->resourceClassResolver->isResourceClass(
-            $source::class
-        ) ? $this->resourceClassResolver->getResourceClass($source) : null;
+        // a computed resource class takes precedence, otherwise resolve it only when the source is a resource
+        $resourceClass = \is_string($computed) ? $computed : ($this->resourceClassResolver->isResourceClass($source::class)
+            ? $this->resourceClassResolver->getResourceClass($source)
+            : null);
 
         if (null === $resourceClass) {
             if ($this->contextBuilder instanceof AnonymousContextBuilderInterface) {
