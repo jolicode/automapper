@@ -38,7 +38,9 @@ final readonly class JsonLdObjectToIdTransformerFactory implements TransformerFa
             return null;
         }
 
-        if (!$target->type->isIdentifiedBy(TypeIdentifier::ARRAY) && $target->type->isIdentifiedBy(TypeIdentifier::MIXED)) {
+        // the transformer produces either the resource IRI or, with groups, a nested array/object, so it only
+        // applies to targets able to hold both (array or mixed), not to concrete scalar/object targets
+        if (!$target->type->isIdentifiedBy(TypeIdentifier::ARRAY) && !$target->type->isIdentifiedBy(TypeIdentifier::MIXED)) {
             return null;
         }
 
