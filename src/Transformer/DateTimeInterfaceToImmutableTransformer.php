@@ -17,17 +17,25 @@ use PhpParser\Node\Name;
  *
  * @internal
  */
-final class DateTimeInterfaceToImmutableTransformer implements TransformerInterface, CheckTypeInterface
+final readonly class DateTimeInterfaceToImmutableTransformer implements TransformerInterface, CheckTypeInterface
 {
+    /**
+     * @param class-string $className a \DateTimeImmutable class or one of its subclasses
+     */
+    public function __construct(
+        private string $className = \DateTimeImmutable::class,
+    ) {
+    }
+
     public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source, ?Expr $existingValue = null): array
     {
         /*
-         * Handles all DateTime instance types using createFromInterface.
+         * Handles all DateTime instance types using createFromInterface, keeping the concrete target class.
          *
          * \DateTimeImmutable::createFromInterface($input);
          */
         return [
-            new Expr\StaticCall(new Name\FullyQualified(\DateTimeImmutable::class), 'createFromInterface', [
+            new Expr\StaticCall(new Name\FullyQualified($this->className), 'createFromInterface', [
                 new Arg($input),
             ]),
             [],

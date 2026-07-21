@@ -1,0 +1,6 @@
+[
+  "immutable_class" => "AutoMapper\Tests\AutoMapperTest\DateTimeSubclass\CustomImmutable"
+  "immutable_value" => "2021-01-01T00:00:00+00:00"
+  "mutable_class" => "AutoMapper\Tests\AutoMapperTest\DateTimeSubclass\CustomMutable"
+  "mutable_value" => "2021-01-01T00:00:00+00:00"
+]
