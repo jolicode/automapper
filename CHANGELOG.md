@@ -25,6 +25,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Do not register the cache warmer when the `eval` loader is enabled, fixing container compilation with `automapper.loader.eval: true`
 - Detect doctrine entities even when their metadata is not loaded yet, fixing missing provider and identifier on cold metadata factories
 - Do not map static properties
+- Keep the concrete Symfony Uid subclass (e.g. `UuidV4`) when copying a uid instead of building a base `Uuid`/`Ulid`
+- Keep the concrete date time subclass in date time to date time mapping instead of always building `DateTime`/`DateTimeImmutable`
+- Guard a single matching union branch at runtime so a value of an unhandled union member is not blindly transformed
+- The `AutoMapperNormalizer` no longer claims value objects handled by dedicated symfony normalizers (`DateTimeInterface`, `BackedEnum`, `AbstractUid`, etc.), which could produce a structure dump instead of the expected representation
+- Use the computed resource class in the API Platform JSON-LD context transformer instead of resolving it from a non-resource source (operator precedence fix)
+- Only shorten an API Platform resource to its id for `array` or `mixed` targets, avoiding a `TypeError` on scalar targets
+- Allow `final` and `static` public getters to be used with `#[MapToContext]`
+- Run the object mapper listeners after the Doctrine and discriminator listeners in the bundle, so a `Map`-attributed source class keeps its Doctrine provider and discriminator handling
 
 ## [10.2.0] - 2026-04-27
 ### Added
