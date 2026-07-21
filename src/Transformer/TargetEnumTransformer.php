@@ -17,7 +17,7 @@ use PhpParser\Node\Name;
  *
  * @internal
  */
-final readonly class TargetEnumTransformer implements TransformerInterface
+final readonly class TargetEnumTransformer implements TransformerInterface, CheckTypeInterface
 {
     public function __construct(
         private string $targetClassName,
@@ -34,5 +34,14 @@ final readonly class TargetEnumTransformer implements TransformerInterface
         return [new Expr\StaticCall(new Name\FullyQualified($this->targetClassName), 'from', [
             new Arg($input),
         ]), []];
+    }
+
+    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source): Expr
+    {
+        /* is_string($input) || is_int($input) */
+        return new Expr\BinaryOp\BooleanOr(
+            new Expr\FuncCall(new Name('is_string'), [new Arg($input)]),
+            new Expr\FuncCall(new Name('is_int'), [new Arg($input)]),
+        );
     }
 }

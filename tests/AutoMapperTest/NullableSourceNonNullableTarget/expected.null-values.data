@@ -1,0 +1,4 @@
+TypeError {
+  +class: "TypeError"
+  +message: "Cannot assign null to property AutoMapper\Tests\AutoMapperTest\NullableSourceNonNullableTarget\Target::$date of type string"
+}

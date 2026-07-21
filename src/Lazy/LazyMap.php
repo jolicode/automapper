@@ -65,6 +65,7 @@ final class LazyMap implements \ArrayAccess, \JsonSerializable, \IteratorAggrega
         }
 
         ($this->mapper)($this->mappedValue);
+        $this->initialized = true;
     }
 
     public function jsonSerialize(): mixed

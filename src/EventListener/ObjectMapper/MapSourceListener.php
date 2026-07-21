@@ -30,7 +30,7 @@ final readonly class MapSourceListener extends MapListener
             $attribute = $sourceAttribute->newInstance();
             $hasAnyMapAttribute = true;
 
-            if (!$attribute->target || $attribute->target === $event->mapperMetadata->target) {
+            if (!$attribute->target || $attribute->target === $event->mapperMetadata->target || is_subclass_of($event->mapperMetadata->target, $attribute->target)) {
                 $mapAttribute = $attribute;
                 break;
             }
@@ -59,9 +59,11 @@ final readonly class MapSourceListener extends MapListener
                     transformer: $this->getTransformerFromMapAttribute($event->mapperMetadata->sourceReflectionClass->getName(), $attribute, $reference, true),
                 );
 
-                $ifCallableName = null;
-
-                if ($attribute->if instanceof TargetClass) {
+                if (false === $attribute->if) {
+                    // symfony/object-mapper never maps a property with `if: false`
+                    $propertyMetadata->ignored = true;
+                    $propertyMetadata->ignoreReason = 'Property is ignored by Map Attribute if condition';
+                } elseif ($attribute->if instanceof TargetClass) {
                     $reflectionObject = new \ReflectionClass($attribute->if);
 
                     if ($reflectionObject->hasProperty('className')) {
@@ -95,12 +97,10 @@ final readonly class MapSourceListener extends MapListener
                             continue;
                         }
                     }
-                } elseif ($attribute->if && \is_callable($attribute->if, false, $ifCallableName)) {
-                    if (\is_object($attribute->if)) {
-                        $propertyMetadata->if = $reference;
-                    } else {
-                        $propertyMetadata->if = $ifCallableName;
-                    }
+                } elseif ($attribute->if && \is_callable($attribute->if, false)) {
+                    // symfony/object-mapper callables have their own calling convention, keep the
+                    // attribute reference so the generated code can replicate it
+                    $propertyMetadata->if = $reference;
                 } elseif (\is_string($attribute->if)) {
                     $propertyMetadata->if = $attribute->if;
                 }

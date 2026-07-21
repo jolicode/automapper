@@ -1,0 +1,6 @@
+AutoMapper\Tests\AutoMapperTest\ObjectMapperIfConditions\Target {
+  +secret: "unchanged"
+  +name: "john"
+  +active: true
+  +score: 42
+}

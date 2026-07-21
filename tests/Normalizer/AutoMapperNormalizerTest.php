@@ -126,6 +126,14 @@ class AutoMapperNormalizerTest extends AutoMapperTestCase
         $stdClass->name = 'Jack';
         $stdClass->age = 37;
         self::assertFalse($this->normalizer->supportsNormalization($stdClass));
+
+        // value objects handled by dedicated symfony normalizers must not be claimed by AutoMapper
+        self::assertFalse($this->normalizer->supportsNormalization(new \DateTimeImmutable()));
+        self::assertFalse($this->normalizer->supportsNormalization(new \DateTime()));
+        self::assertFalse($this->normalizer->supportsNormalization(new \DateInterval('P1D')));
+        self::assertFalse($this->normalizer->supportsNormalization(new \DateTimeZone('UTC')));
+        self::assertFalse($this->normalizer->supportsNormalization(Fixtures\AddressType::FLAT));
+        self::assertFalse($this->normalizer->supportsNormalization(\Symfony\Component\Uid\Uuid::v4()));
     }
 
     public function testSupportsDenormalization(): void
@@ -136,6 +144,28 @@ class AutoMapperNormalizerTest extends AutoMapperTestCase
         $user = ['id' => 1, 'name' => 'Jack', 'age' => 37];
         self::assertTrue($this->normalizer->supportsDenormalization($user, Fixtures\User::class));
         self::assertTrue($this->normalizer->supportsDenormalization($user, \stdClass::class));
+
+        // value objects handled by dedicated symfony normalizers must not be claimed by AutoMapper
+        self::assertFalse($this->normalizer->supportsDenormalization('now', \DateTimeImmutable::class));
+        self::assertFalse($this->normalizer->supportsDenormalization('now', \DateTimeInterface::class));
+        self::assertFalse($this->normalizer->supportsDenormalization('flat', Fixtures\AddressType::class));
+    }
+
+    public function testDoesNotPreemptDedicatedNormalizers(): void
+    {
+        // a serializer stack where AutoMapper has a higher priority than the core normalizers
+        $serializer = new \Symfony\Component\Serializer\Serializer([
+            $this->normalizer,
+            new DateTimeNormalizer(),
+            new \Symfony\Component\Serializer\Normalizer\BackedEnumNormalizer(),
+        ]);
+
+        // the dedicated normalizers must win, AutoMapper must not produce a structure dump
+        self::assertSame(
+            '2021-01-01T00:00:00+00:00',
+            $serializer->normalize(new \DateTimeImmutable('2021-01-01T00:00:00+00:00'))
+        );
+        self::assertSame('flat', $serializer->normalize(Fixtures\AddressType::FLAT));
     }
 
     public function testNormalizeWithNoReturnType(): void

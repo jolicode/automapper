@@ -22,7 +22,7 @@ final readonly class ArrayReadAccessor implements ReadAccessorInterface
         return new Expr\ArrayDimFetch($input, new Scalar\String_($this->property));
     }
 
-    public function getIsDefinedExpression(Expr\Variable $input, bool $nullable = false, bool $target = false): Expr
+    public function getIsDefinedExpression(Expr $input, bool $nullable = false, bool $target = false): Expr
     {
         if ($this->isArrayAccess) {
             return new Expr\MethodCall($input, 'offsetExists', [new Arg(new Scalar\String_($this->property))]);
@@ -35,7 +35,7 @@ final readonly class ArrayReadAccessor implements ReadAccessorInterface
         return new Expr\FuncCall(new Name('array_key_exists'), [new Arg(new Scalar\String_($this->property)), new Arg($input)]);
     }
 
-    public function getIsNullExpression(Expr\Variable $input, bool $target = false): Expr
+    public function getIsNullExpression(Expr $input, bool $target = false): Expr
     {
         /*
          * Use the array dim fetch to read the value
@@ -45,7 +45,7 @@ final readonly class ArrayReadAccessor implements ReadAccessorInterface
         return new Expr\BinaryOp\LogicalAnd(new Expr\BooleanNot(new Expr\Isset_([new Expr\ArrayDimFetch($input, new Scalar\String_($this->property))])), new Expr\BinaryOp\Identical(new Expr\ConstFetch(new Name('null')), new Expr\ArrayDimFetch($input, new Scalar\String_($this->property))));
     }
 
-    public function getIsUndefinedExpression(Expr\Variable $input, bool $target = false): Expr
+    public function getIsUndefinedExpression(Expr $input, bool $target = false): Expr
     {
         if ($this->isArrayAccess) {
             return new Expr\BooleanNot(new Expr\MethodCall($input, 'offsetExists', [new Arg(new Scalar\String_($this->property))]));

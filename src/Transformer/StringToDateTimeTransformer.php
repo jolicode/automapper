@@ -19,7 +19,7 @@ use PhpParser\Node\Scalar;
  *
  * @internal
  */
-final readonly class StringToDateTimeTransformer implements TransformerInterface
+final readonly class StringToDateTimeTransformer implements TransformerInterface, CheckTypeInterface
 {
     public function __construct(
         private string $className,
@@ -54,5 +54,11 @@ final readonly class StringToDateTimeTransformer implements TransformerInterface
                 new Expr\StaticCall(new Name(MapperContext::class), 'getForcedTimezone', [new Arg(new Expr\Variable('context'))])
             ),
         ]), []];
+    }
+
+    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source): Expr
+    {
+        /* is_string($input) */
+        return new Expr\FuncCall(new Name('is_string'), [new Arg($input)]);
     }
 }

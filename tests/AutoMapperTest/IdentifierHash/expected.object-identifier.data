@@ -1,0 +1,16 @@
+AutoMapper\Tests\AutoMapperTest\IdentifierHash\Catalog {
+  +products: [
+    AutoMapper\Tests\AutoMapperTest\IdentifierHash\Product {
+      +ref: AutoMapper\Tests\AutoMapperTest\IdentifierHash\Ref {
+        +value: "a"
+      }
+      +name: "product a updated"
+    }
+    AutoMapper\Tests\AutoMapperTest\IdentifierHash\Product {
+      +ref: AutoMapper\Tests\AutoMapperTest\IdentifierHash\Ref {
+        +value: "b"
+      }
+      +name: "product b"
+    }
+  ]
+}

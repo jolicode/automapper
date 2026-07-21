@@ -53,7 +53,7 @@ final readonly class PropertyReadAccessor implements ReadAccessorInterface
         return new Expr\PropertyFetch($input, $this->property);
     }
 
-    public function getIsDefinedExpression(Expr\Variable $input, bool $nullable = false, bool $target = false): Expr
+    public function getIsDefinedExpression(Expr $input, bool $nullable = false, bool $target = false): Expr
     {
         if ($this->private) {
             /*
@@ -84,7 +84,7 @@ final readonly class PropertyReadAccessor implements ReadAccessorInterface
         return new Expr\FuncCall(new Name('property_exists'), [new Arg($input), new Arg(new Scalar\String_($this->property))]);
     }
 
-    public function getIsNullExpression(Expr\Variable $input, bool $target = false): Expr
+    public function getIsNullExpression(Expr $input, bool $target = false): Expr
     {
         if ($this->private) {
             /*
@@ -110,7 +110,7 @@ final readonly class PropertyReadAccessor implements ReadAccessorInterface
         return new Expr\BinaryOp\LogicalAnd(new Expr\BooleanNot(new Expr\Isset_([new Expr\PropertyFetch($input, $this->property)])), new Expr\BinaryOp\Identical(new Expr\ConstFetch(new Name('null')), new Expr\PropertyFetch($input, $this->property)));
     }
 
-    public function getIsUndefinedExpression(Expr\Variable $input, bool $target = false): Expr
+    public function getIsUndefinedExpression(Expr $input, bool $target = false): Expr
     {
         if ($this->private) {
             /*

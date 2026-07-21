@@ -25,8 +25,10 @@ final class MultipleTransformerFactory implements TransformerFactoryInterface, P
         }
 
         $transformers = [];
+        $sourceTypesCount = 0;
 
         foreach ($source->type->getTypes() as $sourceType) {
+            ++$sourceTypesCount;
             $newSource = $source->withType($sourceType);
             $transformer = $this->chainTransformerFactory->getTransformer($newSource, $target, $mapperMetadata);
 
@@ -38,7 +40,10 @@ final class MultipleTransformerFactory implements TransformerFactoryInterface, P
             }
         }
 
-        if (\count($transformers) > 1) {
+        // As soon as some union members have no transformer, a runtime type guard is required so the found
+        // transformer only runs on the type it was built for, otherwise a value of an unhandled member would
+        // be blindly transformed. MultipleTransformer generates that guard.
+        if (\count($transformers) > 1 || (\count($transformers) === 1 && \count($transformers) < $sourceTypesCount)) {
             return new MultipleTransformer($transformers);
         }
 

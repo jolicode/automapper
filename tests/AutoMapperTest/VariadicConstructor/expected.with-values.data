@@ -1,0 +1,7 @@
+AutoMapper\Tests\AutoMapperTest\VariadicConstructor\Target {
+  +tags: [
+    "dev"
+    "php"
+  ]
+  +name: "john"
+}

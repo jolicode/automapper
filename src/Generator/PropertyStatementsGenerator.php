@@ -8,6 +8,7 @@ use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\PropertyMetadata;
 use AutoMapper\Transformer\AllowNullValueTransformerInterface;
 use AutoMapper\Transformer\AssignedByReferenceTransformerInterface;
+use AutoMapper\Transformer\NullableTransformer;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt;
@@ -62,6 +63,29 @@ final readonly class PropertyStatementsGenerator
             );
 
             $propStatements[] = new Stmt\Expression($writeExpression);
+        }
+
+        if ($propertyMetadata->transformer instanceof NullableTransformer && !$propertyMetadata->transformer->isTargetNullable) {
+            $guard = $propertyMetadata->source->checkExists
+                ? new Expr\Isset_([$fieldValueExpr])
+                : new Expr\BinaryOp\NotIdentical(new Expr\ConstFetch(new Name('null')), $fieldValueExpr);
+
+            $elseStatements = [];
+
+            if ($propertyMetadata->target->writeMutator && !$propertyMetadata->target->writeMutator->isAdderRemover()) {
+                $elseStatements[] = new Stmt\Expression($propertyMetadata->target->writeMutator->getExpression(
+                    $variableRegistry->getResult(),
+                    new Expr\ConstFetch(new Name('null')),
+                    false
+                ));
+            }
+
+            $propStatements = [
+                new Stmt\If_($guard, [
+                    'stmts' => $propStatements,
+                    'else' => $elseStatements ? new Stmt\Else_($elseStatements) : null,
+                ]),
+            ];
         }
 
         $condition = $this->propertyConditionsGenerator->generate($metadata, $propertyMetadata);

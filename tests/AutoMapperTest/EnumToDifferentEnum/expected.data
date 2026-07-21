@@ -1,0 +1,10 @@
+AutoMapper\Tests\AutoMapperTest\EnumToDifferentEnum\Target {
+  +status: AutoMapper\Tests\AutoMapperTest\EnumToDifferentEnum\TargetStatus {
+    +name: "Active"
+    +value: "active"
+  }
+  +shared: AutoMapper\Tests\AutoMapperTest\EnumToDifferentEnum\SharedStatus {
+    +name: "Active"
+    +value: "active"
+  }
+}

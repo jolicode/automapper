@@ -116,6 +116,9 @@ class AutoMapperExtension extends Extension
             $container
                 ->setAlias(ClassLoaderInterface::class, EvalLoader::class)
             ;
+
+            // there is no cache directory to warm with the eval loader
+            $container->removeDefinition(CacheWarmer::class);
         } else {
             $container
                 ->getDefinition(FileLoader::class)

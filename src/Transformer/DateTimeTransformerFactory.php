@@ -41,11 +41,28 @@ final class DateTimeTransformerFactory implements TransformerFactoryInterface, P
     {
         // if target is mutable
         if ($this->isDateTimeMutable($targetType)) {
-            return new DateTimeInterfaceToMutableTransformer();
+            return new DateTimeInterfaceToMutableTransformer($this->getConcreteClassName($targetType, \DateTime::class));
         }
 
         // if target is immutable or a generic DateTimeInterface
-        return new DateTimeInterfaceToImmutableTransformer();
+        return new DateTimeInterfaceToImmutableTransformer($this->getConcreteClassName($targetType, \DateTimeImmutable::class));
+    }
+
+    /**
+     * @param class-string $default
+     *
+     * @return class-string
+     */
+    private function getConcreteClassName(?Type $targetType, string $default): string
+    {
+        // \DateTimeInterface cannot be instantiated, fall back to the default concrete class,
+        // otherwise keep the concrete target class (custom subclasses included)
+        if (!$targetType instanceof Type\ObjectType || \DateTimeInterface::class === $targetType->getClassName()) {
+            return $default;
+        }
+
+        /** @var class-string */
+        return $targetType->getClassName();
     }
 
     private function createTransformerForSource(?Type $targetType, SourcePropertyMetadata $metadata): ?TransformerInterface

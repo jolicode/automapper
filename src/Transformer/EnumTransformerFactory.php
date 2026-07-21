@@ -20,7 +20,8 @@ final class EnumTransformerFactory implements TransformerFactoryInterface, Prior
     {
         // source is enum, target isn't
         if ($this->isEnumType($source->type, true) && !$this->isEnumType($target->type)) {
-            return new SourceEnumTransformer();
+            // @phpstan-ignore-next-line
+            return new SourceEnumTransformer($source->type->getClassName());
         }
 
         // target is enum, source isn't
@@ -31,7 +32,19 @@ final class EnumTransformerFactory implements TransformerFactoryInterface, Prior
 
         // both source & target are enums
         if ($this->isEnumType($source->type) && $this->isEnumType($target->type)) {
-            return new CopyEnumTransformer();
+            // @phpstan-ignore-next-line
+            if ($source->type->getClassName() === $target->type->getClassName()) {
+                // @phpstan-ignore-next-line
+                return new CopyEnumTransformer($source->type->getClassName());
+            }
+
+            // different enum classes can only be converted through their backing value
+            if ($this->isEnumType($source->type, true) && $this->isEnumType($target->type, true)) {
+                // @phpstan-ignore-next-line
+                return new EnumToEnumTransformer($target->type->getClassName(), $source->type->getClassName());
+            }
+
+            return null;
         }
 
         return null;

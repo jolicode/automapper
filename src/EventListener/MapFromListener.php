@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AutoMapper\EventListener;
 
 use AutoMapper\Attribute\MapFrom;
-use AutoMapper\Attribute\MapTo;
 use AutoMapper\AttributeReference\Reference;
 use AutoMapper\Event\GenerateMapperEvent;
 use AutoMapper\Event\PropertyMetadataEvent;
@@ -48,13 +47,13 @@ final readonly class MapFromListener extends MapListener
                     }
 
                     $property = $mapFromAttributeInstance->property;
-                    $reference = new Reference(MapTo::class, $index, $reflectionClassOrPropertyOrMethod->getName());
+                    $reference = new Reference(MapFrom::class, $index, $reflectionClassOrPropertyOrMethod->getName());
                 } elseif ($reflectionClassOrPropertyOrMethod instanceof \ReflectionMethod) {
                     $property = $this->getPropertyName($reflectionClassOrPropertyOrMethod->getName(), $properties);
-                    $reference = new Reference(MapTo::class, $index, $reflectionClassOrPropertyOrMethod->getDeclaringClass()->getName(), methodName: $reflectionClassOrPropertyOrMethod->getName());
+                    $reference = new Reference(MapFrom::class, $index, $reflectionClassOrPropertyOrMethod->getDeclaringClass()->getName(), methodName: $reflectionClassOrPropertyOrMethod->getName());
                 } else {
                     $property = $reflectionClassOrPropertyOrMethod->getName();
-                    $reference = new Reference(MapTo::class, $index, $reflectionClassOrPropertyOrMethod->getDeclaringClass()->getName(), propertyName: $reflectionClassOrPropertyOrMethod->getName());
+                    $reference = new Reference(MapFrom::class, $index, $reflectionClassOrPropertyOrMethod->getDeclaringClass()->getName(), propertyName: $reflectionClassOrPropertyOrMethod->getName());
                 }
 
                 if (null === $property) {

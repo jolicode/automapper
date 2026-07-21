@@ -119,6 +119,27 @@ class DoctrineTest extends AutoMapperTestCase
         $this->assertEquals('Bar', $review->user->name);
     }
 
+    public function testMetadataNotAlreadyLoaded(): void
+    {
+        $book = new Book();
+
+        $this->entityManager->persist($book);
+        $this->entityManager->flush();
+
+        // a fresh entity manager: its metadata factory has not loaded any metadata yet, like on the
+        // first request of a process or during cache:warmup
+        $coldEntityManager = new EntityManager($this->entityManager->getConnection(), $this->entityManager->getConfiguration());
+        $this->assertFalse($coldEntityManager->getMetadataFactory()->hasMetadataFor(Book::class));
+
+        $autoMapper = AutoMapperBuilder::buildAutoMapper(classPrefix: 'ColdMetadataMapper_', objectManager: $coldEntityManager);
+
+        $mappedBook = $autoMapper->map(['id' => $book->id, 'author' => 'John Doe'], Book::class);
+
+        // the doctrine provider must have been used to fetch the managed entity
+        $this->assertTrue($coldEntityManager->contains($mappedBook));
+        $this->assertEquals('John Doe', $mappedBook->author);
+    }
+
     public function testDisabledProvider(): void
     {
         $foo = new Foo();

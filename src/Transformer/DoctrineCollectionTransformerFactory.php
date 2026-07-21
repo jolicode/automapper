@@ -39,8 +39,11 @@ final class DoctrineCollectionTransformerFactory implements TransformerFactoryIn
         });
 
         if ($isDoctrineCollection) {
+            // a nullable collection target wraps the collection type, unwrap it to get the real item type
+            $targetType = $target->type instanceof Type\NullableType ? $target->type->getWrappedType() : $target->type;
+
             $sourceItemType = $source->type->getCollectionValueType();
-            $targetItemType = $target->type instanceof Type\CollectionType ? $target->type->getCollectionValueType() : Type::mixed();
+            $targetItemType = $targetType instanceof Type\CollectionType ? $targetType->getCollectionValueType() : Type::mixed();
 
             $newSource = $source->withType($sourceItemType);
             $newTarget = $target->withType($targetItemType);

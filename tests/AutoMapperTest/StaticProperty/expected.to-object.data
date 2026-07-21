@@ -1,0 +1,3 @@
+AutoMapper\Tests\AutoMapperTest\StaticProperty\Target {
+  +name: "john"
+}

@@ -70,11 +70,14 @@ final readonly class IdentifierHashGenerator
                     ]);
                 }
 
-                // add identifier to hash
-                $statements[] = new Stmt\Expression(new Expr\FuncCall(new Name('hash_update'), [
-                    new Arg($hashCtxVariable),
-                    new Arg($property->source->accessor->getExpression($valueVariable)),
-                ]));
+                $identifierExpr = $property->source->accessor->getExpression($valueVariable);
+
+                if ($property->transformer instanceof IdentifierHashInterface) {
+                    // an object identifier is hashed through its own mapper
+                    $identifierExpr = $property->transformer->getSourceHashExpression($identifierExpr);
+                } else {
+                    $identifierExpr = new Expr\Cast\String_($identifierExpr);
+                }
             } else {
                 $statements[] = new Stmt\If_($property->target->readAccessor->getIsUndefinedExpression($valueVariable, true), [
                     'stmts' => [
@@ -82,11 +85,21 @@ final readonly class IdentifierHashGenerator
                     ],
                 ]);
 
-                $statements[] = new Stmt\Expression(new Expr\FuncCall(new Name('hash_update'), [
-                    new Arg($hashCtxVariable),
-                    new Arg($property->target->readAccessor->getExpression($valueVariable, true)),
-                ]));
+                $identifierExpr = $property->target->readAccessor->getExpression($valueVariable, true);
+
+                if ($property->transformer instanceof IdentifierHashInterface) {
+                    // an object identifier is hashed through its own mapper
+                    $identifierExpr = $property->transformer->getTargetHashExpression($identifierExpr);
+                } else {
+                    $identifierExpr = new Expr\Cast\String_($identifierExpr);
+                }
             }
+
+            // add identifier to hash
+            $statements[] = new Stmt\Expression(new Expr\FuncCall(new Name('hash_update'), [
+                new Arg($hashCtxVariable),
+                new Arg($identifierExpr),
+            ]));
         }
 
         if (\count($statements) < 2) {
@@ -96,7 +109,7 @@ final readonly class IdentifierHashGenerator
         // return hash as string
         $statements[] = new Stmt\Return_(new Expr\FuncCall(new Name('hash_final'), [
             new Arg($hashCtxVariable),
-            new Arg(new Scalar\String_('true')),
+            new Arg(new Expr\ConstFetch(new Name('false'))),
         ]));
 
         return $statements;

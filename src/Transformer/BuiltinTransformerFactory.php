@@ -23,6 +23,11 @@ final class BuiltinTransformerFactory implements TransformerFactoryInterface, Pr
             return null;
         }
 
+        // An enum target is created from the scalar value by the EnumTransformerFactory, which has a lower priority
+        if ($target->type instanceof Type\EnumType) {
+            return null;
+        }
+
         // We don't want to handle mixed here as we can better guess the type with other transformers
         if ($source->type instanceof Type\BuiltinType && $source->type->getTypeIdentifier() !== TypeIdentifier::MIXED && $source->type->getTypeIdentifier() !== TypeIdentifier::NULL) {
             return new BuiltinTransformer($source->type, $target->type ?? Type::mixed());

@@ -14,12 +14,12 @@ final readonly class SourceReadAccessor implements ReadAccessorInterface
         return $input;
     }
 
-    public function getIsDefinedExpression(Expr\Variable $input, bool $nullable = false, bool $target = false): ?Expr
+    public function getIsDefinedExpression(Expr $input, bool $nullable = false, bool $target = false): ?Expr
     {
         return null;
     }
 
-    public function getIsNullExpression(Expr\Variable $input, bool $target = false): Expr
+    public function getIsNullExpression(Expr $input, bool $target = false): Expr
     {
         return new Expr\BinaryOp\Identical(
             new Expr\ConstFetch(new Name('null')),
@@ -27,7 +27,7 @@ final readonly class SourceReadAccessor implements ReadAccessorInterface
         );
     }
 
-    public function getIsUndefinedExpression(Expr\Variable $input, bool $target = false): Expr
+    public function getIsUndefinedExpression(Expr $input, bool $target = false): Expr
     {
         return new Expr\ConstFetch(new Name('false'));
     }

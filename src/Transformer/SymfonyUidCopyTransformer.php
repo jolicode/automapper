@@ -9,32 +9,45 @@ use AutoMapper\Metadata\PropertyMetadata;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
-use Symfony\Component\Uid\Ulid;
-use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Uid\AbstractUid;
 
 /**
- * Transform Symfony Uid to the same object.
+ * Transform a Symfony Uid to another Symfony Uid, keeping the concrete target class.
  *
  * @author Baptiste Leduc <baptiste.leduc@gmail.com>
  *
  * @internal
  */
-final class SymfonyUidCopyTransformer implements TransformerInterface
+final readonly class SymfonyUidCopyTransformer implements TransformerInterface, CheckTypeInterface
 {
+    /**
+     * @param class-string $targetClassName a Symfony Uid class (Uuid, Ulid or one of their subclasses)
+     */
+    public function __construct(
+        private string $targetClassName,
+    ) {
+    }
+
     public function transform(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source, ?Expr $existingValue = null): array
     {
         /*
-         * Create a Symfony Uid object from another Symfony Uid object.
+         * Create the target Symfony Uid from another Symfony Uid. `fromString` is used so the concrete
+         * target class is respected (e.g. UuidV4), and the base Uuid/Ulid class still returns the proper
+         * versioned instance.
          *
-         * $input instanceof \Symfony\Component\Uid\Ulid ? new \Symfony\Component\Uid\Ulid($input->toBase32()) : new \Symfony\Component\Uid\Uuid($input->toRfc4122());
+         * \Symfony\Component\Uid\TargetUid::fromString((string) $input);
          */
         return [
-            new Expr\Ternary(
-                new Expr\Instanceof_($input, new Name(Ulid::class)),
-                new Expr\New_(new Name(Ulid::class), [new Arg(new Expr\MethodCall($input, 'toBase32'))]),
-                new Expr\New_(new Name(Uuid::class), [new Arg(new Expr\MethodCall($input, 'toRfc4122'))])
-            ),
+            new Expr\StaticCall(new Name\FullyQualified($this->targetClassName), 'fromString', [
+                new Arg(new Expr\Cast\String_($input)),
+            ]),
             [],
         ];
+    }
+
+    public function getCheckExpression(Expr $input, Expr $target, PropertyMetadata $propertyMapping, UniqueVariableScope $uniqueVariableScope, Expr $source): Expr
+    {
+        /* $input instanceof \Symfony\Component\Uid\AbstractUid */
+        return new Expr\Instanceof_($input, new Name\FullyQualified(AbstractUid::class));
     }
 }

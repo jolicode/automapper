@@ -35,15 +35,3 @@ parameters:
             identifier: function.alreadyNarrowedType
             count: 1
             path: src/Generator/PropertyConditionsGenerator.php
-
-        -
-            message: '#^Method AutoMapper\\Loader\\FileLoader\:\:getRegistry\(\) should return array\<class\-string, string\> but returns array\.$#'
-            identifier: return.type
-            count: 1
-            path: src/Loader/FileLoader.php
-
-        -
-            message: '#^Property AutoMapper\\Loader\\FileLoader\:\:\$registry \(array\<class\-string, string\>\) does not accept mixed\.$#'
-            identifier: assign.propertyType
-            count: 1
-            path: src/Loader/FileLoader.php

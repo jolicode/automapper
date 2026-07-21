@@ -44,6 +44,13 @@ abstract class MappingExtractor implements MappingExtractorInterface
 
         $properties = $this->propertyInfoExtractor->getProperties($class) ?? [];
 
+        // static properties are not part of an object state, they must not be mapped
+        $reflectionClass = new \ReflectionClass($class);
+        $properties = array_values(array_filter(
+            $properties,
+            static fn (string $property) => !($reflectionClass->hasProperty($property) && $reflectionClass->getProperty($property)->isStatic()),
+        ));
+
         if ($withConstructorParameters) {
             $properties = array_values(
                 array_unique(
@@ -95,7 +102,14 @@ abstract class MappingExtractor implements MappingExtractorInterface
             $type = $this->sourceTypeExtractor->getType($class, $parent);
         }
 
+        // a nullable parent wraps the real type, the nested accessor guards against the null value at runtime
+        if ($type instanceof Type\NullableType) {
+            $type = $type->getWrappedType();
+        }
+
         $parentAccessor = $this->doGetReadAccessor($class, $parent, $allowExtraProperties);
+
+        $childClass = null;
 
         if ($type instanceof Type\ObjectType) {
             /** @var class-string $childClass */
@@ -111,7 +125,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
             return null;
         }
 
-        return new NestedReadAccessor($parentAccessor, $childAccessor);
+        return new NestedReadAccessor($parentAccessor, $childAccessor, $childClass, $property);
     }
 
     public function getWriteMutator(string $source, string $target, string $property, array $context = [], bool $allowExtraProperties = false): ?WriteMutatorInterface
@@ -137,6 +151,11 @@ abstract class MappingExtractor implements MappingExtractorInterface
 
         if (null === $lastAccessorType) {
             return null;
+        }
+
+        // a nullable parent wraps the real type, the nested mutator guards against the null value at runtime
+        if ($lastAccessorType instanceof Type\NullableType) {
+            $lastAccessorType = $lastAccessorType->getWrappedType();
         }
 
         if ($lastAccessorType instanceof Type\ObjectType) {

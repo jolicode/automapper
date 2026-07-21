@@ -7,6 +7,7 @@ namespace AutoMapper\Generator;
 use AutoMapper\AttributeReference\AttributeInstance;
 use AutoMapper\AttributeReference\Reference;
 use AutoMapper\Exception\CompileException;
+use AutoMapper\Extractor\NestedReadAccessor;
 use AutoMapper\MapperContext;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\PropertyMetadata;
@@ -46,6 +47,7 @@ final readonly class PropertyConditionsGenerator
         $conditions[] = $this->customCondition($metadata, $propertyMetadata);
         $conditions[] = $this->propertyExistsForStdClass($metadata, $propertyMetadata);
         $conditions[] = $this->propertyExistsForArray($metadata, $propertyMetadata);
+        $conditions[] = $this->nestedSourceIsAccessible($metadata, $propertyMetadata);
 
         if (!$onlyExists) {
             $conditions[] = $this->isAllowedAttribute($metadata, $propertyMetadata);
@@ -86,6 +88,22 @@ final readonly class PropertyConditionsGenerator
         }
 
         return $condition;
+    }
+
+    /**
+     * When reading from a nested property, the whole mapping is skipped if a value on the path cannot be accessed.
+     *
+     * ```php
+     * isset($source->parent) && isset($source->parent->child)
+     * ```
+     */
+    private function nestedSourceIsAccessible(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
+    {
+        if (!$propertyMetadata->source->accessor instanceof NestedReadAccessor) {
+            return null;
+        }
+
+        return $propertyMetadata->source->accessor->getIsDefinedExpression($metadata->variableRegistry->getSourceInput());
     }
 
     /**
@@ -145,7 +163,7 @@ final readonly class PropertyConditionsGenerator
             new Arg($variableRegistry->getContext()),
             new Arg(new Scalar\String_($propertyMetadata->source->property)),
             new Arg(new Expr\Closure([
-                'uses' => [new Expr\ClosureUse($variableRegistry->getSourceInput())],
+                'uses' => [new Expr\ClosureUse($variableRegistry->getSourceInput()), new Expr\ClosureUse($variableRegistry->getContext())],
                 'stmts' => [new Stmt\Return_($propertyMetadata->source->accessor->getIsNullExpression($variableRegistry->getSourceInput()))],
             ])),
             new Arg($propertyMetadata->source->accessor->getIsUndefinedExpression($variableRegistry->getSourceInput())),
@@ -259,9 +277,16 @@ final readonly class PropertyConditionsGenerator
 
         if ($propertyMetadata->if instanceof Reference) {
             $refExpr = $propertyMetadata->if->getReferenceExpression();
+            $inputExpr = $input ?? new Expr\ConstFetch(new Name('null'));
+            $ifVariable = new Expr\Variable($metadata->variableRegistry->getUniqueVariableScope()->getUniqueName('ifCallable'));
 
-            /** (AttributeInstance::get($attributeClassName, $index, $reference)->transformer)(...) */
-            return new Expr\FuncCall(new Expr\PropertyFetch(new Expr\StaticCall(
+            /*
+             * Replicate the symfony/object-mapper calling convention: a string callable only receives the
+             * value while other callables receive the value, the source and the target
+             *
+             * \is_string($ifCallable = AttributeInstance::get(...)->if) ? $ifCallable($input) : $ifCallable($input, $value, $result)
+             */
+            $ifExpr = new Expr\Assign($ifVariable, new Expr\PropertyFetch(new Expr\StaticCall(
                 new Name\FullyQualified(AttributeInstance::class),
                 'get',
                 [
@@ -269,11 +294,19 @@ final readonly class PropertyConditionsGenerator
                     new Arg($refExpr),
                     new Arg(new Scalar\Int_($propertyMetadata->if->attributeIndex)),
                 ]
-            ), 'if'), [
-                new Arg($value),
-                new Arg($input ?? new Expr\ConstFetch(new Name('null'))),
-                new Arg(new Expr\Variable('context')),
-            ]);
+            ), 'if'));
+
+            return new Expr\Ternary(
+                new Expr\FuncCall(new Name('is_string'), [new Arg($ifExpr)]),
+                new Expr\FuncCall($ifVariable, [
+                    new Arg($inputExpr),
+                ]),
+                new Expr\FuncCall($ifVariable, [
+                    new Arg($inputExpr),
+                    new Arg($value),
+                    new Arg(new Expr\Variable('result')),
+                ]),
+            );
         }
 
         if (\is_callable($propertyMetadata->if, false, $callableName)) {
