@@ -18,7 +18,7 @@ class SymfonyUidTransformerFactoryTest extends TestCase
     public function testNoTransformer(): void
     {
         $factory = new SymfonyUidTransformerFactory();
-        $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $mapperMetadata = $this->createStub(MapperMetadata::class);
         $sourceMapperMetadata = new SourcePropertyMetadata('foo', type: Type::object());
         $targetMapperMetadata = new TargetPropertyMetadata('foo', type: Type::object());
 
@@ -30,7 +30,7 @@ class SymfonyUidTransformerFactoryTest extends TestCase
     public function testGetUlidCopyTransformer(): void
     {
         $factory = new SymfonyUidTransformerFactory();
-        $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $mapperMetadata = $this->createStub(MapperMetadata::class);
         $sourceMapperMetadata = new SourcePropertyMetadata('foo', type: Type::object(Ulid::class));
         $targetMapperMetadata = new TargetPropertyMetadata('foo', type: Type::object(Ulid::class));
 

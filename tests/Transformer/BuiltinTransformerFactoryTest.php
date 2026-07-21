@@ -17,7 +17,7 @@ class BuiltinTransformerFactoryTest extends TestCase
     public function testGetTransformer(): void
     {
         $factory = new BuiltinTransformerFactory();
-        $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $mapperMetadata = $this->createStub(MapperMetadata::class);
 
         $sourceMapperMetadata = new SourcePropertyMetadata('foo', type: Type::string());
         $targetMapperMetadata = new TargetPropertyMetadata('foo', type: Type::string());
@@ -35,7 +35,7 @@ class BuiltinTransformerFactoryTest extends TestCase
     public function testNoTransformer(): void
     {
         $factory = new BuiltinTransformerFactory();
-        $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $mapperMetadata = $this->createStub(MapperMetadata::class);
 
         $sourceMapperMetadata = new SourcePropertyMetadata('foo', type: Type::array());
         $targetMapperMetadata = new TargetPropertyMetadata('foo', type: Type::string());
