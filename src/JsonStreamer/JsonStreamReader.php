@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace AutoMapper\JsonStreamer;
 
 use AutoMapper\AutoMapperInterface;
+use AutoMapper\JsonStreamer\Read\JsonDecoder;
+use AutoMapper\JsonStreamer\Read\LazyJsonObject;
 use AutoMapper\Lazy\LazyCollection;
 use AutoMapper\MapperContext;
 use Symfony\Component\JsonStreamer\StreamReaderInterface;
@@ -73,13 +75,18 @@ final class JsonStreamReader implements StreamReaderInterface
         $className = $this->ownedClassName($unwrapped);
 
         if ($className !== null) {
-            $raw = $this->fallbackStreamReader->read($input, Type::dict(), $options);
+            // Decode lazily: the object is exposed as an array-like source (LazyJsonObject) so the
+            // AutoMapper reads only the fields it maps, straight from the stream, and nested
+            // objects/lists stay lazy — no intermediate array is materialized.
+            $decoded = JsonDecoder::decode($input);
 
-            if (!\is_array($raw)) {
-                return $raw;
+            if (!$decoded instanceof LazyJsonObject) {
+                // The JSON is not an object (null, scalar, list): nothing for the AutoMapper to
+                // hydrate, hand the decoded value back as-is.
+                return $decoded;
             }
 
-            return $this->mapper->map($raw, $className, $options);
+            return $this->mapper->map($decoded, $className, $options);
         }
 
         return $this->fallbackStreamReader->read($input, $type, $options);
