@@ -27,6 +27,7 @@ final readonly class MapperListener
 
         if ($directMapperAttribute) {
             $event->checkAttributes ??= $directMapperAttribute->checkAttributes;
+            $event->checkGroups ??= $directMapperAttribute->checkGroups;
             $event->constructorStrategy ??= $directMapperAttribute->constructorStrategy;
             $event->allowReadOnlyTargetToPopulate ??= $directMapperAttribute->allowReadOnlyTargetToPopulate;
             $event->strictTypes ??= $directMapperAttribute->strictTypes;

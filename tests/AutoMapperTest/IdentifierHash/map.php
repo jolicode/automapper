@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\AutoMapperTest\IdentifierHash;
 
-use AutoMapper\Attribute\Mapper;
 use AutoMapper\Attribute\MapFrom;
+use AutoMapper\Attribute\Mapper;
 use AutoMapper\Tests\AutoMapperBuilder;
 
 #[Mapper(source: 'array', strictTypes: true)]

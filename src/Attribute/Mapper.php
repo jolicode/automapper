@@ -22,6 +22,7 @@ final readonly class Mapper
         public string|array|null $source = null,
         public string|array|null $target = null,
         public ?bool $checkAttributes = null,
+        public ?bool $checkGroups = null,
         public ?ConstructorStrategy $constructorStrategy = null,
         public ?bool $allowReadOnlyTargetToPopulate = null,
         public ?bool $strictTypes = null,

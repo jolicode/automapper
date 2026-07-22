@@ -29,6 +29,7 @@ readonly class Configuration implements ConfigurationInterface
                 ->end()
                 ->scalarNode('date_time_format')->defaultValue(\DateTimeInterface::RFC3339)->end()
                 ->booleanNode('check_attributes')->defaultTrue()->end()
+                ->booleanNode('check_groups')->defaultTrue()->end()
                 ->booleanNode('auto_register')->defaultTrue()->end()
                 ->booleanNode('map_private_properties')->defaultFalse()->end()
                 ->booleanNode('allow_readonly_target_to_populate')->defaultFalse()->end()

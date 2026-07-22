@@ -37,6 +37,7 @@ use Symfony\Component\Uid\AbstractUid;
  *     constructor_strategy: string,
  *     date_time_format: string,
  *     check_attributes: bool,
+ *     check_groups: bool,
  *     auto_register: bool,
  *     map_private_properties: bool,
  *     allow_readonly_target_to_populate: bool,
@@ -86,6 +87,7 @@ class AutoMapperExtension extends Extension
             ->setArgument('$constructorStrategy', ConstructorStrategy::tryFrom($config['constructor_strategy']) ?? ConstructorStrategy::AUTO)
             ->setArgument('$dateTimeFormat', $config['date_time_format'])
             ->setArgument('$attributeChecking', $config['check_attributes'])
+            ->setArgument('$groupChecking', $config['check_groups'])
             ->setArgument('$autoRegister', $config['auto_register'])
             ->setArgument('$mapPrivateProperties', $config['map_private_properties'])
             ->setArgument('$allowReadOnlyTargetToPopulate', $config['allow_readonly_target_to_populate'])

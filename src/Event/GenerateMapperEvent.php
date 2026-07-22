@@ -23,6 +23,7 @@ final class GenerateMapperEvent extends Event
         public array $properties = [],
         public ?Provider $provider = null,
         public ?bool $checkAttributes = null,
+        public ?bool $checkGroups = null,
         public ?ConstructorStrategy $constructorStrategy = null,
         public ?bool $allowReadOnlyTargetToPopulate = null,
         public ?bool $strictTypes = null,

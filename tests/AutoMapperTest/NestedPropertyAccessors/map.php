@@ -64,7 +64,7 @@ class ZipSource
     public string $zipcode = '75000';
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     // uninitialized typed parent property: must be skipped, not crash
