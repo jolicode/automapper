@@ -13,6 +13,7 @@ $configuration = new Configuration(
     constructorStrategy: 'auto',
     dateTimeFormat: \DateTimeInterface::RFC3339,
     attributesChecking: true,
+    groupsChecking: true,
     autoRegister: true,
     mapPrivateProperties: true,
     allowReadonlyTargetToPopulate: false,
@@ -47,6 +48,12 @@ you want to avoid repeating the format in all your mappings.
 * `attributesChecking` (default: `true`)
 
 Setting this to false will not generate the code to check for `allowed_attributes` and `ignored_attributes` at runtime. 
+Some applications may not need this feature and disabling it will improve the performance as it avoid a check for each 
+property at runtime.
+
+* `groupsChecking` (default: `true`)
+
+Setting this to false will not generate the code to check for property `groups` at runtime. 
 Some applications may not need this feature and disabling it will improve the performance as it avoid a check for each 
 property at runtime.
 

@@ -26,7 +26,7 @@ class UntypedTarget
     public $name = 'default name';
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     // null source values on a non-nullable typed target: the transformation must not run on the null

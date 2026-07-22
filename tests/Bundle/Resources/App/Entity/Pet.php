@@ -7,9 +7,9 @@ namespace AutoMapper\Tests\Bundle\Resources\App\Entity;
 use Symfony\Component\Serializer\Attribute\DiscriminatorMap;
 
 #[DiscriminatorMap(typeProperty: 'type', mapping: [
-        'cat' => Cat::class,
-        'dog' => Dog::class,
-    ])]
+    'cat' => Cat::class,
+    'dog' => Dog::class,
+])]
 class Pet
 {
     /** @var string */

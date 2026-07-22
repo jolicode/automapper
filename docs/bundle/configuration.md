@@ -12,6 +12,7 @@ automapper:
   constructor_strategy: 'auto'
   date_time_format: !php/const DateTimeInterface::RFC3339
   check_attributes: true
+  check_groups: true
   auto_register: true
   map_private_properties: true
   allow_readonly_target_to_populate: false
@@ -52,6 +53,8 @@ automapper:
   for more details about it;
 * `check_attributes` (default: `true`): Check if the field should be mapped at runtime, this allow you to have dynamic
   partial mapping, if you don't use this feature set it to false as it will improve the performance;
+* `check_groups` (default: `true`): Does the generator should add code to check groups of the map or other attributes, if false
+  no group checking will be done at runtime, saving performance but may change behaviors also, use it if you don't use groups;
 * `auto_register` (default: `true`): If the bundle should auto register the mappers in the container when it does not
   exist, when set to `false` you have to register the mappers manually using the `mapping` option, this option is useful
   when you cannot write to the disk, and you want to use the cache warmup;
@@ -93,4 +96,4 @@ component to configure the mapping, and use AutoMapper as an implementation for 
     * `paths`: A list of paths where to look for mappers to register; This will automatically register all classes
       with the `#[Mapper]` attribute in the given paths.
     * `mappers`: A list of mapping to register, each mapping should have a `source` and a `target` key, and can have
-      a `reverse` key to also register the reverse mapping. 
+      a `reverse` key to also register the reverse mapping.

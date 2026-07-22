@@ -32,7 +32,7 @@ class Target
     }
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     $source = new Source();

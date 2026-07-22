@@ -24,7 +24,7 @@ class Target
     public string $status;
 }
 
-return (function () {
+return (static function () {
     $autoMapper = AutoMapperBuilder::buildAutoMapper();
 
     // union branches without a native type check (string -> \DateTimeImmutable, enum -> string)

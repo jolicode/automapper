@@ -224,6 +224,7 @@ final class MetadataFactory
         ksort($propertyEvents, SORT_NATURAL);
 
         $propertiesMapping = [];
+        $mapperCheckGroups = $mapperEvent->checkGroups ?? $this->configuration->groupChecking;
 
         foreach ($propertyEvents as $propertyMappedEvent) {
             // Create the source property metadata
@@ -322,7 +323,7 @@ final class MetadataFactory
                 $propertyMappedEvent->maxDepth,
                 $propertyMappedEvent->if,
                 $propertyMappedEvent->groups,
-                $propertyMappedEvent->disableGroupsCheck,
+                $propertyMappedEvent->disableGroupsCheck ?? !$mapperCheckGroups,
                 $propertyMappedEvent->identifier ?? false,
             );
         }
