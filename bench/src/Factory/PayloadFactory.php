@@ -110,6 +110,16 @@ final class PayloadFactory
         return $list;
     }
 
+    /**
+     * @return iterable<Person>
+     */
+    public static function personIterable(int $count): \Generator
+    {
+        for ($i = 0; $i < $count; ++$i) {
+            yield self::person($i);
+        }
+    }
+
     public static function personSource(int $seed = 0): PersonSource
     {
         $person = new PersonSource();

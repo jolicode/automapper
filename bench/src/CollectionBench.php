@@ -122,6 +122,13 @@ class CollectionBench
     }
 
     #[ParamProviders('provideSizes')]
+    public function benchAutoMapperNoCheckingMapCollection(): void
+    {
+        $data = json_decode((string) file_get_contents($this->file), true, 512, JSON_THROW_ON_ERROR);
+        $sink = $this->consume(MapperFactory::autoMapperNoChecking()->mapCollection($data, Person::class));
+    }
+
+    #[ParamProviders('provideSizes')]
     public function benchSymfonySerializer(): void
     {
         $objects = MapperFactory::serializer()->deserialize(

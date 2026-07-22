@@ -74,6 +74,12 @@ class SerializeBench
         $json = json_encode($data, JSON_THROW_ON_ERROR);
     }
 
+    public function benchAutoMapperNoChecking(): void
+    {
+        $data = MapperFactory::autoMapperNoChecking()->map($this->person, 'array');
+        $json = json_encode($data, JSON_THROW_ON_ERROR);
+    }
+
     public function benchSymfonySerializer(): void
     {
         MapperFactory::serializer()->serialize($this->person, 'json');

@@ -30,8 +30,7 @@ use Symfony\Component\TypeInfo\Type;
 #[Groups(['write-collection'])]
 class WriteCollectionBench
 {
-    /** @var list<Person> */
-    private array $persons;
+    private int $count;
 
     private Type $listType;
 
@@ -51,7 +50,7 @@ class WriteCollectionBench
      */
     public function setUp(array $params): void
     {
-        $this->persons = PayloadFactory::personList($params['count']);
+        $this->count = $params['count'];
         $this->listType = Type::iterable(Type::object(Person::class));
 
         // Warm generation and assert both writers agree (canonically).
@@ -69,7 +68,7 @@ class WriteCollectionBench
     public function benchAutoMapperJsonStreamerToString(): void
     {
         $sink = \strlen((string) MapperFactory::autoMapperNoAttributeJsonStreamWriter()->write(
-            $this->persons,
+            PayloadFactory::personIterable($this->count),
             $this->listType,
             [MapperContext::STREAM => true],
         ));
@@ -80,7 +79,7 @@ class WriteCollectionBench
     {
         $sink = 0;
         $result = MapperFactory::autoMapperNoAttributeJsonStreamWriter()->write(
-            $this->persons,
+            PayloadFactory::personIterable($this->count),
             $this->listType,
             [MapperContext::STREAM => true],
         );
@@ -92,14 +91,20 @@ class WriteCollectionBench
     #[ParamProviders('provideSizes')]
     public function benchSymfonyJsonStreamerToString(): void
     {
-        $sink = \strlen((string) MapperFactory::jsonStreamWriter()->write($this->persons, $this->listType));
+        $sink = \strlen((string) MapperFactory::jsonStreamWriter()->write(
+            PayloadFactory::personIterable($this->count),
+            $this->listType
+        ));
     }
 
     #[ParamProviders('provideSizes')]
     public function benchSymfonyJsonStreamerIterate(): void
     {
         $sink = 0;
-        foreach (MapperFactory::jsonStreamWriter()->write($this->persons, $this->listType) as $chunk) {
+        foreach (MapperFactory::jsonStreamWriter()->write(
+            PayloadFactory::personIterable($this->count),
+            $this->listType
+        ) as $chunk) {
             $sink += \strlen($chunk);
         }
     }
@@ -107,7 +112,10 @@ class WriteCollectionBench
     #[ParamProviders('provideSizes')]
     public function benchAutoMapperJsonEncode(): void
     {
-        $array = MapperFactory::autoMapperNoAttributeChecking()->mapCollection($this->persons, 'array');
+        $array = MapperFactory::autoMapperNoAttributeChecking()->mapCollection(
+            PayloadFactory::personIterable($this->count),
+            'array'
+        );
         $sink = \strlen((string) json_encode($array));
     }
 }

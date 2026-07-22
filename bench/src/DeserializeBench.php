@@ -39,10 +39,13 @@ class DeserializeBench
 
     private Type $type;
 
+    private $stream;
+
     public function setUp(): void
     {
         $this->json = PayloadFactory::personJson(1);
         $this->type = Type::object(Person::class);
+        $this->stream = PayloadFactory::stream($this->json);
 
         // Warm up code generation / lazy service wiring so it never lands in a measured rev.
         MapperFactory::autoMapper()->map(json_decode($this->json, true), Person::class);
@@ -87,10 +90,10 @@ class DeserializeBench
         $this->realize(MapperFactory::autoMapper()->map($data, Person::class));
     }
 
-    public function benchAutoMapperNoAttributeChecking(): void
+    public function benchAutoMapperNoChecking(): void
     {
         $data = json_decode($this->json, true, 512, JSON_THROW_ON_ERROR);
-        $this->realize(MapperFactory::autoMapperNoAttributeChecking()->map($data, Person::class));
+        $this->realize(MapperFactory::autoMapperNoChecking()->map($data, Person::class));
     }
 
     public function benchSymfonySerializer(): void
@@ -100,16 +103,16 @@ class DeserializeBench
 
     public function benchSymfonyJsonStreamer(): void
     {
-        $this->realize(MapperFactory::jsonStreamReader()->read(PayloadFactory::stream($this->json), $this->type));
+        $this->realize(MapperFactory::jsonStreamReader()->read($this->stream, $this->type));
     }
 
     public function benchAutoMapperJsonStreamer(): void
     {
-        $this->realize(MapperFactory::autoMapperJsonStreamReader()->read(PayloadFactory::stream($this->json), $this->type));
+        $this->realize(MapperFactory::autoMapperJsonStreamReader()->read($this->stream, $this->type));
     }
 
     public function benchAutoMapperJsonStreamerNoAttributeChecking(): void
     {
-        $this->realize(MapperFactory::autoMapperNoAttributeJsonStreamReader()->read(PayloadFactory::stream($this->json), $this->type));
+        $this->realize(MapperFactory::autoMapperNoAttributeJsonStreamReader()->read($this->stream, $this->type));
     }
 }

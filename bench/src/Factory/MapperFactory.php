@@ -104,6 +104,23 @@ final class MapperFactory
     }
 
     /**
+        * AutoMapper with attribute checking disabled (skips reading Serializer/AutoMapper
+        * attributes when building metadata — cheaper generation, same runtime shape here).
+        */
+    public static function autoMapperNoChecking(): AutoMapperInterface
+    {
+        return self::$autoMappers['no_checking'] ??= AutoMapper::create(
+            new Configuration(
+                classPrefix: 'BenchNoCheck_',
+                attributeChecking: false,
+                mapPrivateProperties: false,
+                groupChecking: false,
+            ),
+            cacheDirectory: self::cacheDir('no_checking'),
+        );
+    }
+
+    /**
      * A Serializer wired like Symfony FrameworkBundle's default service: the
      * property-info extractor and the class-metadata factory are both wrapped in a
      * cache, and the ObjectNormalizer uses a cached PropertyAccessor. Without these
@@ -192,7 +209,7 @@ final class MapperFactory
     public static function autoMapperNoAttributeJsonStreamWriter(): AutoMapperJsonStreamWriter
     {
         return self::$autoMapperNoAttributeJsonStreamWriter ??= new AutoMapperJsonStreamWriter(
-            self::autoMapperNoAttributeChecking(),
+            self::autoMapperNoChecking(),
             self::jsonStreamWriter(),
         );
     }
