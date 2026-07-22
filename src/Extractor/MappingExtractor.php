@@ -6,7 +6,7 @@ namespace AutoMapper\Extractor;
 
 use AutoMapper\Configuration;
 use AutoMapper\Event\PropertyMetadataEvent;
-use AutoMapper\Lazy\LazyMap;
+use AutoMapper\Lazy\LazyMapInterface;
 use Symfony\Component\PropertyInfo\PropertyListExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyReadInfo;
 use Symfony\Component\PropertyInfo\PropertyReadInfoExtractorInterface;
@@ -38,7 +38,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
      */
     public function getProperties(string $class, bool $withConstructorParameters = false): iterable
     {
-        if ($class === 'array' || $class === 'json' || $class === \stdClass::class || $class === LazyMap::class) {
+        if ($class === 'array' || $class === 'json' || $class === \stdClass::class || is_a($class, LazyMapInterface::class, true)) {
             return [];
         }
 
@@ -245,7 +245,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
             return new PropertyReadAccessor($property);
         }
 
-        if (LazyMap::class === $class) {
+        if (is_a($class, LazyMapInterface::class, true)) {
             return new ArrayReadAccessor($property, true);
         }
 

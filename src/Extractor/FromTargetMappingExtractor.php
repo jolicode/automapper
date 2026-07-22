@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\Extractor;
 
-use AutoMapper\Lazy\LazyMap;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
 use Symfony\Component\TypeInfo\Type;
@@ -21,8 +20,8 @@ use Symfony\Component\TypeInfo\Type;
 final class FromTargetMappingExtractor extends MappingExtractor
 {
     /**
-     * @param 'array'      $source
-     * @param class-string $target
+     * @param 'array'|class-string $source
+     * @param class-string         $target
      */
     public function getTypes(string $source, SourcePropertyMetadata $sourceProperty, string $target, TargetPropertyMetadata $targetProperty, bool $extractTypesFromGetter): array
     {
@@ -131,7 +130,10 @@ final class FromTargetMappingExtractor extends MappingExtractor
                 return Type::object(\stdClass::class);
             }
 
-            return Type::object(LazyMap::class);
+            // Any other source here is a LazyMap-like class (see MapperMetadata::isSourceArrayLike):
+            // keep the same source type on nested objects so on-demand access propagates recursively.
+            /** @var class-string $source */
+            return Type::object($source);
         }
 
         return $type;

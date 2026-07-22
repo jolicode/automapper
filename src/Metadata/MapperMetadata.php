@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Metadata;
 
-use AutoMapper\Lazy\LazyMap;
+use AutoMapper\Lazy\LazyMapInterface;
 use Composer\InstalledVersions;
 
 class MapperMetadata
@@ -60,7 +60,7 @@ class MapperMetadata
      */
     public function isTargetArrayLike(): bool
     {
-        return \in_array($this->target, ['array', \stdClass::class, LazyMap::class, 'json'], true);
+        return \in_array($this->target, ['array', \stdClass::class, 'json'], true) || is_a($this->target, LazyMapInterface::class, true);
     }
 
     /**
@@ -68,7 +68,7 @@ class MapperMetadata
      */
     public function isSourceArrayLike(): bool
     {
-        return \in_array($this->source, ['array', \stdClass::class, LazyMap::class], true);
+        return \in_array($this->source, ['array', \stdClass::class], true) || is_a($this->source, LazyMapInterface::class, true);
     }
 
     public function getHash(): string

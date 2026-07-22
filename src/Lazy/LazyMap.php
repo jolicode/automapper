@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace AutoMapper\Lazy;
 
 /**
- * @implements \ArrayAccess<string, mixed>
+ * @implements LazyMapInterface<string, mixed>
  * @implements \IteratorAggregate<string, mixed>
  */
-final class LazyMap implements \ArrayAccess, \JsonSerializable, \IteratorAggregate
+final class LazyMap implements LazyMapInterface, \JsonSerializable, \IteratorAggregate
 {
     /** @var array<string, mixed> */
     private mixed $mappedValue = [];
