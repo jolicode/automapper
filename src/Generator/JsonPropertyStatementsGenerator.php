@@ -9,6 +9,7 @@ use AutoMapper\Metadata\PropertyMetadata;
 use AutoMapper\Transformer\AllowNullValueTransformerInterface;
 use AutoMapper\Transformer\ArrayTransformer;
 use AutoMapper\Transformer\LazyCollectionTransformer;
+use AutoMapper\Transformer\MapperDependency;
 use AutoMapper\Transformer\ObjectTransformer;
 use AutoMapper\Transformer\TransformerInterface;
 use PhpParser\Node\Arg;
@@ -18,20 +19,19 @@ use PhpParser\Node\Scalar;
 use PhpParser\Node\Stmt;
 
 /**
- * Generates the body of a `mapToJsonStream()` generator method for an object → array
- * mapper: instead of building an array and returning it, it yields the JSON string
- * chunk by chunk, straight from the source object.
+ * The `json` counterpart of {@see PropertyStatementsGenerator}: instead of assigning the
+ * transformed value to the target, it yields the property's JSON, chunk by chunk, straight from
+ * the source object.
  *
- * It reuses the mapper's read accessors and transformers (so renames, `#[MapTo]`,
- * date/enum handling, ... all still apply). For leaf values it `json_encode()`s the
- * transformed value; for a nested object or a list of objects it `yield from`s the
- * sub-mapper's own `mapToJsonStream()` (found through the transformer's mapper
- * dependency), so a large nested collection is streamed element by element instead
- * of being materialized and encoded whole.
+ * It reuses the mapper's read accessors and transformers (so renames, `#[MapTo]`, date/enum
+ * handling, ... all still apply). For leaf values it `json_encode()`s the transformed value; for
+ * a nested object or a list of objects it `yield from`s the nested object → json sub-mapper's own
+ * `map()`, so a large nested collection streams element by element instead of being materialized
+ * and encoded whole.
  *
  * @internal
  */
-final readonly class JsonStreamMethodStatementsGenerator
+final readonly class JsonPropertyStatementsGenerator
 {
     public function __construct(
         private PropertyConditionsGenerator $propertyConditionsGenerator,
@@ -39,55 +39,75 @@ final readonly class JsonStreamMethodStatementsGenerator
     }
 
     /**
+     * The variable holding the `,` separator between properties, shared with the framing emitted
+     * by the mapper's map() method.
+     */
+    public static function separatorVariable(): Expr\Variable
+    {
+        return new Expr\Variable('sep');
+    }
+
+    /**
      * @return Stmt[]
      */
-    public function getStatements(GeneratorMetadata $metadata): array
+    public function generate(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): array
     {
-        $variableRegistry = $metadata->variableRegistry;
-        $sepVar = new Expr\Variable('sep');
+        if ($propertyMetadata->ignored) {
+            return [];
+        }
 
-        $statements = [
-            // A scratch array so transformers that reference the target's existing
-            // value ($result[...]) keep working; it is never returned.
-            new Stmt\Expression(new Expr\Assign($variableRegistry->getResult(), new Expr\Array_())),
-            new Stmt\Expression(new Expr\Yield_(new Scalar\String_('{'))),
-            new Stmt\Expression(new Expr\Assign($sepVar, new Scalar\String_(''))),
-        ];
+        $variableRegistry = $metadata->variableRegistry;
+        $fieldValueExpr = $propertyMetadata->source->accessor?->getExpression($variableRegistry->getSourceInput());
+
+        if (null === $fieldValueExpr) {
+            if (!$propertyMetadata->transformer instanceof AllowNullValueTransformerInterface) {
+                return [];
+            }
+
+            $fieldValueExpr = new Expr\ConstFetch(new Name('null'));
+        }
+
+        $keyPrefix = new Expr\BinaryOp\Concat(
+            self::separatorVariable(),
+            new Scalar\String_('"' . $this->escapeKey($propertyMetadata->target->property) . '":'),
+        );
+
+        $propStatements = $this->propertyStatements($metadata, $propertyMetadata, $fieldValueExpr, $keyPrefix);
+
+        $condition = $this->propertyConditionsGenerator->generate($metadata, $propertyMetadata);
+
+        if ($condition) {
+            return [new Stmt\If_($condition, ['stmts' => $propStatements])];
+        }
+
+        return $propStatements;
+    }
+
+    /**
+     * The nested object → json dependencies referenced by this mapper, so they can be injected.
+     *
+     * @return MapperDependency[]
+     */
+    public function jsonDependencies(GeneratorMetadata $metadata): array
+    {
+        $dependencies = [];
 
         foreach ($metadata->propertiesMetadata as $propertyMetadata) {
             if ($propertyMetadata->ignored) {
                 continue;
             }
 
-            $fieldValueExpr = $propertyMetadata->source->accessor?->getExpression($variableRegistry->getSourceInput());
+            $transformer = $propertyMetadata->transformer;
+            $objectTransformer = $transformer instanceof ObjectTransformer ? $transformer : $this->objectListItemTransformer($transformer);
 
-            if (null === $fieldValueExpr) {
-                if (!$propertyMetadata->transformer instanceof AllowNullValueTransformerInterface) {
-                    continue;
-                }
-
-                $fieldValueExpr = new Expr\ConstFetch(new Name('null'));
+            if ($objectTransformer === null || ($source = $this->streamableSource($objectTransformer)) === null) {
+                continue;
             }
 
-            $keyPrefix = new Expr\BinaryOp\Concat(
-                $sepVar,
-                new Scalar\String_('"' . $this->escapeKey($propertyMetadata->target->property) . '":'),
-            );
-
-            $propStatements = $this->propertyStatements($metadata, $propertyMetadata, $fieldValueExpr, $keyPrefix, $sepVar);
-
-            $condition = $this->propertyConditionsGenerator->generate($metadata, $propertyMetadata);
-
-            if ($condition) {
-                $propStatements = [new Stmt\If_($condition, ['stmts' => $propStatements])];
-            }
-
-            $statements = [...$statements, ...$propStatements];
+            $dependencies[$source] = new MapperDependency($this->jsonDependencyName($source), $source, 'json');
         }
 
-        $statements[] = new Stmt\Expression(new Expr\Yield_(new Scalar\String_('}')));
-
-        return $statements;
+        return array_values($dependencies);
     }
 
     /**
@@ -98,16 +118,14 @@ final readonly class JsonStreamMethodStatementsGenerator
         PropertyMetadata $propertyMetadata,
         Expr $fieldValueExpr,
         Expr $keyPrefix,
-        Expr\Variable $sepVar,
     ): array {
         $transformer = $propertyMetadata->transformer;
         $variableRegistry = $metadata->variableRegistry;
-        $advanceSep = new Stmt\Expression(new Expr\Assign($sepVar, new Scalar\String_(',')));
+        $advanceSep = new Stmt\Expression(new Expr\Assign(self::separatorVariable(), new Scalar\String_(',')));
 
-        // A nested object mapped by a sub-mapper: stream it via the sub-mapper's own
-        // mapToJsonStream() so nested collections stream too.
-        if ($transformer instanceof ObjectTransformer
-            && ($dependencyName = $this->streamableDependency($transformer)) !== null) {
+        // A nested object mapped by a sub-mapper: stream it via the nested object → json
+        // sub-mapper's own map() so nested collections stream too.
+        if ($transformer instanceof ObjectTransformer && ($source = $this->streamableSource($transformer)) !== null) {
             $valueVar = new Expr\Variable($variableRegistry->getUniqueVariableScope()->getUniqueName('jsonValue'));
 
             return [
@@ -116,14 +134,14 @@ final readonly class JsonStreamMethodStatementsGenerator
                 $advanceSep,
                 new Stmt\If_(new Expr\BinaryOp\Identical(new Expr\ConstFetch(new Name('null')), $valueVar), [
                     'stmts' => [new Stmt\Expression(new Expr\Yield_(new Scalar\String_('null')))],
-                    'else' => new Stmt\Else_([$this->yieldFromMapper($dependencyName, $valueVar, $variableRegistry)]),
+                    'else' => new Stmt\Else_([$this->yieldFromMapper($source, $valueVar, $variableRegistry)]),
                 ]),
             ];
         }
 
         // A list of objects mapped by a sub-mapper: stream `[` + each element + `]`.
         if (($itemTransformer = $this->objectListItemTransformer($transformer)) !== null
-            && ($dependencyName = $this->streamableDependency($itemTransformer)) !== null) {
+            && ($source = $this->streamableSource($itemTransformer)) !== null) {
             $scope = $variableRegistry->getUniqueVariableScope();
             $itemVar = new Expr\Variable($scope->getUniqueName('jsonItem'));
             $itemSepVar = new Expr\Variable($scope->getUniqueName('jsonItemSep'));
@@ -139,7 +157,7 @@ final readonly class JsonStreamMethodStatementsGenerator
                         new Stmt\Expression(new Expr\Assign($itemSepVar, new Scalar\String_(','))),
                         new Stmt\If_(new Expr\BinaryOp\Identical(new Expr\ConstFetch(new Name('null')), $itemVar), [
                             'stmts' => [new Stmt\Expression(new Expr\Yield_(new Scalar\String_('null')))],
-                            'else' => new Stmt\Else_([$this->yieldFromMapper($dependencyName, $itemVar, $variableRegistry)]),
+                            'else' => new Stmt\Else_([$this->yieldFromMapper($source, $itemVar, $variableRegistry)]),
                         ]),
                     ],
                 ]),
@@ -147,8 +165,8 @@ final readonly class JsonStreamMethodStatementsGenerator
             ];
         }
 
-        // Leaf value (scalar, date, enum, scalar list, dict, ...): transform then
-        // json_encode the result in one native call.
+        // Leaf value (scalar, date, enum, scalar list, dict, ...): transform then json_encode
+        // the result in one native call.
         [$output, $propStatements] = $transformer->transform(
             $fieldValueExpr,
             $variableRegistry->getResult(),
@@ -161,19 +179,19 @@ final readonly class JsonStreamMethodStatementsGenerator
             $keyPrefix,
             new Expr\FuncCall(new Name('json_encode'), [new Arg($output)]),
         )));
-        $propStatements[] = $advanceSep;
+        $propStatements[] = new Stmt\Expression(new Expr\Assign(self::separatorVariable(), new Scalar\String_(',')));
 
         return $propStatements;
     }
 
-    private function yieldFromMapper(string $dependencyName, Expr $value, VariableRegistry $variableRegistry): Stmt
+    private function yieldFromMapper(string $source, Expr $value, VariableRegistry $variableRegistry): Stmt
     {
         return new Stmt\Expression(new Expr\YieldFrom(new Expr\MethodCall(
             new Expr\ArrayDimFetch(
                 new Expr\PropertyFetch(new Expr\Variable('this'), 'mappers'),
-                new Scalar\String_($dependencyName),
+                new Scalar\String_($this->jsonDependencyName($source)),
             ),
-            'mapToJsonStream',
+            'map',
             [
                 new Arg($value),
                 new Arg($variableRegistry->getContext()),
@@ -199,18 +217,26 @@ final readonly class JsonStreamMethodStatementsGenerator
     }
 
     /**
-     * The sub-mapper key when it is an object → array mapper (so it has a
-     * mapToJsonStream() method), or null otherwise.
+     * The source class of the nested object mapping when it is an object → array mapping (so a
+     * json sibling mapper exists for it), or null otherwise.
+     *
+     * @return class-string|null
      */
-    private function streamableDependency(ObjectTransformer $transformer): ?string
+    private function streamableSource(ObjectTransformer $transformer): ?string
     {
         foreach ($transformer->getDependencies() as $dependency) {
             if ('array' !== $dependency->source && 'array' === $dependency->target) {
-                return $dependency->name;
+                /** @var class-string */
+                return $dependency->source;
             }
         }
 
         return null;
+    }
+
+    private function jsonDependencyName(string $source): string
+    {
+        return 'Mapper_' . $source . '_json';
     }
 
     private function escapeKey(string $key): string

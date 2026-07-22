@@ -18,8 +18,15 @@ final readonly class DoctrineProviderListener
 
     public function __invoke(GenerateMapperEvent $event): void
     {
+        if ($event->mapperMetadata->isTargetArrayLike()) {
+            return;
+        }
+
+        /** @var class-string $target */
+        $target = $event->mapperMetadata->target;
+
         // isTransient loads the metadata when needed, unlike hasMetadataFor which only checks already loaded ones
-        if ($event->mapperMetadata->target === 'array' || $this->objectManager->getMetadataFactory()->isTransient($event->mapperMetadata->target)) {
+        if ($this->objectManager->getMetadataFactory()->isTransient($target)) {
             return;
         }
 

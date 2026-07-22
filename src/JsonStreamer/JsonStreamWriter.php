@@ -6,6 +6,7 @@ namespace AutoMapper\JsonStreamer;
 
 use AutoMapper\AutoMapperInterface;
 use AutoMapper\AutoMapperRegistryInterface;
+use AutoMapper\MapperInterface;
 use Symfony\Component\JsonStreamer\StreamWriterInterface;
 use Symfony\Component\TypeInfo\Type;
 use Symfony\Component\TypeInfo\Type\CollectionType;
@@ -14,9 +15,9 @@ use Symfony\Component\TypeInfo\Type\NullableType;
 use Symfony\Component\TypeInfo\Type\ObjectType;
 
 /**
- * Streams an object (or a collection of objects) to JSON by delegating to the
- * AutoMapper's generated `mapToJsonStream()` generator, which yields the JSON chunk
- * by chunk straight from the source object — no intermediate array or lazy walk.
+ * Streams an object (or a collection of objects) to JSON by delegating to the AutoMapper's
+ * generated `json` mapper, whose `map()` yields the JSON chunk by chunk straight from the source
+ * object — no intermediate array or lazy walk.
  *
  * @implements StreamWriterInterface<MapperContextArray>
  *
@@ -41,7 +42,7 @@ final class JsonStreamWriter implements StreamWriterInterface
         if ($unwrapped instanceof CollectionType) {
             $className = $this->ownedClassName($this->unwrap($unwrapped->getCollectionValueType()));
 
-            if ($className !== null && is_iterable($data) && $this->jsonStreamMapper($className) !== null) {
+            if ($className !== null && is_iterable($data) && $this->jsonMapper($className) !== null) {
                 /** @var iterable<mixed> $data */
                 return $this->wrap(fn (): \Generator => $this->collectionChunks($data, $className, $options));
             }
@@ -51,9 +52,9 @@ final class JsonStreamWriter implements StreamWriterInterface
             $unwrapped instanceof ObjectType
             && \is_object($data)
             && $unwrapped->getClassName() === $data::class
-            && ($mapper = $this->jsonStreamMapper($data::class)) !== null
+            && ($mapper = $this->jsonMapper($data::class)) !== null
         ) {
-            return $this->wrap(fn (): iterable => $mapper->mapToJsonStream($data, $options));
+            return $this->wrap(static fn (): iterable => $mapper->map($data, $options) ?? []);
         }
 
         return $this->fallbackStreamWriter->write($data, $type, $options);
@@ -63,20 +64,22 @@ final class JsonStreamWriter implements StreamWriterInterface
      * Yield the JSON of a collection: `[` + each element's JSON + `]`, one element
      * at a time so a large collection is never held in memory at once.
      *
-     * @param iterable<mixed>      $data
-     * @param class-string         $className
-     * @param array<string, mixed> $options
+     * @param iterable<mixed>    $data
+     * @param class-string       $className
+     * @param MapperContextArray $options
+     *
+     * @return \Generator<int, string>
      */
     private function collectionChunks(iterable $data, string $className, array $options): \Generator
     {
-        $mapper = $this->jsonStreamMapper($className);
+        $mapper = $this->jsonMapper($className);
 
         yield '[';
         $sep = '';
         foreach ($data as $item) {
             yield $sep;
             if (\is_object($item) && $item::class === $className && $mapper !== null) {
-                yield from $mapper->mapToJsonStream($item, $options);
+                yield from $mapper->map($item, $options) ?? [];
             } else {
                 yield json_encode($item) ?: 'null';
             }
@@ -86,18 +89,23 @@ final class JsonStreamWriter implements StreamWriterInterface
     }
 
     /**
-     * Return the object → array mapper for the class if it exposes the generated
-     * `mapToJsonStream()` method, otherwise null.
+     * Return the `json` mapper for the class, whose `map()` yields the JSON stream, or null when
+     * the AutoMapper cannot provide one.
+     *
+     * @param class-string $className
+     *
+     * @return MapperInterface<object, iterable<int, string>>|null
      */
-    private function jsonStreamMapper(string $className): ?object
+    private function jsonMapper(string $className): ?MapperInterface
     {
         if (!$this->mapper instanceof AutoMapperRegistryInterface) {
             return null;
         }
 
-        $mapper = $this->mapper->getMapper($className, 'array');
+        /** @var MapperInterface<object, iterable<int, string>> $mapper */
+        $mapper = $this->mapper->getMapper($className, 'json');
 
-        return method_exists($mapper, 'mapToJsonStream') ? $mapper : null;
+        return $mapper;
     }
 
     /**
@@ -105,7 +113,9 @@ final class JsonStreamWriter implements StreamWriterInterface
      * (`getIterator`) or buffered (`__toString`). The factory is re-invoked per
      * consumption so the result stays re-iterable.
      *
-     * @param \Closure(): iterable<string> $factory
+     * @param \Closure(): iterable<int, string> $factory
+     *
+     * @return \Traversable<int, string>&\Stringable
      */
     private function wrap(\Closure $factory): \Traversable&\Stringable
     {
@@ -113,7 +123,7 @@ final class JsonStreamWriter implements StreamWriterInterface
          * @implements \IteratorAggregate<int, string>
          */ class($factory) implements \IteratorAggregate, \Stringable {
             /**
-             * @param \Closure(): iterable<string> $factory
+             * @param \Closure(): iterable<int, string> $factory
              */
             public function __construct(
                 private \Closure $factory,
