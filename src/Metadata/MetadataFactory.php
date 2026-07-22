@@ -28,7 +28,6 @@ use AutoMapper\Extractor\FromSourceMappingExtractor;
 use AutoMapper\Extractor\FromTargetMappingExtractor;
 use AutoMapper\Extractor\SourceTargetMappingExtractor;
 use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
-use AutoMapper\Lazy\LazyMap;
 use AutoMapper\Transformer\AllowNullValueTransformerInterface;
 use AutoMapper\Transformer\ArrayShapeTransformerFactory;
 use AutoMapper\Transformer\ArrayTransformerFactory;
@@ -86,8 +85,8 @@ final class MetadataFactory
     }
 
     /**
-     * @param class-string<object>|'array' $source
-     * @param class-string<object>|'array' $target
+     * @param class-string<object>|'array'        $source
+     * @param class-string<object>|'array'|'json' $target
      *
      * @internal
      */
@@ -173,11 +172,11 @@ final class MetadataFactory
     {
         $extractor = $this->sourceTargetPropertiesMappingExtractor;
 
-        if ('array' === $mapperMetadata->source || 'stdClass' === $mapperMetadata->source || LazyMap::class === $mapperMetadata->source) {
+        if ($mapperMetadata->isSourceArrayLike()) {
             $extractor = $this->fromTargetPropertiesMappingExtractor;
         }
 
-        if ('array' === $mapperMetadata->target || 'stdClass' === $mapperMetadata->target || LazyMap::class === $mapperMetadata->target) {
+        if ($mapperMetadata->isTargetArrayLike()) {
             $extractor = $this->fromSourcePropertiesMappingExtractor;
         }
 

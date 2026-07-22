@@ -38,7 +38,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
      */
     public function getProperties(string $class, bool $withConstructorParameters = false): iterable
     {
-        if ($class === 'array' || $class === \stdClass::class || $class === LazyMap::class) {
+        if ($class === 'array' || $class === 'json' || $class === \stdClass::class || $class === LazyMap::class) {
             return [];
         }
 
@@ -233,6 +233,10 @@ abstract class MappingExtractor implements MappingExtractorInterface
      */
     private function doGetReadAccessor(string $class, string $property, bool $allowExtraProperties = false): ?ReadAccessorInterface
     {
+        if ('json' === $class) {
+            return null;
+        }
+
         if ('array' === $class) {
             return new ArrayReadAccessor($property);
         }
@@ -275,6 +279,12 @@ abstract class MappingExtractor implements MappingExtractorInterface
      */
     private function doGetWriteMutator(string $target, string $property, array $context = [], bool $allowExtraProperties = false): ?WriteMutatorInterface
     {
+        // `json` targets are never actually written to: their mapper yields the value. A dedicated
+        // mutator marks the property as writable so it is not dropped as unwritable.
+        if ('json' === $target) {
+            return new JsonWriteMutator();
+        }
+
         $writeInfo = $this->writeInfoExtractor->getWriteInfo($target, $property, $context);
 
         if (null === $writeInfo || PropertyWriteInfo::TYPE_NONE === $writeInfo->getType()) {

@@ -16,12 +16,19 @@ final readonly class DoctrineIdentifierListener
 
     public function __invoke(PropertyMetadataEvent $event): void
     {
-        // isTransient loads the metadata when needed, unlike hasMetadataFor which only checks already loaded ones
-        if ($event->mapperMetadata->target === 'array' || $this->objectManager->getMetadataFactory()->isTransient($event->mapperMetadata->target)) {
+        if ($event->mapperMetadata->isTargetArrayLike()) {
             return;
         }
 
-        $metadata = $this->objectManager->getClassMetadata($event->mapperMetadata->target);
+        /** @var class-string $target */
+        $target = $event->mapperMetadata->target;
+
+        // isTransient loads the metadata when needed, unlike hasMetadataFor which only checks already loaded ones
+        if ($this->objectManager->getMetadataFactory()->isTransient($target)) {
+            return;
+        }
+
+        $metadata = $this->objectManager->getClassMetadata($target);
 
         if ($metadata->isIdentifier($event->target->property)) {
             $event->identifier = true;

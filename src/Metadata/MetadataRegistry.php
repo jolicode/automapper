@@ -26,20 +26,23 @@ class MetadataRegistry implements \IteratorAggregate, \Countable
     }
 
     /**
-     * @param class-string<object>|'array' $source
-     * @param class-string<object>|'array' $target
+     * @param class-string<object>|'array'        $source
+     * @param class-string<object>|'array'|'json' $target
      */
     public function get(string $source, string $target, bool $registered = false): MapperMetadata
     {
         $source = $this->getRealClassName($source);
-        $target = $this->getRealClassName($target);
+        // `json` is a projection format that behaves like `array` for every metadata concern, so
+        // it is kept as a plain array-like target downstream rather than a distinct type.
+        /** @var class-string<object>|'array' $target */
+        $target = 'json' === $target ? 'json' : $this->getRealClassName($target);
 
         return $this->registry[$source][$target] ??= new MapperMetadata($source, $target, $registered, $this->configuration->classPrefix);
     }
 
     /**
-     * @param class-string<object>|'array' $source
-     * @param class-string<object>|'array' $target
+     * @param class-string<object>|'array'        $source
+     * @param class-string<object>|'array'|'json' $target
      */
     public function register(string $source, string $target): void
     {
@@ -47,13 +50,14 @@ class MetadataRegistry implements \IteratorAggregate, \Countable
     }
 
     /**
-     * @param class-string<object>|'array' $source
-     * @param class-string<object>|'array' $target
+     * @param class-string<object>|'array'        $source
+     * @param class-string<object>|'array'|'json' $target
      */
     public function has(string $source, string $target, bool $onlyRegistered): bool
     {
         $source = $this->getRealClassName($source);
-        $target = $this->getRealClassName($target);
+        /** @var class-string<object>|'array' $target */
+        $target = 'json' === $target ? 'json' : $this->getRealClassName($target);
 
         if (!isset($this->registry[$source][$target])) {
             return false;

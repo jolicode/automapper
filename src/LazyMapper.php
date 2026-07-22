@@ -23,7 +23,7 @@ class LazyMapper implements MapperInterface
         private readonly AutoMapperRegistryInterface $registry,
         /** @var 'array'|class-string<object> */
         private readonly string $source,
-        /** @var 'array'|class-string<object> */
+        /** @var 'array'|'json'|class-string<object> */
         private readonly string $target,
     ) {
     }
@@ -64,20 +64,6 @@ class LazyMapper implements MapperInterface
     public function &map(mixed $value, array $context = []): mixed
     {
         return $this->getMapper()->map($value, $context);
-    }
-
-    /**
-     * Delegates to the generated object → array mapper's JSON streaming method.
-     *
-     * @param array<string, mixed> $context
-     *
-     * @return iterable<string>
-     */
-    public function mapToJsonStream(mixed $value, array $context = []): iterable
-    {
-        $mapper = $this->getMapper();
-
-        return method_exists($mapper, 'mapToJsonStream') ? $mapper->mapToJsonStream($value, $context) : [];
     }
 
     /**

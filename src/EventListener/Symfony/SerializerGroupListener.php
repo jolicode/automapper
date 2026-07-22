@@ -16,8 +16,13 @@ final readonly class SerializerGroupListener
 
     public function __invoke(PropertyMetadataEvent $event): void
     {
-        $event->target->groups = $this->getGroups($event->mapperMetadata->target, $event->target->property);
-        $event->source->groups = $this->getGroups($event->mapperMetadata->source, $event->source->property);
+        if (!$event->mapperMetadata->isTargetArrayLike()) {
+            $event->target->groups = $this->getGroups($event->mapperMetadata->target, $event->target->property);
+        }
+
+        if (!$event->mapperMetadata->isSourceArrayLike()) {
+            $event->source->groups = $this->getGroups($event->mapperMetadata->source, $event->source->property);
+        }
     }
 
     /**
@@ -25,10 +30,6 @@ final readonly class SerializerGroupListener
      */
     private function getGroups(string $class, string $property): ?array
     {
-        if ('array' === $class || \stdClass::class === $class) {
-            return null;
-        }
-
         $serializerClassMetadata = $this->classMetadataFactory->getMetadataFor($class);
         $anyGroupFound = false;
         $groups = [];

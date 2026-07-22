@@ -66,4 +66,38 @@ class JsonStreamWriterTest extends AutoMapperTestCase
 
         $this->assertEquals($user, $user2);
     }
+
+    public function testGetJsonMapperStreamsThroughMapMethod(): void
+    {
+        $autoMapper = AutoMapperBuilder::buildAutoMapper(
+            mapPrivatePropertiesAndMethod: true,
+            classPrefix: 'JsonStreamerPrivate_'
+        );
+
+        $address = new Fixtures\Address();
+        $address->setCity('Toulon');
+        $user = new Fixtures\User(1, 'yolo', '13');
+        $user->address = $address;
+        $user->addresses[] = $address;
+        $user->money = 20.1;
+
+        // The `json` mapper exposes the stream straight through map().
+        $stream = $autoMapper->getMapper(Fixtures\User::class, 'json')->map($user);
+
+        self::assertInstanceOf(\Traversable::class, $stream, 'A json mapper streams its result.');
+
+        $json = '';
+        foreach ($stream as $chunk) {
+            self::assertIsString($chunk);
+            $json .= $chunk;
+        }
+
+        $data = json_decode($json, true, flags: \JSON_THROW_ON_ERROR);
+        self::assertSame('Toulon', $data['address']['city']);
+        self::assertCount(1, $data['addresses']);
+
+        // And it round-trips back to the original object.
+        $user2 = $autoMapper->map($data, Fixtures\User::class);
+        self::assertEquals($user, $user2);
+    }
 }

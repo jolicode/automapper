@@ -110,7 +110,7 @@ final class FromSourceMappingExtractor extends MappingExtractor
 
         // Transform objects to array or \stdClass given the target
         if ($type instanceof Type\ObjectType && \stdClass::class !== $type->getClassName()) {
-            return $target === 'array' ? Type::arrayShape([]) : Type::object(\stdClass::class);
+            return \in_array($target, ['array', 'json'], true) ? Type::arrayShape([]) : Type::object(\stdClass::class);
         }
 
         return $type;

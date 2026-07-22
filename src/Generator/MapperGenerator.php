@@ -12,11 +12,15 @@ use AutoMapper\GeneratedMapper;
 use AutoMapper\Generator\Shared\CachedReflectionStatementsGenerator;
 use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
 use AutoMapper\Generator\Shared\DiscriminatorStatementsGenerator;
+use AutoMapper\LazyMapper;
 use AutoMapper\Metadata\GeneratorMetadata;
+use AutoMapper\Transformer\MapperDependency;
 use PhpParser\Builder;
+use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
 use PhpParser\Node\Param;
+use PhpParser\Node\Scalar;
 use PhpParser\Node\Stmt;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
@@ -35,7 +39,7 @@ final readonly class MapperGenerator
     private MapperConstructorGenerator $mapperConstructorGenerator;
     private InjectMapperMethodStatementsGenerator $injectMapperMethodStatementsGenerator;
     private MapMethodStatementsGenerator $mapMethodStatementsGenerator;
-    private JsonStreamMethodStatementsGenerator $jsonStreamMethodStatementsGenerator;
+    private JsonMapMethodStatementsGenerator $jsonMapMethodStatementsGenerator;
     private IdentifierHashGenerator $identifierHashGenerator;
     private bool $disableGeneratedMapper;
 
@@ -55,8 +59,8 @@ final readonly class MapperGenerator
             $expressionLanguage,
         );
 
-        $this->jsonStreamMethodStatementsGenerator = new JsonStreamMethodStatementsGenerator(
-            new PropertyConditionsGenerator($expressionLanguage),
+        $this->jsonMapMethodStatementsGenerator = new JsonMapMethodStatementsGenerator(
+            new JsonPropertyStatementsGenerator(new PropertyConditionsGenerator($expressionLanguage)),
         );
 
         $this->injectMapperMethodStatementsGenerator = new InjectMapperMethodStatementsGenerator();
@@ -84,6 +88,12 @@ final readonly class MapperGenerator
             $statements[] = new Stmt\Declare_([create_declare_item('strict_types', create_scalar_int(1))]);
         }
 
+        if ($metadata->mapperMetadata->isJsonTarget()) {
+            $statements[] = $this->generateJsonMapper($metadata);
+
+            return $statements;
+        }
+
         [$constructorStatements, $duplicatedStatements, $setterStatements] = $this->mapMethodStatementsGenerator->getMappingStatements($metadata);
 
         $builder = (new Builder\Class_($metadata->mapperMetadata->className))
@@ -100,12 +110,6 @@ final readonly class MapperGenerator
         $builder
             ->addStmt($this->doMapMethod($metadata, $setterStatements))
             ->addStmt($this->registerMappersMethod($metadata));
-
-        // Object → array mappers also get a generator method that streams the JSON
-        // straight from the source object, reusing the same read/transform pipeline.
-        if ('array' === $metadata->mapperMetadata->target && 'array' !== $metadata->mapperMetadata->source) {
-            $builder->addStmt($this->mapToJsonStreamMethod($metadata));
-        }
 
         if ($sourceHashMethod = $this->identifierHashGenerator->getSourceHashMethod($metadata)) {
             $builder->addStmt($sourceHashMethod);
@@ -223,26 +227,84 @@ final readonly class MapperGenerator
     }
 
     /**
-     * Create the mapToJsonStream generator method for this mapper.
+     * Create a mapper whose `map()` streams the source as JSON (target `json`).
      *
-     * ```php
-     * public function mapToJsonStream($value, array $context = []): iterable {
-     *   yield '{';
-     *   yield '"id":' . json_encode($value->getId());
-     *   ...
-     *   yield '}';
-     * }
-     * ```
+     * It reuses the same read/transform pipeline as the object → array mapper, but emits the
+     * value as a JSON stream (`map()` returns an `iterable<string>` of chunks) instead of
+     * building an array.
      */
-    private function mapToJsonStreamMethod(GeneratorMetadata $metadata): Stmt\ClassMethod
+    private function generateJsonMapper(GeneratorMetadata $metadata): Stmt\Class_
     {
-        return (new Builder\Method('mapToJsonStream'))
-            ->makePublic()
-            ->setReturnType('iterable')
-            ->addParam(new Param($metadata->variableRegistry->getSourceInput()))
-            ->addParam(new Param($metadata->variableRegistry->getContext(), default: new Expr\Array_(), type: new Name('array')))
-            ->addStmts($this->jsonStreamMethodStatementsGenerator->getStatements($metadata))
+        return (new Builder\Class_($metadata->mapperMetadata->className))
+            ->makeFinal()
+            ->extend(GeneratedMapper::class)
+            ->addStmt($this->constructorMethod($metadata))
+            ->addStmt($this->jsonMapMethod($metadata))
+            ->addStmt($this->jsonRegisterMappersMethod($metadata))
             ->getNode();
+    }
+
+    /**
+     * The `map()` method of a `json` mapper: it returns a generator that yields the JSON chunk
+     * by chunk. The body is wrapped in a closure so `map()` itself is not a generator and can
+     * return the stream (by reference, like every other mapper).
+     */
+    private function jsonMapMethod(GeneratorMetadata $metadata): Stmt\ClassMethod
+    {
+        $variableRegistry = $metadata->variableRegistry;
+
+        return (new Builder\Method('map'))
+            ->makePublic()
+            ->setReturnType('mixed')
+            ->makeReturnByRef()
+            ->addParam(new Param($variableRegistry->getSourceInput()))
+            ->addParam(new Param($variableRegistry->getContext(), default: new Expr\Array_(), type: new Name('array')))
+            ->addStmts($this->jsonMapMethodStatementsGenerator->getStatements($metadata))
+            ->setDocComment(
+                \sprintf(
+                    '/** @param %s $%s */',
+                    '\\' . $metadata->mapperMetadata->source,
+                    'value'
+                )
+            )
+            ->getNode();
+    }
+
+    /**
+     * The `registerMappers()` of a `json` mapper: the regular dependencies (used by leaf
+     * transformers) plus the nested object → json sub-mappers used to stream nested objects.
+     */
+    private function jsonRegisterMappersMethod(GeneratorMetadata $metadata): Stmt\ClassMethod
+    {
+        $registryVariable = new Expr\Variable('autoMapperRegistry');
+
+        $statements = $this->injectMapperMethodStatementsGenerator->getStatements($registryVariable, $metadata);
+
+        foreach ($this->jsonMapMethodStatementsGenerator->jsonDependencies($metadata) as $dependency) {
+            $statements[] = $this->injectMapperStatement($registryVariable, $dependency);
+        }
+
+        return (new Builder\Method('registerMappers'))
+            ->makePublic()
+            ->setReturnType('void')
+            ->addParam(new Param(var: $registryVariable, type: new Name(AutoMapperRegistryInterface::class)))
+            ->addStmts($statements)
+            ->getNode();
+    }
+
+    private function injectMapperStatement(Expr\Variable $registryVariable, MapperDependency $dependency): Stmt
+    {
+        return new Stmt\Expression(new Expr\Assign(
+            new Expr\ArrayDimFetch(
+                new Expr\PropertyFetch(new Expr\Variable('this'), 'mappers'),
+                new Scalar\String_($dependency->name),
+            ),
+            new Expr\New_(new Name(LazyMapper::class), [
+                new Arg($registryVariable),
+                new Arg(new Scalar\String_($dependency->source)),
+                new Arg(new Scalar\String_($dependency->target)),
+            ]),
+        ));
     }
 
     /**

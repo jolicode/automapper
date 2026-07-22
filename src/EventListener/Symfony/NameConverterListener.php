@@ -16,14 +16,14 @@ final readonly class NameConverterListener
 
     public function __invoke(PropertyMetadataEvent $event): void
     {
-        if (($event->mapperMetadata->source === 'array' || $event->mapperMetadata->source === \stdClass::class) && $event->source->property === $event->target->property) {
+        if ($event->mapperMetadata->isSourceArrayLike() && $event->source->property === $event->target->property) {
             /** @var class-string $target */
             $target = $event->mapperMetadata->target;
 
             $event->source->property = $this->nameConverter->normalize($event->target->property, $target);
         }
 
-        if (($event->mapperMetadata->target === 'array' || $event->mapperMetadata->target === \stdClass::class) && $event->source->property === $event->target->property) {
+        if ($event->mapperMetadata->isTargetArrayLike() && $event->source->property === $event->target->property) {
             /** @var class-string $source */
             $source = $event->mapperMetadata->source;
 

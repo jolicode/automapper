@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Metadata;
 
+use AutoMapper\Lazy\LazyMap;
 use Composer\InstalledVersions;
 
 class MapperMetadata
@@ -45,6 +46,29 @@ class MapperMetadata
         /** @var class-string<object> $className */
         $className = \sprintf('%s%s_%s', $this->classPrefix, $this->formatSourceTarget($this->source, $this->sourceReflectionClass?->isAnonymous() ?? false), $this->formatSourceTarget($this->target, $this->targetReflectionClass?->isAnonymous() ?? false));
         $this->className = $className;
+    }
+
+    public function isJsonTarget(): bool
+    {
+        return 'json' === $this->target;
+    }
+
+    /**
+     * Whether the target is built by projecting the source (array shape) rather than hydrating a
+     * class. `json` behaves like `array` here: it is the same object → array projection, only
+     * serialized instead of assigned.
+     */
+    public function isTargetArrayLike(): bool
+    {
+        return \in_array($this->target, ['array', \stdClass::class, LazyMap::class, 'json'], true);
+    }
+
+    /**
+     * Whether the source is read as an array shape rather than an object.
+     */
+    public function isSourceArrayLike(): bool
+    {
+        return \in_array($this->source, ['array', \stdClass::class, LazyMap::class], true);
     }
 
     public function getHash(): string
