@@ -8,6 +8,7 @@ use AutoMapper\AttributeReference\AttributeInstance;
 use AutoMapper\AttributeReference\Reference;
 use AutoMapper\Exception\CompileException;
 use AutoMapper\Extractor\NestedReadAccessor;
+use AutoMapper\Lazy\LazyMapInterface;
 use AutoMapper\MapperContext;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\PropertyMetadata;
@@ -126,22 +127,37 @@ final readonly class PropertyConditionsGenerator
     }
 
     /**
-     * In case of source is an array we ensure that the key exists.
+     * When the source is read as an array shape we ensure that the key exists, so an absent key is
+     * skipped instead of mapped as null.
      *
      * ```php
-     * array_key_exists('propertyName', $source).
+     * array_key_exists('propertyName', $source)     // plain array source
+     * $source->offsetExists('propertyName')         // LazyMapInterface (ArrayAccess) source
      * ```
      */
     private function propertyExistsForArray(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
     {
-        if (!$propertyMetadata->source->checkExists || 'array' !== $metadata->mapperMetadata->source) {
+        if (!$propertyMetadata->source->checkExists) {
             return null;
         }
 
-        return new Expr\FuncCall(new Name('array_key_exists'), [
-            new Arg(new Scalar\String_($propertyMetadata->source->property)),
-            new Arg($metadata->variableRegistry->getSourceInput()),
-        ]);
+        $source = $metadata->mapperMetadata->source;
+        $input = $metadata->variableRegistry->getSourceInput();
+
+        if ('array' === $source) {
+            return new Expr\FuncCall(new Name('array_key_exists'), [
+                new Arg(new Scalar\String_($propertyMetadata->source->property)),
+                new Arg($input),
+            ]);
+        }
+
+        if (is_a($source, LazyMapInterface::class, true)) {
+            return new Expr\MethodCall($input, 'offsetExists', [
+                new Arg(new Scalar\String_($propertyMetadata->source->property)),
+            ]);
+        }
+
+        return null;
     }
 
     /**

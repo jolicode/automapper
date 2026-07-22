@@ -178,7 +178,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
 
     public function getCheckExists(string $class, string $property): bool
     {
-        if ('array' === $class || \stdClass::class === $class) {
+        if ('array' === $class || \stdClass::class === $class || is_a($class, LazyMapInterface::class, true)) {
             return true;
         }
 
