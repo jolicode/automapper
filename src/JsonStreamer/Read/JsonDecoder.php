@@ -18,11 +18,17 @@ final class JsonDecoder
 {
     /**
      * @param resource|string $input
+     * @param bool            $streaming when the top-level value is an array, free each element from
+     *                                   the buffer once iterated past (single-pass, memory-bounded)
      */
-    public static function decode(mixed $input): mixed
+    public static function decode(mixed $input, bool $streaming = false): mixed
     {
         $buffer = new JsonBuffer($input);
         $pos = JsonParser::skipWhitespace($buffer, 0);
+
+        if ($streaming && $buffer->byteAt($pos) === '[') {
+            return new LazyJsonList($buffer, $pos, streaming: true);
+        }
 
         return JsonParser::parseValue($buffer, $pos);
     }

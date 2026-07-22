@@ -9,8 +9,13 @@ namespace AutoMapper\JsonStreamer\Read;
  *
  * Iterating decodes one element at a time straight from the buffer, so a large array of objects is
  * never materialized at once and each element's own laziness is preserved (an object element is a
- * {@see LazyJsonObject}). The node is stateless over the buffer, so it can be iterated more than
- * once — useful when the AutoMapper both counts and maps a collection.
+ * {@see LazyJsonObject}).
+ *
+ * By default the node is stateless over the buffer, so it can be iterated more than once — useful
+ * when the AutoMapper both counts and maps a collection. In `$streaming` mode it instead frees each
+ * element from the buffer once it has advanced past it, so a huge top-level array is bounded to one
+ * element's worth of bytes; the trade-off is that it can then be iterated only once and each
+ * element must be fully consumed before the next is pulled.
  *
  * @implements \IteratorAggregate<int, mixed>
  *
@@ -21,6 +26,7 @@ final class LazyJsonList implements \IteratorAggregate, \JsonSerializable
     public function __construct(
         private readonly JsonBuffer $buffer,
         private readonly int $start,
+        private readonly bool $streaming = false,
     ) {
     }
 
@@ -38,6 +44,11 @@ final class LazyJsonList implements \IteratorAggregate, \JsonSerializable
         $index = 0;
 
         while (true) {
+            if ($this->streaming) {
+                // The previous element has been fully consumed by now: free it.
+                $this->buffer->discardBefore($pos);
+            }
+
             yield $index++ => JsonParser::parseValue($this->buffer, $pos);
 
             $pos = JsonParser::skipWhitespace($this->buffer, JsonParser::skipValue($this->buffer, $pos));

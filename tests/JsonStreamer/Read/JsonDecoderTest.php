@@ -163,6 +163,59 @@ class JsonDecoderTest extends TestCase
         $object['a'] = 2;
     }
 
+    public function testDiscardBeforeFreesEarlierBytesAndGuardsAccess(): void
+    {
+        $buffer = new JsonBuffer('0123456789');
+
+        self::assertSame('5', $buffer->byteAt(5));
+        $buffer->discardBefore(5);
+
+        // Offsets stay absolute: 5 onward is still reachable...
+        self::assertSame('5', $buffer->byteAt(5));
+        self::assertSame('789', $buffer->slice(7, 3));
+
+        // ...but a discarded offset now fails loudly instead of returning stale data.
+        $this->expectException(\LogicException::class);
+        $buffer->byteAt(4);
+    }
+
+    public function testStreamingListDecodesEachElement(): void
+    {
+        $list = JsonDecoder::decode('[{"id":1},{"id":2},{"id":3}]', streaming: true);
+
+        self::assertInstanceOf(LazyJsonList::class, $list);
+
+        $ids = [];
+        foreach ($list as $item) {
+            self::assertInstanceOf(LazyJsonObject::class, $item);
+            $ids[] = $item['id'];
+        }
+
+        self::assertSame([1, 2, 3], $ids);
+    }
+
+    public function testStreamingListIsSinglePass(): void
+    {
+        $list = JsonDecoder::decode('[{"id":1},{"id":2}]', streaming: true);
+
+        self::assertInstanceOf(LazyJsonList::class, $list);
+        iterator_to_array($list); // consuming discards the earlier elements
+
+        // A second pass would start on already-freed bytes.
+        $this->expectException(\LogicException::class);
+        iterator_to_array($list);
+    }
+
+    public function testStreamingIsOptInSoTopLevelListStaysReIterableByDefault(): void
+    {
+        $list = JsonDecoder::decode('[{"id":1},{"id":2}]');
+
+        self::assertInstanceOf(LazyJsonList::class, $list);
+        self::assertSame([['id' => 1], ['id' => 2]], array_map(iterator_to_array(...), iterator_to_array($list)));
+        // Not streaming: it can be iterated again.
+        self::assertCount(2, iterator_to_array($list));
+    }
+
     public function testDecodesFromANonRewoundChunkedStream(): void
     {
         $json = '{"name":"yolo","address":{"city":"Toulon"},"items":[1,2,3]}';

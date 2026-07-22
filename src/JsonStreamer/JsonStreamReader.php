@@ -6,6 +6,7 @@ namespace AutoMapper\JsonStreamer;
 
 use AutoMapper\AutoMapperInterface;
 use AutoMapper\JsonStreamer\Read\JsonDecoder;
+use AutoMapper\JsonStreamer\Read\LazyJsonList;
 use AutoMapper\JsonStreamer\Read\LazyJsonObject;
 use AutoMapper\Lazy\LazyCollection;
 use AutoMapper\MapperContext;
@@ -49,24 +50,24 @@ final class JsonStreamReader implements StreamReaderInterface
             $className = $this->ownedClassName($this->unwrap($unwrapped->getCollectionValueType()));
 
             if ($className !== null) {
-                // The `iterable` builtin is the only shape the underlying reader decodes lazily
-                // (`list`/`array`/`dict` are always materialized through `iterator_to_array`).
-                // The key type drives whether the JSON is read as a list or as a dict.
-                $shape = Type::iterable(Type::dict(), $unwrapped->getCollectionKeyType());
-                $rawItems = $this->fallbackStreamReader->read($input, $shape, $options);
-
-                if (!is_iterable($rawItems)) {
-                    return $rawItems;
-                }
-
                 $buffered = !($options[MapperContext::STREAM] ?? false);
 
-                /** @var iterable<int|string, mixed> $rawItems */
+                // Decode lazily: each element is exposed as an array-like source (LazyJsonObject) so
+                // the AutoMapper reads only the fields it maps. In streaming mode the decoder frees
+                // each element once iterated past, so a large top-level array stays memory-bounded;
+                // LazyCollection then maps each element as it is pulled.
+                $decoded = JsonDecoder::decode($input, streaming: !$buffered);
+
+                if (!$decoded instanceof LazyJsonList && !$decoded instanceof LazyJsonObject) {
+                    // The JSON is not a list or an object (null, scalar): nothing to iterate.
+                    return $decoded;
+                }
+
                 return new LazyCollection(
                     fn (mixed $rawItem): mixed => \is_array($rawItem) || \is_object($rawItem)
                         ? $this->mapper->map($rawItem, $className, $options)
                         : $rawItem,
-                    $rawItems,
+                    $decoded,
                     $buffered,
                 );
             }
