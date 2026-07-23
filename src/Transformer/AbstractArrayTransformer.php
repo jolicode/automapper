@@ -55,8 +55,26 @@ abstract readonly class AbstractArrayTransformer implements \Stringable, Transfo
         if ($propertyMapping->target->readAccessor !== null && $this->itemTransformer instanceof IdentifierHashInterface) {
             $existingValue = new Expr\Variable($uniqueVariableScope->getUniqueName('existingValue'));
             $hashValueTargetVariable = new Expr\Variable($uniqueVariableScope->getUniqueName('hashValueTarget'));
-            $itemStatements[] = new Stmt\Expression(new Expr\Assign($hashValueTargetVariable, $this->itemTransformer->getSourceHashExpression($loopValueVar)));
-            $itemStatements[] = new Stmt\Expression(new Expr\Assign($existingValue, new Expr\BinaryOp\Coalesce(new Expr\ArrayDimFetch($exisingValuesIndexed, $hashValueTargetVariable), new Expr\ConstFetch(new Name('null')))));
+
+            /*
+             * Only hash a source item to look up an existing target to merge into when there
+             * actually is an indexed target collection. Otherwise each source item would be read
+             * twice (once to hash, once to map), which breaks single-pass / transient sources.
+             *
+             * ```php
+             * $existingValue = null;
+             * if ($existingValuesIndexed) {
+             *     $existingValue = $existingValuesIndexed[<source hash>] ?? null;
+             * }
+             * ```
+             */
+            $itemStatements[] = new Stmt\Expression(new Expr\Assign($existingValue, new Expr\ConstFetch(new Name('null'))));
+            $itemStatements[] = new Stmt\If_($exisingValuesIndexed, [
+                'stmts' => [
+                    new Stmt\Expression(new Expr\Assign($hashValueTargetVariable, $this->itemTransformer->getSourceHashExpression($loopValueVar))),
+                    new Stmt\Expression(new Expr\Assign($existingValue, new Expr\BinaryOp\Coalesce(new Expr\ArrayDimFetch($exisingValuesIndexed, $hashValueTargetVariable), new Expr\ConstFetch(new Name('null'))))),
+                ],
+            ]);
         }
 
         /* Get the transform statements for the source property */

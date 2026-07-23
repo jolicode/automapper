@@ -17,6 +17,9 @@ final readonly class Mapper
      * @param class-string<object>|'array'|array<class-string<object>|'array'>|null $source         The source class or classes
      * @param class-string<object>|'array'|array<class-string<object>|'array'>|null $target         The target class or classes
      * @param string|null                                                           $dateTimeFormat The date-time format to use when transforming this property
+     * @param bool|null                                                             $arrayLike      Whether this class should be read/written as a keyed array shape (dynamic
+     *                                                                                              keys, `ArrayAccess`, ...) rather than as a typed object. Left null it is
+     *                                                                                              inferred (`array`, `stdClass`, `json`, {@see \AutoMapper\Lazy\LazyMapInterface}).
      */
     public function __construct(
         public string|array|null $source = null,
@@ -30,6 +33,7 @@ final readonly class Mapper
         public ?string $dateTimeFormat = null,
         public ?bool $allowExtraProperties = null,
         public ?Discriminator $discriminator = null,
+        public ?bool $arrayLike = null,
     ) {
     }
 }

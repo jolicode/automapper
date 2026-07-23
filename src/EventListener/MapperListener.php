@@ -33,6 +33,7 @@ final readonly class MapperListener
             $event->strictTypes ??= $directMapperAttribute->strictTypes;
             $event->allowExtraProperties ??= $directMapperAttribute->allowExtraProperties;
             $event->mapperMetadata->dateTimeFormat = $directMapperAttribute->dateTimeFormat;
+            $event->sourceArrayLike ??= $directMapperAttribute->arrayLike;
 
             if ($directMapperAttribute->discriminator) {
                 if ($fromSource) {

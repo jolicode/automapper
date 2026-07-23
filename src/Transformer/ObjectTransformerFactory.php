@@ -56,7 +56,10 @@ final class ObjectTransformerFactory implements TransformerFactoryInterface, Pri
             if ($className !== \stdClass::class) {
                 $reflectionClass = new \ReflectionClass($className);
 
-                if ($reflectionClass->isInternal()) {
+                // Internal classes are not mappable as generic objects (DateTime, Closure, ...) —
+                // except array-like ones (ArrayAccess), which are read by key like an array source,
+                // e.g. the native `JsonStream\Document`.
+                if ($reflectionClass->isInternal() && !$reflectionClass->implementsInterface(\ArrayAccess::class)) {
                     return false;
                 }
             }

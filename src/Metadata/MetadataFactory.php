@@ -170,6 +170,14 @@ final class MetadataFactory
 
     private function createGeneratorMetadata(MapperMetadata $mapperMetadata): GeneratorMetadata
     {
+        $mapperEvent = new GenerateMapperEvent($mapperMetadata);
+        $this->eventDispatcher->dispatch($mapperEvent);
+
+        // Resolve "array-like" once, before choosing the extractor and before any property metadata
+        // event: honor a #[Mapper(arrayLike: ...)] override (via the event), otherwise infer it.
+        $mapperMetadata->sourceArrayLike = $mapperEvent->sourceArrayLike ?? $mapperMetadata->inferSourceArrayLike();
+        $mapperMetadata->targetArrayLike = $mapperEvent->targetArrayLike ?? $mapperMetadata->inferTargetArrayLike();
+
         $extractor = $this->sourceTargetPropertiesMappingExtractor;
 
         if ($mapperMetadata->isSourceArrayLike()) {
@@ -181,9 +189,6 @@ final class MetadataFactory
         }
 
         $propertyEvents = [];
-
-        $mapperEvent = new GenerateMapperEvent($mapperMetadata);
-        $this->eventDispatcher->dispatch($mapperEvent);
 
         // First get properties from the source
         foreach ($extractor->getProperties($mapperMetadata->source) as $property) {
@@ -391,6 +396,10 @@ final class MetadataFactory
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapToListener($serviceLocator, $expressionLanguage));
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapFromListener($serviceLocator, $expressionLanguage));
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapperListener());
+
+        $jsonStreamDocumentListener = new \AutoMapper\JsonStreamer\JsonStreamDocumentListener();
+        $eventDispatcher->addListener(GenerateMapperEvent::class, [$jsonStreamDocumentListener, 'onGenerateMapper']);
+        $eventDispatcher->addListener(PropertyMetadataEvent::class, [$jsonStreamDocumentListener, 'onPropertyMetadata']);
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapProviderListener());
 
         if (interface_exists(ObjectMapperInterface::class)) {

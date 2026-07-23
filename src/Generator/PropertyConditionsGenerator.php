@@ -7,8 +7,8 @@ namespace AutoMapper\Generator;
 use AutoMapper\AttributeReference\AttributeInstance;
 use AutoMapper\AttributeReference\Reference;
 use AutoMapper\Exception\CompileException;
+use AutoMapper\Extractor\ArrayReadAccessor;
 use AutoMapper\Extractor\NestedReadAccessor;
-use AutoMapper\Lazy\LazyMapInterface;
 use AutoMapper\MapperContext;
 use AutoMapper\Metadata\GeneratorMetadata;
 use AutoMapper\Metadata\PropertyMetadata;
@@ -132,8 +132,12 @@ final readonly class PropertyConditionsGenerator
      *
      * ```php
      * array_key_exists('propertyName', $source)     // plain array source
-     * $source->offsetExists('propertyName')         // LazyMapInterface (ArrayAccess) source
+     * $source->offsetExists('propertyName')         // ArrayAccess source
      * ```
+     *
+     * The exact check is provided by the read accessor itself, so it stays correct whatever the
+     * array-like source is (plain array, `LazyMapInterface`, native `ArrayAccess` document, ...)
+     * instead of being guessed from the source name.
      */
     private function propertyExistsForArray(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
     {
@@ -141,20 +145,8 @@ final readonly class PropertyConditionsGenerator
             return null;
         }
 
-        $source = $metadata->mapperMetadata->source;
-        $input = $metadata->variableRegistry->getSourceInput();
-
-        if ('array' === $source) {
-            return new Expr\FuncCall(new Name('array_key_exists'), [
-                new Arg(new Scalar\String_($propertyMetadata->source->property)),
-                new Arg($input),
-            ]);
-        }
-
-        if (is_a($source, LazyMapInterface::class, true)) {
-            return new Expr\MethodCall($input, 'offsetExists', [
-                new Arg(new Scalar\String_($propertyMetadata->source->property)),
-            ]);
+        if ($propertyMetadata->source->accessor instanceof ArrayReadAccessor) {
+            return $propertyMetadata->source->accessor->getIsDefinedExpression($metadata->variableRegistry->getSourceInput(), nullable: true);
         }
 
         return null;
