@@ -103,16 +103,16 @@ class DeserializeBench
 
     public function benchSymfonyJsonStreamer(): void
     {
-        $this->realize(MapperFactory::jsonStreamReader()->read($this->stream, $this->type));
+        $this->realize(MapperFactory::jsonStreamReader()->read(PayloadFactory::stream($this->json), $this->type));
     }
 
     public function benchAutoMapperJsonStreamer(): void
     {
-        $this->realize(MapperFactory::autoMapperJsonStreamReader()->read($this->stream, $this->type));
+        $this->realize(MapperFactory::autoMapperJsonStreamReader()->read(PayloadFactory::stream($this->json), $this->type));
     }
 
     public function benchAutoMapperJsonStreamerNoAttributeChecking(): void
     {
-        $this->realize(MapperFactory::autoMapperNoAttributeJsonStreamReader()->read($this->stream, $this->type));
+        $this->realize(MapperFactory::autoMapperNoAttributeJsonStreamReader()->read(PayloadFactory::stream($this->json), $this->type));
     }
 }

@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace AutoMapper\JsonStreamer;
 
 use AutoMapper\AutoMapperInterface;
-use AutoMapper\JsonStreamer\Read\JsonDecoder;
-use AutoMapper\JsonStreamer\Read\LazyJsonList;
-use AutoMapper\JsonStreamer\Read\LazyJsonObject;
 use AutoMapper\Lazy\LazyCollection;
 use AutoMapper\MapperContext;
 use Symfony\Component\JsonStreamer\StreamReaderInterface;
@@ -51,24 +48,7 @@ final class JsonStreamReader implements StreamReaderInterface
 
             if ($className !== null) {
                 $buffered = !($options[MapperContext::STREAM] ?? false);
-
-                // Decode lazily: each element is exposed as an array-like source (LazyJsonObject) so
-                // the AutoMapper reads only the fields it maps. In streaming mode the decoder frees
-                // each element once iterated past, so a large top-level array stays memory-bounded;
-                // LazyCollection then maps each element as it is pulled.
-                if (function_exists('json_stream_decode')) {
-                    // Only release consumed content (transient) in streaming mode: a buffered
-                    // collection must stay re-readable, and releasing would also break the mapper's
-                    // out-of-order field reads on a large document.
-                    $decoded = json_stream_decode($input, $buffered ? 0 : JSON_STREAM_TRANSIENT);
-                } else {
-                    $decoded = JsonDecoder::decode($input, streaming: !$buffered);
-
-                    if (!$decoded instanceof LazyJsonList && !$decoded instanceof LazyJsonObject) {
-                        // The JSON is not a list or an object (null, scalar): nothing to iterate.
-                        return $decoded;
-                    }
-                }
+                $decoded = json_stream_decode($input, $buffered ? 0 : JSON_STREAM_TRANSIENT);
 
                 return new LazyCollection(
                     fn (mixed $rawItem): mixed => \is_array($rawItem) || \is_object($rawItem)
@@ -83,20 +63,8 @@ final class JsonStreamReader implements StreamReaderInterface
         $className = $this->ownedClassName($unwrapped);
 
         if ($className !== null) {
-            // Decode lazily: the object is exposed as an array-like source (LazyJsonObject) so the
-            // AutoMapper reads only the fields it maps, straight from the stream, and nested
-            // objects/lists stay lazy — no intermediate array is materialized.
-            if (function_exists('json_stream_decode')) {
-                $decoded = json_stream_decode($input);
-            } else {
-                $decoded = JsonDecoder::decode($input, streaming: !$buffered);
-
-                if (!$decoded instanceof LazyJsonObject) {
-                    // The JSON is not an object (null, scalar, list): nothing for the AutoMapper to
-                    // hydrate, hand the decoded value back as-is.
-                    return $decoded;
-                }
-            }
+            $buffered = !($options[MapperContext::STREAM] ?? false);
+            $decoded = json_stream_decode($input, $buffered ? 0 : JSON_STREAM_TRANSIENT);
 
             return $this->mapper->map($decoded, $className, $options);
         }

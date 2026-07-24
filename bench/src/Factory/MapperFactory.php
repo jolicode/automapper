@@ -209,7 +209,7 @@ final class MapperFactory
     public static function autoMapperNoAttributeJsonStreamWriter(): AutoMapperJsonStreamWriter
     {
         return self::$autoMapperNoAttributeJsonStreamWriter ??= new AutoMapperJsonStreamWriter(
-            self::autoMapperNoChecking(),
+            self::autoMapperNoAttributeChecking(),
             self::jsonStreamWriter(),
         );
     }
