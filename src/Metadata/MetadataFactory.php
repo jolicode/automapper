@@ -85,7 +85,7 @@ final class MetadataFactory
     }
 
     /**
-     * @param class-string<object>|'array'        $source
+     * @param class-string<object>|'array'|'json' $source
      * @param class-string<object>|'array'|'json' $target
      *
      * @internal
@@ -250,7 +250,7 @@ final class MetadataFactory
 
             // Create the target property metadata
             if ($propertyMappedEvent->target->readAccessor === null) {
-                $propertyMappedEvent->target->readAccessor = $extractor->getReadAccessor($mapperMetadata->target, $propertyMappedEvent->target->property, $mapperEvent->allowExtraProperties ?? $this->configuration->allowExtraProperties, $mapperMetadata->isTargetArrayLike());
+                $propertyMappedEvent->target->readAccessor = $extractor->getReadAccessor($mapperMetadata->target, $propertyMappedEvent->target->property, $mapperEvent->allowExtraProperties ?? $this->configuration->allowExtraProperties, $mapperMetadata->isTargetArrayLike() && !$mapperMetadata->isJsonTarget());
             }
 
             if ($propertyMappedEvent->target->writeMutator === null) {
@@ -397,9 +397,6 @@ final class MetadataFactory
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapFromListener($serviceLocator, $expressionLanguage));
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapperListener());
 
-        $jsonStreamDocumentListener = new \AutoMapper\JsonStreamer\JsonStreamDocumentListener();
-        $eventDispatcher->addListener(GenerateMapperEvent::class, [$jsonStreamDocumentListener, 'onGenerateMapper']);
-        $eventDispatcher->addListener(PropertyMetadataEvent::class, [$jsonStreamDocumentListener, 'onPropertyMetadata']);
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapProviderListener());
 
         if (interface_exists(ObjectMapperInterface::class)) {

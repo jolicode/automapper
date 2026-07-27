@@ -64,6 +64,11 @@ class MapperMetadata
         return 'json' === $this->target;
     }
 
+    public function isJsonSource(): bool
+    {
+        return 'json' === $this->source;
+    }
+
     /**
      * Whether the target is built by projecting the source (array shape) rather than hydrating a
      * class. `json` behaves like `array` here: it is the same object → array projection, only
@@ -96,7 +101,7 @@ class MapperMetadata
 
     public function inferSourceArrayLike(): bool
     {
-        return \in_array($this->source, ['array', \stdClass::class], true);
+        return \in_array($this->source, ['array', \stdClass::class, 'json'], true);
     }
 
     public function getHash(): string

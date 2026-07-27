@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace AutoMapper\JsonStreamer;
 
 use AutoMapper\AutoMapperInterface;
+use AutoMapper\AutoMapperRegistryInterface;
 use AutoMapper\Lazy\LazyCollection;
 use AutoMapper\MapperContext;
+use AutoMapper\MapperInterface;
 use AutoMapper\Metadata\MetadataRegistry;
 use Symfony\Component\JsonStreamer\StreamReaderInterface;
 use Symfony\Component\TypeInfo\Type;
@@ -34,7 +36,7 @@ use Symfony\Component\TypeInfo\Type\ObjectType;
 final class JsonStreamReader implements StreamReaderInterface
 {
     public function __construct(
-        private readonly AutoMapperInterface $mapper,
+        private readonly AutoMapperInterface&AutoMapperRegistryInterface $mapper,
         /** @var StreamReaderInterface<array<string, mixed>> */
         private readonly StreamReaderInterface $fallbackStreamReader,
         /**
@@ -56,9 +58,12 @@ final class JsonStreamReader implements StreamReaderInterface
                 $buffered = !($options[MapperContext::STREAM] ?? false);
                 $decoded = json_stream_decode($input, $buffered ? 0 : JSON_STREAM_TRANSIENT);
 
+                $mapper = $this->jsonMapper($className);
+
                 return new LazyCollection(
-                    fn (mixed $rawItem): mixed => \is_array($rawItem) || \is_object($rawItem)
-                        ? $this->mapper->map($rawItem, $className, $options)
+                    // a decoded container is always a document object, anything else is a scalar
+                    static fn (mixed $rawItem): mixed => \is_object($rawItem)
+                        ? $mapper->map($rawItem, $options)
                         : $rawItem,
                     $decoded,
                     $buffered,
@@ -72,10 +77,23 @@ final class JsonStreamReader implements StreamReaderInterface
             $buffered = !($options[MapperContext::STREAM] ?? false);
             $decoded = json_stream_decode($input, $buffered ? 0 : JSON_STREAM_TRANSIENT);
 
-            return $this->mapper->map($decoded, $className, $options);
+            return $this->jsonMapper($className)->map($decoded, $options);
         }
 
         return $this->fallbackStreamReader->read($input, $type, $options);
+    }
+
+    /**
+     * The `json` → class mapper, reading straight from the decoded document.
+     *
+     * @param class-string $className
+     *
+     * @return MapperInterface<object, object>
+     */
+    private function jsonMapper(string $className): MapperInterface
+    {
+        /** @var MapperInterface<object, object> */
+        return $this->mapper->getMapper('json', $className);
     }
 
     /**
@@ -116,7 +134,7 @@ final class JsonStreamReader implements StreamReaderInterface
         }
 
         // Registry aware: without a registered mapper for this class, let the Symfony reader do it.
-        if (null !== $this->onlyMetadataRegistry && !$this->onlyMetadataRegistry->has('array', $className, true)) {
+        if (null !== $this->onlyMetadataRegistry && !$this->onlyMetadataRegistry->has('json', $className, true)) {
             return null;
         }
 

@@ -38,10 +38,11 @@ class RegistryAwareTest extends AutoMapperTestCase
 
     private function registry(): MetadataRegistry
     {
-        // Fixtures\User is registered, Fixtures\Address is not
+        // Fixtures\User is registered, Fixtures\Address is not. The registration is symmetric with
+        // the mappers actually used: `json` -> class when reading, class -> `json` when writing.
         $registry = new MetadataRegistry(new Configuration());
-        $registry->register('array', Fixtures\User::class);
-        $registry->register(Fixtures\User::class, 'array');
+        $registry->register('json', Fixtures\User::class);
+        $registry->register(Fixtures\User::class, 'json');
 
         return $registry;
     }

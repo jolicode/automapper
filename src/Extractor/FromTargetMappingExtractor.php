@@ -122,7 +122,9 @@ final class FromTargetMappingExtractor extends MappingExtractor
 
         // Transform objects to array or \stdClass given the target
         if ($type instanceof Type\ObjectType && \stdClass::class !== $type->getClassName()) {
-            if ($source === 'array') {
+            // `json` behaves like `array` here: the nested value is another decoded document, and
+            // the nested mapper keeps `json` as its source (see ObjectTransformerFactory).
+            if ($source === 'array' || $source === 'json') {
                 return Type::arrayShape([]);
             }
 

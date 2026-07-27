@@ -72,16 +72,16 @@ automapper:
     only_registered_mapping: true
   mapping:
     mappers:
-      # reading: array -> User, writing: User -> array
-      - { source: 'App\Entity\User', target: 'array', reverse: true }
+      # reading: json -> User, writing: User -> json
+      - { source: 'App\Entity\User', target: 'json', reverse: true }
 ```
 
-A type is considered registered when:
+The `json` side names the JSON document itself, symmetrically in both directions:
 
-* for **reading** (JSON to object), a mapper from `array` to the class is registered;
-* for **writing** (object to JSON), a mapper from the class to `array` or to `json` is registered.
+* **reading** (JSON to object) uses a `json` → class mapper;
+* **writing** (object to JSON) uses a class → `json` mapper.
 
-Registering the `array` mapping with `reverse: true`, as above, therefore enables both directions.
+Registering the mapping with `reverse: true`, as above, therefore enables both directions.
 
 ## Streaming a collection
 

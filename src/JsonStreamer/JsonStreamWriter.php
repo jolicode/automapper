@@ -121,11 +121,7 @@ final class JsonStreamWriter implements StreamWriterInterface
         }
 
         // Registry aware: without a registered mapper for this class, let the Symfony writer do it.
-        if (
-            null !== $this->onlyMetadataRegistry
-            && !$this->onlyMetadataRegistry->has($className, 'json', true)
-            && !$this->onlyMetadataRegistry->has($className, 'array', true)
-        ) {
+        if (null !== $this->onlyMetadataRegistry && !$this->onlyMetadataRegistry->has($className, 'json', true)) {
             return null;
         }
 

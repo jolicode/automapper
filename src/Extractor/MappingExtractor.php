@@ -234,7 +234,9 @@ abstract class MappingExtractor implements MappingExtractorInterface
     private function doGetReadAccessor(string $class, string $property, bool $allowExtraProperties = false, bool $arrayLike = false): ?ReadAccessorInterface
     {
         if ('json' === $class) {
-            return null;
+            // As a source, `json` is the decoded document, read by key; as a target it is never read
+            // (its mapper yields the value instead of assigning it).
+            return $arrayLike ? new ArrayReadAccessor($property, true) : null;
         }
 
         if ('array' === $class) {
