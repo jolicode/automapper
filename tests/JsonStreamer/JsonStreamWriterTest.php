@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\JsonStreamer;
 
+use AutoMapper\Exception\InvalidMappingException;
 use AutoMapper\JsonStreamer\JsonStreamWriter;
 use AutoMapper\Tests\AutoMapperBuilder;
 use AutoMapper\Tests\AutoMapperTestCase;
@@ -81,7 +82,15 @@ class JsonStreamWriterTest extends AutoMapperTestCase
         $user->addresses[] = $address;
         $user->money = 20.1;
 
-        // The `json` mapper exposes the stream straight through map().
+        // `json` is a serialization target, it is not reachable through AutoMapperInterface::map()
+        try {
+            $autoMapper->map($user, 'json');
+            self::fail('Mapping to the "json" target should not be allowed.');
+        } catch (InvalidMappingException $e) {
+            self::assertStringContainsString('json', $e->getMessage());
+        }
+
+        // Only the mapper itself, as used by the JsonStreamer integration, exposes the stream.
         $stream = $autoMapper->getMapper(Fixtures\User::class, 'json')->map($user);
 
         self::assertInstanceOf(\Traversable::class, $stream, 'A json mapper streams its result.');

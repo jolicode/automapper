@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
-use AutoMapper\Lazy\LazyMapInterface;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
@@ -36,8 +35,7 @@ final class ArrayShapeTransformerFactory implements TransformerFactoryInterface,
         }
 
         $fieldTransformers = [];
-        $sourceIsUntyped = isset($mapperMetadata->source)
-            && (\in_array($mapperMetadata->source, ['array', \stdClass::class], true) || is_a($mapperMetadata->source, LazyMapInterface::class, true));
+        $sourceIsUntyped = isset($mapperMetadata->source) && $mapperMetadata->isSourceArrayLike();
 
         $sourceShape = $sourceType instanceof Type\ArrayShapeType ? $sourceType->getShape() : [];
 

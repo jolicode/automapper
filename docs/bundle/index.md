@@ -9,5 +9,6 @@ features linked to Symfony way of doing things.
 - [Expression Language](expression-language.md)
 - [Api Platform](api-platform.md)
 - [Object Mapper](object-mapper.md)
+- [JSON Streamer](json-streamer.md)
 - [Migrate existing application](migrate.md)
 - [Debugging](debugging.md)

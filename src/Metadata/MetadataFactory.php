@@ -191,7 +191,7 @@ final class MetadataFactory
         $propertyEvents = [];
 
         // First get properties from the source
-        foreach ($extractor->getProperties($mapperMetadata->source) as $property) {
+        foreach ($extractor->getProperties($mapperMetadata->source, arrayLike: $mapperMetadata->isSourceArrayLike()) as $property) {
             $propertyEvent = new PropertyMetadataEvent($mapperMetadata, new SourcePropertyMetadataEvent($property), new TargetPropertyMetadataEvent($property), isFromDefaultExtractor: true);
 
             $this->eventDispatcher->dispatch($propertyEvent);
@@ -199,7 +199,7 @@ final class MetadataFactory
             $propertyEvents[$propertyEvent->target->property] = $propertyEvent;
         }
 
-        foreach ($extractor->getProperties($mapperMetadata->target, withConstructorParameters: true) as $property) {
+        foreach ($extractor->getProperties($mapperMetadata->target, withConstructorParameters: true, arrayLike: $mapperMetadata->isTargetArrayLike()) as $property) {
             if (isset($propertyEvents[$property])) {
                 continue;
             }
@@ -233,11 +233,11 @@ final class MetadataFactory
         foreach ($propertyEvents as $propertyMappedEvent) {
             // Create the source property metadata
             if ($propertyMappedEvent->source->accessor === null) {
-                $propertyMappedEvent->source->accessor = $extractor->getReadAccessor($mapperMetadata->source, $propertyMappedEvent->source->property, $mapperEvent->allowExtraProperties ?? $this->configuration->allowExtraProperties);
+                $propertyMappedEvent->source->accessor = $extractor->getReadAccessor($mapperMetadata->source, $propertyMappedEvent->source->property, $mapperEvent->allowExtraProperties ?? $this->configuration->allowExtraProperties, $mapperMetadata->isSourceArrayLike());
             }
 
             if ($propertyMappedEvent->source->checkExists === null) {
-                $propertyMappedEvent->source->checkExists = $extractor->getCheckExists($mapperMetadata->source, $propertyMappedEvent->source->property);
+                $propertyMappedEvent->source->checkExists = $extractor->getCheckExists($mapperMetadata->source, $propertyMappedEvent->source->property, $mapperMetadata->isSourceArrayLike());
             }
 
             if ($propertyMappedEvent->source->extractGroupsIfNull && $propertyMappedEvent->source->groups === null) {
@@ -250,13 +250,13 @@ final class MetadataFactory
 
             // Create the target property metadata
             if ($propertyMappedEvent->target->readAccessor === null) {
-                $propertyMappedEvent->target->readAccessor = $extractor->getReadAccessor($mapperMetadata->target, $propertyMappedEvent->target->property, $mapperEvent->allowExtraProperties ?? $this->configuration->allowExtraProperties);
+                $propertyMappedEvent->target->readAccessor = $extractor->getReadAccessor($mapperMetadata->target, $propertyMappedEvent->target->property, $mapperEvent->allowExtraProperties ?? $this->configuration->allowExtraProperties, $mapperMetadata->isTargetArrayLike());
             }
 
             if ($propertyMappedEvent->target->writeMutator === null) {
                 $propertyMappedEvent->target->writeMutator = $extractor->getWriteMutator($mapperMetadata->source, $mapperMetadata->target, $propertyMappedEvent->target->property, [
                     'enable_constructor_extraction' => false,
-                ], $mapperEvent->allowExtraProperties ?? $this->configuration->allowExtraProperties);
+                ], $mapperEvent->allowExtraProperties ?? $this->configuration->allowExtraProperties, $mapperMetadata->isTargetArrayLike());
             }
 
             if ($propertyMappedEvent->target->parameterInConstructor === null) {

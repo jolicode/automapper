@@ -19,7 +19,7 @@ final readonly class Mapper
      * @param string|null                                                           $dateTimeFormat The date-time format to use when transforming this property
      * @param bool|null                                                             $arrayLike      Whether this class should be read/written as a keyed array shape (dynamic
      *                                                                                              keys, `ArrayAccess`, ...) rather than as a typed object. Left null it is
-     *                                                                                              inferred (`array`, `stdClass`, `json`, {@see \AutoMapper\Lazy\LazyMapInterface}).
+     *                                                                                              inferred (`array`, `stdClass` and `json`).
      */
     public function __construct(
         public string|array|null $source = null,

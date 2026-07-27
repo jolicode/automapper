@@ -7,6 +7,7 @@ namespace AutoMapper\JsonStreamer;
 use AutoMapper\AutoMapperInterface;
 use AutoMapper\Lazy\LazyCollection;
 use AutoMapper\MapperContext;
+use AutoMapper\Metadata\MetadataRegistry;
 use Symfony\Component\JsonStreamer\StreamReaderInterface;
 use Symfony\Component\TypeInfo\Type;
 use Symfony\Component\TypeInfo\Type\CollectionType;
@@ -36,6 +37,11 @@ final class JsonStreamReader implements StreamReaderInterface
         private readonly AutoMapperInterface $mapper,
         /** @var StreamReaderInterface<array<string, mixed>> */
         private readonly StreamReaderInterface $fallbackStreamReader,
+        /**
+         * When set, only types having a mapper registered in this registry are read through the
+         * AutoMapper; everything else is delegated to the underlying Symfony reader.
+         */
+        private readonly ?MetadataRegistry $onlyMetadataRegistry = null,
     ) {
     }
 
@@ -88,7 +94,7 @@ final class JsonStreamReader implements StreamReaderInterface
     /**
      * Return the class name when the AutoMapper should own its construction, or null when
      * the underlying reader is a better fit (scalars, enums, and value objects handled by the
-     * Symfony value transformers).
+     * Symfony value transformers, or types without a registered mapper).
      *
      * @return class-string|null
      */
@@ -106,6 +112,11 @@ final class JsonStreamReader implements StreamReaderInterface
             || is_a($className, \DateInterval::class, true)
             || is_a($className, \DateTimeZone::class, true)
         ) {
+            return null;
+        }
+
+        // Registry aware: without a registered mapper for this class, let the Symfony reader do it.
+        if (null !== $this->onlyMetadataRegistry && !$this->onlyMetadataRegistry->has('array', $className, true)) {
             return null;
         }
 

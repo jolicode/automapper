@@ -87,6 +87,49 @@ final class AutoMapperExtensionTest extends AbstractExtensionTestCase
         self::assertLessThan($discriminator, $mapTarget);
     }
 
+    public function testJsonStreamerIsNotRegisteredByDefault(): void
+    {
+        $this->container->setParameter('kernel.debug', false);
+        $this->load();
+
+        $this->assertContainerBuilderNotHasService('automapper.json_streamer.stream_reader');
+        $this->assertContainerBuilderNotHasService('automapper.json_streamer.stream_writer');
+    }
+
+    public function testJsonStreamerDecoratesTheSymfonyServices(): void
+    {
+        $this->container->setParameter('kernel.debug', false);
+        $this->load(['json_streamer' => ['enabled' => true]]);
+
+        foreach (['reader', 'writer'] as $kind) {
+            $definition = $this->container->getDefinition("automapper.json_streamer.stream_{$kind}");
+
+            self::assertSame("json_streamer.stream_{$kind}", $definition->getDecoratedService()[0]);
+            // the decorated Symfony service is kept as the fallback
+            self::assertSame(
+                "automapper.json_streamer.stream_{$kind}.inner",
+                (string) $definition->getArgument(1),
+            );
+            // registry awareness is opt-in
+            self::assertArrayNotHasKey('$onlyMetadataRegistry', $definition->getArguments());
+        }
+    }
+
+    public function testJsonStreamerOnlyRegisteredMappingUsesTheConfigRegistry(): void
+    {
+        $this->container->setParameter('kernel.debug', false);
+        $this->load(['json_streamer' => ['enabled' => true, 'only_registered_mapping' => true]]);
+
+        foreach (['reader', 'writer'] as $kind) {
+            $definition = $this->container->getDefinition("automapper.json_streamer.stream_{$kind}");
+
+            self::assertSame(
+                'automapper.config_mapping_registry',
+                (string) $definition->getArgument('$onlyMetadataRegistry'),
+            );
+        }
+    }
+
     private function generateMapperListenerPriority(string $serviceId): int
     {
         $definition = $this->container->getDefinition($serviceId);

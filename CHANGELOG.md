@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Feature
 - Allow to disable group checking globally or per mapper, instead of only per property
+- Add a `symfony/json-streamer` integration: the AutoMapper can now read and write JSON streams,
+  keeping all its mapping features available while streaming. Enable it in the bundle with the
+  `json_streamer.enabled` option, which decorates the Symfony reader and writer and keeps them as a
+  fallback for the types the AutoMapper does not handle. Use `json_streamer.only_registered_mapping`
+  to restrict it to the registered mappings. See the [documentation](docs/bundle/json-streamer.md)
+- Add a `MapperContext::STREAM` option, to read and write collections without buffering them, so the
+  memory usage stays flat whatever the collection size
+- Add an `arrayLike` option on the `#[Mapper]` attribute, to read or write a class as a keyed array
+  shape (dynamic keys, `ArrayAccess`, ...) instead of a typed object. The array-like decision is now
+  resolved once during metadata discovery and reused everywhere, instead of being guessed from the
+  source and target names
 
 ### Fixed
 - Use the `MapFrom` attribute reference instead of `MapTo` when resolving transformers in `MapFromListener`

@@ -13,9 +13,8 @@ use AutoMapper\Extractor\ArrayReadAccessor;
  * produced by the `json_stream_decode()` extension function) as an array-like source.
  *
  * The document is a read-only `ArrayAccess` object that exposes the decoded JSON by key, exactly
- * like the pure-PHP {@see Read\LazyJsonObject} — but being a native class it cannot implement
- * {@see \AutoMapper\Lazy\LazyMapInterface}, so the default inference does not recognize it. This
- * listener supplies, for that one class, what the interface would otherwise provide:
+ * like a plain `array` source — but being a native class it carries no `#[Mapper]` attribute, so the
+ * default inference does not recognize it. This listener supplies the two things it needs:
  *
  *  - {@see onGenerateMapper} marks the mapper as array-like, so the "from target" extractor is used;
  *  - {@see onPropertyMetadata} reads each property through `offsetGet` (an {@see ArrayReadAccessor}).

@@ -25,7 +25,7 @@ interface MappingExtractorInterface
      *
      * @return list<string>
      */
-    public function getProperties(string $class): iterable;
+    public function getProperties(string $class, bool $withConstructorParameters = false, bool $arrayLike = false): iterable;
 
     /**
      * @param class-string|'array' $source
@@ -42,14 +42,14 @@ interface MappingExtractorInterface
      */
     public function getGroups(string $class, string $property): ?array;
 
-    public function getCheckExists(string $class, string $property): bool;
+    public function getCheckExists(string $class, string $property, bool $arrayLike = false): bool;
 
     /**
      * Extracts read accessor for a given source, target and property.
      *
      * @param class-string|'array' $class
      */
-    public function getReadAccessor(string $class, string $property): ?ReadAccessorInterface;
+    public function getReadAccessor(string $class, string $property, bool $allowExtraProperties = false, bool $arrayLike = false): ?ReadAccessorInterface;
 
     /**
      * Extracts write mutator for a given source, target and property.
@@ -58,5 +58,5 @@ interface MappingExtractorInterface
      * @param class-string|'array' $target
      * @param array<string, mixed> $context
      */
-    public function getWriteMutator(string $source, string $target, string $property, array $context = []): ?WriteMutatorInterface;
+    public function getWriteMutator(string $source, string $target, string $property, array $context = [], bool $allowExtraProperties = false, bool $arrayLike = false): ?WriteMutatorInterface;
 }

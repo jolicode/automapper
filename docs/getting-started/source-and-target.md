@@ -51,7 +51,6 @@ $target = $autoMapper->map($source, $target);
 > [!NOTE]
 > In this case you have to assign the result of the `map` method to the `$target` variable since it is not passed by reference.
 
-
 ### Denormalization : Array to Object
 
 Denormalization is the process of converting an `array` or `stdClass` to an object.

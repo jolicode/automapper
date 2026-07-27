@@ -4,11 +4,18 @@ declare(strict_types=1);
 
 namespace AutoMapper\Lazy;
 
+use AutoMapper\Attribute\Mapper;
+
 /**
- * @implements LazyMapInterface<string, mixed>
+ * A map whose values are produced on first access, used as the target of a lazy `array` mapping.
+ *
+ * It is read by key like a plain `array` source, hence the `arrayLike` marker.
+ *
+ * @implements \ArrayAccess<string, mixed>
  * @implements \IteratorAggregate<string, mixed>
  */
-final class LazyMap implements LazyMapInterface, \JsonSerializable, \IteratorAggregate
+#[Mapper(arrayLike: true)]
+final class LazyMap implements \ArrayAccess, \JsonSerializable, \IteratorAggregate
 {
     /** @var array<string, mixed> */
     private mixed $mappedValue = [];

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
-use AutoMapper\Lazy\LazyMapInterface;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
@@ -41,8 +40,7 @@ final class ArrayTransformerFactory implements TransformerFactoryInterface, Prio
         // For untyped sources, the value type is mirrored from target and needs
         // overriding to mixed so the chain generates proper scalar casts.
         $wrapWithNullable = false;
-        if (isset($mapperMetadata->source)
-            && (\in_array($mapperMetadata->source, ['array', \stdClass::class], true) || is_a($mapperMetadata->source, LazyMapInterface::class, true))) {
+        if (isset($mapperMetadata->source) && $mapperMetadata->isSourceArrayLike()) {
             [$sourceCollectionType, $wrapWithNullable] = $this->overrideSourceCollectionType($sourceCollectionType, $targetCollectionType);
         }
 
@@ -86,8 +84,7 @@ final class ArrayTransformerFactory implements TransformerFactoryInterface, Prio
      */
     private function targetCanHoldLazyCollection(Type $targetType, MapperMetadata $mapperMetadata): bool
     {
-        if (isset($mapperMetadata->target)
-            && (\in_array($mapperMetadata->target, ['array', \stdClass::class], true) || is_a($mapperMetadata->target, LazyMapInterface::class, true))) {
+        if (isset($mapperMetadata->target) && $mapperMetadata->isTargetArrayLike()) {
             return true;
         }
 

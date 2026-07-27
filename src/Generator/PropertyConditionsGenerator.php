@@ -136,7 +136,7 @@ final readonly class PropertyConditionsGenerator
      * ```
      *
      * The exact check is provided by the read accessor itself, so it stays correct whatever the
-     * array-like source is (plain array, `LazyMapInterface`, native `ArrayAccess` document, ...)
+     * array-like source is (plain array, `stdClass`, a native `ArrayAccess` document, ...)
      * instead of being guessed from the source name.
      */
     private function propertyExistsForArray(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr

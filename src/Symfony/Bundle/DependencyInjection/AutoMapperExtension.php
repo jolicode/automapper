@@ -26,6 +26,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\JsonStreamer\StreamWriterInterface;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -45,6 +46,10 @@ use Symfony\Component\Uid\AbstractUid;
  *         enabled: bool,
  *         only_registered_mapping: bool,
  *         priority: int,
+ *     },
+ *     json_streamer: array{
+ *         enabled: bool,
+ *         only_registered_mapping: bool,
  *     },
  *     serializer_attributes: bool,
  *     api_platform: bool,
@@ -161,6 +166,21 @@ class AutoMapperExtension extends Extension
 
             if ($config['normalizer']['only_registered_mapping']) {
                 $normalizerDefinition->setArgument('$onlyMetadataRegistry', new Reference('automapper.config_mapping_registry'));
+            }
+        }
+
+        if ($config['json_streamer']['enabled']) {
+            if (!interface_exists(StreamWriterInterface::class)) {
+                throw new LogicException('The "symfony/json-streamer" component is required to use the "json_streamer" feature.');
+            }
+
+            $loader->load('json_streamer.php');
+
+            if ($config['json_streamer']['only_registered_mapping']) {
+                $registry = new Reference('automapper.config_mapping_registry');
+
+                $container->getDefinition('automapper.json_streamer.stream_reader')->setArgument('$onlyMetadataRegistry', $registry);
+                $container->getDefinition('automapper.json_streamer.stream_writer')->setArgument('$onlyMetadataRegistry', $registry);
             }
         }
 

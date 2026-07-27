@@ -7,6 +7,7 @@ namespace AutoMapper\JsonStreamer;
 use AutoMapper\AutoMapperInterface;
 use AutoMapper\AutoMapperRegistryInterface;
 use AutoMapper\MapperInterface;
+use AutoMapper\Metadata\MetadataRegistry;
 use Symfony\Component\JsonStreamer\StreamWriterInterface;
 use Symfony\Component\TypeInfo\Type;
 use Symfony\Component\TypeInfo\Type\CollectionType;
@@ -29,6 +30,11 @@ final class JsonStreamWriter implements StreamWriterInterface
         private readonly AutoMapperInterface $mapper,
         /** @var StreamWriterInterface<array<string, mixed>> */
         private readonly StreamWriterInterface $fallbackStreamWriter,
+        /**
+         * When set, only types having a mapper registered in this registry are written through the
+         * AutoMapper; everything else is delegated to the underlying Symfony writer.
+         */
+        private readonly ?MetadataRegistry $onlyMetadataRegistry = null,
     ) {
     }
 
@@ -44,7 +50,9 @@ final class JsonStreamWriter implements StreamWriterInterface
 
             if ($className !== null && is_iterable($data) && $this->jsonMapper($className) !== null) {
                 /** @var iterable<mixed> $data */
-                return $this->wrap(fn (): \Generator => $this->collectionChunks($data, $className, $options));
+                $isList = $unwrapped->isList();
+
+                return $this->wrap(fn (): \Generator => $this->collectionChunks($data, $className, $options, $isList));
             }
         }
 
@@ -61,8 +69,8 @@ final class JsonStreamWriter implements StreamWriterInterface
     }
 
     /**
-     * Yield the JSON of a collection: `[` + each element's JSON + `]`, one element
-     * at a time so a large collection is never held in memory at once.
+     * Yield the JSON of a collection, one element at a time so a large collection is never held in
+     * memory at once: a list is framed with `[` … `]`, a dict with `{` … `}` and its keys kept.
      *
      * @param iterable<mixed>    $data
      * @param class-string       $className
@@ -70,22 +78,32 @@ final class JsonStreamWriter implements StreamWriterInterface
      *
      * @return \Generator<int, string>
      */
-    private function collectionChunks(iterable $data, string $className, array $options): \Generator
+    private function collectionChunks(iterable $data, string $className, array $options, bool $isList): \Generator
     {
         $mapper = $this->jsonMapper($className);
 
-        yield '[';
+        yield $isList ? '[' : '{';
         $sep = '';
-        foreach ($data as $item) {
-            yield $sep;
+        foreach ($data as $key => $item) {
+            yield $isList ? $sep : $sep . $this->encodeKey($key) . ':';
             if (\is_object($item) && $item::class === $className && $mapper !== null) {
                 yield from $mapper->map($item, $options) ?? [];
             } else {
-                yield json_encode($item) ?: 'null';
+                // JSON_THROW_ON_ERROR, like the Symfony writer: an unencodable value fails loudly
+                // instead of silently emitting an empty (structurally invalid) chunk.
+                yield json_encode($item, \JSON_THROW_ON_ERROR);
             }
             $sep = ',';
         }
-        yield ']';
+        yield $isList ? ']' : '}';
+    }
+
+    /**
+     * A JSON object key is always a string, whatever the PHP array key type is.
+     */
+    private function encodeKey(mixed $key): string
+    {
+        return json_encode((string) (\is_scalar($key) ? $key : ''), \JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -99,6 +117,15 @@ final class JsonStreamWriter implements StreamWriterInterface
     private function jsonMapper(string $className): ?MapperInterface
     {
         if (!$this->mapper instanceof AutoMapperRegistryInterface) {
+            return null;
+        }
+
+        // Registry aware: without a registered mapper for this class, let the Symfony writer do it.
+        if (
+            null !== $this->onlyMetadataRegistry
+            && !$this->onlyMetadataRegistry->has($className, 'json', true)
+            && !$this->onlyMetadataRegistry->has($className, 'array', true)
+        ) {
             return null;
         }
 

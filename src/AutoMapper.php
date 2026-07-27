@@ -107,6 +107,12 @@ class AutoMapper implements AutoMapperInterface, AutoMapperRegistryInterface
             throw new InvalidMappingException('Cannot map this value, both source and target are array.');
         }
 
+        if ('json' === $targetType) {
+            // `json` is a serialization target, not a mapping one: it is only reachable through the
+            // JsonStreamer integration, which asks for the mapper directly.
+            throw new InvalidMappingException('Cannot map to the "json" target, use the JsonStreamer integration to serialize an object to JSON.');
+        }
+
         return $this->getMapper($sourceType, $targetType)->map($source, $context);
     }
 

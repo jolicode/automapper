@@ -10,6 +10,7 @@ use AutoMapper\Transformer\AllowNullValueTransformerInterface;
 use AutoMapper\Transformer\ArrayTransformer;
 use AutoMapper\Transformer\LazyCollectionTransformer;
 use AutoMapper\Transformer\MapperDependency;
+use AutoMapper\Transformer\NullableTransformer;
 use AutoMapper\Transformer\ObjectTransformer;
 use AutoMapper\Transformer\TransformerInterface;
 use PhpParser\Node\Arg;
@@ -97,7 +98,7 @@ final readonly class JsonPropertyStatementsGenerator
                 continue;
             }
 
-            $transformer = $propertyMetadata->transformer;
+            $transformer = $this->unwrapNullable($propertyMetadata->transformer);
             $objectTransformer = $transformer instanceof ObjectTransformer ? $transformer : $this->objectListItemTransformer($transformer);
 
             if ($objectTransformer === null || ($source = $this->streamableSource($objectTransformer)) === null) {
@@ -119,7 +120,9 @@ final readonly class JsonPropertyStatementsGenerator
         Expr $fieldValueExpr,
         Expr $keyPrefix,
     ): array {
-        $transformer = $propertyMetadata->transformer;
+        // A nullable nested object/list is still streamed through its json sub-mapper: the branches
+        // below emit their own `null` guard, so the NullableTransformer wrapper can be unwrapped.
+        $transformer = $this->unwrapNullable($propertyMetadata->transformer);
         $variableRegistry = $metadata->variableRegistry;
         $advanceSep = new Stmt\Expression(new Expr\Assign(self::separatorVariable(), new Scalar\String_(',')));
 
@@ -175,9 +178,15 @@ final readonly class JsonPropertyStatementsGenerator
             $variableRegistry->getSourceInput(),
         );
 
+        // JSON_THROW_ON_ERROR, like the Symfony writer does: an unencodable value (INF, NAN,
+        // malformed UTF-8, ...) must fail loudly instead of silently emitting `false`, which would
+        // concatenate to an empty string and produce structurally invalid JSON.
         $propStatements[] = new Stmt\Expression(new Expr\Yield_(new Expr\BinaryOp\Concat(
             $keyPrefix,
-            new Expr\FuncCall(new Name('json_encode'), [new Arg($output)]),
+            new Expr\FuncCall(new Name('json_encode'), [
+                new Arg($output),
+                new Arg(new Expr\ConstFetch(new Name('JSON_THROW_ON_ERROR'))),
+            ]),
         )));
         $propStatements[] = new Stmt\Expression(new Expr\Assign(self::separatorVariable(), new Scalar\String_(',')));
 
@@ -197,6 +206,15 @@ final readonly class JsonPropertyStatementsGenerator
                 new Arg($variableRegistry->getContext()),
             ],
         )));
+    }
+
+    /**
+     * Unwrap a {@see NullableTransformer} so a nullable nested object or object list is recognized
+     * as such. Only meaningful for the branches emitting an explicit null check.
+     */
+    private function unwrapNullable(TransformerInterface $transformer): TransformerInterface
+    {
+        return $transformer instanceof NullableTransformer ? $transformer->getItemTransformer() : $transformer;
     }
 
     /**

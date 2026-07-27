@@ -5,6 +5,8 @@ automapper:
   loader:
     eval: false
     reload_strategy: 'always'
+  json_streamer:
+    enabled: true
   api_platform: true
   object_mapper: true
   doctrine: true

@@ -26,6 +26,7 @@
     - [Expression Language](bundle/expression-language.md)
     - [Api Platform](bundle/api-platform.md)
     - [Object Mapper](bundle/object-mapper.md)
+    - [JSON Streamer](bundle/json-streamer.md)
     - [Migrate existing application](bundle/migrate.md)
     - [Debugging](bundle/debugging.md)
 - [Upgrading](upgrading/upgrading-10.0.md)
