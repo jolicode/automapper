@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace AutoMapper\Tests\Bundle;
 
 use AutoMapper\AutoMapperInterface;
+use AutoMapper\JsonStreamer\JsonStreamReader as AutoMapperJsonStreamReader;
+use AutoMapper\JsonStreamer\JsonStreamWriter as AutoMapperJsonStreamWriter;
 use AutoMapper\MapperContext;
 use AutoMapper\Metadata\MetadataFactory;
 use AutoMapper\Metadata\SourcePropertyMetadata;
@@ -31,7 +33,10 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\JsonStreamer\StreamReaderInterface;
+use Symfony\Component\JsonStreamer\StreamWriterInterface;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
+use Symfony\Component\TypeInfo\Type;
 
 class ServiceInstantiationTest extends WebTestCase
 {
@@ -325,6 +330,38 @@ class ServiceInstantiationTest extends WebTestCase
         $b->relation = $d;
         $b->relationNotMapped = $d;
         yield [$b, [$a]];
+    }
+
+    public function testJsonStreamerUsesTheAutoMapperImplementation(): void
+    {
+        static::bootKernel();
+        $container = self::getContainer();
+
+        $reader = $container->get(StreamReaderInterface::class);
+        $writer = $container->get(StreamWriterInterface::class);
+
+        // the Symfony services are decorated by the AutoMapper ones
+        self::assertInstanceOf(AutoMapperJsonStreamReader::class, $reader);
+        self::assertInstanceOf(AutoMapperJsonStreamWriter::class, $writer);
+
+        $stream = fopen('php://memory', 'r+');
+        fwrite($stream, '{"id":1,"name":"foo"}');
+        rewind($stream);
+
+        $addressDto = $reader->read($stream, Type::object(AddressDTO::class));
+        self::assertInstanceOf(AddressDTO::class, $addressDto);
+
+        // and the writer streams it back
+        self::assertJson((string) $writer->write($addressDto, Type::object(AddressDTO::class)));
+    }
+
+    public function testJsonStreamerFallsBackToSymfonyForUnhandledTypes(): void
+    {
+        static::bootKernel();
+        $writer = self::getContainer()->get(StreamWriterInterface::class);
+
+        // a scalar is not something the AutoMapper owns: the decorated Symfony writer handles it
+        self::assertSame('"foo"', (string) $writer->write('foo', Type::string()));
     }
 
     public function testMapFromClassWithPrivatePropertyPhpstan(): void

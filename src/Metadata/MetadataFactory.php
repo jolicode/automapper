@@ -28,7 +28,6 @@ use AutoMapper\Extractor\FromSourceMappingExtractor;
 use AutoMapper\Extractor\FromTargetMappingExtractor;
 use AutoMapper\Extractor\SourceTargetMappingExtractor;
 use AutoMapper\Generator\Shared\ClassDiscriminatorResolver;
-use AutoMapper\Lazy\LazyMap;
 use AutoMapper\Transformer\AllowNullValueTransformerInterface;
 use AutoMapper\Transformer\ArrayShapeTransformerFactory;
 use AutoMapper\Transformer\ArrayTransformerFactory;
@@ -86,8 +85,8 @@ final class MetadataFactory
     }
 
     /**
-     * @param class-string<object>|'array' $source
-     * @param class-string<object>|'array' $target
+     * @param class-string<object>|'array'|'json' $source
+     * @param class-string<object>|'array'|'json' $target
      *
      * @internal
      */
@@ -171,23 +170,28 @@ final class MetadataFactory
 
     private function createGeneratorMetadata(MapperMetadata $mapperMetadata): GeneratorMetadata
     {
+        $mapperEvent = new GenerateMapperEvent($mapperMetadata);
+        $this->eventDispatcher->dispatch($mapperEvent);
+
+        // Resolve "array-like" once, before choosing the extractor and before any property metadata
+        // event: honor a #[Mapper(arrayLike: ...)] override (via the event), otherwise infer it.
+        $mapperMetadata->sourceArrayLike = $mapperEvent->sourceArrayLike ?? $mapperMetadata->inferSourceArrayLike();
+        $mapperMetadata->targetArrayLike = $mapperEvent->targetArrayLike ?? $mapperMetadata->inferTargetArrayLike();
+
         $extractor = $this->sourceTargetPropertiesMappingExtractor;
 
-        if ('array' === $mapperMetadata->source || 'stdClass' === $mapperMetadata->source || LazyMap::class === $mapperMetadata->source) {
+        if ($mapperMetadata->isSourceArrayLike()) {
             $extractor = $this->fromTargetPropertiesMappingExtractor;
         }
 
-        if ('array' === $mapperMetadata->target || 'stdClass' === $mapperMetadata->target || LazyMap::class === $mapperMetadata->target) {
+        if ($mapperMetadata->isTargetArrayLike()) {
             $extractor = $this->fromSourcePropertiesMappingExtractor;
         }
 
         $propertyEvents = [];
 
-        $mapperEvent = new GenerateMapperEvent($mapperMetadata);
-        $this->eventDispatcher->dispatch($mapperEvent);
-
         // First get properties from the source
-        foreach ($extractor->getProperties($mapperMetadata->source) as $property) {
+        foreach ($extractor->getProperties($mapperMetadata->source, arrayLike: $mapperMetadata->isSourceArrayLike()) as $property) {
             $propertyEvent = new PropertyMetadataEvent($mapperMetadata, new SourcePropertyMetadataEvent($property), new TargetPropertyMetadataEvent($property), isFromDefaultExtractor: true);
 
             $this->eventDispatcher->dispatch($propertyEvent);
@@ -195,7 +199,7 @@ final class MetadataFactory
             $propertyEvents[$propertyEvent->target->property] = $propertyEvent;
         }
 
-        foreach ($extractor->getProperties($mapperMetadata->target, withConstructorParameters: true) as $property) {
+        foreach ($extractor->getProperties($mapperMetadata->target, withConstructorParameters: true, arrayLike: $mapperMetadata->isTargetArrayLike()) as $property) {
             if (isset($propertyEvents[$property])) {
                 continue;
             }
@@ -229,11 +233,11 @@ final class MetadataFactory
         foreach ($propertyEvents as $propertyMappedEvent) {
             // Create the source property metadata
             if ($propertyMappedEvent->source->accessor === null) {
-                $propertyMappedEvent->source->accessor = $extractor->getReadAccessor($mapperMetadata->source, $propertyMappedEvent->source->property, $mapperEvent->allowExtraProperties ?? $this->configuration->allowExtraProperties);
+                $propertyMappedEvent->source->accessor = $extractor->getReadAccessor($mapperMetadata->source, $propertyMappedEvent->source->property, $mapperEvent->allowExtraProperties ?? $this->configuration->allowExtraProperties, $mapperMetadata->isSourceArrayLike());
             }
 
             if ($propertyMappedEvent->source->checkExists === null) {
-                $propertyMappedEvent->source->checkExists = $extractor->getCheckExists($mapperMetadata->source, $propertyMappedEvent->source->property);
+                $propertyMappedEvent->source->checkExists = $extractor->getCheckExists($mapperMetadata->source, $propertyMappedEvent->source->property, $mapperMetadata->isSourceArrayLike());
             }
 
             if ($propertyMappedEvent->source->extractGroupsIfNull && $propertyMappedEvent->source->groups === null) {
@@ -246,13 +250,13 @@ final class MetadataFactory
 
             // Create the target property metadata
             if ($propertyMappedEvent->target->readAccessor === null) {
-                $propertyMappedEvent->target->readAccessor = $extractor->getReadAccessor($mapperMetadata->target, $propertyMappedEvent->target->property, $mapperEvent->allowExtraProperties ?? $this->configuration->allowExtraProperties);
+                $propertyMappedEvent->target->readAccessor = $extractor->getReadAccessor($mapperMetadata->target, $propertyMappedEvent->target->property, $mapperEvent->allowExtraProperties ?? $this->configuration->allowExtraProperties, $mapperMetadata->isTargetArrayLike() && !$mapperMetadata->isJsonTarget());
             }
 
             if ($propertyMappedEvent->target->writeMutator === null) {
                 $propertyMappedEvent->target->writeMutator = $extractor->getWriteMutator($mapperMetadata->source, $mapperMetadata->target, $propertyMappedEvent->target->property, [
                     'enable_constructor_extraction' => false,
-                ], $mapperEvent->allowExtraProperties ?? $this->configuration->allowExtraProperties);
+                ], $mapperEvent->allowExtraProperties ?? $this->configuration->allowExtraProperties, $mapperMetadata->isTargetArrayLike());
             }
 
             if ($propertyMappedEvent->target->parameterInConstructor === null) {
@@ -392,6 +396,7 @@ final class MetadataFactory
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapToListener($serviceLocator, $expressionLanguage));
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapFromListener($serviceLocator, $expressionLanguage));
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapperListener());
+
         $eventDispatcher->addListener(GenerateMapperEvent::class, new MapProviderListener());
 
         if (interface_exists(ObjectMapperInterface::class)) {

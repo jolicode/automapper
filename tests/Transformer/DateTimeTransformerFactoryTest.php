@@ -20,7 +20,7 @@ class DateTimeTransformerFactoryTest extends TestCase
     public function testGetTransformer(): void
     {
         $factory = new DateTimeTransformerFactory();
-        $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $mapperMetadata = $this->createStub(MapperMetadata::class);
 
         $sourceMapperMetadata = new SourcePropertyMetadata('foo', type: Type::object(\DateTime::class));
         $targetMapperMetadata = new TargetPropertyMetadata('foo', type: Type::object(\DateTime::class));
@@ -47,7 +47,7 @@ class DateTimeTransformerFactoryTest extends TestCase
     public function testGetTransformerImmutable(): void
     {
         $factory = new DateTimeTransformerFactory();
-        $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $mapperMetadata = $this->createStub(MapperMetadata::class);
 
         $sourceMapperMetadata = new SourcePropertyMetadata('foo', type: Type::object(\DateTimeImmutable::class));
         $targetMapperMetadata = new TargetPropertyMetadata('foo', type: Type::object(\DateTime::class));
@@ -60,7 +60,7 @@ class DateTimeTransformerFactoryTest extends TestCase
     public function testGetTransformerMutable(): void
     {
         $factory = new DateTimeTransformerFactory();
-        $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $mapperMetadata = $this->createStub(MapperMetadata::class);
 
         $sourceMapperMetadata = new SourcePropertyMetadata('foo', type: Type::object(\DateTime::class));
         $targetMapperMetadata = new TargetPropertyMetadata('foo', type: Type::object(\DateTimeImmutable::class));
@@ -73,7 +73,7 @@ class DateTimeTransformerFactoryTest extends TestCase
     public function testNoTransformer(): void
     {
         $factory = new DateTimeTransformerFactory();
-        $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $mapperMetadata = $this->createStub(MapperMetadata::class);
 
         $sourceMapperMetadata = new SourcePropertyMetadata('foo', type: Type::string());
         $targetMapperMetadata = new TargetPropertyMetadata('foo', type: Type::string());

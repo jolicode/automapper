@@ -23,7 +23,7 @@ class LazyMapper implements MapperInterface
         private readonly AutoMapperRegistryInterface $registry,
         /** @var 'array'|class-string<object> */
         private readonly string $source,
-        /** @var 'array'|class-string<object> */
+        /** @var 'array'|'json'|class-string<object> */
         private readonly string $target,
     ) {
     }

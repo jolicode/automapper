@@ -7,6 +7,7 @@ namespace AutoMapper\Generator;
 use AutoMapper\AttributeReference\AttributeInstance;
 use AutoMapper\AttributeReference\Reference;
 use AutoMapper\Exception\CompileException;
+use AutoMapper\Extractor\ArrayReadAccessor;
 use AutoMapper\Extractor\NestedReadAccessor;
 use AutoMapper\MapperContext;
 use AutoMapper\Metadata\GeneratorMetadata;
@@ -126,22 +127,29 @@ final readonly class PropertyConditionsGenerator
     }
 
     /**
-     * In case of source is an array we ensure that the key exists.
+     * When the source is read as an array shape we ensure that the key exists, so an absent key is
+     * skipped instead of mapped as null.
      *
      * ```php
-     * array_key_exists('propertyName', $source).
+     * array_key_exists('propertyName', $source)     // plain array source
+     * $source->offsetExists('propertyName')         // ArrayAccess source
      * ```
+     *
+     * The exact check is provided by the read accessor itself, so it stays correct whatever the
+     * array-like source is (plain array, `stdClass`, a native `ArrayAccess` document, ...)
+     * instead of being guessed from the source name.
      */
     private function propertyExistsForArray(GeneratorMetadata $metadata, PropertyMetadata $propertyMetadata): ?Expr
     {
-        if (!$propertyMetadata->source->checkExists || 'array' !== $metadata->mapperMetadata->source) {
+        if (!$propertyMetadata->source->checkExists) {
             return null;
         }
 
-        return new Expr\FuncCall(new Name('array_key_exists'), [
-            new Arg(new Scalar\String_($propertyMetadata->source->property)),
-            new Arg($metadata->variableRegistry->getSourceInput()),
-        ]);
+        if ($propertyMetadata->source->accessor instanceof ArrayReadAccessor) {
+            return $propertyMetadata->source->accessor->getIsDefinedExpression($metadata->variableRegistry->getSourceInput(), nullable: true);
+        }
+
+        return null;
     }
 
     /**

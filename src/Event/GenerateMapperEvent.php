@@ -30,6 +30,10 @@ final class GenerateMapperEvent extends Event
         public ?bool $allowExtraProperties = null,
         public ?Discriminator $sourceDiscriminator = null,
         public ?Discriminator $targetDiscriminator = null,
+        /** Whether the source is read as a keyed array shape rather than a typed object (null = infer). */
+        public ?bool $sourceArrayLike = null,
+        /** Whether the target is built as a keyed array shape rather than a typed object (null = infer). */
+        public ?bool $targetArrayLike = null,
     ) {
     }
 }

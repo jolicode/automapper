@@ -5,6 +5,8 @@ framework:
   test: ~
   serializer:
     enabled: true
+  json_streamer:
+    enabled: true
   profiler:
     enabled: "%kernel.debug%"
     only_exceptions: false

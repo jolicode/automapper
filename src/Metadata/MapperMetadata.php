@@ -18,6 +18,18 @@ class MapperMetadata
     public readonly ?\ReflectionClass $targetReflectionClass;
 
     /**
+     * Whether the source is read as a keyed array shape rather than a typed object. Resolved once
+     * during metadata discovery: a `#[Mapper(arrayLike: ...)]` override, otherwise inferred.
+     */
+    public ?bool $sourceArrayLike = null;
+
+    /**
+     * Whether the target is built as a keyed array shape rather than a typed object. Resolved once
+     * during metadata discovery: a `#[Mapper(arrayLike: ...)]` override, otherwise inferred.
+     */
+    public ?bool $targetArrayLike = null;
+
+    /**
      * @param class-string<object>|'array' $source
      * @param class-string<object>|'array' $target
      */
@@ -45,6 +57,51 @@ class MapperMetadata
         /** @var class-string<object> $className */
         $className = \sprintf('%s%s_%s', $this->classPrefix, $this->formatSourceTarget($this->source, $this->sourceReflectionClass?->isAnonymous() ?? false), $this->formatSourceTarget($this->target, $this->targetReflectionClass?->isAnonymous() ?? false));
         $this->className = $className;
+    }
+
+    public function isJsonTarget(): bool
+    {
+        return 'json' === $this->target;
+    }
+
+    public function isJsonSource(): bool
+    {
+        return 'json' === $this->source;
+    }
+
+    /**
+     * Whether the target is built by projecting the source (array shape) rather than hydrating a
+     * class. `json` behaves like `array` here: it is the same object → array projection, only
+     * serialized instead of assigned.
+     *
+     * Returns the value resolved during discovery ({@see $targetArrayLike}) when set, otherwise the
+     * inferred default.
+     */
+    public function isTargetArrayLike(): bool
+    {
+        return $this->targetArrayLike ?? $this->inferTargetArrayLike();
+    }
+
+    /**
+     * Whether the source is read as an array shape rather than an object. Returns the value resolved
+     * during discovery ({@see $sourceArrayLike}) when set, otherwise the inferred default.
+     */
+    public function isSourceArrayLike(): bool
+    {
+        return $this->sourceArrayLike ?? $this->inferSourceArrayLike();
+    }
+
+    /**
+     * The default array-like inference used when no `#[Mapper(arrayLike: ...)]` override is given.
+     */
+    public function inferTargetArrayLike(): bool
+    {
+        return \in_array($this->target, ['array', \stdClass::class, 'json'], true);
+    }
+
+    public function inferSourceArrayLike(): bool
+    {
+        return \in_array($this->source, ['array', \stdClass::class, 'json'], true);
     }
 
     public function getHash(): string

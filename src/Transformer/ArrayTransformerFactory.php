@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AutoMapper\Transformer;
 
-use AutoMapper\Lazy\LazyMap;
 use AutoMapper\Metadata\MapperMetadata;
 use AutoMapper\Metadata\SourcePropertyMetadata;
 use AutoMapper\Metadata\TargetPropertyMetadata;
@@ -41,8 +40,7 @@ final class ArrayTransformerFactory implements TransformerFactoryInterface, Prio
         // For untyped sources, the value type is mirrored from target and needs
         // overriding to mixed so the chain generates proper scalar casts.
         $wrapWithNullable = false;
-        if (isset($mapperMetadata->source)
-            && \in_array($mapperMetadata->source, ['array', \stdClass::class, LazyMap::class], true)) {
+        if (isset($mapperMetadata->source) && $mapperMetadata->isSourceArrayLike()) {
             [$sourceCollectionType, $wrapWithNullable] = $this->overrideSourceCollectionType($sourceCollectionType, $targetCollectionType);
         }
 
@@ -64,13 +62,47 @@ final class ArrayTransformerFactory implements TransformerFactoryInterface, Prio
             $sourceCollectionKeyType = $sourceType instanceof Type\CollectionType ? $sourceType->getCollectionKeyType() : Type::mixed();
 
             if ($sourceCollectionKeyType instanceof Type\BuiltinType && $sourceCollectionKeyType->getTypeIdentifier() === TypeIdentifier::INT) {
-                return new ArrayTransformer($subItemTransformer);
+                $collectionTransformer = new ArrayTransformer($subItemTransformer);
+            } else {
+                $collectionTransformer = new DictionaryTransformer($subItemTransformer);
             }
 
-            return new DictionaryTransformer($subItemTransformer);
+            if ($this->targetCanHoldLazyCollection($targetType, $mapperMetadata)) {
+                return new LazyCollectionTransformer($collectionTransformer, $subItemTransformer);
+            }
+
+            return $collectionTransformer;
         }
 
         return null;
+    }
+
+    /**
+     * Whether the target can store a {@see \AutoMapper\Lazy\LazyCollection} instead of a plain
+     * array: either the target is an array shape (any value is accepted), or the property is typed
+     * as a non-array iterable. A concrete `array`/`list`/`dict` property cannot, and must stay eager.
+     */
+    private function targetCanHoldLazyCollection(Type $targetType, MapperMetadata $mapperMetadata): bool
+    {
+        if (isset($mapperMetadata->target) && $mapperMetadata->isTargetArrayLike()) {
+            return true;
+        }
+
+        if ($targetType instanceof Type\NullableType) {
+            $targetType = $targetType->getWrappedType();
+        }
+
+        if (!$targetType instanceof Type\CollectionType) {
+            return false;
+        }
+
+        $wrappedType = $targetType->getWrappedType();
+
+        while ($wrappedType instanceof Type\GenericType) {
+            $wrappedType = $wrappedType->getWrappedType();
+        }
+
+        return $wrappedType instanceof Type\BuiltinType && $wrappedType->getTypeIdentifier() === TypeIdentifier::ITERABLE;
     }
 
     /**

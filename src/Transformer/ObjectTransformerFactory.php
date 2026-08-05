@@ -33,7 +33,13 @@ final class ObjectTransformerFactory implements TransformerFactoryInterface, Pri
             return null;
         }
 
-        return new ObjectTransformer($source->type, $target->type);
+        // A nested value of a `json` source is another decoded document: keep `json` as the source
+        // of the sub-mapper so the whole chain is read the same way.
+        return new ObjectTransformer(
+            $source->type,
+            $target->type,
+            sourceOverride: $mapperMetadata->isJsonSource() ? 'json' : null,
+        );
     }
 
     private function isObjectType(Type $type): bool
@@ -56,7 +62,10 @@ final class ObjectTransformerFactory implements TransformerFactoryInterface, Pri
             if ($className !== \stdClass::class) {
                 $reflectionClass = new \ReflectionClass($className);
 
-                if ($reflectionClass->isInternal()) {
+                // Internal classes are not mappable as generic objects (DateTime, Closure, ...) —
+                // except array-like ones (ArrayAccess), which are read by key like an array source,
+                // e.g. the native `JsonStream\Document`.
+                if ($reflectionClass->isInternal() && !$reflectionClass->implementsInterface(\ArrayAccess::class)) {
                     return false;
                 }
             }

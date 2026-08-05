@@ -27,6 +27,13 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
         private readonly Type $sourceType,
         private readonly Type $targetType,
         public bool $deepTargetToPopulate = true,
+        /**
+         * Forces the sub-mapper source, for the sides that are not a real class: a nested value of a
+         * `json` source is another decoded document, so it keeps `json` as its own source.
+         *
+         * @var class-string<object>|'array'|'json'|null
+         */
+        private readonly ?string $sourceOverride = null,
     ) {
     }
 
@@ -127,10 +134,14 @@ final class ObjectTransformer implements TransformerInterface, DependentTransfor
     }
 
     /**
-     * @return class-string<object>|'array'
+     * @return class-string<object>|'array'|'json'
      */
     private function getSource(): string
     {
+        if (null !== $this->sourceOverride) {
+            return $this->sourceOverride;
+        }
+
         $sourceTypeName = 'array';
 
         if ($this->sourceType instanceof Type\ObjectType) {

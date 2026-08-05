@@ -22,7 +22,7 @@ class UniqueTypeTransformerFactoryTest extends TestCase
         $factory = new UniqueTypeTransformerFactory();
         $factory->setChainTransformerFactory($chainFactory);
 
-        $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $mapperMetadata = $this->createStub(MapperMetadata::class);
         $sourceMapperMetadata = new SourcePropertyMetadata('foo', type: Type::string());
         $targetMapperMetadata = new TargetPropertyMetadata('foo', type: Type::union(Type::string(), Type::string()));
 
@@ -38,7 +38,7 @@ class UniqueTypeTransformerFactoryTest extends TestCase
         $factory = new UniqueTypeTransformerFactory();
         $factory->setChainTransformerFactory($chainFactory);
 
-        $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $mapperMetadata = $this->createStub(MapperMetadata::class);
         $sourceMapperMetadata = new SourcePropertyMetadata('foo');
         $targetMapperMetadata = new TargetPropertyMetadata('foo');
 

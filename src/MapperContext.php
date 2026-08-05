@@ -35,6 +35,7 @@ use AutoMapper\Exception\InvalidArgumentException;
  *   "normalizer_format"?: string,
  *   "initialize_lazy_object"?: bool,
  *   "lazy_mapping"?: bool,
+ *   "stream"?: bool,
  * }
  */
 class MapperContext
@@ -59,6 +60,12 @@ class MapperContext
     public const string NORMALIZER_FORMAT = 'normalizer_format';
     public const string INITIALIZE_LAZY_OBJECT = 'initialize_lazy_object';
     public const string LAZY_MAPPING = 'lazy_mapping';
+
+    /**
+     * When true, lazy collections are streamed without buffering: they can only be iterated
+     * once and cannot be counted or rewound, but never hold more than a single element.
+     */
+    public const string STREAM = 'stream';
 
     /** @var MapperContextArray */
     private array $context = [
@@ -353,5 +360,13 @@ class MapperContext
     public static function shouldLazyLoad(array $context): bool
     {
         return $context[self::LAZY_MAPPING] ?? false;
+    }
+
+    /**
+     * @param array{stream?: bool} $context
+     */
+    public static function shouldStream(array $context): bool
+    {
+        return $context[self::STREAM] ?? false;
     }
 }

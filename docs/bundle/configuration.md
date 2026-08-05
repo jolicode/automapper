@@ -25,6 +25,9 @@ automapper:
     eval: false
     cache_dir: "%kernel.cache_dir%/automapper"
     reload_strategy: "always"
+  json_streamer:
+    enabled: false
+    only_registered_mapping: false
   serializer_attributes: true
   api_platform: false
   object_mapper: false
@@ -78,6 +81,11 @@ automapper:
         * `always` will generate the mappers at each request;
         * `never` will generate them only if they don't exist;
         * `on_change` will generate the mappers only if the source or target class has changed since the last generation;
+* `json_streamer`: Configure the [JSON Streamer integration](json-streamer.md);
+    * `enabled` (default: `false`): If the symfony/json-streamer reader and writer should be replaced by the AutoMapper
+      ones, the Symfony implementations being kept as a fallback for the types the AutoMapper does not handle;
+    * `only_registered_mapping` (default: `false`): If the JSON streamer should only use the registered mapping, any
+      other type falling back to the Symfony implementation;
 * `serializer_attributes` (default: `true` if the symfony/serializer is available, false otherwise): A boolean which 
 indicate if we use the attribute of the symfony/serializer during the mapping, this only apply to the `#[Groups]`, 
 `#[MaxDepth]`, `#[Ignore]` and `#[DiscriminatorMap]` attributes;

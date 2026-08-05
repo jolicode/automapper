@@ -16,7 +16,7 @@ class ObjectTransformerFactoryTest extends TestCase
 {
     public function testGetTransformer(): void
     {
-        $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $mapperMetadata = $this->createStub(MapperMetadata::class);
         $factory = new ObjectTransformerFactory();
 
         $sourceMapperMetadata = new SourcePropertyMetadata('foo', type: Type::object(\stdClass::class));
@@ -43,7 +43,7 @@ class ObjectTransformerFactoryTest extends TestCase
 
     public function testNoTransformer(): void
     {
-        $mapperMetadata = $this->getMockBuilder(MapperMetadata::class)->disableOriginalConstructor()->getMock();
+        $mapperMetadata = $this->createStub(MapperMetadata::class);
         $factory = new ObjectTransformerFactory();
 
         $sourceMapperMetadata = new SourcePropertyMetadata('foo');

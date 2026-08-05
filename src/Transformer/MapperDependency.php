@@ -14,8 +14,8 @@ namespace AutoMapper\Transformer;
 final readonly class MapperDependency
 {
     /**
-     * @param class-string<object>|'array' $source
-     * @param class-string<object>|'array' $target
+     * @param class-string<object>|'array'|'json' $source
+     * @param class-string<object>|'array'|'json' $target
      */
     public function __construct(
         public string $name,

@@ -6,6 +6,12 @@ parameters:
     tmpDir: cache
     treatPhpDocTypesAsCertain: false
 
+    # json_stream_decode() and JsonStream\Document are provided by the json_stream extension, or by
+    # the polyfill which declares them behind a runtime guard, so they are not autoloadable.
+    scanFiles:
+        - vendor/joelwurtz/json-stream-polyfill/src/functions.php
+        - vendor/joelwurtz/json-stream-polyfill/src/Document.php
+
     ignoreErrors:
         -
             message: "#^Method AutoMapper\\\\ObjectMapper\\\\ObjectMapper\\:\\:map\\(\\) should return T of object but returns object\\|null\\.$#"

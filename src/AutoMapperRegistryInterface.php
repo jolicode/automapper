@@ -17,8 +17,8 @@ interface AutoMapperRegistryInterface
      * @template Source of object
      * @template Target of object
      *
-     * @param class-string<Source>|'array' $source
-     * @param class-string<Target>|'array' $target
+     * @param class-string<Source>|'array'|'json' $source
+     * @param class-string<Target>|'array'|'json' $target
      *
      * @return ($source is class-string ? ($target is 'array' ? MapperInterface<Source, array<mixed>> : MapperInterface<Source, Target>) : MapperInterface<array<mixed>, Target>)
      */

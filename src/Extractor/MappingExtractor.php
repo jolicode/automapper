@@ -6,7 +6,6 @@ namespace AutoMapper\Extractor;
 
 use AutoMapper\Configuration;
 use AutoMapper\Event\PropertyMetadataEvent;
-use AutoMapper\Lazy\LazyMap;
 use Symfony\Component\PropertyInfo\PropertyListExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyReadInfo;
 use Symfony\Component\PropertyInfo\PropertyReadInfoExtractorInterface;
@@ -36,9 +35,10 @@ abstract class MappingExtractor implements MappingExtractorInterface
     /**
      * @return array<string>
      */
-    public function getProperties(string $class, bool $withConstructorParameters = false): iterable
+    public function getProperties(string $class, bool $withConstructorParameters = false, bool $arrayLike = false): iterable
     {
-        if ($class === 'array' || $class === \stdClass::class || $class === LazyMap::class) {
+        // An array-like class has no fixed property list: the properties come from the other side.
+        if ($arrayLike || $class === 'array' || $class === 'json' || $class === \stdClass::class) {
             return [];
         }
 
@@ -83,7 +83,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
         }
     }
 
-    public function getReadAccessor(string $class, string $property, bool $allowExtraProperties = false): ?ReadAccessorInterface
+    public function getReadAccessor(string $class, string $property, bool $allowExtraProperties = false, bool $arrayLike = false): ?ReadAccessorInterface
     {
         // split to first dot for nested properties
         $exploded = explode('.', $property, 2);
@@ -91,7 +91,7 @@ abstract class MappingExtractor implements MappingExtractorInterface
         if (2 === \count($exploded)) {
             [$parent, $child] = $exploded;
         } else {
-            return $this->doGetReadAccessor($class, $property, $allowExtraProperties);
+            return $this->doGetReadAccessor($class, $property, $allowExtraProperties, $arrayLike);
         }
 
         if ('array' === $class) {
@@ -128,13 +128,13 @@ abstract class MappingExtractor implements MappingExtractorInterface
         return new NestedReadAccessor($parentAccessor, $childAccessor, $childClass, $property);
     }
 
-    public function getWriteMutator(string $source, string $target, string $property, array $context = [], bool $allowExtraProperties = false): ?WriteMutatorInterface
+    public function getWriteMutator(string $source, string $target, string $property, array $context = [], bool $allowExtraProperties = false, bool $arrayLike = false): ?WriteMutatorInterface
     {
         // split to last dot for nested properties
         $lastDotPosition = strrpos($property, '.');
 
         if (false === $lastDotPosition) {
-            return $this->doGetWriteMutator($target, $property, $context, $allowExtraProperties);
+            return $this->doGetWriteMutator($target, $property, $context, $allowExtraProperties, $arrayLike);
         }
 
         $parent = substr($property, 0, $lastDotPosition);
@@ -176,9 +176,9 @@ abstract class MappingExtractor implements MappingExtractorInterface
         return new NestedWriteMutator($accessor, $mutator);
     }
 
-    public function getCheckExists(string $class, string $property): bool
+    public function getCheckExists(string $class, string $property, bool $arrayLike = false): bool
     {
-        if ('array' === $class || \stdClass::class === $class) {
+        if ($arrayLike || 'array' === $class || \stdClass::class === $class) {
             return true;
         }
 
@@ -231,8 +231,14 @@ abstract class MappingExtractor implements MappingExtractorInterface
     /**
      * @param class-string|'array' $class
      */
-    private function doGetReadAccessor(string $class, string $property, bool $allowExtraProperties = false): ?ReadAccessorInterface
+    private function doGetReadAccessor(string $class, string $property, bool $allowExtraProperties = false, bool $arrayLike = false): ?ReadAccessorInterface
     {
+        if ('json' === $class) {
+            // As a source, `json` is the decoded document, read by key; as a target it is never read
+            // (its mapper yields the value instead of assigning it).
+            return $arrayLike ? new ArrayReadAccessor($property, true) : null;
+        }
+
         if ('array' === $class) {
             return new ArrayReadAccessor($property);
         }
@@ -241,7 +247,8 @@ abstract class MappingExtractor implements MappingExtractorInterface
             return new PropertyReadAccessor($property);
         }
 
-        if (LazyMap::class === $class) {
+        // An array-like class exposes its values by key: read them through offsetGet.
+        if ($arrayLike) {
             return new ArrayReadAccessor($property, true);
         }
 
@@ -273,8 +280,14 @@ abstract class MappingExtractor implements MappingExtractorInterface
      * @param class-string|'array' $target
      * @param array<string, mixed> $context
      */
-    private function doGetWriteMutator(string $target, string $property, array $context = [], bool $allowExtraProperties = false): ?WriteMutatorInterface
+    private function doGetWriteMutator(string $target, string $property, array $context = [], bool $allowExtraProperties = false, bool $arrayLike = false): ?WriteMutatorInterface
     {
+        // `json` targets are never actually written to: their mapper yields the value. A dedicated
+        // mutator marks the property as writable so it is not dropped as unwritable.
+        if ('json' === $target) {
+            return new JsonWriteMutator();
+        }
+
         $writeInfo = $this->writeInfoExtractor->getWriteInfo($target, $property, $context);
 
         if (null === $writeInfo || PropertyWriteInfo::TYPE_NONE === $writeInfo->getType()) {
