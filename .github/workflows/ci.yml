@@ -61,6 +61,17 @@ jobs:
         run: composer update --prefer-stable
       - name: tests
         run: vendor/bin/phpunit
+  ast-metrics:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@master
+      - uses: ast-metrics/action-ast-metrics@v2
+        with:
+          version: v0.42.1
+          directory: src
   tests-lowest:
     runs-on: ubuntu-latest
     name: tests-lowest
