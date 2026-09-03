@@ -12,6 +12,12 @@ use AutoMapper\Provider\ProviderInterface;
 
 final readonly class IriProvider implements ProviderInterface
 {
+    /**
+     * Formats where a relation is carried as an IRI string, so not only JSON-LD:
+     * API Platform's default patch_formats maps application/merge-patch+json to the "json" format.
+     */
+    private const array SUPPORTED_FORMATS = ['jsonld', 'json', 'jsonhal', 'jsonapi'];
+
     public function __construct(
         private IriConverterInterface $iriConverter,
         private ResourceClassResolverInterface $resourceClassResolver,
@@ -20,7 +26,7 @@ final readonly class IriProvider implements ProviderInterface
 
     public function provide(string $targetType, mixed $source, array $context, mixed $id): ?object
     {
-        if (($context[MapperContext::NORMALIZER_FORMAT] ?? false) !== 'jsonld') {
+        if (!\in_array($context[MapperContext::NORMALIZER_FORMAT] ?? null, self::SUPPORTED_FORMATS, true)) {
             return null;
         }
 
