@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace AutoMapper\Tests\Bundle\Resources\App\Api\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use AutoMapper\Attribute\Mapper;
+use AutoMapper\Tests\Bundle\Resources\App\Api\Processor\ReviewProcessor;
 
 /** A book. */
-#[ApiResource]
+#[ApiResource(processor: ReviewProcessor::class)]
+#[Mapper(source: 'array', target: 'array')]
 class Review
 {
     /** The ID of this review. */

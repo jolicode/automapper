@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   source and target names
 
 ### Fixed
+- Resolve API Platform IRIs in every JSON format, not only JSON-LD, so a relation sent as an IRI on `application/json` or `application/merge-patch+json` no longer reaches the mapper as a raw string
 - Use the `MapFrom` attribute reference instead of `MapTo` when resolving transformers in `MapFromListener`
 - Do not run a transformation on a null source value when the target is not nullable, a `TypeError` is thrown for typed properties instead of the transformation crashing on the null value
 - Create backed enum from scalar source value instead of assigning the raw scalar

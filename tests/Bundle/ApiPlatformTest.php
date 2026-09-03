@@ -147,6 +147,25 @@ class ApiPlatformTest extends ApiTestCase
         ]);
     }
 
+    public function testCreateWithIriRelationInPlainJson(): void
+    {
+        $response = static::createClient()->request('POST', '/reviews', [
+            'json' => [
+                'rating' => 5,
+                'body' => 'A great book.',
+                'author' => 'Someone',
+                'book' => '/books/1',
+            ],
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSame('/books/1', $response->toArray()['book']);
+    }
+
     protected function tearDown(): void
     {
         parent::tearDown();
