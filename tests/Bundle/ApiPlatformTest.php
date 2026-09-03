@@ -166,6 +166,26 @@ class ApiPlatformTest extends ApiTestCase
         $this->assertSame('/books/1', $response->toArray()['book']);
     }
 
+    public function testCreateWithUnknownIriRelation(): void
+    {
+        static::createClient()->request('POST', '/reviews', [
+            'json' => [
+                'rating' => 5,
+                'body' => 'A great book.',
+                'author' => 'Someone',
+                'book' => '/books/unknown',
+            ],
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ],
+        ]);
+
+        // ItemNotFoundException extends API Platform's InvalidArgumentException, which its default
+        // exception_to_status maps to 400, so the provider lets it bubble up rather than translating it
+        $this->assertResponseStatusCodeSame(400);
+    }
+
     protected function tearDown(): void
     {
         parent::tearDown();

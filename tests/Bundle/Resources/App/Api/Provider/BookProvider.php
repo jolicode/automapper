@@ -21,6 +21,6 @@ class BookProvider implements ProviderInterface
             return [$book];
         }
 
-        return $book;
+        return ($uriVariables['id'] ?? 1) == $book->id ? $book : null;
     }
 }
