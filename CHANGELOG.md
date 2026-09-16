@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-### Feature
+## [10.3.0] - 2026-09-16
+
+### Added
 - Allow to disable group checking globally or per mapper, instead of only per property
 - Add a `symfony/json-streamer` integration: the AutoMapper can now read and write JSON streams,
   keeping all its mapping features available while streaming. Enable it in the bundle with the
@@ -24,19 +26,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   resolved once during metadata discovery and reused everywhere, instead of being guessed from the
   source and target names
 
+### Changed
+These are bug fixes, but they change the output of mappings that already worked:
+
+- Convert between different backed enums through their backing value instead of copying the source instance
+- Keep the concrete Symfony Uid subclass (e.g. `UuidV4`) when copying a uid instead of building a base `Uuid`/`Ulid`
+- Keep the concrete date time subclass in date time to date time mapping instead of always building `DateTime`/`DateTimeImmutable`
+- The `AutoMapperNormalizer` no longer claims value objects handled by dedicated symfony normalizers (`DateTimeInterface`, `BackedEnum`, `AbstractUid`, etc.), which could produce a structure dump instead of the expected representation
+- The highest priority `Mapper` attribute wins as documented, instead of the lowest
+
 ### Fixed
 - Resolve API Platform IRIs in every JSON format, not only JSON-LD, so a relation sent as an IRI on `application/json` or `application/merge-patch+json` no longer reaches the mapper as a raw string
 - Use the `MapFrom` attribute reference instead of `MapTo` when resolving transformers in `MapFromListener`
 - Do not run a transformation on a null source value when the target is not nullable, a `TypeError` is thrown for typed properties instead of the transformation crashing on the null value
 - Create backed enum from scalar source value instead of assigning the raw scalar
-- Convert between different backed enums through their backing value instead of copying the source instance
 - Normalize leading backslash in class names resolved from docblocks, fixing a parse error in generated mappers for global namespace classes and the `__PM__` proxy name off-by-one
 - Implement `CheckTypeInterface` on enum, date-time and uid transformers so union source types generate a runtime check for every branch
 - Unwrap nullable doctrine collection target type, items are mapped to the collection value type instead of plain arrays
 - Capture the context in the `isAllowedAttribute` closure, fixing `MapToContext` combined with `skip_null_values`
 - Guard nested property accessors (`parent.child`) against null or uninitialized parent values on read, write and constructor paths, support private nested leaf properties and nullable parent types
 - Support variadic constructor parameters, values are spread as individual arguments and an absent variadic no longer throws `MissingConstructorArgumentsException`
-- The highest priority `Mapper` attribute wins as documented, instead of the lowest
 - Correct identifier hashing: scalar identifiers are cast to string, object identifiers are hashed through their own mapper and `hash_final` no longer receives a string as its boolean argument, fixing mappers generated with `strictTypes: true`
 - Atomic mapper file writes and locked registry updates in `FileLoader`, fixing partially written files and lost registry entries under concurrency, the cache warmer no longer discards previously registered mapper hashes
 - Initialize `LazyMap` only once instead of re-running the mapping on every access
@@ -44,14 +53,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Do not register the cache warmer when the `eval` loader is enabled, fixing container compilation with `automapper.loader.eval: true`
 - Detect doctrine entities even when their metadata is not loaded yet, fixing missing provider and identifier on cold metadata factories
 - Do not map static properties
-- Keep the concrete Symfony Uid subclass (e.g. `UuidV4`) when copying a uid instead of building a base `Uuid`/`Ulid`
-- Keep the concrete date time subclass in date time to date time mapping instead of always building `DateTime`/`DateTimeImmutable`
 - Guard a single matching union branch at runtime so a value of an unhandled union member is not blindly transformed
-- The `AutoMapperNormalizer` no longer claims value objects handled by dedicated symfony normalizers (`DateTimeInterface`, `BackedEnum`, `AbstractUid`, etc.), which could produce a structure dump instead of the expected representation
 - Use the computed resource class in the API Platform JSON-LD context transformer instead of resolving it from a non-resource source (operator precedence fix)
 - Only shorten an API Platform resource to its id for `array` or `mixed` targets, avoiding a `TypeError` on scalar targets
 - Allow `final` and `static` public getters to be used with `#[MapToContext]`
 - Run the object mapper listeners after the Doctrine and discriminator listeners in the bundle, so a `Map`-attributed source class keeps its Doctrine provider and discriminator handling
+- The JsonStreamer integration no longer claims enums and uids, which were read as `null` and written as a structure dump (`{"name":"FLAT","value":"flat"}`) instead of being delegated to the Symfony reader and writer
 
 ## [10.2.0] - 2026-04-27
 ### Added
@@ -74,18 +81,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [GH#331](https://github.com/jolicode/automapper/pull/331) Fix syntax error in supports method return statement example
 - [GH#329](https://github.com/jolicode/automapper/pull/329) Fix some typos
 
-## [10.0.3] - 2025-02-25
+## [10.0.3] - 2026-02-25
 - [GH#327](https://github.com/jolicode/automapper/pull/327) Fix cache extractor in symfony bundle being mixed between source and target.
 
-## [10.0.2] - 2025-02-24
+## [10.0.2] - 2026-02-24
 ### Fixed
 - [GH#326](https://github.com/jolicode/automapper/pull/326) Fix array, be consistent with old behavior, undefined array should be mapped with their keys.
 
-## [10.0.1] - 2025-02-24
+## [10.0.1] - 2026-02-24
 ### Fixed
 - [GH#325](https://github.com/jolicode/automapper/pull/325) Fix creating union or intersection type when not enough types.
 
-## [10.0.0] - 2025-02-10
+## [10.0.0] - 2026-02-10
 ### Added
 - [GH#297](https://github.com/jolicode/automapper/pull/297) Support PHP 8.5 and Symfony 8, this library now use the `TypeInfo` Component for types instead of PropertyInfo directly.
 - [GH#297](https://github.com/jolicode/automapper/pull/297) Debug command now show the type of each property mapped, transformers will also display more information.
@@ -109,6 +116,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Miscellaneous
 - [GH#297](https://github.com/jolicode/automapper/pull/297) Add a castor task to serve the symfony app in tests for debugging purpose.
+
+## [9.5.1] - 2026-04-27
+### Fixed
+- Allow type resolver deps in 2.0
 
 ## [9.5.0] - 2025-09-18
 ### Added
@@ -525,12 +536,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * [AutoMapper] [GH#179](https://github.com/janephp/janephp/pull/179) Fixing incompatible changes in Symfony 5.0
 
-[Unreleased]: https://github.com/jolicode/automapper/compare/10.1.0...HEAD
+[10.3.0]: https://github.com/jolicode/automapper/compare/10.2.0...10.3.0
+[10.2.0]: https://github.com/jolicode/automapper/compare/10.1.0...10.2.0
 [10.1.0]: https://github.com/jolicode/automapper/compare/10.0.3...10.1.0
 [10.0.3]: https://github.com/jolicode/automapper/compare/10.0.2...10.0.3
 [10.0.2]: https://github.com/jolicode/automapper/compare/10.0.1...10.0.2
 [10.0.1]: https://github.com/jolicode/automapper/compare/10.0.0...10.0.1
 [10.0.0]: https://github.com/jolicode/automapper/compare/9.5.0...10.0.0
+[9.5.1]: https://github.com/jolicode/automapper/compare/9.5.0...9.5.1
 [9.5.0]: https://github.com/janephp/janephp/compare/9.4.1...9.5.0
 [9.4.1]: https://github.com/janephp/janephp/compare/9.4.0...9.4.1
 [9.4.0]: https://github.com/janephp/janephp/compare/9.3.1...9.4.0

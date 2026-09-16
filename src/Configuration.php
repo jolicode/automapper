@@ -26,10 +26,6 @@ final readonly class Configuration
          */
         public bool $attributeChecking = true,
         /**
-         * Make mapper group aware, configure this to false when there is no groups behavior in your mapping, saving a lot of times.
-         */
-        public bool $groupChecking = true,
-        /**
          * If the mappers should be automatically generated if it does not exist
          * Otherwise the mapper will throw a MapperNotFoundException.
          */
@@ -62,6 +58,10 @@ final readonly class Configuration
          * Enable this option to extract the type from the getter instead of the setter.
          */
         public bool $extractTypesFromGetter = false,
+        /**
+         * Make mapper group aware, configure this to false when there is no groups behavior in your mapping, saving a lot of times.
+         */
+        public bool $groupChecking = true,
     ) {
     }
 }

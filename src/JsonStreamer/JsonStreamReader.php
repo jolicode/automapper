@@ -10,6 +10,7 @@ use AutoMapper\Lazy\LazyCollection;
 use AutoMapper\MapperContext;
 use AutoMapper\MapperInterface;
 use AutoMapper\Metadata\MetadataRegistry;
+use AutoMapper\ValueObjectTypes;
 use Symfony\Component\JsonStreamer\StreamReaderInterface;
 use Symfony\Component\TypeInfo\Type;
 use Symfony\Component\TypeInfo\Type\CollectionType;
@@ -125,11 +126,7 @@ final class JsonStreamReader implements StreamReaderInterface
         /** @var class-string $className */
         $className = $type->getClassName();
 
-        if (
-            is_a($className, \DateTimeInterface::class, true)
-            || is_a($className, \DateInterval::class, true)
-            || is_a($className, \DateTimeZone::class, true)
-        ) {
+        if (ValueObjectTypes::isUnsupported($className)) {
             return null;
         }
 

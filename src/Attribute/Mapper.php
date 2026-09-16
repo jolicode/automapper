@@ -25,7 +25,6 @@ final readonly class Mapper
         public string|array|null $source = null,
         public string|array|null $target = null,
         public ?bool $checkAttributes = null,
-        public ?bool $checkGroups = null,
         public ?ConstructorStrategy $constructorStrategy = null,
         public ?bool $allowReadOnlyTargetToPopulate = null,
         public ?bool $strictTypes = null,
@@ -34,6 +33,7 @@ final readonly class Mapper
         public ?bool $allowExtraProperties = null,
         public ?Discriminator $discriminator = null,
         public ?bool $arrayLike = null,
+        public ?bool $checkGroups = null,
     ) {
     }
 }

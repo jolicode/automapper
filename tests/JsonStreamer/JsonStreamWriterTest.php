@@ -109,4 +109,23 @@ class JsonStreamWriterTest extends AutoMapperTestCase
         $user2 = $autoMapper->map($data, Fixtures\User::class);
         self::assertEquals($user, $user2);
     }
+
+    public function testEnumIsDelegatedToTheFallbackWriter(): void
+    {
+        $autoMapper = AutoMapperBuilder::buildAutoMapper(classPrefix: 'JsonStreamWriterEnum_');
+        $writer = new JsonStreamWriter($autoMapper, FallbackJsonStreamWriter::create());
+
+        self::assertSame(
+            '"flat"',
+            (string) $writer->write(Fixtures\AddressType::FLAT, Type::enum(Fixtures\AddressType::class)),
+        );
+
+        self::assertSame(
+            '["flat","apartment"]',
+            (string) $writer->write(
+                [Fixtures\AddressType::FLAT, Fixtures\AddressType::APARTMENT],
+                Type::list(Type::enum(Fixtures\AddressType::class)),
+            ),
+        );
+    }
 }
