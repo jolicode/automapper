@@ -8,6 +8,7 @@ use AutoMapper\AutoMapperInterface;
 use AutoMapper\AutoMapperRegistryInterface;
 use AutoMapper\MapperInterface;
 use AutoMapper\Metadata\MetadataRegistry;
+use AutoMapper\ValueObjectTypes;
 use Symfony\Component\JsonStreamer\StreamWriterInterface;
 use Symfony\Component\TypeInfo\Type;
 use Symfony\Component\TypeInfo\Type\CollectionType;
@@ -57,9 +58,8 @@ final class JsonStreamWriter implements StreamWriterInterface
         }
 
         if (
-            $unwrapped instanceof ObjectType
-            && \is_object($data)
-            && $unwrapped->getClassName() === $data::class
+            \is_object($data)
+            && $this->ownedClassName($unwrapped) === $data::class
             && ($mapper = $this->jsonMapper($data::class)) !== null
         ) {
             return $this->wrap(static fn (): iterable => $mapper->map($data, $options) ?? []);
@@ -191,11 +191,7 @@ final class JsonStreamWriter implements StreamWriterInterface
         /** @var class-string $className */
         $className = $type->getClassName();
 
-        if (
-            is_a($className, \DateTimeInterface::class, true)
-            || is_a($className, \DateInterval::class, true)
-            || is_a($className, \DateTimeZone::class, true)
-        ) {
+        if (ValueObjectTypes::isUnsupported($className)) {
             return null;
         }
 

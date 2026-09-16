@@ -178,4 +178,25 @@ class JsonStreamReaderTest extends AutoMapperTestCase
 
         self::assertEquals($user, $user2);
     }
+
+    public function testEnumIsDelegatedToTheFallbackReader(): void
+    {
+        $autoMapper = AutoMapperBuilder::buildAutoMapper(classPrefix: 'JsonStreamReaderEnum_');
+        $reader = new JsonStreamReader($autoMapper, FallbackJsonStreamReader::create());
+
+        self::assertSame(
+            Fixtures\AddressType::FLAT,
+            $reader->read($this->stream('"flat"'), Type::enum(Fixtures\AddressType::class)),
+        );
+
+        $list = $reader->read(
+            $this->stream('["flat","apartment"]'),
+            Type::list(Type::enum(Fixtures\AddressType::class)),
+        );
+
+        self::assertSame(
+            [Fixtures\AddressType::FLAT, Fixtures\AddressType::APARTMENT],
+            iterator_to_array($list),
+        );
+    }
 }

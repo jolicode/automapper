@@ -9,6 +9,7 @@ use AutoMapper\Exception\CircularReferenceException;
 use AutoMapper\Exception\MissingConstructorArgumentsException;
 use AutoMapper\MapperContext;
 use AutoMapper\Metadata\MetadataRegistry;
+use AutoMapper\ValueObjectTypes;
 use Symfony\Component\Serializer\Exception\CircularReferenceException as SymfonyCircularReferenceException;
 use Symfony\Component\Serializer\Exception\MissingConstructorArgumentsException as SymfonyMissingConstructorArgumentsException;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -26,20 +27,6 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
  */
 readonly class AutoMapperNormalizer implements NormalizerInterface, DenormalizerInterface
 {
-    /**
-     * Value object types handled by their own dedicated symfony normalizer, AutoMapper must not claim them
-     * otherwise it would produce a structure dump instead of e.g. an RFC3339 date string.
-     *
-     * @var list<class-string>
-     */
-    private const array UNSUPPORTED_TYPES = [
-        \DateTimeInterface::class,
-        \DateTimeZone::class,
-        \DateInterval::class,
-        \UnitEnum::class,
-        \Symfony\Component\Uid\AbstractUid::class,
-    ];
-
     private const array SERIALIZER_CONTEXT_MAPPING = [
         AbstractNormalizer::GROUPS => MapperContext::GROUPS,
         AbstractNormalizer::ATTRIBUTES => MapperContext::ALLOWED_ATTRIBUTES,
@@ -106,10 +93,8 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
             return false;
         }
 
-        foreach (self::UNSUPPORTED_TYPES as $unsupportedType) {
-            if ($data instanceof $unsupportedType) {
-                return false;
-            }
+        if (ValueObjectTypes::isUnsupported($data::class)) {
+            return false;
         }
 
         if ($this->onlyMetadataRegistry === null) {
@@ -128,10 +113,8 @@ readonly class AutoMapperNormalizer implements NormalizerInterface, Denormalizer
             return false;
         }
 
-        foreach (self::UNSUPPORTED_TYPES as $unsupportedType) {
-            if (is_a($type, $unsupportedType, true)) {
-                return false;
-            }
+        if (ValueObjectTypes::isUnsupported($type)) {
+            return false;
         }
 
         if ($this->onlyMetadataRegistry === null) {
