@@ -23,7 +23,6 @@ final class GenerateMapperEvent extends Event
         public array $properties = [],
         public ?Provider $provider = null,
         public ?bool $checkAttributes = null,
-        public ?bool $checkGroups = null,
         public ?ConstructorStrategy $constructorStrategy = null,
         public ?bool $allowReadOnlyTargetToPopulate = null,
         public ?bool $strictTypes = null,
@@ -34,6 +33,7 @@ final class GenerateMapperEvent extends Event
         public ?bool $sourceArrayLike = null,
         /** Whether the target is built as a keyed array shape rather than a typed object (null = infer). */
         public ?bool $targetArrayLike = null,
+        public ?bool $checkGroups = null,
     ) {
     }
 }
