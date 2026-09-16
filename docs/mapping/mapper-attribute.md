@@ -32,6 +32,26 @@ with a single attribute.
 The `#[Mapper]` attribute supports most of the configuration parameters specified in the [global configuration](../getting-started/configuration.md).
 It will override the global configuration for the specified mapping.
 
+## Array-like classes
+
+By default a class is mapped as a typed object: its properties are discovered through reflection.
+Set `arrayLike: true` to read or write it as a keyed array shape instead, where the keys are
+dynamic and come from the other side of the mapping. This is what `array`, `stdClass` and `json`
+already do implicitly, and it is the option to use for a class exposing arbitrary keys through
+`ArrayAccess`.
+
+```php
+#[Mapper(arrayLike: true)]
+class Bag implements \ArrayAccess
+{
+    private array $values = [];
+
+    // ...
+}
+```
+
+Left to `null` the behaviour is inferred.
+
 ## Register
 
 This attribute may also be used when registering mappers manually when using the Symfony bundle.
