@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [10.3.1] - 2026-09-22
+
 ### Added
 - Support API Platform 5 alongside API Platform 4
 
@@ -539,6 +541,7 @@ These are bug fixes, but they change the output of mappings that already worked:
 ### Fixed
 * [AutoMapper] [GH#179](https://github.com/janephp/janephp/pull/179) Fixing incompatible changes in Symfony 5.0
 
+[10.3.1]: https://github.com/jolicode/automapper/compare/10.3.0...10.3.1
 [10.3.0]: https://github.com/jolicode/automapper/compare/10.2.0...10.3.0
 [10.2.0]: https://github.com/jolicode/automapper/compare/10.1.0...10.2.0
 [10.1.0]: https://github.com/jolicode/automapper/compare/10.0.3...10.1.0
