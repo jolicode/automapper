@@ -4,10 +4,17 @@ declare(strict_types=1);
 
 namespace AutoMapper\Tests\Bundle;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
-if (!class_exists(ApiTestCase::class)) {
+// API Platform 5 moved the test case out of the Symfony bundle namespace and deprecated the old one
+$baseApiTestCase = match (true) {
+    class_exists(\ApiPlatform\Test\ApiTestCase::class) => \ApiPlatform\Test\ApiTestCase::class,
+    class_exists(\ApiPlatform\Symfony\Bundle\Test\ApiTestCase::class) => \ApiPlatform\Symfony\Bundle\Test\ApiTestCase::class,
+    default => null,
+};
+
+if (null === $baseApiTestCase) {
     class ApiPlatformTest extends \PHPUnit\Framework\TestCase
     {
         protected static function createClient(): void
@@ -19,7 +26,9 @@ if (!class_exists(ApiTestCase::class)) {
     return;
 }
 
-class ApiPlatformTest extends ApiTestCase
+class_alias($baseApiTestCase, BaseApiTestCase::class);
+
+class ApiPlatformTest extends BaseApiTestCase
 {
     protected function setUp(): void
     {
@@ -70,7 +79,7 @@ class ApiPlatformTest extends ApiTestCase
         $response = static::createClient()->request('GET', '/books.jsonld');
 
         $this->assertResponseIsSuccessful();
-        $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
+        $this->assertContentTypeSame($response, 'application/ld+json');
 
         $this->assertJsonContains([
             '@context' => '/contexts/Book',
@@ -89,10 +98,10 @@ class ApiPlatformTest extends ApiTestCase
 
     public function testGetBook(): void
     {
-        static::createClient()->request('GET', '/books/1.jsonld');
+        $response = static::createClient()->request('GET', '/books/1.jsonld');
 
         $this->assertResponseIsSuccessful();
-        $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
+        $this->assertContentTypeSame($response, 'application/ld+json');
 
         $this->assertJsonContains([
             '@context' => '/contexts/Book',
@@ -113,7 +122,7 @@ class ApiPlatformTest extends ApiTestCase
         ]]);
 
         $this->assertResponseStatusCodeSame(201);
-        $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
+        $this->assertContentTypeSame($response, 'application/ld+json');
         $this->assertJsonContains([
             '@context' => '/contexts/Book',
             '@type' => 'Book',
@@ -164,6 +173,16 @@ class ApiPlatformTest extends ApiTestCase
 
         $this->assertResponseIsSuccessful();
         $this->assertSame('/books/1', $response->toArray()['book']);
+    }
+
+    /**
+     * API Platform 5 no longer appends "; charset=utf-8" to JSON based media types.
+     */
+    private function assertContentTypeSame(ResponseInterface $response, string $mimeType): void
+    {
+        $contentType = $response->getHeaders(false)['content-type'][0] ?? '';
+
+        $this->assertSame($mimeType, explode(';', $contentType, 2)[0]);
     }
 
     protected function tearDown(): void
