@@ -11,6 +11,8 @@ use function Castor\PHPQa\php_cs_fixer;
 use function Castor\PHPQa\phpstan;
 use function Castor\run;
 
+defined('CASTOR_USE_CHDIR') || define('CASTOR_USE_CHDIR', true);
+
 const PHP_CS_FIXER_VERSION = '3.95.1';
 
 #[AsTask('cs:check', namespace: 'qa', description: 'Check for coding standards without fixing them')]
