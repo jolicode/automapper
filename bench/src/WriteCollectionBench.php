@@ -67,6 +67,16 @@ class WriteCollectionBench
     #[ParamProviders('provideSizes')]
     public function benchAutoMapperJsonStreamerToString(): void
     {
+        $sink = \strlen((string) MapperFactory::autoMapperJsonStreamWriter()->write(
+            PayloadFactory::personIterable($this->count),
+            $this->listType,
+            [MapperContext::STREAM => true],
+        ));
+    }
+
+    #[ParamProviders('provideSizes')]
+    public function benchAutoMapperJsonStreamerToStringNoAttributeChecking(): void
+    {
         $sink = \strlen((string) MapperFactory::autoMapperNoAttributeJsonStreamWriter()->write(
             PayloadFactory::personIterable($this->count),
             $this->listType,
@@ -76,6 +86,20 @@ class WriteCollectionBench
 
     #[ParamProviders('provideSizes')]
     public function benchAutoMapperJsonStreamerStream(): void
+    {
+        $sink = 0;
+        $result = MapperFactory::autoMapperJsonStreamWriter()->write(
+            PayloadFactory::personIterable($this->count),
+            $this->listType,
+            [MapperContext::STREAM => true],
+        );
+        foreach ($result as $chunk) {
+            $sink += \strlen($chunk);
+        }
+    }
+
+    #[ParamProviders('provideSizes')]
+    public function benchAutoMapperJsonStreamerStreamNoAttributeChecking(): void
     {
         $sink = 0;
         $result = MapperFactory::autoMapperNoAttributeJsonStreamWriter()->write(
