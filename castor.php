@@ -93,7 +93,7 @@ function doc_docker_build(): void
 #[AsTask('build', namespace: 'doc', description: 'Build documentation')]
 function doc_build(): void
 {
-    doc_run(['zensical', 'build']);
+    doc_run(['zensical', 'build', '--strict']);
 }
 
 #[AsTask('server', namespace: 'doc', description: 'Serve documentation and watch for changes')]

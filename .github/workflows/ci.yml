@@ -13,6 +13,15 @@ jobs:
         uses: castor-php/setup-castor@2a495b8c91f00be6768ad8a040ba8634c797d386 # v1.1.0
       - name: 'php-cs-fixer check'
         run: 'castor qa:cs:check'
+  doc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: setup
+        uses: castor-php/setup-castor@2a495b8c91f00be6768ad8a040ba8634c797d386 # v1.1.0
+      - name: 'documentation build'
+        run: 'castor doc:build'
   phpstan:
     runs-on: ubuntu-latest
     steps:
