@@ -7,10 +7,8 @@
 /castor.php             export-ignore
 /castor.composer.json   export-ignore
 /castor.composer.lock   export-ignore
-/mkdocs.yaml            export-ignore
+/zensical.toml          export-ignore
 /phpstan.neon           export-ignore
 /phpunit.xml            export-ignore
-/pyproject.toml         export-ignore
-/poetry.lock            export-ignore
 /bootstrap.php          export-ignore
 /.github/           export-ignore
