@@ -20,6 +20,7 @@ $groups = [
     'serialize' => Verifier::serializeResults(...),
     'object-to-object' => Verifier::objectToObjectResults(...),
     'collection' => Verifier::collectionResults(...),
+    'doctrine' => \Automapper\Bench\Doctrine\DoctrineFixture::results(...),
 ];
 
 $exit = 0;

@@ -246,16 +246,19 @@ stream **writer** implementations:
 
 | Writer / consumption | 1 000 | 20 000 | time (20k) |
 |----------------------|------:|-------:|-----------:|
-| **Symfony JSON streamer — `getIterator()` (streamed)** | **7.2 MB** | **7.2 MB** | **0.10 s** |
-| Symfony JSON streamer — `__toString()` | 7.5 MB | 16 MB | 0.12 s |
-| AutoMapper `mapCollection` + `json_encode` (eager) | 11 MB | 77 MB | 0.14 s |
-| **AutoMapper JSON streamer — `STREAM=true` (streamed)** | 7.8 MB | **7.8 MB** | 0.15 s |
-| AutoMapper JSON streamer — `__toString()` | 8.2 MB | 17 MB | 0.17 s |
+| **Symfony JSON streamer — `getIterator()` (streamed)** | **7.2 MB** | **7.2 MB** | **68 ms** |
+| Symfony JSON streamer — `__toString()` | 7.5 MB | 16 MB | 76 ms |
+| AutoMapper `mapCollection` + `json_encode` (eager, no attr checking) | 11 MB | 77 MB | 76 ms |
+| **AutoMapper JSON streamer — `STREAM=true`, no attr checking** | 7.8 MB | **7.8 MB** | 95 ms |
+| AutoMapper JSON streamer — `__toString()`, no attr checking | 8.2 MB | 17 MB | 104 ms |
+| **AutoMapper JSON streamer — `STREAM=true` (streamed)** | 7.2 MB | **7.2 MB** | 170 ms |
+| AutoMapper JSON streamer — `__toString()` | 7.5 MB | 16 MB | 180 ms |
 
-Both streamed writers keep a **flat peak** whatever the collection size, and the
-AutoMapper one is now within ~1.5× of Symfony's while running every element through the
-full mapping pipeline. The eager `mapCollection` + `json_encode` path is comparable in
-time but allocates the whole array-of-arrays (77 MB at 20k).
+Both streamed writers keep a **flat peak** whatever the collection size — an identical
+one, in fact — while the AutoMapper writer runs every element through the full mapping
+pipeline. That pipeline is what it costs: ~2.5× Symfony's time by default, ~1.4× with
+`attributeChecking: false`. The eager `mapCollection` + `json_encode` path is as fast as
+Symfony's streamer but allocates the whole array-of-arrays (77 MB at 20k).
 
 ### Collection — write one object with a big nested collection (`src/WriteWideObjectBench.php`)
 
