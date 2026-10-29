@@ -5,13 +5,14 @@ declare(strict_types=1);
 use Castor\Attribute\AsTask;
 
 use function Castor\context;
-use function Castor\http_download;
-use function Castor\io;
+use function Castor\import;
 use function Castor\PHPQa\php_cs_fixer;
 use function Castor\PHPQa\phpstan;
 use function Castor\run;
 
 defined('CASTOR_USE_CHDIR') || define('CASTOR_USE_CHDIR', true);
+
+import('composer://jolicode/oss-theme');
 
 const PHP_CS_FIXER_VERSION = '3.95.1';
 
@@ -80,132 +81,6 @@ function debug_mapper(string $source, string $target, string $load = ''): void
     ]);
 
     $command->run($input, \Castor\output());
-}
-
-const DOC_DOCKER_IMAGE = 'automapper-doc';
-
-#[AsTask('docker-build', namespace: 'doc', description: 'Build the documentation docker image')]
-function doc_docker_build(): void
-{
-    run(['docker', 'build', '-t', DOC_DOCKER_IMAGE, __DIR__ . '/docs']);
-}
-
-#[AsTask('build', namespace: 'doc', description: 'Build documentation')]
-function doc_build(): void
-{
-    doc_run(['zensical', 'build', '--strict']);
-}
-
-#[AsTask('server', namespace: 'doc', description: 'Serve documentation and watch for changes')]
-function doc_serve(): void
-{
-    doc_run(['zensical', 'serve', '--dev-addr', 'localhost:8000']);
-}
-
-function doc_run(array $command): void
-{
-    $image = run(['docker', 'image', 'inspect', DOC_DOCKER_IMAGE], context: context()->withAllowFailure()->withQuiet());
-    if (!$image->isSuccessful()) {
-        doc_docker_build();
-    }
-
-    run([
-        'docker', 'run', '--init', '--rm', '--network=host',
-        '--user', getmyuid() . ':' . getmygid(),
-        '--env', 'HOME=/tmp',
-        '--volume', __DIR__ . ':/app',
-        DOC_DOCKER_IMAGE,
-        ...$command,
-    ]);
-}
-
-#[AsTask(description: 'Fetch external assets and customize theme', namespace: 'doc')]
-function build_assets(): void
-{
-    io()->title('Fetching external assets for documentation');
-
-    http_download('https://raw.githubusercontent.com/jolicode/oss-theme/refs/heads/main/Zensical/extra.css', __DIR__ . '/docs/assets/stylesheets/jolicode.css');
-    http_download('https://raw.githubusercontent.com/jolicode/oss-theme/refs/heads/main/snippet-joli-footer.html', __DIR__ . '/docs/overrides/jolicode-footer.html');
-
-    $html = <<<'HTML'
-    AutoMapper is licensed under
-    <a href="https://github.com/jolicode/automapper/blob/main/LICENSE" target="_blank" rel="noreferrer noopener" class="jf-link">
-      MIT license
-    </a>
-    HTML;
-
-    $footer = file_get_contents(__DIR__ . '/docs/overrides/jolicode-footer.html');
-    $footer = str_replace('#GITHUB_REPO', 'jolicode/automapper', $footer);
-    $footer = str_replace('<!-- #SUBTITLE -->', $html, $footer);
-
-    file_put_contents(__DIR__ . '/docs/overrides/jolicode-footer.html', $footer);
-}
-
-#[AsTask('build-github-pages', namespace: 'doc', description: 'Build every version of the documentation for GitHub Pages')]
-function doc_build_github_pages(): void
-{
-    // clean .build directory
-    run('rm -rf ./.build', context: context()->withAllowFailure());
-
-    // create .build directory
-    @mkdir(__DIR__ . '/.build');
-    run('git config user.name ci-bot');
-    run('git config user.email ci-bot@example.org');
-    run('git remote add gh-pages ./.build', context: context()->withAllowFailure());
-
-    $context = context()->withWorkingDirectory(__DIR__ . '/.build');
-
-    run('git init', context: $context);
-    run('git checkout -b gh-pages', context: $context);
-    run('git config receive.denyCurrentBranch ignore', context: $context);
-
-    // build documentation for main branch
-    doc_run(['mike', 'deploy', '--push', '--remote', 'gh-pages', 'dev']);
-
-    // get the list of tags
-    $tags = run('git tag --list', context: context()->withQuiet())->getOutput();
-    $tags = array_filter(array_map('trim', explode("\n", $tags)));
-
-    $minVersion = '8.2.2';
-    $latestVersion = $minVersion;
-    $buildTags = [];
-
-    foreach ($tags as $tag) {
-        if (!version_compare($tag, $minVersion, '>=')) {
-            continue;
-        }
-
-        // version is X.Y.Z we want the X.Y part
-        $parts = explode('.', $tag);
-        if (count($parts) !== 3) {
-            continue;
-        }
-
-        $majorMinor = $parts[0] . '.' . $parts[1];
-
-        // get only the last version for this major.minor
-        if (isset($buildTags[$majorMinor]) && version_compare($tag, $buildTags[$majorMinor], '<=')) {
-            continue;
-        }
-
-        if (version_compare($tag, $latestVersion, '>')) {
-            $latestVersion = $tag;
-        }
-
-        $buildTags[$majorMinor] = $tag;
-    }
-
-    foreach ($buildTags as $tag) {
-        run('git checkout tags/' . $tag);
-
-        if ($tag === $latestVersion) {
-            doc_run(['mike', 'deploy', '--push', '--remote', 'gh-pages', $tag, 'latest']);
-        } else {
-            doc_run(['mike', 'deploy', '--push', '--remote', 'gh-pages', '--update-aliases', $tag]);
-        }
-    }
-
-    run('git reset --hard gh-pages', context: $context);
 }
 
 #[AsTask('serve', namespace: 'test', description: 'Serve the symfony app in tests')]
