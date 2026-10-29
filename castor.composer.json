@@ -1,5 +1,12 @@
 {
     "require": {
-        "castor-php/php-qa": "^0.3.4"
-    }
+        "castor-php/php-qa": "^0.3.4",
+        "jolicode/oss-theme": "dev-castor-plugin"
+    },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/jolicode/oss-theme.git"
+        }
+    ]
 }

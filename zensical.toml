@@ -8,7 +8,6 @@ docs_dir = "docs"
 exclude_docs = """
 _nav.md
 /overrides/
-/Dockerfile
 """
 extra_javascript = [
   "assets/javascripts/highlight.min.js",
@@ -70,6 +69,7 @@ toggle.name = "Switch to system preference"
 
 [project.extra]
 generator = false
+short_name = "AutoMapper"
 version.provider = "mike"
 
 [[project.extra.social]]

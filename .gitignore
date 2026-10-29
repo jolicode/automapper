@@ -8,6 +8,13 @@ tests/Bundle/Resources/config/reference.php
 tools/phpstan/cache/
 cache/
 site/
-.build/
 .castor*
 tests/Doctrine/db.sqlite
+# Installed by castor doc:assets (jolicode/oss-theme)
+/docs/assets/stylesheets/jolicode.css
+/docs/overrides/jolicode-footer.html
+/docs/overrides/jolicode.html
+/docs/overrides/partials/
+/jolicode_macros.py
+/__pycache__/
+/castor.composer.lock
